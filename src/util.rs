@@ -27,12 +27,7 @@ impl JanetBuildConfig {
 
     #[cfg(test)]
     pub(crate) const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
-        JanetBuildConfig {
-            major,
-            minor,
-            patch,
-            bits,
-        }
+        JanetBuildConfig { major, minor, patch, bits }
     }
 }
 
@@ -68,39 +63,15 @@ mod tests {
     #[test]
     fn janet_build_config_ord() {
         use super::JanetBuildConfig as Jbc;
-        assert_eq!(
-            Ordering::Equal,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0))
-        );
-        assert_eq!(
-            Ordering::Equal,
-            Jbc::custom(1, 2, 1, 0).cmp(&Jbc::custom(1, 2, 1, 1))
-        );
+        assert_eq!(Ordering::Equal, Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0)));
+        assert_eq!(Ordering::Equal, Jbc::custom(1, 2, 1, 0).cmp(&Jbc::custom(1, 2, 1, 1)));
 
-        assert_eq!(
-            Ordering::Less,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(2, 1, 1, 0))
-        );
-        assert_eq!(
-            Ordering::Less,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 2, 1, 0))
-        );
-        assert_eq!(
-            Ordering::Less,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 1, 2, 0))
-        );
+        assert_eq!(Ordering::Less, Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(2, 1, 1, 0)));
+        assert_eq!(Ordering::Less, Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 2, 1, 0)));
+        assert_eq!(Ordering::Less, Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 1, 2, 0)));
 
-        assert_eq!(
-            Ordering::Greater,
-            Jbc::custom(2, 1, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0))
-        );
-        assert_eq!(
-            Ordering::Greater,
-            Jbc::custom(1, 2, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0))
-        );
-        assert_eq!(
-            Ordering::Greater,
-            Jbc::custom(1, 1, 2, 0).cmp(&Jbc::custom(1, 1, 1, 0))
-        );
+        assert_eq!(Ordering::Greater, Jbc::custom(2, 1, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0)));
+        assert_eq!(Ordering::Greater, Jbc::custom(1, 2, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0)));
+        assert_eq!(Ordering::Greater, Jbc::custom(1, 1, 2, 0).cmp(&Jbc::custom(1, 1, 1, 0)));
     }
 }
