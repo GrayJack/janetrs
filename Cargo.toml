@@ -1,0 +1,17 @@
+[package]
+name = "janetrs"
+version = "0.1.0"
+authors = ["Eric Shimizu Karbstein <gr41.j4ck@gmail.com>"]
+description = "High level binding for Janet programming language"
+repository = "https://github.com/GrayJack/janetrs"
+homepage = "https://crates.io/crates/janetrs"
+documentation = "https://docs.rs/janetrs"
+license-file = "LICENSE"
+readme = "README.md"
+edition = "2018"
+keywords = ["janet", "embedding"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+janet-ll = { git = "https://github.com/GrayJack/janet-ll" }

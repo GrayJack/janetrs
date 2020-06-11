@@ -1,0 +1,2 @@
+# custom: "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RFC4CKATPS4US&source=url"
+custom: ["https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RFC4CKATPS4US&source=url", "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FBXMZU2NLJPUW&source=url", "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2MQZLTXACP964&source=url"]
