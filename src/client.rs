@@ -31,8 +31,8 @@ pub struct JanetClient {
 impl JanetClient {
     /// Initialize Janet global state.
     ///
-    /// This must be called once per thread if using Janet in a multithreaded environment,
-    /// as all Janet global state is thread local by default.
+    /// This must be called only once per thread if using Janet in a multithreaded
+    /// environment, as all Janet global state is thread local by default.
     ///
     /// If tried to initialize the client more than once it returns a `Err` variant.
     pub fn init() -> Result<Self, Error> {
@@ -43,6 +43,21 @@ impl JanetClient {
         unsafe { janet_init() };
         Ok(JanetClient { phantom: PhantomData })
     }
+
+    /// Initialize Jant global state without checking.
+    ///
+    /// This must be called only once per thread if using Janet in a multithreaded
+    /// environment, as all Janet global state is thread local by default.
+    ///
+    /// # Safety
+    /// If initialized more than once, and more than one drop, you can have a double free,
+    /// if one drop and another continue to execute, it will crash with segmentation
+    /// fault.
+    pub unsafe fn init_unchecked() -> Self {
+        janet_init();
+        JanetClient { phantom: PhantomData }
+    }
+
 }
 
 impl Drop for JanetClient {
@@ -56,10 +71,11 @@ mod tests {
 
     #[test]
     fn double_init() {
-        let _c1 = JanetClient::init().unwrap();
+        let c1 = JanetClient::init();
         let c2 = JanetClient::init();
         let c3 = JanetClient::init();
 
+        assert!(c1.is_ok());
         assert_eq!(Error::AlreadyInit, c2.unwrap_err());
         assert_eq!(Error::AlreadyInit, c3.unwrap_err());
     }
