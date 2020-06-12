@@ -1,23 +1,27 @@
 //! This module implements anything required to run a Janet client.
 use core::{
     fmt::{self, Display},
-    marker::PhantomData,
+    ptr,
     sync::atomic::{AtomicBool, Ordering},
 };
 
-use janet_ll::{janet_deinit, janet_init};
+use janet_ll::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
+
+use crate::types::JanetTable;
 
 static INIT: AtomicBool = AtomicBool::new(false);
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Error {
     AlreadyInit,
+    EnvNotInit,
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::AlreadyInit => write!(f, "Janet client already initialized."),
+            Error::AlreadyInit => write!(f, "Janet client already initialized"),
+            Error::EnvNotInit => write!(f, "The environment table was not initialized"),
         }
     }
 }
@@ -25,7 +29,7 @@ impl Display for Error {
 /// Janet client.
 #[derive(Debug)]
 pub struct JanetClient {
-    phantom: PhantomData<()>,
+    env_table: Option<JanetTable<'static>>,
 }
 
 impl JanetClient {
@@ -41,7 +45,7 @@ impl JanetClient {
         }
 
         unsafe { janet_init() };
-        Ok(JanetClient { phantom: PhantomData })
+        Ok(JanetClient { env_table: None })
     }
 
     /// Initialize Jant global state without checking.
@@ -55,13 +59,70 @@ impl JanetClient {
     /// fault.
     pub unsafe fn init_unchecked() -> Self {
         janet_init();
-        JanetClient { phantom: PhantomData }
+        JanetClient { env_table: None }
     }
 
+    /// Load the default environment of Janet.
+    ///
+    /// The default environment of Janet constains all the Janet C code as well as the
+    /// code in [`boot.janet`]
+    ///
+    /// [`boot.janet](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet)
+    pub fn with_default_env(mut self) -> Self {
+        self.env_table = Some(unsafe { JanetTable::with_raw(janet_core_env(ptr::null_mut())) });
+        self
+    }
+
+    /// Load the environment of `env_table`.
+    pub fn with_env(mut self, env_table: JanetTable<'static>) -> Self {
+        self.env_table = Some(env_table);
+        self
+    }
+
+    /// Run given Janet `code` bytes.
+    ///
+    /// ## TODO:
+    /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
+    /// respectively.
+    /// Change that the Client struct holds a nother struct that configure those two.
+    pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<(), Error> {
+        let code = code.as_ref();
+        let env = match self.env_table.as_ref() {
+            Some(e) => e,
+            None => return Err(Error::EnvNotInit),
+        };
+
+        unsafe {
+            janet_dobytes(
+                env.raw_table,
+                code.as_ptr(),
+                code.len() as i32,
+                b"main\0".as_ptr() as *const i8,
+                ptr::null_mut(),
+            )
+        };
+        Ok(())
+    }
+
+    /// Run given Janet `code` string.
+    ///
+    /// ## TODO:
+    /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
+    /// respectively.
+    /// Change that the Client struct holds a nother struct that configure those two.
+    pub fn run(&self, code: impl AsRef<str>) -> Result<(), Error> {
+        let code = code.as_ref();
+        self.run_bytes(code.as_bytes())
+    }
 }
 
 impl Drop for JanetClient {
-    fn drop(&mut self) { unsafe { janet_deinit() } }
+    fn drop(&mut self) {
+        // Reset the INIT to false
+        INIT.swap(false, Ordering::SeqCst);
+
+        unsafe { janet_deinit() }
+    }
 }
 
 
@@ -78,5 +139,14 @@ mod tests {
         assert!(c1.is_ok());
         assert_eq!(Error::AlreadyInit, c2.unwrap_err());
         assert_eq!(Error::AlreadyInit, c3.unwrap_err());
+    }
+
+    #[test]
+    fn env_not_init() {
+        let client = JanetClient::init().unwrap();
+
+        let a = client.run("()");
+
+        assert_eq!(Err(Error::EnvNotInit), a);
     }
 }
