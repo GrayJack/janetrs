@@ -1,16 +1,65 @@
-//! This module should have all Janet types structures
+//! This module should have all Janet types structures.
 use janet_ll::{
-    JanetType as JType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN,
-    JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER,
-    JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER,
-    JanetType_JANET_POINTER, JanetType_JANET_STRING, JanetType_JANET_STRUCT,
-    JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
+    janet_type, janet_wrap_boolean, janet_wrap_integer, janet_wrap_number, janet_wrap_table,
+    Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY,
+    JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION,
+    JanetType_JANET_FIBER, JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL,
+    JanetType_JANET_NUMBER, JanetType_JANET_POINTER, JanetType_JANET_STRING,
+    JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
 };
 
 pub mod table;
 
 pub use table::JanetTable;
 
+/// Central structure for Janet.
+///
+/// All possible Janet types is represented at some point as this structure.
+#[derive(Clone, Copy)]
+pub struct Janet {
+    pub(crate) inner: CJanet,
+    kind: JanetType,
+}
+
+impl Janet {
+    /// Create a boolean [`Janet`] with `value`.
+    pub fn boolean(value: bool) -> Self {
+        Janet { inner: unsafe { janet_wrap_boolean(value.into()) }, kind: JanetType::Boolean }
+    }
+
+    /// Create a number [`Janet`] with `value`.
+    pub fn number(value: f64) -> Self {
+        Janet { inner: unsafe { janet_wrap_number(value) }, kind: JanetType::Number }
+    }
+
+    /// Create a abstract integer [`Janet`] with `value`.
+    pub fn integer(value: i32) -> Self {
+        Janet { inner: unsafe { janet_wrap_integer(value) }, kind: JanetType::Abstract }
+    }
+
+    /// Create a table [`Janet`] with `value`.
+    pub fn table(value: JanetTable<'_>) -> Self {
+        Janet { inner: unsafe { janet_wrap_table(value.raw_table) }, kind: JanetType::Table }
+    }
+
+    /// Returns the type that the [`Janet`] object.
+    pub const fn kind(&self) -> JanetType { self.kind }
+
+    pub const fn data(&self) -> CJanet {
+        self.inner
+    }
+}
+
+impl From<CJanet> for Janet {
+    fn from(val: CJanet) -> Self {
+        let raw_kind = unsafe { janet_type(val) };
+        Janet { inner: val, kind: raw_kind.into() }
+    }
+}
+
+impl From<Janet> for CJanet {
+    fn from(val: Janet) -> Self { val.inner }
+}
 
 
 /// Representation of all Janet types.
@@ -35,9 +84,9 @@ pub enum JanetType {
     Tuple  = JanetType_JANET_TUPLE,
 }
 
-impl From<JType> for JanetType {
+impl From<CJanetType> for JanetType {
     #[allow(non_upper_case_globals)]
-    fn from(raw: JType) -> Self {
+    fn from(raw: CJanetType) -> Self {
         match raw {
             JanetType_JANET_ABSTRACT => JanetType::Abstract,
             JanetType_JANET_ARRAY => JanetType::Array,
@@ -62,7 +111,7 @@ impl From<JType> for JanetType {
     }
 }
 
-impl From<JanetType> for JType {
+impl From<JanetType> for CJanetType {
     fn from(val: JanetType) -> Self {
         match val {
             JanetType::Abstract => JanetType_JANET_ABSTRACT,
