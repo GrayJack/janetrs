@@ -1,4 +1,4 @@
-name: Build
+name: Check and Test
 
 on: [push]
 
@@ -18,9 +18,9 @@ jobs:
         profile: minimal
         components: clippy
     - name: Check compilation
-      run: cargo clippy --verbose
+      run: cargo clippy --all-features --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --all-features --verbose
 
   build-macos:
     runs-on: ${{ matrix.os }}
@@ -37,9 +37,9 @@ jobs:
         profile: minimal
         components: clippy
     - name: Check compilation
-      run: cargo clippy --verbose
+      run: cargo clippy --all-features --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --all-features --verbose
 
   build-windows:
     runs-on: ${{ matrix.os }}
@@ -56,6 +56,6 @@ jobs:
         profile: minimal
         components: clippy
     - name: Check compilation
-      run: cargo clippy --verbose
+      run: cargo clippy --all-features --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --all-features --verbose

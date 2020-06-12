@@ -1,3 +1,5 @@
+#![no_std]
+
 use janet_ll::{
     JanetType as JType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN,
     JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER,
@@ -8,6 +10,7 @@ use janet_ll::{
 
 pub use janet_ll as janet_sys;
 
+#[cfg(feature = "amalgation")]
 pub mod client;
 pub mod util;
 

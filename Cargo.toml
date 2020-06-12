@@ -15,3 +15,7 @@ keywords = ["janet", "embedding"]
 
 [dependencies]
 janet-ll = { git = "https://github.com/GrayJack/janet-ll" }
+
+[features]
+default = []
+amalgation = ["janet-ll/link-amalg"]
