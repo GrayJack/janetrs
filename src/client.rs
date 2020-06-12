@@ -5,6 +5,9 @@ use core::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
+#[cfg(feature = "std")]
+use std::error::Error as StdError;
+
 use janet_ll::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
 
 use crate::types::JanetTable;
@@ -25,6 +28,9 @@ impl Display for Error {
         }
     }
 }
+
+#[cfg(feature = "std")]
+impl StdError for Error {}
 
 /// Janet client.
 #[derive(Debug)]

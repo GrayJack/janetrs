@@ -18,6 +18,9 @@ janet-ll = { git = "https://github.com/GrayJack/janet-ll" }
 
 [features]
 default = []
+# To use Error trait and alocations
+std = []
+# Use to have Janet client
 amalgation = ["janet-ll/link-amalg"]
 
 [[example]]
