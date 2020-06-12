@@ -14,9 +14,13 @@ use crate::types::JanetTable;
 
 static INIT: AtomicBool = AtomicBool::new(false);
 
+/// The possible errors for the [`JanetClient`].
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[non_exhaustive]
 pub enum Error {
+    /// May happen when trying to initialize two or more [`JanetClient`].
     AlreadyInit,
+    /// May happen when trying to run a Janet code without a environment table.
     EnvNotInit,
 }
 
@@ -71,9 +75,7 @@ impl JanetClient {
     /// Load the default environment of Janet.
     ///
     /// The default environment of Janet constains all the Janet C code as well as the
-    /// code in [`boot.janet`]
-    ///
-    /// [`boot.janet](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet)
+    /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     pub fn with_default_env(mut self) -> Self {
         self.env_table = Some(unsafe { JanetTable::with_raw(janet_core_env(ptr::null_mut())) });
         self

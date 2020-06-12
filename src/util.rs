@@ -7,6 +7,7 @@ use janet_ll::{
     JANET_CURRENT_CONFIG_BITS, JANET_VERSION_MAJOR, JANET_VERSION_MINOR, JANET_VERSION_PATCH,
 };
 
+/// Janet version in this build and configuration bits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct JanetBuildConfig {
     major: u32,
@@ -16,6 +17,7 @@ pub struct JanetBuildConfig {
 }
 
 impl JanetBuildConfig {
+    /// Get the current Janet build version.
     pub const fn current() -> Self {
         JanetBuildConfig {
             major: JANET_VERSION_MAJOR,
@@ -25,8 +27,10 @@ impl JanetBuildConfig {
         }
     }
 
-    #[cfg(test)]
-    pub(crate) const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
+    /// Create a custom [`JanetBuildConfig`].
+    ///
+    /// Mostly used to check if current version match a requirement for your code.
+    pub const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
         JanetBuildConfig { major, minor, patch, bits }
     }
 }
