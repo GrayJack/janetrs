@@ -23,7 +23,10 @@ impl JanetTable<'_> {
     /// It is initially created with capacity 0, , so it will not allocate until it is
     /// first inserted into.
     pub fn new(capacity: i32) -> Self {
-        JanetTable { raw_table: unsafe { janet_table(capacity) }, phatom: PhantomData }
+        JanetTable {
+            raw_table: unsafe { janet_table(capacity) },
+            phatom:    PhantomData,
+        }
     }
 
     /// Create a empty [`JanetTable`] with the specified `capacity`.
@@ -31,7 +34,10 @@ impl JanetTable<'_> {
     /// The hash map will be able to hold at least capacity elements without reallocating.
     /// If capacity is 0, the hash map will not allocate.
     pub fn with_capacity(capacity: i32) -> Self {
-        JanetTable { raw_table: unsafe { janet_table(capacity) }, phatom: PhantomData }
+        JanetTable {
+            raw_table: unsafe { janet_table(capacity) },
+            phatom:    PhantomData,
+        }
     }
 
     /// Create a new [`JanetTable`] with a `raw_table`.
@@ -40,7 +46,10 @@ impl JanetTable<'_> {
     /// This function do not check if the given `raw_table` is `NULL` or not. Use at your
     /// own risk.
     pub(crate) unsafe fn with_raw(raw_table: *mut CJanetTable) -> Self {
-        JanetTable { raw_table, phatom: PhantomData }
+        JanetTable {
+            raw_table,
+            phatom: PhantomData,
+        }
     }
 
     /// Returns the number of elements the table can hold without reallocating.
@@ -52,8 +61,8 @@ impl JanetTable<'_> {
     /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
     /// reuse.
     ///
-    /// TODO: Not implemented yet, for some reason Janet doesn't export to the public API the
-    /// function that do that.
+    /// TODO: Not implemented yet, for some reason Janet doesn't export to the public API
+    /// the function that do that.
     pub fn clear(&mut self) { todo!() }
 
     /// Returns the number of elements of the table, also refered to as its 'length'.

@@ -24,36 +24,49 @@ pub struct Janet {
 impl Janet {
     /// Create a boolean [`Janet`] with `value`.
     pub fn boolean(value: bool) -> Self {
-        Janet { inner: unsafe { janet_wrap_boolean(value.into()) }, kind: JanetType::Boolean }
+        Janet {
+            inner: unsafe { janet_wrap_boolean(value.into()) },
+            kind:  JanetType::Boolean,
+        }
     }
 
     /// Create a number [`Janet`] with `value`.
     pub fn number(value: f64) -> Self {
-        Janet { inner: unsafe { janet_wrap_number(value) }, kind: JanetType::Number }
+        Janet {
+            inner: unsafe { janet_wrap_number(value) },
+            kind:  JanetType::Number,
+        }
     }
 
     /// Create a abstract integer [`Janet`] with `value`.
     pub fn integer(value: i32) -> Self {
-        Janet { inner: unsafe { janet_wrap_integer(value) }, kind: JanetType::Abstract }
+        Janet {
+            inner: unsafe { janet_wrap_integer(value) },
+            kind:  JanetType::Abstract,
+        }
     }
 
     /// Create a table [`Janet`] with `value`.
     pub fn table(value: JanetTable<'_>) -> Self {
-        Janet { inner: unsafe { janet_wrap_table(value.raw_table) }, kind: JanetType::Table }
+        Janet {
+            inner: unsafe { janet_wrap_table(value.raw_table) },
+            kind:  JanetType::Table,
+        }
     }
 
     /// Returns the type that the [`Janet`] object.
     pub const fn kind(&self) -> JanetType { self.kind }
 
-    pub const fn data(&self) -> CJanet {
-        self.inner
-    }
+    pub const fn data(&self) -> CJanet { self.inner }
 }
 
 impl From<CJanet> for Janet {
     fn from(val: CJanet) -> Self {
         let raw_kind = unsafe { janet_type(val) };
-        Janet { inner: val, kind: raw_kind.into() }
+        Janet {
+            inner: val,
+            kind:  raw_kind.into(),
+        }
     }
 }
 
@@ -135,7 +148,8 @@ impl From<JanetType> for CJanetType {
 }
 
 
-/// Trait that express the ability of a Janet collection to extend it with another collection.
+/// Trait that express the ability of a Janet collection to extend it with another
+/// collection.
 pub trait JanetExtend<T> {
     fn extend(&mut self, collection: T);
 }
