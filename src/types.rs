@@ -133,3 +133,9 @@ impl From<JanetType> for CJanetType {
         }
     }
 }
+
+
+/// Trait that express the ability of a Janet collection to extend it with another collection.
+pub trait JanetExtend<T> {
+    fn extend(&mut self, collection: T);
+}
