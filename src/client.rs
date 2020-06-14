@@ -138,7 +138,6 @@ impl Drop for JanetClient {
 mod tests {
     use super::*;
 
-    #[test]
     fn double_init() {
         let c1 = JanetClient::init();
         let c2 = JanetClient::init();
@@ -149,12 +148,18 @@ mod tests {
         assert_eq!(Error::AlreadyInit, c3.unwrap_err());
     }
 
-    #[test]
     fn env_not_init() {
         let client = JanetClient::init().unwrap();
 
         let a = client.run("()");
 
         assert_eq!(Err(Error::EnvNotInit), a);
+    }
+
+    /// All tests that should be sequential
+    #[test]
+    fn sequential() {
+        double_init();
+        env_not_init();
     }
 }
