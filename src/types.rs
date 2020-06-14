@@ -1,11 +1,12 @@
 //! This module should have all Janet types structures.
 use janet_ll::{
-    janet_type, janet_wrap_boolean, janet_wrap_integer, janet_wrap_number, janet_wrap_table,
-    Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY,
-    JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION,
-    JanetType_JANET_FIBER, JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL,
-    JanetType_JANET_NUMBER, JanetType_JANET_POINTER, JanetType_JANET_STRING,
-    JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
+    janet_type, janet_wrap_boolean, janet_wrap_integer, janet_wrap_nil, janet_wrap_number,
+    janet_wrap_table, Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT,
+    JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER,
+    JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER, JanetType_JANET_FUNCTION,
+    JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER, JanetType_JANET_POINTER,
+    JanetType_JANET_STRING, JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE,
+    JanetType_JANET_TUPLE,
 };
 
 pub mod table;
@@ -22,6 +23,14 @@ pub struct Janet {
 }
 
 impl Janet {
+    /// Create a nil [`Janet`].
+    pub fn nil() -> Janet {
+        Janet {
+            inner: unsafe { janet_wrap_nil() },
+            kind:  JanetType::Nil,
+        }
+    }
+
     /// Create a boolean [`Janet`] with `value`.
     pub fn boolean(value: bool) -> Self {
         Janet {
@@ -54,10 +63,11 @@ impl Janet {
         }
     }
 
-    /// Returns the type that the [`Janet`] object.
+    /// Returns the type of [`Janet`] object.
     pub const fn kind(&self) -> JanetType { self.kind }
 
-    pub const fn data(&self) -> CJanet { self.inner }
+    /// Returns the raw data of the data
+    pub const fn raw_data(&self) -> CJanet { self.inner }
 }
 
 impl From<CJanet> for Janet {
@@ -68,6 +78,22 @@ impl From<CJanet> for Janet {
             kind:  raw_kind.into(),
         }
     }
+}
+
+impl From<bool> for Janet {
+    fn from(val: bool) -> Self { Janet::boolean(val) }
+}
+
+impl From<i32> for Janet {
+    fn from(val: i32) -> Self { Janet::integer(val) }
+}
+
+impl From<f64> for Janet {
+    fn from(val: f64) -> Self { Janet::number(val) }
+}
+
+impl From<JanetTable<'_>> for Janet {
+    fn from(val: JanetTable<'_>) -> Self { Janet::table(val) }
 }
 
 impl From<Janet> for CJanet {
