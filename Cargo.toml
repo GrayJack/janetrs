@@ -16,6 +16,9 @@ keywords = ["janet", "embedding"]
 [dependencies]
 janet-ll = { git = "https://github.com/GrayJack/janet-ll" }
 
+[dev-dependencies]
+serial_test = "~0.4.0"
+
 [features]
 default = []
 # To use Error trait and alocations

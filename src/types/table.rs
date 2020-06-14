@@ -20,19 +20,31 @@ pub struct JanetTable<'data> {
 impl JanetTable<'_> {
     /// Create a empty [`JanetTable`].
     ///
-    /// It is initially created with capacity 0, , so it will not allocate until it is
-    /// first inserted into.
-    pub fn new(capacity: i32) -> Self {
+    /// It is initially created with capacity 1, so it will not allocate until it is
+    /// second inserted into.
+    pub fn new() -> Self {
         JanetTable {
-            raw_table: unsafe { janet_table(capacity) },
+            raw_table: unsafe { janet_table(0) },
             phatom:    PhantomData,
         }
     }
 
-    /// Create a empty [`JanetTable`] with the specified `capacity`.
+    /// Create a empty [`JanetTable`] given to Janet the specified `capacity`.
     ///
-    /// The hash map will be able to hold at least capacity elements without reallocating.
-    /// If capacity is 0, the hash map will not allocate.
+    /// That does not mean that Janet will create a table with the exact same `capacity`.
+    /// It seems to follow some heuristics:
+    ///  - `capacity` in 0..4 → Allocates `capacity` + 1
+    ///  - `capacity` in 4..8 → Allocates 8
+    ///  - `capacity` in 8..16 → Allocates 16
+    ///  - `capacity` in 16..32 → Allocates 32
+    ///  - ...
+    ///
+    /// Without loss of generality, it progresses like this:
+    ///  - `capacity` in 0..4 → Allocates `capacity` + 1
+    ///  - `capacity` in m..2m where m = 4 → Allocates 2m
+    ///  - `capacity` in p..2p where p = 2m → Allocates 2p
+    ///  - `capacity` in q..2q where q = last step value + 1 → Allocates 2q
+    ///  - ...
     pub fn with_capacity(capacity: i32) -> Self {
         JanetTable {
             raw_table: unsafe { janet_table(capacity) },
@@ -42,10 +54,10 @@ impl JanetTable<'_> {
 
     /// Create a new [`JanetTable`] with a `raw_table`.
     ///
-    /// Safety:
+    /// # Safety
     /// This function do not check if the given `raw_table` is `NULL` or not. Use at your
     /// own risk.
-    pub(crate) unsafe fn with_raw(raw_table: *mut CJanetTable) -> Self {
+    pub unsafe fn from_raw(raw_table: *mut CJanetTable) -> Self {
         JanetTable {
             raw_table,
             phatom: PhantomData,
@@ -57,6 +69,9 @@ impl JanetTable<'_> {
     /// This number is a lower bound; the [`JanetTable`] might be able to hold more, but
     /// is guaranteed to be able to hold at least this many.
     pub fn capacity(&self) -> i32 { unsafe { (*self.raw_table).capacity } }
+
+    /// Returns the number of elements that was removed from the table.
+    pub fn removed(&self) -> i32 { unsafe { (*self.raw_table).deleted } }
 
     /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
     /// reuse.
@@ -124,5 +139,39 @@ impl JanetExtend<(Janet, Janet)> for JanetTable<'_> {
         let mut other = JanetTable::with_capacity(1);
         other.insert(key, value);
         self.extend(other);
+    }
+}
+
+impl Default for JanetTable<'_> {
+    fn default() -> Self { JanetTable::new() }
+}
+
+#[cfg(all(test, feature = "amalgation"))]
+mod tests {
+    use serial_test::serial;
+
+    use super::*;
+    use crate::client::JanetClient;
+
+    #[test]
+    #[serial]
+    fn creation() {
+        let _client = JanetClient::init().unwrap();
+        let table = JanetTable::new();
+        assert_eq!(1, table.capacity());
+
+        let table = JanetTable::with_capacity(10);
+        assert_eq!(16, table.capacity());
+    }
+
+    #[test]
+    #[serial]
+    fn insert_and_length() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::new();
+        assert_eq!(0, table.len());
+
+        table.insert(0.into(), true.into());
+        assert_eq!(1, table.len())
     }
 }

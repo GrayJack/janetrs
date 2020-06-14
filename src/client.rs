@@ -77,7 +77,7 @@ impl JanetClient {
     /// The default environment of Janet constains all the Janet C code as well as the
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     pub fn with_default_env(mut self) -> Self {
-        self.env_table = Some(unsafe { JanetTable::with_raw(janet_core_env(ptr::null_mut())) });
+        self.env_table = Some(unsafe { JanetTable::from_raw(janet_core_env(ptr::null_mut())) });
         self
     }
 
@@ -136,8 +136,12 @@ impl Drop for JanetClient {
 
 #[cfg(test)]
 mod tests {
+    use serial_test::serial;
+
     use super::*;
 
+    #[test]
+    #[serial]
     fn double_init() {
         let c1 = JanetClient::init();
         let c2 = JanetClient::init();
@@ -148,18 +152,13 @@ mod tests {
         assert_eq!(Error::AlreadyInit, c3.unwrap_err());
     }
 
+    #[test]
+    #[serial]
     fn env_not_init() {
         let client = JanetClient::init().unwrap();
 
         let a = client.run("()");
 
         assert_eq!(Err(Error::EnvNotInit), a);
-    }
-
-    /// All tests that should be sequential
-    #[test]
-    fn sequential() {
-        double_init();
-        env_not_init();
     }
 }
