@@ -28,8 +28,7 @@ jobs:
 
     - name: Build Documentation
       run: cargo doc --workspace
-      # run: mkdir -p ./target/doc/x86_64-unknown-linux-gnu
-      # run: cp ./target/x86_64-unknown-linux-gnu/doc/* ./target/doc/x86_64-unknown-linux-gnu
+      run: cp ./target/doc/janetrs/index.html ./target/doc/index.html
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3
