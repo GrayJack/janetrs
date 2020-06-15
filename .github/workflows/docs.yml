@@ -30,7 +30,7 @@ jobs:
       run: cargo doc --all-features
     
     - name: Create base index
-      run: ln ./target/doc/janetrs/index.html ./target/doc/index.html
+      run: ln -s ./target/doc/janetrs/index.html ./target/doc/index.html
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3
