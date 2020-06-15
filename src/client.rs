@@ -48,6 +48,8 @@ impl StdError for Error {}
 /// interface only once, since the static atomic global cannot be thread local in a
 /// `no_std` environment, if you're on a multithread + `no_std` environment refer to use
 /// [`init_unchecked`].
+///
+/// [`init_unchecked`]: ./struct.JanetClient.html#method.init_unchecked.html
 #[derive(Debug)]
 pub struct JanetClient {
     env_table: Option<JanetTable<'static>>,
