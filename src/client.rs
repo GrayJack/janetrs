@@ -6,12 +6,18 @@ use core::{
 };
 
 #[cfg(feature = "std")]
-use std::error::Error as StdError;
+use std::{error::Error as StdError, thread_local};
 
 use janet_ll::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
 
 use crate::types::JanetTable;
 
+#[cfg(feature = "std")]
+thread_local! {
+    static INIT: AtomicBool = AtomicBool::new(false);
+}
+
+#[cfg(not(feature = "std"))]
 static INIT: AtomicBool = AtomicBool::new(false);
 
 /// The possible errors for the [`JanetClient`].
@@ -36,7 +42,12 @@ impl Display for Error {
 #[cfg(feature = "std")]
 impl StdError for Error {}
 
-/// Janet client.
+/// Janet client that initialize the Janet runtime.
+///
+/// If in a `no_std` environment you can only initilize the runtime through the safe
+/// interface only once, since the static atomic global cannot be thread local in a
+/// `no_std` environment, if you're on a multithread + `no_std` environment refer to use
+/// [`init_unchecked`].
 #[derive(Debug)]
 pub struct JanetClient {
     env_table: Option<JanetTable<'static>>,
@@ -50,7 +61,12 @@ impl JanetClient {
     ///
     /// If tried to initialize the client more than once it returns a `Err` variant.
     pub fn init() -> Result<Self, Error> {
-        if INIT.swap(true, Ordering::SeqCst) {
+        #[cfg(feature = "std")]
+        let init_state = INIT.with(|i| i.swap(true, Ordering::SeqCst));
+        #[cfg(not(feature = "std"))]
+        let init_state = INIT.swap(true, Ordering::SeqCst);
+
+        if init_state {
             return Err(Error::AlreadyInit);
         }
 
@@ -64,9 +80,9 @@ impl JanetClient {
     /// environment, as all Janet global state is thread local by default.
     ///
     /// # Safety
-    /// If initialized more than once, and more than one drop, you can have a double free,
-    /// if one drop and another continue to execute, it will crash with segmentation
-    /// fault.
+    /// If initialized more than once per thread, and more than one drop, you can have a
+    /// double free, if one drop and another continue to execute, it will crash with
+    /// segmentation fault.
     pub unsafe fn init_unchecked() -> Self {
         janet_init();
         JanetClient { env_table: None }
@@ -92,7 +108,7 @@ impl JanetClient {
     /// ## TODO:
     /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
     /// respectively.
-    /// Change that the Client struct holds a nother struct that configure those two.
+    /// Change that the Client struct holds another struct that configure those two.
     pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<(), Error> {
         let code = code.as_ref();
         let env = match self.env_table.as_ref() {
@@ -127,6 +143,10 @@ impl JanetClient {
 impl Drop for JanetClient {
     fn drop(&mut self) {
         // Reset the INIT to false
+        #[cfg(feature = "std")]
+        INIT.with(|i| i.swap(false, Ordering::SeqCst));
+
+        #[cfg(not(feature = "std"))]
         INIT.swap(false, Ordering::SeqCst);
 
         unsafe { janet_deinit() }
