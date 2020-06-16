@@ -9,7 +9,7 @@ use janet_ll::{
     janet_array_push, janet_array_setcount, Janet as CJanet, JanetArray as CJanetArray,
 };
 
-use super::Janet;
+use super::{Janet, JanetExtend};
 
 pub struct JanetArray<'data> {
     pub raw: *mut CJanetArray,
@@ -110,6 +110,13 @@ impl Default for JanetArray<'_> {
     fn default() -> Self { Self::new() }
 }
 
+impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {
+    fn extend(&mut self, collection: T) {
+        let collection = collection.as_ref();
+        collection.iter().for_each(|&elem| self.push(elem))
+    }
+}
+
 
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
@@ -143,5 +150,43 @@ mod tests {
         }
 
         assert_eq!(10, array.len());
+    }
+
+    #[test]
+    #[serial]
+    fn pop_and_peek() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = JanetArray::new();
+
+        for i in 0..10 {
+            array.push(i.into());
+        }
+
+        for _ in 0..10 {
+            let last_peek = array.peek();
+            let poped_last = array.pop();
+
+            assert_eq!(last_peek, poped_last);
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn set_length() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = JanetArray::new();
+
+        for i in 0..10 {
+            array.push(i.into());
+        }
+
+        assert_eq!(10, array.len());
+        array.set_len(0);
+        assert_eq!(0, array.len());
+        array.set_len(19);
+        assert_eq!(19, array.len());
+        assert_eq!(Janet::nil(), array.peek());
+        array.set_len(-10);
+        assert_eq!(19, array.len());
     }
 }
