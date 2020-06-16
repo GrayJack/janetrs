@@ -1,16 +1,18 @@
-//! This module should have all Janet types structures.
+//! This module should have all Janet type structures.
 use janet_ll::{
-    janet_type, janet_wrap_boolean, janet_wrap_integer, janet_wrap_nil, janet_wrap_number,
-    janet_wrap_table, Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT,
-    JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER,
-    JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER, JanetType_JANET_FUNCTION,
-    JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER, JanetType_JANET_POINTER,
-    JanetType_JANET_STRING, JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE,
-    JanetType_JANET_TUPLE,
+    janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_integer, janet_wrap_nil,
+    janet_wrap_number, janet_wrap_table, Janet as CJanet, JanetType as CJanetType,
+    JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN,
+    JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER,
+    JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER,
+    JanetType_JANET_POINTER, JanetType_JANET_STRING, JanetType_JANET_STRUCT,
+    JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
 };
 
+pub mod array;
 pub mod table;
 
+pub use array::JanetArray;
 pub use table::JanetTable;
 
 /// Central structure for Janet.
@@ -55,6 +57,14 @@ impl Janet {
         }
     }
 
+    /// Create a array [`Janet`] with `value`.
+    pub fn array(value: JanetArray<'_>) -> Self {
+        Janet {
+            inner: unsafe { janet_wrap_array(value.raw) },
+            kind:  JanetType::Array,
+        }
+    }
+
     /// Create a table [`Janet`] with `value`.
     pub fn table(value: JanetTable<'_>) -> Self {
         Janet {
@@ -94,6 +104,10 @@ impl From<f64> for Janet {
 
 impl From<JanetTable<'_>> for Janet {
     fn from(val: JanetTable<'_>) -> Self { Janet::table(val) }
+}
+
+impl From<JanetArray<'_>> for Janet {
+    fn from(val: JanetArray<'_>) -> Self { Janet::array(val) }
 }
 
 impl From<Janet> for CJanet {
