@@ -1,6 +1,7 @@
 //! Module for stuff that are not required either to use in a application or to write
 //! janet modules.
 use core::cmp::Ordering;
+use core::fmt;
 
 
 use janet_ll::{
@@ -14,6 +15,12 @@ pub struct JanetBuildConfig {
     minor: u32,
     patch: u32,
     bits:  u32,
+}
+
+impl fmt::Display for JanetBuildConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Janet {}.{}.{}", self.major, self.minor, self.patch)
+    }
 }
 
 impl JanetBuildConfig {
@@ -36,6 +43,24 @@ impl JanetBuildConfig {
             minor,
             patch,
             bits,
+        }
+    }
+
+    /// Return `true` if Janet single threaded bit is set.
+    pub fn is_single_threaded(&self) -> bool {
+        match self.bits {
+            0 | 1 => false,
+            2 | 3 => true,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Return `true` is Janet nanbox bit is set.
+    pub fn is_nanbox(&self) -> bool {
+        match self.bits {
+            0 | 2 => false,
+            1 | 3 => true,
+            _ => unreachable!(),
         }
     }
 }
@@ -66,7 +91,7 @@ impl Ord for JanetBuildConfig {
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
     use core::cmp::Ordering;
 
     #[test]
@@ -106,5 +131,25 @@ mod tests {
             Ordering::Greater,
             Jbc::custom(1, 1, 2, 0).cmp(&Jbc::custom(1, 1, 1, 0))
         );
+    }
+
+    #[test]
+    fn config_bits() {
+        let test0 = JanetBuildConfig::custom(0, 0, 0, 0);
+        let test1 = JanetBuildConfig::custom(0, 0, 0, 1);
+        let test2 = JanetBuildConfig::custom(0, 0, 0, 2);
+        let test3 = JanetBuildConfig::custom(0, 0, 0, 3);
+
+        assert!(!test0.is_nanbox());
+        assert!(!test0.is_single_threaded());
+
+        assert!(test1.is_nanbox());
+        assert!(!test1.is_single_threaded());
+
+        assert!(!test2.is_nanbox());
+        assert!(test2.is_single_threaded());
+
+        assert!(test3.is_nanbox());
+        assert!(test3.is_single_threaded());
     }
 }
