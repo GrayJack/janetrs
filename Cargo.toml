@@ -14,7 +14,7 @@ keywords = ["janet", "embedding"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-janet-ll = { git = "https://github.com/GrayJack/janet-ll" }
+janet-ll = { git = "https://github.com/GrayJack/janet-ll", rev = "dev" }
 
 [dev-dependencies]
 serial_test = "~0.4.0"
