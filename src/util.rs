@@ -1,36 +1,24 @@
 //! Module for stuff that are not required either to use in a application or to write
 //! janet modules.
-use core::cmp::Ordering;
-use core::fmt;
-
+use core::{cmp::Ordering, fmt};
 
 use janet_ll::{
     JANET_CURRENT_CONFIG_BITS, JANET_VERSION_MAJOR, JANET_VERSION_MINOR, JANET_VERSION_PATCH,
 };
 
-/// Janet version in this build and configuration bits.
+/// Janet configuration in the build.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct JanetBuildConfig {
-    major: u32,
-    minor: u32,
-    patch: u32,
-    bits:  u32,
-}
-
-impl fmt::Display for JanetBuildConfig {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Janet {}.{}.{}", self.major, self.minor, self.patch)
-    }
+    version: JanetVersion,
+    bits:    u32,
 }
 
 impl JanetBuildConfig {
     /// Get the current Janet build version.
     pub const fn current() -> Self {
         JanetBuildConfig {
-            major: JANET_VERSION_MAJOR,
-            minor: JANET_VERSION_MINOR,
-            patch: JANET_VERSION_PATCH,
-            bits:  JANET_CURRENT_CONFIG_BITS,
+            version: JanetVersion::current(),
+            bits:    JANET_CURRENT_CONFIG_BITS,
         }
     }
 
@@ -39,12 +27,13 @@ impl JanetBuildConfig {
     /// Mostly used to check if current version match a requirement for your code.
     pub const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
         JanetBuildConfig {
-            major,
-            minor,
-            patch,
+            version: JanetVersion::custom(major, minor, patch),
             bits,
         }
     }
+
+    /// Return the version of the Janet.
+    pub const fn version(&self) -> JanetVersion { self.version }
 
     /// Return `true` if Janet single threaded bit is set.
     pub fn is_single_threaded(&self) -> bool {
@@ -65,8 +54,85 @@ impl JanetBuildConfig {
     }
 }
 
-impl PartialOrd for JanetBuildConfig {
-    fn partial_cmp(&self, other: &JanetBuildConfig) -> Option<Ordering> {
+/// Janet version representation.
+///
+/// It has convenient comparison operators implementations with triples `(u32, u32, u32)`,
+/// arrays `[u32; 3]` and [`str`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct JanetVersion {
+    major: u32,
+    minor: u32,
+    patch: u32,
+}
+
+impl JanetVersion {
+    /// Get the current Janet version.
+    pub const fn current() -> Self {
+        JanetVersion {
+            major: JANET_VERSION_MAJOR,
+            minor: JANET_VERSION_MINOR,
+            patch: JANET_VERSION_PATCH,
+        }
+    }
+
+    /// Create a custom [`JanetVersion`] given the version number.
+    ///
+    /// Mostly used to check if current version match a requirement for your code and
+    /// tests in this crate.
+    pub const fn custom(major: u32, minor: u32, patch: u32) -> Self {
+        JanetVersion {
+            major,
+            minor,
+            patch,
+        }
+    }
+
+    /// Return the Janet major version.
+    pub const fn major(&self) -> u32 { self.major }
+
+    /// Return the Janet minor version.
+    pub const fn minor(&self) -> u32 { self.minor }
+
+    /// Return the Janet patch version.
+    pub const fn patch(&self) -> u32 { self.patch }
+}
+
+impl fmt::Display for JanetVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Janet {}.{}.{}", self.major, self.minor, self.patch)
+    }
+}
+
+impl PartialEq<(u32, u32, u32)> for JanetVersion {
+    fn eq(&self, (major, minor, patch): &(u32, u32, u32)) -> bool {
+        self.major.eq(&major) && self.minor.eq(&minor) && self.patch.eq(&patch)
+    }
+}
+
+impl PartialEq<[u32; 3]> for JanetVersion {
+    fn eq(&self, [major, minor, patch]: &[u32; 3]) -> bool {
+        self.major.eq(&major) && self.minor.eq(&minor) && self.patch.eq(&patch)
+    }
+}
+
+impl PartialEq<&str> for JanetVersion {
+    fn eq(&self, other: &&str) -> bool {
+        if other.split('.').count() > 3 {
+            false
+        } else {
+            other
+                .split('.')
+                .map(|s| s.parse::<u32>())
+                .take(3)
+                .zip([self.major, self.minor, self.patch].iter())
+                .map(|(o, s)| o.unwrap_or(u32::MAX).eq(s))
+                .all(core::convert::identity)
+        }
+    }
+}
+
+impl PartialOrd for JanetVersion {
+    fn partial_cmp(&self, other: &JanetVersion) -> Option<Ordering> {
         match self.major.cmp(&other.major) {
             Ordering::Equal => match self.minor.cmp(&other.minor) {
                 Ordering::Equal => Some(self.patch.cmp(&other.patch)),
@@ -77,8 +143,59 @@ impl PartialOrd for JanetBuildConfig {
     }
 }
 
-impl Ord for JanetBuildConfig {
-    fn cmp(&self, other: &JanetBuildConfig) -> Ordering {
+impl PartialOrd<(u32, u32, u32)> for JanetVersion {
+    fn partial_cmp(&self, (major, minor, patch): &(u32, u32, u32)) -> Option<Ordering> {
+        match self.major.cmp(&major) {
+            Ordering::Equal => match self.minor.cmp(&minor) {
+                Ordering::Equal => Some(self.patch.cmp(&patch)),
+                x => Some(x),
+            },
+            x => Some(x),
+        }
+    }
+}
+
+impl PartialOrd<[u32; 3]> for JanetVersion {
+    fn partial_cmp(&self, [major, minor, patch]: &[u32; 3]) -> Option<Ordering> {
+        match self.major.cmp(&major) {
+            Ordering::Equal => match self.minor.cmp(&minor) {
+                Ordering::Equal => Some(self.patch.cmp(&patch)),
+                x => Some(x),
+            },
+            x => Some(x),
+        }
+    }
+}
+
+impl PartialOrd<&str> for JanetVersion {
+    fn partial_cmp(&self, other: &&str) -> Option<Ordering> {
+        let [major, minor, patch] = {
+            let iter = other.split('.');
+
+            if iter.clone().count() > 3 {
+                return None;
+            }
+
+            let mut arr = [0; 3];
+
+            for (index, elem) in iter.map(|s| s.parse().ok()).enumerate() {
+                arr[index] = elem?;
+            }
+            arr
+        };
+
+        match self.major.cmp(&major) {
+            Ordering::Equal => match self.minor.cmp(&minor) {
+                Ordering::Equal => Some(self.patch.cmp(&patch)),
+                x => Some(x),
+            },
+            x => Some(x),
+        }
+    }
+}
+
+impl Ord for JanetVersion {
+    fn cmp(&self, other: &JanetVersion) -> Ordering {
         match self.major.cmp(&other.major) {
             Ordering::Equal => match self.minor.cmp(&other.minor) {
                 Ordering::Equal => self.patch.cmp(&other.patch),
@@ -95,42 +212,136 @@ mod tests {
     use core::cmp::Ordering;
 
     #[test]
-    fn janet_build_config_ord() {
-        use super::JanetBuildConfig as Jbc;
+    fn janet_version_ord() {
         assert_eq!(
             Ordering::Equal,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0))
+            JanetVersion::custom(1, 1, 1).cmp(&JanetVersion::custom(1, 1, 1))
         );
         assert_eq!(
             Ordering::Equal,
-            Jbc::custom(1, 2, 1, 0).cmp(&Jbc::custom(1, 2, 1, 1))
+            JanetVersion::custom(1, 2, 1).cmp(&JanetVersion::custom(1, 2, 1))
         );
 
         assert_eq!(
             Ordering::Less,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(2, 1, 1, 0))
+            JanetVersion::custom(1, 1, 1).cmp(&JanetVersion::custom(2, 1, 1))
         );
         assert_eq!(
             Ordering::Less,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 2, 1, 0))
+            JanetVersion::custom(1, 1, 1).cmp(&JanetVersion::custom(1, 2, 1))
         );
         assert_eq!(
             Ordering::Less,
-            Jbc::custom(1, 1, 1, 0).cmp(&Jbc::custom(1, 1, 2, 0))
+            JanetVersion::custom(1, 1, 1).cmp(&JanetVersion::custom(1, 1, 2))
         );
 
         assert_eq!(
             Ordering::Greater,
-            Jbc::custom(2, 1, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0))
+            JanetVersion::custom(2, 1, 1).cmp(&JanetVersion::custom(1, 1, 1))
         );
         assert_eq!(
             Ordering::Greater,
-            Jbc::custom(1, 2, 1, 0).cmp(&Jbc::custom(1, 1, 1, 0))
+            JanetVersion::custom(1, 2, 1).cmp(&JanetVersion::custom(1, 1, 1))
         );
         assert_eq!(
             Ordering::Greater,
-            Jbc::custom(1, 1, 2, 0).cmp(&Jbc::custom(1, 1, 1, 0))
+            JanetVersion::custom(1, 1, 2).cmp(&JanetVersion::custom(1, 1, 1))
         );
+    }
+
+    #[test]
+    fn version_eq_tuple() {
+        assert!(JanetVersion::custom(1, 10, 0) == (1, 10, 0));
+        assert!(JanetVersion::custom(0, 1, 9) == (0, 1, 9));
+    }
+
+    #[test]
+    fn version_eq_str() {
+        assert!(JanetVersion::custom(1, 10, 0) == "1.10.0");
+        assert!(JanetVersion::custom(0, 1, 9) == "0.1.9");
+    }
+
+    #[test]
+    fn version_ord_tuple() {
+        assert_eq!(
+            Some(Ordering::Equal),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&(1, 1, 1))
+        );
+        assert_eq!(
+            Some(Ordering::Equal),
+            JanetVersion::custom(1, 2, 1).partial_cmp(&(1, 2, 1))
+        );
+
+        assert_eq!(
+            Some(Ordering::Less),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&(2, 1, 1))
+        );
+        assert_eq!(
+            Some(Ordering::Less),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&(1, 2, 1))
+        );
+        assert_eq!(
+            Some(Ordering::Less),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&(1, 1, 2))
+        );
+
+        assert_eq!(
+            Some(Ordering::Greater),
+            JanetVersion::custom(2, 1, 1).partial_cmp(&(1, 1, 1))
+        );
+        assert_eq!(
+            Some(Ordering::Greater),
+            JanetVersion::custom(1, 2, 1).partial_cmp(&(1, 1, 1))
+        );
+        assert_eq!(
+            Some(Ordering::Greater),
+            JanetVersion::custom(1, 1, 2).partial_cmp(&(1, 1, 1))
+        );
+    }
+
+    #[test]
+    fn version_ord_str() {
+        assert_eq!(
+            Some(Ordering::Equal),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&"1.1.1")
+        );
+        assert_eq!(
+            Some(Ordering::Equal),
+            JanetVersion::custom(1, 2, 1).partial_cmp(&"1.2.1")
+        );
+
+        assert_eq!(
+            Some(Ordering::Less),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&"2.1.1")
+        );
+        assert_eq!(
+            Some(Ordering::Less),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&"1.2.1")
+        );
+        assert_eq!(
+            Some(Ordering::Less),
+            JanetVersion::custom(1, 1, 1).partial_cmp(&"1.1.2")
+        );
+
+        assert_eq!(
+            Some(Ordering::Greater),
+            JanetVersion::custom(2, 1, 1).partial_cmp(&"1.1.1")
+        );
+        assert_eq!(
+            Some(Ordering::Greater),
+            JanetVersion::custom(1, 2, 1).partial_cmp(&"1.1.1")
+        );
+        assert_eq!(
+            Some(Ordering::Greater),
+            JanetVersion::custom(1, 1, 2).partial_cmp(&"1.1.1")
+        );
+
+        assert_eq!(None, JanetVersion::custom(1, 1, 2).partial_cmp(&""));
+        assert_eq!(
+            None,
+            JanetVersion::custom(1, 1, 2).partial_cmp(&"version go brr")
+        );
+        assert_eq!(None, JanetVersion::custom(1, 1, 2).partial_cmp(&"1.1.1.1"));
     }
 
     #[test]

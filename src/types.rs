@@ -117,27 +117,19 @@ impl From<Janet> for CJanet {
 }
 
 impl PartialEq<CJanet> for Janet {
-    fn eq(&self, other: &CJanet) -> bool {
-        self.inner.eq(other)
-    }
+    fn eq(&self, other: &CJanet) -> bool { self.inner.eq(other) }
 }
 
 impl PartialEq<Janet> for CJanet {
-    fn eq(&self, other: &Janet) -> bool {
-        self.eq(&other.inner)
-    }
+    fn eq(&self, other: &Janet) -> bool { self.eq(&other.inner) }
 }
 
 impl PartialOrd<CJanet> for Janet {
-    fn partial_cmp(&self, other: &CJanet) -> Option<Ordering> {
-        self.inner.partial_cmp(other)
-    }
+    fn partial_cmp(&self, other: &CJanet) -> Option<Ordering> { self.inner.partial_cmp(other) }
 }
 
 impl PartialOrd<Janet> for CJanet {
-    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> {
-        self.partial_cmp(&other.inner)
-    }
+    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> { self.partial_cmp(&other.inner) }
 }
 
 
