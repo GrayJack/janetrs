@@ -11,6 +11,10 @@ use janet_ll::{
 
 use super::{Janet, JanetExtend};
 
+/// Janet [array]() type.
+///
+/// It is akin to a Vec.
+#[derive(Debug)]
 pub struct JanetArray<'data> {
     pub raw: *mut CJanetArray,
     phantom: PhantomData<&'data ()>,
