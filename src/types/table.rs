@@ -115,6 +115,22 @@ impl JanetTable<'_> {
             Some((ans.key.into(), ans.value.into()))
         }
     }
+
+    /// Return a raw pointer to the buffer raw structure.
+    ///
+    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    ///
+    /// If you need to mutate the contents of the slice, use [`as_mut_ptr`].
+    ///
+    /// [`as_mut_ptr`]: ./struct.JanetTable.html#method.as_mut_raw
+    pub fn as_raw(&self) -> *const CJanetTable{ self.raw }
+
+    /// Return a raw mutable pointer to the buffer raw structure.
+    ///
+    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    pub fn as_mut_raw(&mut self) -> *mut CJanetTable { self.raw }
 }
 
 impl Clone for JanetTable<'_> {
