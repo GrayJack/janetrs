@@ -13,7 +13,7 @@ use super::{Janet, JanetExtend};
 /// It is akin to a HashMap.
 #[derive(Debug)]
 pub struct JanetTable<'data> {
-    pub(crate) raw_table: *mut CJanetTable,
+    pub(crate) raw: *mut CJanetTable,
     phatom: PhantomData<&'data ()>,
 }
 
@@ -24,7 +24,7 @@ impl JanetTable<'_> {
     /// second inserted into.
     pub fn new() -> Self {
         JanetTable {
-            raw_table: unsafe { janet_table(0) },
+            raw: unsafe { janet_table(0) },
             phatom:    PhantomData,
         }
     }
@@ -47,7 +47,7 @@ impl JanetTable<'_> {
     ///  - ...
     pub fn with_capacity(capacity: i32) -> Self {
         JanetTable {
-            raw_table: unsafe { janet_table(capacity) },
+            raw: unsafe { janet_table(capacity) },
             phatom:    PhantomData,
         }
     }
@@ -57,9 +57,9 @@ impl JanetTable<'_> {
     /// # Safety
     /// This function do not check if the given `raw_table` is `NULL` or not. Use at your
     /// own risk.
-    pub unsafe fn from_raw(raw_table: *mut CJanetTable) -> Self {
+    pub unsafe fn from_raw(raw: *mut CJanetTable) -> Self {
         JanetTable {
-            raw_table,
+            raw,
             phatom: PhantomData,
         }
     }
@@ -68,10 +68,10 @@ impl JanetTable<'_> {
     ///
     /// This number is a lower bound; the [`JanetTable`] might be able to hold more, but
     /// is guaranteed to be able to hold at least this many.
-    pub fn capacity(&self) -> i32 { unsafe { (*self.raw_table).capacity } }
+    pub fn capacity(&self) -> i32 { unsafe { (*self.raw).capacity } }
 
     /// Returns the number of elements that was removed from the table.
-    pub fn removed(&self) -> i32 { unsafe { (*self.raw_table).deleted } }
+    pub fn removed(&self) -> i32 { unsafe { (*self.raw).deleted } }
 
     /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
     /// reuse.
@@ -81,14 +81,14 @@ impl JanetTable<'_> {
     pub fn clear(&mut self) { todo!() }
 
     /// Returns the number of elements of the table, also refered to as its 'length'.
-    pub fn len(&self) -> i32 { unsafe { (*self.raw_table).count } }
+    pub fn len(&self) -> i32 { unsafe { (*self.raw).count } }
 
     /// Returns `true` if the table contains no elements.
     pub fn is_empty(&self) -> bool { self.len() == 0 }
 
     /// Returns the value corresponding to the supplied `key`.
     pub fn get(&self, key: Janet) -> Janet {
-        unsafe { janet_table_get(self.raw_table, key.inner).into() }
+        unsafe { janet_table_get(self.raw, key.inner).into() }
     }
 
     /// Returns the key-value pair corresponding to the supplied `key`.
@@ -96,17 +96,17 @@ impl JanetTable<'_> {
 
     /// Removes `key` from the table, returning the value of the `key`.
     pub fn remove(&mut self, key: Janet) -> Janet {
-        unsafe { janet_table_remove(self.raw_table, key.inner).into() }
+        unsafe { janet_table_remove(self.raw, key.inner).into() }
     }
 
     /// Insert a `key`-`value` pair into the table.
     pub fn insert(&mut self, key: Janet, value: Janet) {
-        unsafe { janet_table_put(self.raw_table, key.inner, value.inner) }
+        unsafe { janet_table_put(self.raw, key.inner, value.inner) }
     }
 
     /// Find the key-value pair that contains the suplied `key` in the table.
     pub fn find(&self, key: Janet) -> Option<(Janet, Janet)> {
-        let ans = unsafe { janet_table_find(self.raw_table, key.into()) };
+        let ans = unsafe { janet_table_find(self.raw, key.into()) };
 
         if ans.is_null() {
             None
@@ -120,7 +120,7 @@ impl JanetTable<'_> {
 impl Clone for JanetTable<'_> {
     fn clone(&self) -> Self {
         JanetTable {
-            raw_table: unsafe { janet_table_clone(self.raw_table) },
+            raw: unsafe { janet_table_clone(self.raw) },
             phatom:    PhantomData,
         }
     }
@@ -129,7 +129,7 @@ impl Clone for JanetTable<'_> {
 impl JanetExtend<JanetTable<'_>> for JanetTable<'_> {
     /// Extend the table with all key-value pairs of the `other` table.
     fn extend(&mut self, other: JanetTable<'_>) {
-        unsafe { janet_table_merge_table(self.raw_table, other.raw_table) }
+        unsafe { janet_table_merge_table(self.raw, other.raw) }
     }
 }
 

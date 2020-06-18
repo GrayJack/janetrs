@@ -122,7 +122,7 @@ impl JanetClient {
         // TODO: Handle the value when != than 0
         let _res = unsafe {
             janet_dobytes(
-                env.raw_table,
+                env.raw,
                 code.as_ptr(),
                 code.len() as i32,
                 b"main\0".as_ptr() as *const i8,

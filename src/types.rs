@@ -80,7 +80,7 @@ impl Janet {
     /// Create a table [`Janet`] with `value`.
     pub fn table(value: JanetTable<'_>) -> Self {
         Janet {
-            inner: unsafe { janet_wrap_table(value.raw_table) },
+            inner: unsafe { janet_wrap_table(value.raw) },
             kind:  JanetType::Table,
         }
     }
