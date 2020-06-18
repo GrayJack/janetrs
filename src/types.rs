@@ -2,8 +2,8 @@
 use core::cmp::Ordering;
 
 use janet_ll::{
-    janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_integer, janet_wrap_nil,
-    janet_wrap_number, janet_wrap_table, Janet as CJanet, JanetType as CJanetType,
+    janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer, janet_wrap_integer,
+    janet_wrap_nil, janet_wrap_number, janet_wrap_table, Janet as CJanet, JanetType as CJanetType,
     JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN,
     JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER,
     JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER,
@@ -12,9 +12,11 @@ use janet_ll::{
 };
 
 pub mod array;
+pub mod buffer;
 pub mod table;
 
 pub use array::JanetArray;
+pub use buffer::JanetBuffer;
 pub use table::JanetTable;
 
 /// Central structure for Janet.
@@ -67,6 +69,14 @@ impl Janet {
         }
     }
 
+    /// Create a buffer [`Janet`] with `value`.
+    pub fn buffer(value: JanetBuffer<'_>) -> Self {
+        Janet {
+            inner: unsafe { janet_wrap_buffer(value.raw) },
+            kind:  JanetType::Buffer,
+        }
+    }
+
     /// Create a table [`Janet`] with `value`.
     pub fn table(value: JanetTable<'_>) -> Self {
         Janet {
@@ -110,6 +120,10 @@ impl From<JanetTable<'_>> for Janet {
 
 impl From<JanetArray<'_>> for Janet {
     fn from(val: JanetArray<'_>) -> Self { Janet::array(val) }
+}
+
+impl From<JanetBuffer<'_>> for Janet {
+    fn from(val: JanetBuffer<'_>) -> Self { Janet::buffer(val) }
 }
 
 impl From<Janet> for CJanet {

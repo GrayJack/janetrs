@@ -111,6 +111,7 @@ impl JanetClient {
     /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
     /// respectively.
     /// Change that the Client struct holds another struct that configure those two.
+    /// Also, we don't handle the errors of the janet_dobytes function.
     pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<(), Error> {
         let code = code.as_ref();
         let env = match self.env_table.as_ref() {
@@ -118,7 +119,8 @@ impl JanetClient {
             None => return Err(Error::EnvNotInit),
         };
 
-        unsafe {
+        // TODO: Handle the value when != than 0
+        let _res = unsafe {
             janet_dobytes(
                 env.raw_table,
                 code.as_ptr(),

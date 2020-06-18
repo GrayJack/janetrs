@@ -6,7 +6,8 @@
 //!
 //! ## TODO: Lib level
 //!  - Better docs, the docs sucks right now for the top-level modules docs and for the
-//!    types. For the functions is kinda ok, but improvements are welcome.
+//!    types. For the functions is kinda ok, but there is no examples, and improvements
+//!    are welcome.
 //!  - Expand the types API. First expose what alread exists from Janet!!!.
 //!  - We still don't know exactly how Janet panics would work on Rust, so we need to
 //!    explore that and documment it

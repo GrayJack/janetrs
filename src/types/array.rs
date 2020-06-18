@@ -11,9 +11,9 @@ use janet_ll::{
 
 use super::{Janet, JanetExtend};
 
-/// Janet [array]() type.
+/// Janet [array](https://janet-lang.org/docs/data_structures/arrays.html) type.
 ///
-/// It is akin to a Vec.
+/// It is akin to a [`Vec`].
 #[derive(Debug)]
 pub struct JanetArray<'data> {
     pub raw: *mut CJanetArray,
@@ -72,7 +72,7 @@ impl JanetArray<'_> {
 
     /// Appends an element to the back of the array.
     ///
-    /// # Panics:
+    /// # Panics
     /// Panics if the number of elements overflow a `i32`.
     pub fn push(&mut self, value: Janet) { unsafe { janet_array_push(self.raw, value.inner) }; }
 
