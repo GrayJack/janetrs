@@ -5,10 +5,12 @@ use core::marker::PhantomData;
 use std::ffi::CStr;
 
 use janet_ll::{
-    janet_buffer, janet_buffer_ensure, janet_buffer_extra, janet_buffer_push_bytes,
-    janet_buffer_push_cstring, janet_buffer_push_u16, janet_buffer_push_u32, janet_buffer_push_u64,
+    janet_buffer, janet_buffer_ensure, janet_buffer_extra, janet_buffer_push_bytes, janet_buffer_push_u16, janet_buffer_push_u32, janet_buffer_push_u64,
     janet_buffer_push_u8, janet_buffer_setcount, JanetBuffer as CJanetBuffer,
 };
+
+#[cfg(feature = "std")]
+use janet_ll::janet_buffer_push_cstring;
 
 use super::JanetExtend;
 
@@ -134,4 +136,62 @@ impl JanetExtend<&[u8]> for JanetBuffer<'_> {
 #[cfg(feature = "std")]
 impl JanetExtend<&CStr> for JanetBuffer<'_> {
     fn extend(&mut self, cstr: &CStr) { self.push_cstr(cstr) }
+}
+
+#[cfg(all(test, feature = "amalgation"))]
+mod tests {
+    use super::*;
+    use crate::client::JanetClient;
+    use serial_test::serial;
+
+    #[test]
+    #[serial]
+    fn creation() {
+        let _client = JanetClient::init().unwrap();
+
+        let test = JanetBuffer::new();
+        assert!(test.is_empty());
+        assert_eq!(0, test.capacity());
+
+        let test = JanetBuffer::with_capacity(100);
+        assert!(test.is_empty());
+        assert_eq!(100, test.capacity());
+    }
+
+    #[test]
+    #[serial]
+    fn pushs_and_length() {
+        let _client = JanetClient::init().unwrap();
+
+        let mut test = JanetBuffer::with_capacity(10);
+        assert!(test.is_empty());
+
+        test.push('a');
+        assert_eq!(4, test.len());
+
+        test.push_bytes(b"bytes");
+        assert_eq!(9, test.len());
+
+        test.push_u8(b'a');
+        assert_eq!(10, test.len());
+    }
+
+    #[test]
+    #[serial]
+    fn set_length() {
+        let _client = JanetClient::init().unwrap();
+        let mut buffer = JanetBuffer::new();
+
+        for i in 0..10 {
+            buffer.push(i.into());
+        }
+
+        assert_eq!(40, buffer.len());
+        buffer.set_len(0);
+        assert_eq!(0, buffer.len());
+        buffer.set_len(19);
+        assert_eq!(19, buffer.len());
+        buffer.set_len(-10);
+        assert_eq!(19, buffer.len());
+    }
 }
