@@ -13,7 +13,44 @@
 //!    explore that and documment it
 //!  - Janet requires allocations being possible, how do we enforce `alloc` on `no_std`
 //!    environment?
-
+//!
+//! ## Some ideas:
+//! For module creation some proc macros to help module creation
+//!
+//! Example:
+//! ```rust
+//! #[janet_fn]
+//! fn fn_name(args: &mut [Janet]) -> Janet {
+//!     // Function logic
+//! }
+//! ```
+//!
+//! would become:
+//!
+//! ```rust
+//! #[no_mangle]
+//! extern "C" fn fn_name(argc: i32, argv: *mut CJanet) -> CJanet {
+//!     fn rust_fn_name(args: &mut [Janet]) -> Janet {
+//!         // ...
+//!     }
+//!
+//!     let args = unsafe { core::slice::from_raw_parts_mut(argv, argc as usize) };
+//!     let mut args = unsafe { core::mem::transmute::<&mut [CJanet], &mut [Janet]>(args) };
+//!     rust_fn_name(args).into()
+//! }
+//! ```
+//!
+//! And something to do the same as Janet C API
+//! ```c
+//! static const JanetReg cfuns[] = {
+//!     {"myfun", myfun, "(mymod/myfun)\n\nPrints a hello message."},
+//!     {NULL, NULL, NULL}
+//! };
+//!
+//! JANET_MODULE_ENTRY(JanetTable *env) {
+//!     janet_cfuns(env, "mymod", cfuns);
+//! }
+//! ```
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use janet_ll as janet_sys;

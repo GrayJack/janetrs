@@ -12,6 +12,10 @@ use janet_ll::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
 
 use crate::types::JanetTable;
 
+
+// There are platforms where AtomicBool doesn't exist
+// At some point it would be awesome to find what targets doesn't have support for atomics
+// and for those add something else to substitute the AtomicBool.
 #[cfg(feature = "std")]
 thread_local! {
     static INIT: AtomicBool = AtomicBool::new(false);
@@ -74,6 +78,8 @@ impl JanetClient {
             return Err(Error::AlreadyInit);
         }
 
+        // SAFETY: We use a static AtomicBool to make sure that it is started only once (per
+        // thread if "std" feature activated)
         unsafe { janet_init() };
         Ok(JanetClient { env_table: None })
     }

@@ -80,9 +80,6 @@ impl JanetTable<'_> {
 
     /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
     /// reuse.
-    ///
-    /// TODO: Not implemented yet, for some reason Janet doesn't export to the public API
-    /// the function that do that.
     #[inline]
     pub fn clear(&mut self) { unsafe { janet_table_clear(self.raw) } }
 
