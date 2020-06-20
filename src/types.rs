@@ -30,6 +30,7 @@ pub struct Janet {
 
 impl Janet {
     /// Create a nil [`Janet`].
+    #[inline]
     pub fn nil() -> Janet {
         Janet {
             inner: unsafe { janet_wrap_nil() },
@@ -38,6 +39,7 @@ impl Janet {
     }
 
     /// Create a boolean [`Janet`] with `value`.
+    #[inline]
     pub fn boolean(value: bool) -> Self {
         Janet {
             inner: unsafe { janet_wrap_boolean(value.into()) },
@@ -46,6 +48,7 @@ impl Janet {
     }
 
     /// Create a number [`Janet`] with `value`.
+    #[inline]
     pub fn number(value: f64) -> Self {
         Janet {
             inner: unsafe { janet_wrap_number(value) },
@@ -54,6 +57,7 @@ impl Janet {
     }
 
     /// Create a abstract integer [`Janet`] with `value`.
+    #[inline]
     pub fn integer(value: i32) -> Self {
         Janet {
             inner: unsafe { janet_wrap_integer(value) },
@@ -62,6 +66,7 @@ impl Janet {
     }
 
     /// Create a array [`Janet`] with `value`.
+    #[inline]
     pub fn array(value: JanetArray<'_>) -> Self {
         Janet {
             inner: unsafe { janet_wrap_array(value.raw) },
@@ -70,6 +75,7 @@ impl Janet {
     }
 
     /// Create a buffer [`Janet`] with `value`.
+    #[inline]
     pub fn buffer(value: JanetBuffer<'_>) -> Self {
         Janet {
             inner: unsafe { janet_wrap_buffer(value.raw) },
@@ -78,6 +84,7 @@ impl Janet {
     }
 
     /// Create a table [`Janet`] with `value`.
+    #[inline]
     pub fn table(value: JanetTable<'_>) -> Self {
         Janet {
             inner: unsafe { janet_wrap_table(value.raw) },
@@ -86,13 +93,16 @@ impl Janet {
     }
 
     /// Returns the type of [`Janet`] object.
+    #[inline]
     pub const fn kind(&self) -> JanetType { self.kind }
 
     /// Returns the raw data of the data
+    #[inline]
     pub const fn raw_data(&self) -> CJanet { self.inner }
 }
 
 impl From<CJanet> for Janet {
+    #[inline]
     fn from(val: CJanet) -> Self {
         let raw_kind = unsafe { janet_type(val) };
         Janet {
@@ -103,46 +113,57 @@ impl From<CJanet> for Janet {
 }
 
 impl From<bool> for Janet {
+    #[inline]
     fn from(val: bool) -> Self { Janet::boolean(val) }
 }
 
 impl From<i32> for Janet {
+    #[inline]
     fn from(val: i32) -> Self { Janet::integer(val) }
 }
 
 impl From<f64> for Janet {
+    #[inline]
     fn from(val: f64) -> Self { Janet::number(val) }
 }
 
 impl From<JanetTable<'_>> for Janet {
+    #[inline]
     fn from(val: JanetTable<'_>) -> Self { Janet::table(val) }
 }
 
 impl From<JanetArray<'_>> for Janet {
+    #[inline]
     fn from(val: JanetArray<'_>) -> Self { Janet::array(val) }
 }
 
 impl From<JanetBuffer<'_>> for Janet {
+    #[inline]
     fn from(val: JanetBuffer<'_>) -> Self { Janet::buffer(val) }
 }
 
 impl From<Janet> for CJanet {
+    #[inline]
     fn from(val: Janet) -> Self { val.inner }
 }
 
 impl PartialEq<CJanet> for Janet {
+    #[inline]
     fn eq(&self, other: &CJanet) -> bool { self.inner.eq(other) }
 }
 
 impl PartialEq<Janet> for CJanet {
+    #[inline]
     fn eq(&self, other: &Janet) -> bool { self.eq(&other.inner) }
 }
 
 impl PartialOrd<CJanet> for Janet {
+    #[inline]
     fn partial_cmp(&self, other: &CJanet) -> Option<Ordering> { self.inner.partial_cmp(other) }
 }
 
 impl PartialOrd<Janet> for CJanet {
+    #[inline]
     fn partial_cmp(&self, other: &Janet) -> Option<Ordering> { self.partial_cmp(&other.inner) }
 }
 
@@ -171,6 +192,7 @@ pub enum JanetType {
 
 impl From<CJanetType> for JanetType {
     #[allow(non_upper_case_globals)]
+    #[inline]
     fn from(raw: CJanetType) -> Self {
         match raw {
             JanetType_JANET_ABSTRACT => JanetType::Abstract,
@@ -197,6 +219,7 @@ impl From<CJanetType> for JanetType {
 }
 
 impl From<JanetType> for CJanetType {
+    #[inline]
     fn from(val: JanetType) -> Self {
         match val {
             JanetType::Abstract => JanetType_JANET_ABSTRACT,

@@ -15,6 +15,7 @@ pub struct JanetBuildConfig {
 
 impl JanetBuildConfig {
     /// Get the current Janet build version.
+    #[inline]
     pub const fn current() -> Self {
         JanetBuildConfig {
             version: JanetVersion::current(),
@@ -25,6 +26,7 @@ impl JanetBuildConfig {
     /// Create a custom [`JanetBuildConfig`].
     ///
     /// Mostly used to check if current version match a requirement for your code.
+    #[inline]
     pub const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
         JanetBuildConfig {
             version: JanetVersion::custom(major, minor, patch),
@@ -33,9 +35,11 @@ impl JanetBuildConfig {
     }
 
     /// Return the version of the Janet.
+    #[inline]
     pub const fn version(&self) -> JanetVersion { self.version }
 
     /// Return `true` if Janet single threaded bit is set.
+    #[inline]
     pub fn is_single_threaded(&self) -> bool {
         match self.bits {
             0 | 1 => false,
@@ -45,6 +49,7 @@ impl JanetBuildConfig {
     }
 
     /// Return `true` is Janet nanbox bit is set.
+    #[inline]
     pub fn is_nanbox(&self) -> bool {
         match self.bits {
             0 | 2 => false,
@@ -67,6 +72,7 @@ pub struct JanetVersion {
 
 impl JanetVersion {
     /// Get the current Janet version.
+    #[inline]
     pub const fn current() -> Self {
         JanetVersion {
             major: JANET_VERSION_MAJOR,
@@ -79,6 +85,7 @@ impl JanetVersion {
     ///
     /// Mostly used to check if current version match a requirement for your code and
     /// tests in this crate.
+    #[inline]
     pub const fn custom(major: u32, minor: u32, patch: u32) -> Self {
         JanetVersion {
             major,
@@ -88,28 +95,34 @@ impl JanetVersion {
     }
 
     /// Return the Janet major version.
+    #[inline]
     pub const fn major(&self) -> u32 { self.major }
 
     /// Return the Janet minor version.
+    #[inline]
     pub const fn minor(&self) -> u32 { self.minor }
 
     /// Return the Janet patch version.
+    #[inline]
     pub const fn patch(&self) -> u32 { self.patch }
 }
 
 impl fmt::Display for JanetVersion {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Janet {}.{}.{}", self.major, self.minor, self.patch)
     }
 }
 
 impl PartialEq<(u32, u32, u32)> for JanetVersion {
+    #[inline]
     fn eq(&self, (major, minor, patch): &(u32, u32, u32)) -> bool {
         self.major.eq(&major) && self.minor.eq(&minor) && self.patch.eq(&patch)
     }
 }
 
 impl PartialEq<[u32; 3]> for JanetVersion {
+    #[inline]
     fn eq(&self, [major, minor, patch]: &[u32; 3]) -> bool {
         self.major.eq(&major) && self.minor.eq(&minor) && self.patch.eq(&patch)
     }
@@ -132,6 +145,7 @@ impl PartialEq<&str> for JanetVersion {
 }
 
 impl PartialOrd for JanetVersion {
+    #[inline]
     fn partial_cmp(&self, other: &JanetVersion) -> Option<Ordering> {
         match self.major.cmp(&other.major) {
             Ordering::Equal => match self.minor.cmp(&other.minor) {
@@ -144,6 +158,7 @@ impl PartialOrd for JanetVersion {
 }
 
 impl PartialOrd<(u32, u32, u32)> for JanetVersion {
+    #[inline]
     fn partial_cmp(&self, (major, minor, patch): &(u32, u32, u32)) -> Option<Ordering> {
         match self.major.cmp(&major) {
             Ordering::Equal => match self.minor.cmp(&minor) {
@@ -156,6 +171,7 @@ impl PartialOrd<(u32, u32, u32)> for JanetVersion {
 }
 
 impl PartialOrd<[u32; 3]> for JanetVersion {
+    #[inline]
     fn partial_cmp(&self, [major, minor, patch]: &[u32; 3]) -> Option<Ordering> {
         match self.major.cmp(&major) {
             Ordering::Equal => match self.minor.cmp(&minor) {
@@ -195,6 +211,7 @@ impl PartialOrd<&str> for JanetVersion {
 }
 
 impl Ord for JanetVersion {
+    #[inline]
     fn cmp(&self, other: &JanetVersion) -> Ordering {
         match self.major.cmp(&other.major) {
             Ordering::Equal => match self.minor.cmp(&other.minor) {

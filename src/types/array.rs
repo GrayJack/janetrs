@@ -25,6 +25,7 @@ impl JanetArray<'_> {
     ///
     /// It is initially created with capacity 0, so it will not allocate until it is
     /// first pushed into.
+    #[inline]
     pub fn new() -> Self {
         JanetArray {
             raw:     unsafe { janet_array(0) },
@@ -36,6 +37,7 @@ impl JanetArray<'_> {
     ///
     /// When `capacity` is lesser than zero, it's the same as calling with `capacity`
     /// equals to zero.
+    #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
         JanetArray {
             raw:     unsafe { janet_array(capacity) },
@@ -44,12 +46,15 @@ impl JanetArray<'_> {
     }
 
     /// Returns the number of elements the array can hold without reallocating.
+    #[inline]
     pub fn capacity(&self) -> i32 { unsafe { (*self.raw).capacity } }
 
     /// Returns the number of elements in the array, also referred to as its 'length'.
+    #[inline]
     pub fn len(&self) -> i32 { unsafe { (*self.raw).count } }
 
     /// Returns `true` if the array contains no elements.
+    #[inline]
     pub fn is_empty(&self) -> bool { self.len() == 0 }
 
     /// Set the length of the array to `new_len`.
@@ -61,11 +66,13 @@ impl JanetArray<'_> {
     /// compared to the Rust [`Vec`] method with the same name.
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
+    #[inline]
     pub fn set_len(&mut self, new_len: i32) { unsafe { janet_array_setcount(self.raw, new_len) }; }
 
     /// Ensure that an array has enough space for `check_capacity` elements. If not,
     /// resize the backing memory to `capacity` * `growth` slots. In most cases, `growth`
     /// should be `1` or `2`.
+    #[inline]
     pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
         unsafe { janet_array_ensure(self.raw, check_capacity, growth) };
     }
@@ -74,13 +81,16 @@ impl JanetArray<'_> {
     ///
     /// # Panics
     /// Panics if the number of elements overflow a `i32`.
+    #[inline]
     pub fn push(&mut self, value: Janet) { unsafe { janet_array_push(self.raw, value.inner) }; }
 
     /// Removes the last element from a array and returns it, or Janet `nil` if it is
     /// empty.
+    #[inline]
     pub fn pop(&mut self) -> Janet { unsafe { janet_array_pop(self.raw).into() } }
 
     /// Returns the last element in the array without modifying it.
+    #[inline]
     pub fn peek(&mut self) -> Janet { unsafe { janet_array_peek(self.raw).into() } }
 
     /// Return a raw pointer to the buffer raw structure.
@@ -91,18 +101,21 @@ impl JanetArray<'_> {
     /// If you need to mutate the contents of the slice, use [`as_mut_ptr`].
     ///
     /// [`as_mut_ptr`]: ./struct.JanetArray.html#method.as_mut_raw
+    #[inline]
     pub fn as_raw(&self) -> *const CJanetArray { self.raw }
 
     /// Return a raw mutable pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
+    #[inline]
     pub fn as_mut_raw(&mut self) -> *mut CJanetArray { self.raw }
 }
 
 impl TryFrom<&[Janet]> for JanetArray<'_> {
     type Error = core::num::TryFromIntError;
 
+    #[inline]
     fn try_from(slice: &[Janet]) -> Result<Self, Self::Error> {
         let len = slice.len().try_into()?;
         let mut j_array = Self::with_capacity(len);
@@ -116,6 +129,7 @@ impl TryFrom<&[Janet]> for JanetArray<'_> {
 impl TryFrom<&[CJanet]> for JanetArray<'_> {
     type Error = core::num::TryFromIntError;
 
+    #[inline]
     fn try_from(slice: &[CJanet]) -> Result<Self, Self::Error> {
         let len = slice.len().try_into()?;
 
@@ -127,13 +141,14 @@ impl TryFrom<&[CJanet]> for JanetArray<'_> {
 }
 
 impl Default for JanetArray<'_> {
+    #[inline]
     fn default() -> Self { Self::new() }
 }
 
 impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {
+    #[inline]
     fn extend(&mut self, collection: T) {
-        let collection = collection.as_ref();
-        collection.iter().for_each(|&elem| self.push(elem))
+        collection.as_ref().iter().for_each(|&elem| self.push(elem))
     }
 }
 

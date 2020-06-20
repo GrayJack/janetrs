@@ -31,6 +31,7 @@ pub enum Error {
 }
 
 impl Display for Error {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::AlreadyInit => write!(f, "Janet client already initialized"),
@@ -62,6 +63,7 @@ impl JanetClient {
     /// environment, as all Janet global state is thread local by default.
     ///
     /// If tried to initialize the client more than once it returns a `Err` variant.
+    #[inline]
     pub fn init() -> Result<Self, Error> {
         #[cfg(feature = "std")]
         let init_state = INIT.with(|i| i.swap(true, Ordering::SeqCst));
@@ -85,6 +87,7 @@ impl JanetClient {
     /// If initialized more than once per thread, and more than one drop, you can have a
     /// double free, if one drop and another continue to execute, it will crash with
     /// segmentation fault.
+    #[inline]
     pub unsafe fn init_unchecked() -> Self {
         janet_init();
         JanetClient { env_table: None }
@@ -94,12 +97,14 @@ impl JanetClient {
     ///
     /// The default environment of Janet constains all the Janet C code as well as the
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
+    #[inline]
     pub fn with_default_env(mut self) -> Self {
         self.env_table = Some(unsafe { JanetTable::from_raw(janet_core_env(ptr::null_mut())) });
         self
     }
 
     /// Load the environment of `env_table`.
+    #[inline]
     pub fn with_env(mut self, env_table: JanetTable<'static>) -> Self {
         self.env_table = Some(env_table);
         self
@@ -112,6 +117,7 @@ impl JanetClient {
     /// respectively.
     /// Change that the Client struct holds another struct that configure those two.
     /// Also, we don't handle the errors of the janet_dobytes function.
+    #[inline]
     pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<(), Error> {
         let code = code.as_ref();
         let env = match self.env_table.as_ref() {
@@ -138,6 +144,7 @@ impl JanetClient {
     /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
     /// respectively.
     /// Change that the Client struct holds a nother struct that configure those two.
+    #[inline]
     pub fn run(&self, code: impl AsRef<str>) -> Result<(), Error> {
         let code = code.as_ref();
         self.run_bytes(code.as_bytes())
@@ -145,6 +152,7 @@ impl JanetClient {
 }
 
 impl Drop for JanetClient {
+    #[inline]
     fn drop(&mut self) {
         // Reset the INIT to false
         #[cfg(feature = "std")]
