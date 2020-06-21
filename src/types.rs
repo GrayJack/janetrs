@@ -23,9 +23,9 @@ pub use table::JanetTable;
 ///
 /// All possible Janet types is represented at some point as this structure.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[repr(transparent)]
 pub struct Janet {
     pub(crate) inner: CJanet,
-    kind: JanetType,
 }
 
 impl Janet {
@@ -34,7 +34,6 @@ impl Janet {
     pub fn nil() -> Janet {
         Janet {
             inner: unsafe { janet_wrap_nil() },
-            kind:  JanetType::Nil,
         }
     }
 
@@ -43,7 +42,6 @@ impl Janet {
     pub fn boolean(value: bool) -> Self {
         Janet {
             inner: unsafe { janet_wrap_boolean(value.into()) },
-            kind:  JanetType::Boolean,
         }
     }
 
@@ -52,7 +50,6 @@ impl Janet {
     pub fn number(value: f64) -> Self {
         Janet {
             inner: unsafe { janet_wrap_number(value) },
-            kind:  JanetType::Number,
         }
     }
 
@@ -61,7 +58,6 @@ impl Janet {
     pub fn integer(value: i32) -> Self {
         Janet {
             inner: unsafe { janet_wrap_integer(value) },
-            kind:  JanetType::Abstract,
         }
     }
 
@@ -70,7 +66,6 @@ impl Janet {
     pub fn array(value: JanetArray<'_>) -> Self {
         Janet {
             inner: unsafe { janet_wrap_array(value.raw) },
-            kind:  JanetType::Array,
         }
     }
 
@@ -79,7 +74,6 @@ impl Janet {
     pub fn buffer(value: JanetBuffer<'_>) -> Self {
         Janet {
             inner: unsafe { janet_wrap_buffer(value.raw) },
-            kind:  JanetType::Buffer,
         }
     }
 
@@ -88,13 +82,12 @@ impl Janet {
     pub fn table(value: JanetTable<'_>) -> Self {
         Janet {
             inner: unsafe { janet_wrap_table(value.raw) },
-            kind:  JanetType::Table,
         }
     }
 
     /// Returns the type of [`Janet`] object.
     #[inline]
-    pub const fn kind(&self) -> JanetType { self.kind }
+    pub fn kind(&self) -> JanetType { unsafe { janet_type(self.inner) }.into() }
 
     /// Returns the raw data of the data
     #[inline]
@@ -103,13 +96,7 @@ impl Janet {
 
 impl From<CJanet> for Janet {
     #[inline]
-    fn from(val: CJanet) -> Self {
-        let raw_kind = unsafe { janet_type(val) };
-        Janet {
-            inner: val,
-            kind:  raw_kind.into(),
-        }
-    }
+    fn from(val: CJanet) -> Self { Janet { inner: val } }
 }
 
 impl From<bool> for Janet {
