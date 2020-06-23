@@ -18,7 +18,7 @@
 //! For module creation some proc macros to help module creation
 //!
 //! Example:
-//! ```rust
+//! ```rust,ignore
 //! #[janet_fn]
 //! fn fn_name(args: &mut [Janet]) -> Janet {
 //!     // Function logic
@@ -27,7 +27,7 @@
 //!
 //! would become:
 //!
-//! ```rust
+//! ```rust, ignore
 //! #[no_mangle]
 //! extern "C" fn fn_name(argc: i32, argv: *mut CJanet) -> CJanet {
 //!     fn rust_fn_name(args: &mut [Janet]) -> Janet {

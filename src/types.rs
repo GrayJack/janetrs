@@ -31,8 +31,8 @@ pub struct Janet {
 impl Janet {
     /// Create a nil [`Janet`].
     #[inline]
-    pub fn nil() -> Janet {
-        Janet {
+    pub fn nil() -> Self {
+        Self {
             inner: unsafe { janet_wrap_nil() },
         }
     }
@@ -40,7 +40,7 @@ impl Janet {
     /// Create a boolean [`Janet`] with `value`.
     #[inline]
     pub fn boolean(value: bool) -> Self {
-        Janet {
+        Self {
             inner: unsafe { janet_wrap_boolean(value.into()) },
         }
     }
@@ -48,7 +48,7 @@ impl Janet {
     /// Create a number [`Janet`] with `value`.
     #[inline]
     pub fn number(value: f64) -> Self {
-        Janet {
+        Self {
             inner: unsafe { janet_wrap_number(value) },
         }
     }
@@ -56,7 +56,7 @@ impl Janet {
     /// Create a abstract integer [`Janet`] with `value`.
     #[inline]
     pub fn integer(value: i32) -> Self {
-        Janet {
+        Self {
             inner: unsafe { janet_wrap_integer(value) },
         }
     }
@@ -64,7 +64,7 @@ impl Janet {
     /// Create a array [`Janet`] with `value`.
     #[inline]
     pub fn array(value: JanetArray<'_>) -> Self {
-        Janet {
+        Self {
             inner: unsafe { janet_wrap_array(value.raw) },
         }
     }
@@ -72,7 +72,7 @@ impl Janet {
     /// Create a buffer [`Janet`] with `value`.
     #[inline]
     pub fn buffer(value: JanetBuffer<'_>) -> Self {
-        Janet {
+        Self {
             inner: unsafe { janet_wrap_buffer(value.raw) },
         }
     }
@@ -80,7 +80,7 @@ impl Janet {
     /// Create a table [`Janet`] with `value`.
     #[inline]
     pub fn table(value: JanetTable<'_>) -> Self {
-        Janet {
+        Self {
             inner: unsafe { janet_wrap_table(value.raw) },
         }
     }
@@ -96,37 +96,37 @@ impl Janet {
 
 impl From<CJanet> for Janet {
     #[inline]
-    fn from(val: CJanet) -> Self { Janet { inner: val } }
+    fn from(val: CJanet) -> Self { Self { inner: val } }
 }
 
 impl From<bool> for Janet {
     #[inline]
-    fn from(val: bool) -> Self { Janet::boolean(val) }
+    fn from(val: bool) -> Self { Self::boolean(val) }
 }
 
 impl From<i32> for Janet {
     #[inline]
-    fn from(val: i32) -> Self { Janet::integer(val) }
+    fn from(val: i32) -> Self { Self::integer(val) }
 }
 
 impl From<f64> for Janet {
     #[inline]
-    fn from(val: f64) -> Self { Janet::number(val) }
+    fn from(val: f64) -> Self { Self::number(val) }
 }
 
 impl From<JanetTable<'_>> for Janet {
     #[inline]
-    fn from(val: JanetTable<'_>) -> Self { Janet::table(val) }
+    fn from(val: JanetTable<'_>) -> Self { Self::table(val) }
 }
 
 impl From<JanetArray<'_>> for Janet {
     #[inline]
-    fn from(val: JanetArray<'_>) -> Self { Janet::array(val) }
+    fn from(val: JanetArray<'_>) -> Self { Self::array(val) }
 }
 
 impl From<JanetBuffer<'_>> for Janet {
     #[inline]
-    fn from(val: JanetBuffer<'_>) -> Self { Janet::buffer(val) }
+    fn from(val: JanetBuffer<'_>) -> Self { Self::buffer(val) }
 }
 
 impl From<Janet> for CJanet {
@@ -177,27 +177,29 @@ pub enum JanetType {
     Tuple  = JanetType_JANET_TUPLE,
 }
 
+
+// TODO: Change to TryFrom
 impl From<CJanetType> for JanetType {
     #[allow(non_upper_case_globals)]
     #[inline]
     fn from(raw: CJanetType) -> Self {
         match raw {
-            JanetType_JANET_ABSTRACT => JanetType::Abstract,
-            JanetType_JANET_ARRAY => JanetType::Array,
-            JanetType_JANET_BOOLEAN => JanetType::Boolean,
-            JanetType_JANET_BUFFER => JanetType::Buffer,
-            JanetType_JANET_CFUNCTION => JanetType::CFunction,
-            JanetType_JANET_FIBER => JanetType::Fiber,
-            JanetType_JANET_FUNCTION => JanetType::Function,
-            JanetType_JANET_KEYWORD => JanetType::Keyword,
-            JanetType_JANET_NIL => JanetType::Nil,
-            JanetType_JANET_NUMBER => JanetType::Number,
-            JanetType_JANET_POINTER => JanetType::Pointer,
-            JanetType_JANET_STRING => JanetType::String,
-            JanetType_JANET_STRUCT => JanetType::Struct,
-            JanetType_JANET_SYMBOL => JanetType::Symbol,
-            JanetType_JANET_TABLE => JanetType::Table,
-            JanetType_JANET_TUPLE => JanetType::Tuple,
+            JanetType_JANET_ABSTRACT => Self::Abstract,
+            JanetType_JANET_ARRAY => Self::Array,
+            JanetType_JANET_BOOLEAN => Self::Boolean,
+            JanetType_JANET_BUFFER => Self::Buffer,
+            JanetType_JANET_CFUNCTION => Self::CFunction,
+            JanetType_JANET_FIBER => Self::Fiber,
+            JanetType_JANET_FUNCTION => Self::Function,
+            JanetType_JANET_KEYWORD => Self::Keyword,
+            JanetType_JANET_NIL => Self::Nil,
+            JanetType_JANET_NUMBER => Self::Number,
+            JanetType_JANET_POINTER => Self::Pointer,
+            JanetType_JANET_STRING => Self::String,
+            JanetType_JANET_STRUCT => Self::Struct,
+            JanetType_JANET_SYMBOL => Self::Symbol,
+            JanetType_JANET_TABLE => Self::Table,
+            JanetType_JANET_TUPLE => Self::Tuple,
             _ => panic!(
                 "Invalid raw type. Either Janet gave a wrong number, or Janet has a new type."
             ),

@@ -38,8 +38,8 @@ impl Display for Error {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::AlreadyInit => write!(f, "Janet client already initialized"),
-            Error::EnvNotInit => write!(f, "The environment table was not initialized"),
+            Self::AlreadyInit => write!(f, "Janet client already initialized"),
+            Self::EnvNotInit => write!(f, "The environment table was not initialized"),
         }
     }
 }
@@ -81,7 +81,7 @@ impl JanetClient {
         // SAFETY: We use a static AtomicBool to make sure that it is started only once (per
         // thread if "std" feature activated)
         unsafe { janet_init() };
-        Ok(JanetClient { env_table: None })
+        Ok(Self { env_table: None })
     }
 
     /// Initialize Jant global state without checking.
@@ -96,7 +96,7 @@ impl JanetClient {
     #[inline]
     pub unsafe fn init_unchecked() -> Self {
         janet_init();
-        JanetClient { env_table: None }
+        Self { env_table: None }
     }
 
     /// Load the default environment of Janet.

@@ -30,7 +30,7 @@ impl JanetBuffer<'_> {
     /// first pushed into.
     #[inline]
     pub fn new() -> Self {
-        JanetBuffer {
+        Self {
             raw:     unsafe { janet_buffer(0) },
             phantom: PhantomData,
         }
@@ -42,7 +42,7 @@ impl JanetBuffer<'_> {
     /// equals to zero.
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
-        JanetBuffer {
+        Self {
             raw:     unsafe { janet_buffer(capacity) },
             phantom: PhantomData,
         }
@@ -150,7 +150,7 @@ impl JanetBuffer<'_> {
 
 impl Default for JanetBuffer<'_> {
     #[inline]
-    fn default() -> Self { JanetBuffer::new() }
+    fn default() -> Self { Self::new() }
 }
 
 impl JanetExtend<char> for JanetBuffer<'_> {

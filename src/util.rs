@@ -17,7 +17,7 @@ impl JanetBuildConfig {
     /// Get the current Janet build version.
     #[inline]
     pub const fn current() -> Self {
-        JanetBuildConfig {
+        Self {
             version: JanetVersion::current(),
             bits:    JANET_CURRENT_CONFIG_BITS,
         }
@@ -28,7 +28,7 @@ impl JanetBuildConfig {
     /// Mostly used to check if current version match a requirement for your code.
     #[inline]
     pub const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
-        JanetBuildConfig {
+        Self {
             version: JanetVersion::custom(major, minor, patch),
             bits,
         }
@@ -74,7 +74,7 @@ impl JanetVersion {
     /// Get the current Janet version.
     #[inline]
     pub const fn current() -> Self {
-        JanetVersion {
+        Self {
             major: JANET_VERSION_MAJOR,
             minor: JANET_VERSION_MINOR,
             patch: JANET_VERSION_PATCH,
@@ -87,7 +87,7 @@ impl JanetVersion {
     /// tests in this crate.
     #[inline]
     pub const fn custom(major: u32, minor: u32, patch: u32) -> Self {
-        JanetVersion {
+        Self {
             major,
             minor,
             patch,
@@ -117,14 +117,14 @@ impl fmt::Display for JanetVersion {
 impl PartialEq<(u32, u32, u32)> for JanetVersion {
     #[inline]
     fn eq(&self, (major, minor, patch): &(u32, u32, u32)) -> bool {
-        self.major.eq(&major) && self.minor.eq(&minor) && self.patch.eq(&patch)
+        self.major.eq(major) && self.minor.eq(minor) && self.patch.eq(patch)
     }
 }
 
 impl PartialEq<[u32; 3]> for JanetVersion {
     #[inline]
     fn eq(&self, [major, minor, patch]: &[u32; 3]) -> bool {
-        self.major.eq(&major) && self.minor.eq(&minor) && self.patch.eq(&patch)
+        self.major.eq(major) && self.minor.eq(minor) && self.patch.eq(patch)
     }
 }
 
@@ -146,7 +146,7 @@ impl PartialEq<&str> for JanetVersion {
 
 impl PartialOrd for JanetVersion {
     #[inline]
-    fn partial_cmp(&self, other: &JanetVersion) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.major.cmp(&other.major) {
             Ordering::Equal => match self.minor.cmp(&other.minor) {
                 Ordering::Equal => Some(self.patch.cmp(&other.patch)),
@@ -160,9 +160,9 @@ impl PartialOrd for JanetVersion {
 impl PartialOrd<(u32, u32, u32)> for JanetVersion {
     #[inline]
     fn partial_cmp(&self, (major, minor, patch): &(u32, u32, u32)) -> Option<Ordering> {
-        match self.major.cmp(&major) {
-            Ordering::Equal => match self.minor.cmp(&minor) {
-                Ordering::Equal => Some(self.patch.cmp(&patch)),
+        match self.major.cmp(major) {
+            Ordering::Equal => match self.minor.cmp(minor) {
+                Ordering::Equal => Some(self.patch.cmp(patch)),
                 x => Some(x),
             },
             x => Some(x),
@@ -173,9 +173,9 @@ impl PartialOrd<(u32, u32, u32)> for JanetVersion {
 impl PartialOrd<[u32; 3]> for JanetVersion {
     #[inline]
     fn partial_cmp(&self, [major, minor, patch]: &[u32; 3]) -> Option<Ordering> {
-        match self.major.cmp(&major) {
-            Ordering::Equal => match self.minor.cmp(&minor) {
-                Ordering::Equal => Some(self.patch.cmp(&patch)),
+        match self.major.cmp(major) {
+            Ordering::Equal => match self.minor.cmp(minor) {
+                Ordering::Equal => Some(self.patch.cmp(patch)),
                 x => Some(x),
             },
             x => Some(x),
@@ -212,7 +212,7 @@ impl PartialOrd<&str> for JanetVersion {
 
 impl Ord for JanetVersion {
     #[inline]
-    fn cmp(&self, other: &JanetVersion) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         match self.major.cmp(&other.major) {
             Ordering::Equal => match self.minor.cmp(&other.minor) {
                 Ordering::Equal => self.patch.cmp(&other.patch),

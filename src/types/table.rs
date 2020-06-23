@@ -24,7 +24,7 @@ impl JanetTable<'_> {
     /// second inserted into.
     #[inline]
     pub fn new() -> Self {
-        JanetTable {
+        Self {
             raw:    unsafe { janet_table(0) },
             phatom: PhantomData,
         }
@@ -48,7 +48,7 @@ impl JanetTable<'_> {
     ///  - ...
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
-        JanetTable {
+        Self {
             raw:    unsafe { janet_table(capacity) },
             phatom: PhantomData,
         }
@@ -61,7 +61,7 @@ impl JanetTable<'_> {
     /// own risk.
     #[inline]
     pub const unsafe fn from_raw(raw: *mut CJanetTable) -> Self {
-        JanetTable {
+        Self {
             raw,
             phatom: PhantomData,
         }
@@ -167,7 +167,7 @@ impl JanetExtend<(Janet, Janet)> for JanetTable<'_> {
     /// Extend the table with a given key-value pair.
     #[inline]
     fn extend(&mut self, (key, value): (Janet, Janet)) {
-        let mut other = JanetTable::with_capacity(1);
+        let mut other = Self::with_capacity(1);
         other.insert(key, value);
         self.extend(other);
     }
@@ -175,7 +175,7 @@ impl JanetExtend<(Janet, Janet)> for JanetTable<'_> {
 
 impl Default for JanetTable<'_> {
     #[inline]
-    fn default() -> Self { JanetTable::new() }
+    fn default() -> Self { Self::new() }
 }
 
 #[cfg(all(test, feature = "amalgation"))]

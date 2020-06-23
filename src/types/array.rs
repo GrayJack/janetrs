@@ -27,7 +27,7 @@ impl JanetArray<'_> {
     /// first pushed into.
     #[inline]
     pub fn new() -> Self {
-        JanetArray {
+        Self {
             raw:     unsafe { janet_array(0) },
             phantom: PhantomData,
         }
@@ -39,7 +39,7 @@ impl JanetArray<'_> {
     /// equals to zero.
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
-        JanetArray {
+        Self {
             raw:     unsafe { janet_array(capacity) },
             phantom: PhantomData,
         }
@@ -133,7 +133,7 @@ impl TryFrom<&[CJanet]> for JanetArray<'_> {
     fn try_from(slice: &[CJanet]) -> Result<Self, Self::Error> {
         let len = slice.len().try_into()?;
 
-        Ok(JanetArray {
+        Ok(Self {
             raw:     unsafe { janet_array_n(slice.as_ptr(), len) },
             phantom: PhantomData,
         })
