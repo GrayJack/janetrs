@@ -20,7 +20,7 @@
 //! Example:
 //! ```rust,ignore
 //! #[janet_fn]
-//! fn fn_name(args: &mut [Janet]) -> Janet {
+//! pub extern "C" fn fn_name(args: &mut [Janet]) -> Janet {
 //!     // Function logic
 //! }
 //! ```
@@ -29,7 +29,7 @@
 //!
 //! ```rust, ignore
 //! #[no_mangle]
-//! extern "C" fn fn_name(argc: i32, argv: *mut CJanet) -> CJanet {
+//! pub extern "C" fn fn_name(argc: i32, argv: *mut CJanet) -> CJanet {
 //!     fn rust_fn_name(args: &mut [Janet]) -> Janet {
 //!         // ...
 //!     }

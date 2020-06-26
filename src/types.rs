@@ -2,22 +2,26 @@
 use core::cmp::Ordering;
 
 use janet_ll::{
-    janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer, janet_wrap_integer,
-    janet_wrap_nil, janet_wrap_number, janet_wrap_table, Janet as CJanet, JanetType as CJanetType,
-    JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN,
-    JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER,
-    JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER,
-    JanetType_JANET_POINTER, JanetType_JANET_STRING, JanetType_JANET_STRUCT,
-    JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
+    janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer, janet_wrap_fiber,
+    janet_wrap_integer, janet_wrap_nil, janet_wrap_number, janet_wrap_table, janet_wrap_tuple,
+    Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY,
+    JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION,
+    JanetType_JANET_FIBER, JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL,
+    JanetType_JANET_NUMBER, JanetType_JANET_POINTER, JanetType_JANET_STRING,
+    JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
 };
 
 pub mod array;
 pub mod buffer;
+pub mod fiber;
 pub mod table;
+pub mod tuple;
 
 pub use array::JanetArray;
 pub use buffer::JanetBuffer;
+pub use fiber::JanetFiber;
 pub use table::JanetTable;
+pub use tuple::JanetTuple;
 
 /// Central structure for Janet.
 ///
@@ -85,6 +89,20 @@ impl Janet {
         }
     }
 
+    #[inline]
+    pub fn fiber(value: JanetFiber<'_>) -> Self {
+        Self {
+            inner: unsafe { janet_wrap_fiber(value.raw) },
+        }
+    }
+
+    #[inline]
+    pub fn tuple(value: JanetTuple<'_>) -> Self {
+        Self {
+            inner: unsafe { janet_wrap_tuple(value.raw) },
+        }
+    }
+
     /// Returns the type of [`Janet`] object.
     #[inline]
     pub fn kind(&self) -> JanetType { unsafe { janet_type(self.inner) }.into() }
@@ -127,6 +145,15 @@ impl From<JanetArray<'_>> for Janet {
 impl From<JanetBuffer<'_>> for Janet {
     #[inline]
     fn from(val: JanetBuffer<'_>) -> Self { Self::buffer(val) }
+}
+
+impl From<JanetFiber<'_>> for Janet {
+    #[inline]
+    fn from(val: JanetFiber<'_>) -> Self { Self::fiber(val) }
+}
+
+impl From<JanetTuple<'_>> for Janet {
+    fn from(val: JanetTuple<'_>) -> Self { Self::tuple(val) }
 }
 
 impl From<Janet> for CJanet {
