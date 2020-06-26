@@ -5,21 +5,25 @@ use janet_ll::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJ
 
 use super::Janet;
 
+/// Builder for [`JanetTuple`]s.
 #[derive(Debug)]
 pub struct JanetTupleBuilder<'data> {
-    raw:    *mut CJanet,
-    len:    i32,
-    added:  i32,
-    phatom: PhantomData<&'data ()>,
+    raw:     *mut CJanet,
+    len:     i32,
+    added:   i32,
+    phantom: PhantomData<&'data ()>,
 }
 
 impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
+    #[inline]
     pub fn value(mut self, value: Janet) -> Self {
+        // TODO: Can we not panic here? (Result? Do nothing and just return self?)
         if self.added >= self.len {
             panic!("Cannot push anymore into tuple builder")
         }
 
+        // SAFETY: We assured that if cannot try to write above it's max len in the lines above.
         unsafe {
             let val_ptr = self.raw.offset(self.added as isize);
             *val_ptr = value.inner;
@@ -30,6 +34,7 @@ impl<'data> JanetTupleBuilder<'data> {
     }
 
     /// Finalie the build process and create [`JanetTuple`].
+    #[inline]
     pub fn finalize(self) -> JanetTuple<'data> {
         JanetTuple {
             raw:     unsafe { janet_tuple_end(self.raw) },
@@ -55,16 +60,17 @@ pub struct JanetTuple<'data> {
 
 impl<'data> JanetTuple<'data> {
     /// Start the build process to create a [`JanetTuple`].
+    ///
+    /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
+    #[inline]
     pub fn builder(len: i32) -> JanetTupleBuilder<'data> {
-        if len < 0 {
-            panic!("The len must be positive")
-        }
+        let len = if len < 0 { 0 } else { len };
 
         JanetTupleBuilder {
             raw: unsafe { janet_tuple_begin(len) },
             len,
             added: 0,
-            phatom: PhantomData,
+            phantom: PhantomData,
         }
     }
 
