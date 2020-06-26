@@ -65,7 +65,7 @@ impl<'data> JanetStringBuilder<'data> {
 /// TODO: A proper doc
 #[derive(Debug)]
 pub struct JanetString<'data> {
-    raw:     *const u8,
+    pub(crate) raw: *const u8,
     phantom: PhantomData<&'data ()>,
 }
 
