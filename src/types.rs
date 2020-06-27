@@ -31,7 +31,7 @@ pub use tuple::JanetTuple;
 /// Central structure for Janet.
 ///
 /// All possible Janet types is represented at some point as this structure.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct Janet {
     pub(crate) inner: CJanet,
@@ -131,11 +131,27 @@ impl Janet {
     pub const fn raw_data(&self) -> CJanet { self.inner }
 }
 
+impl fmt::Debug for Janet {
+    /// janet_ll::Janet is a C enum, so we cannot display much of a useful for debugging
+    /// data with the default derive Debug, so we add phantom debug data to help debugging
+    /// Janet values, therefore, all data shown with `phantom` prefix it's just for debug
+    /// purposes and doesn't exist on actual Janet struct.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Janet")
+            .field("inner", &self.inner)
+            .field("phantom_kind", &self.kind())
+            .field("phantom_value", &format_args!("{}", self))
+            .finish()
+    }
+}
+
 impl fmt::Display for Janet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // There some overhead for doing this dance, but the only way to get the Janet value from
+        // C API and transform into &str to display it.
         let s = unsafe {
             let jstr = JanetString::from_raw(janet_ll::janet_formatc(
-                "%v\0".as_ptr() as *const i8,
+                "%q\0".as_ptr() as *const i8,
                 self.inner,
             ));
             let slice = core::slice::from_raw_parts(jstr.as_raw(), jstr.len() as usize);

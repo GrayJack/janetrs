@@ -45,6 +45,8 @@ impl<'data> JanetStructBuilder<'data> {
 /// [`JanetTable`]s, they are backed by an efficient, native hash table.
 ///
 /// # Examples
+///
+/// [`JanetTable`]: ./../table/struct.JanetTable.html
 #[derive(Debug)]
 pub struct JanetStruct<'data> {
     pub(crate) raw: *const CJanetKV,
