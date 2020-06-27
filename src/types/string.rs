@@ -86,8 +86,20 @@ impl<'data> JanetString<'data> {
             );
         }
 
-        JanetString {
+        Self {
             raw:     unsafe { janet_string(buffer.as_ptr(), buffer.len() as i32) },
+            phantom: PhantomData,
+        }
+    }
+
+    /// Create a new [`JanetString`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    pub const unsafe fn from_raw(raw: *const u8) -> Self {
+        Self {
+            raw,
             phantom: PhantomData,
         }
     }
