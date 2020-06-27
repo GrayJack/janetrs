@@ -2,11 +2,12 @@
 use core::marker::PhantomData;
 
 use janet_ll::{
-    janet_table, janet_table_clear, janet_table_clone, janet_table_find, janet_table_get,
-    janet_table_merge_table, janet_table_put, janet_table_remove, JanetTable as CJanetTable,
+    janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
+    janet_table_get, janet_table_merge_table, janet_table_put, janet_table_remove,
+    JanetTable as CJanetTable,
 };
 
-use super::{Janet, JanetExtend};
+use super::{Janet, JanetExtend, JanetStruct};
 
 /// Janet [table](https://janet-lang.org/docs/data_structures/tables.html) type.
 ///
@@ -176,6 +177,12 @@ impl JanetExtend<(Janet, Janet)> for JanetTable<'_> {
 impl Default for JanetTable<'_> {
     #[inline]
     fn default() -> Self { Self::new() }
+}
+
+impl From<JanetStruct<'_>> for JanetTable<'_> {
+    fn from(val: JanetStruct<'_>) -> Self {
+        unsafe { Self::from_raw(janet_struct_to_table(val.raw)) }
+    }
 }
 
 #[cfg(all(test, feature = "amalgation"))]
