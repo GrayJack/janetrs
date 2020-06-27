@@ -151,6 +151,13 @@ impl From<f64> for Janet {
     fn from(val: f64) -> Self { Self::number(val) }
 }
 
+impl From<&str> for Janet {
+    fn from(val: &str) -> Self {
+        let s = JanetString::new(val);
+        Self::string(s)
+    }
+}
+
 impl From<JanetTable<'_>> for Janet {
     #[inline]
     fn from(val: JanetTable<'_>) -> Self { Self::table(val) }
