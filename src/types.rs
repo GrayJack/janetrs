@@ -371,3 +371,106 @@ impl From<JanetType> for CJanetType {
 pub trait JanetExtend<T> {
     fn extend(&mut self, collection: T);
 }
+
+macro_rules! impl_string_like {
+    ($($ty:ty)+) => {
+        $(
+            impl From<&[u8]> for $ty {
+                #[inline]
+                fn from(bytes: &[u8]) -> Self { Self::new(bytes) }
+            }
+
+            impl From<&str> for $ty {
+                #[inline]
+                fn from(rust_str: &str) -> Self { Self::new(rust_str) }
+            }
+
+            impl PartialEq for $ty {
+                #[inline]
+                fn eq(&self, other: &Self) -> bool { unsafe { janet_ll::janet_string_equal(self.raw, other.raw) != 0 } }
+            }
+
+            impl Eq for $ty {}
+
+            impl PartialOrd for $ty {
+                #[inline]
+                fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                    let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
+
+                    Some(match cmp_res {
+                        -1 => Ordering::Less,
+                        0 => Ordering::Equal,
+                        1 => Ordering::Greater,
+                        _ => return None,
+                    })
+                }
+            }
+
+            impl Ord for $ty {
+                #[inline]
+                fn cmp(&self, other: &Self) -> Ordering {
+                    match self.partial_cmp(other) {
+                        Some(ord) => ord,
+                        None => {
+                            // Janet seems to ensure that the only values returned as -1, 0 and 1
+                            // It could be possible to use unreachable unchecked but I don't think it's
+                            // necessary, this branch will probably be optimized out by the compiler.
+                            unreachable!()
+                        },
+                    }
+                }
+            }
+        )+
+    };
+}
+
+macro_rules! impl_part {
+    ($t1:ty, $t2:ty) => {
+        impl PartialEq<$t1> for $t2 {
+            #[inline]
+            fn eq(&self, other: &$t1) -> bool {
+                unsafe { janet_ll::janet_string_equal(self.raw, other.raw) != 0 }
+            }
+        }
+
+        impl PartialEq<$t2> for $t1 {
+            #[inline]
+            fn eq(&self, other: &$t2) -> bool {
+                unsafe { janet_ll::janet_string_equal(self.raw, other.raw) != 0 }
+            }
+        }
+
+        impl PartialOrd<$t1> for $t2 {
+            #[inline]
+            fn partial_cmp(&self, other: &$t1) -> Option<Ordering> {
+                let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
+
+                Some(match cmp_res {
+                    -1 => Ordering::Less,
+                    0 => Ordering::Equal,
+                    1 => Ordering::Greater,
+                    _ => return None,
+                })
+            }
+        }
+
+        impl PartialOrd<$t2> for $t1 {
+            #[inline]
+            fn partial_cmp(&self, other: &$t2) -> Option<Ordering> {
+                let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
+
+                Some(match cmp_res {
+                    -1 => Ordering::Less,
+                    0 => Ordering::Equal,
+                    1 => Ordering::Greater,
+                    _ => return None,
+                })
+            }
+        }
+    };
+}
+
+impl_string_like!(JanetString<'_> JanetKeyword<'_> JanetSymbol<'_>);
+impl_part!(JanetString<'_>, JanetKeyword<'_>);
+impl_part!(JanetString<'_>, JanetSymbol<'_>);
+impl_part!(JanetKeyword<'_>, JanetSymbol<'_>);

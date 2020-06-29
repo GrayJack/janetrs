@@ -1,10 +1,7 @@
 //! Janet String
-use core::{cmp::Ordering, marker::PhantomData};
+use core::marker::PhantomData;
 
-use janet_ll::{
-    janet_string, janet_string_begin, janet_string_compare, janet_string_end, janet_string_equal,
-    janet_string_head,
-};
+use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
 
 /// Builder for [`JanetString`]s.
 #[derive(Debug)]
@@ -73,6 +70,8 @@ impl<'data> JanetStringBuilder<'data> {
 /// ```
 ///
 /// [Janet buffers]: ./../buffer/struct.JanetBuffer.html
+/// [`builder`]: ./struct.JanetString.html#method.builder
+/// [`new`]: ./struct.JanetString.html#method.new
 #[derive(Debug)]
 pub struct JanetString<'data> {
     pub(crate) raw: *const u8,
@@ -138,52 +137,6 @@ impl<'data> JanetString<'data> {
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_raw(&self) -> *const u8 { self.raw }
-}
-
-impl From<&[u8]> for JanetString<'_> {
-    #[inline]
-    fn from(bytes: &[u8]) -> Self { Self::new(bytes) }
-}
-
-impl From<&str> for JanetString<'_> {
-    #[inline]
-    fn from(rust_str: &str) -> Self { Self::new(rust_str) }
-}
-
-impl PartialEq for JanetString<'_> {
-    #[inline]
-    fn eq(&self, other: &Self) -> bool { unsafe { janet_string_equal(self.raw, other.raw) != 0 } }
-}
-
-impl Eq for JanetString<'_> {}
-
-impl PartialOrd for JanetString<'_> {
-    #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let cmp_res = unsafe { janet_string_compare(self.raw, other.raw) };
-
-        Some(match cmp_res {
-            -1 => Ordering::Less,
-            0 => Ordering::Equal,
-            1 => Ordering::Greater,
-            _ => return None,
-        })
-    }
-}
-
-impl Ord for JanetString<'_> {
-    #[inline]
-    fn cmp(&self, other: &Self) -> Ordering {
-        match self.partial_cmp(other) {
-            Some(ord) => ord,
-            None => {
-                // Janet seems to ensure that the only values returned as -1, 0 and 1
-                // It could be possible to use unreachable unchecked but I don't think it's
-                // necessary, this branch will probably be optimized out by the compiler.
-                unreachable!()
-            },
-        }
-    }
 }
 
 #[cfg(all(test, feature = "amalgation"))]

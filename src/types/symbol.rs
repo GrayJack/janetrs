@@ -1,7 +1,7 @@
 //! Module dealing with symbols and keywords
 use core::marker::PhantomData;
 
-use janet_ll::janet_symbol;
+use janet_ll::{janet_symbol, janet_symbol_gen};
 
 /// Janet symbol type. Usually used to name things in Janet.
 #[derive(Debug)]
@@ -27,6 +27,17 @@ impl JanetSymbol<'_> {
 
         Self {
             raw:     unsafe { janet_symbol(val.as_ptr(), len) },
+            phantom: PhantomData,
+        }
+    }
+
+    /// Generate a unique Janet symbol. This is used in the library function gensym. The
+    /// symbol will be of the format _XXXXXX, where X is a base64 digit, and prefix is
+    /// the argument passed. No prefix for speed.
+    #[inline]
+    pub fn unique() -> Self {
+        Self {
+            raw:     unsafe { janet_symbol_gen() },
             phantom: PhantomData,
         }
     }
