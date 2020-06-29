@@ -45,6 +45,12 @@ impl<'data> JanetStructBuilder<'data> {
 /// [`JanetTable`]s, they are backed by an efficient, native hash table.
 ///
 /// # Examples
+/// ```ignore
+/// let st = JanetStruct::builder(2)
+///     .put("ten".into(), 10.into())
+///     .put("eleven", 11.into())
+///     .finalize();
+/// ```
 ///
 /// [`JanetTable`]: ./../table/struct.JanetTable.html
 #[derive(Debug)]

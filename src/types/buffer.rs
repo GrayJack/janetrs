@@ -15,9 +15,48 @@ use janet_ll::janet_buffer_push_cstring;
 
 use super::JanetExtend;
 
-/// Janet [buffer](https://janet-lang.org/docs/data_structures/buffers.html) type.
+/// Janet [buffers](https://janet-lang.org/docs/data_structures/buffers.html) are the mutable
+/// version of [`JanetStrings`]. Since Janet strings can hold any sequence of bytes,
+/// including zeros, buffers share this same property and can be used to hold any
+/// arbitrary memory, which makes them very simple but versatile data structures. They can
+/// be used to accumulate small strings into a large string, to implement a bitset, or to
+/// represent sound or images in a program.
 ///
-/// It is akin to a [`String`].
+/// # Examples
+/// You can create a `JanetBuffer` from a Rust string literal.
+///
+/// ```ignore
+/// let hello = JanetBuffer::from("Hello, world!");
+/// ```
+///
+/// You can append a [`char`] to a JanetBuffer with the [`push`] method, and append a
+/// [`str`] with the [`push_str`] method:
+///
+/// ```ignore
+/// let mut buff = JanetBuffer::from("Hello, ");
+/// buff.push('w');
+/// buff.push_str("orld!");
+/// ```
+///
+/// You can also append a arbitrary sized unsigned integers with [`push_u8`],
+/// [`push_u16`], [`push_u32`], [`push_u64`]:
+///
+/// ```ignore
+/// let mut buff = JanetBuffer::with_capacity(20);
+///
+/// buff.push_u8(10),
+/// buff.push_u16(1000028472),
+/// buff.push_u32(u32::MAX),
+/// buff.push_u64(u64::MIN),
+/// ```
+///
+/// [`JanetStrings`]: ./../string/struct.JanetString.html
+/// [`push`]: ./struct.JanetBuffer.html#method.push
+/// [`push_str`]: ./struct.JanetBuffer.html#method.push_str
+/// [`push_u8`]: ./struct.JanetBuffer.html#method.push_u8
+/// [`push_u16`]: ./struct.JanetBuffer.html#method.push_u16
+/// [`push_u32`]: ./struct.JanetBuffer.html#method.push_u32
+/// [`push_u64`]: ./struct.JanetBuffer.html#method.push_u64
 pub struct JanetBuffer<'data> {
     pub(crate) raw: *mut CJanetBuffer,
     phantom: PhantomData<&'data ()>,
@@ -146,6 +185,23 @@ impl JanetBuffer<'_> {
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_mut_raw(&mut self) -> *mut CJanetBuffer { self.raw }
+}
+
+impl From<&str> for JanetBuffer<'_> {
+    fn from(string: &str) -> Self {
+        let cap = string.len();
+        let mut buff = JanetBuffer::with_capacity(cap as i32);
+        buff.push_str(string);
+        buff
+    }
+}
+
+impl From<char> for JanetBuffer<'_> {
+    fn from(ch: char) -> Self {
+        let mut buff = JanetBuffer::with_capacity(4);
+        buff.push(ch);
+        buff
+    }
 }
 
 impl Default for JanetBuffer<'_> {

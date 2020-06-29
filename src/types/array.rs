@@ -11,9 +11,20 @@ use janet_ll::{
 
 use super::{Janet, JanetExtend};
 
-/// Janet [array](https://janet-lang.org/docs/data_structures/arrays.html) type.
+/// Janet [arrays](https://janet-lang.org/docs/data_structures/arrays.html) are a fundamental
+/// datatype in Janet. Janet Arrays are values that contain a sequence of other values.
 ///
-/// It is akin to a [`Vec`].
+/// Arrays are also mutable, meaning that values can be added or removed in place.
+///
+/// # Examples
+/// ```rust, ignore
+/// # use janetrs::types::JanetArray;
+/// let mut arr = JanetArray::new();
+/// arr.push(10.1.into());
+/// arr.push(12.into());
+///
+/// assert_eq!(2, arr.len());
+/// ```
 #[derive(Debug)]
 pub struct JanetArray<'data> {
     pub raw: *mut CJanetArray,

@@ -9,9 +9,26 @@ use janet_ll::{
 
 use super::{Janet, JanetExtend, JanetStruct};
 
-/// Janet [table](https://janet-lang.org/docs/data_structures/tables.html) type.
+/// Janet [table]s are mutable data structures that map keys to values. Values are put
+/// into a Janet table with a key, and can be looked up later with the same key. Tables
+/// are implemented with an underlying open hash table, so they are quite fast and cache
+/// friendly.
 ///
-/// It is akin to a HashMap.
+/// Any Janet value except Janet `nil` and Janet number that is `NaN` can be a key or a
+/// value in a Janet table, and a single Janet table can have any mixture of Janet types
+/// as keys and values.
+///
+/// # Examples
+/// ```ignore
+/// let mut table = JanetTable::new();
+///
+/// table.insert("key".into(), 10.0.into());
+/// table.insert(10.into(), 20.3.into());
+///
+/// println!("{}", Janet::table(table));
+/// ```
+///
+/// [table]: https://janet-lang.org/docs/data_structures/tables.html
 #[derive(Debug)]
 pub struct JanetTable<'data> {
     pub(crate) raw: *mut CJanetTable,

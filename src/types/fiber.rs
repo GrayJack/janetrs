@@ -7,6 +7,7 @@ use core::marker::PhantomData;
 
 use janet_ll::JanetFiber as CJanetFiber;
 
+/// TODO: A proper docs
 #[derive(Debug)]
 pub struct JanetFiber<'data> {
     pub(crate) raw: *mut CJanetFiber,

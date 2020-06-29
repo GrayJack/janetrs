@@ -21,7 +21,7 @@ impl<'data> JanetStringBuilder<'data> {
     /// # Panics
     /// This function may panic if the given `data` is bigger than `i32::MAX` or if the
     /// `data` cannot fit the max length of the string.
-    pub fn insert(mut self, data: impl AsRef<[u8]>) -> Self {
+    pub fn put(mut self, data: impl AsRef<[u8]>) -> Self {
         let data = data.as_ref();
 
         if data.len() > i32::MAX as usize {
@@ -62,7 +62,22 @@ impl<'data> JanetStringBuilder<'data> {
     }
 }
 
-/// TODO: A proper doc
+/// Janet strings are a immutable type that are similar to [Janet buffers].
+///
+/// # Example
+/// You can easily create a Janet string from Rust [`str`] and bytes slice with [`new`]:
+/// ```ignore
+/// let jstr = JanetString::new("Hello, World");
+/// let jstr2 = JanetString::new(b"Janet! A bottle of water please!");
+/// ```
+///
+/// You can also use the [`builder`] API to create a in a more dynamic way
+/// ```ignore
+/// let size = 13
+/// let jstr = JanetString::builder(size).put('H').put("ello, ").put(b"World!").finalize();
+/// ```
+///
+/// [Janet buffers]: ./../buffer/struct.JanetBuffer.html
 #[derive(Debug)]
 pub struct JanetString<'data> {
     pub(crate) raw: *const u8,
@@ -207,13 +222,10 @@ mod tests {
         let string = JanetString::builder(0).finalize();
         assert!(string.is_empty());
 
-        let string = JanetString::builder(6).insert("buffer").finalize();
+        let string = JanetString::builder(6).put("buffer").finalize();
         assert_eq!(6, string.len());
 
-        let string = JanetString::builder(8)
-            .insert("data")
-            .insert("data")
-            .finalize();
+        let string = JanetString::builder(8).put("data").put("data").finalize();
         assert_eq!(8, string.len());
 
         let string = JanetString::builder(10).finalize();
@@ -226,7 +238,7 @@ mod tests {
         let _client = JanetClient::init().unwrap();
 
         let str1 = JanetString::new("buffer");
-        let str2 = JanetString::builder(6).insert("buffer").finalize();
+        let str2 = JanetString::builder(6).put("buffer").finalize();
 
         assert_eq!(str1, str2);
     }

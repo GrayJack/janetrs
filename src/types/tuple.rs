@@ -17,7 +17,7 @@ pub struct JanetTupleBuilder<'data> {
 impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
     #[inline]
-    pub fn value(mut self, value: Janet) -> Self {
+    pub fn put(mut self, value: Janet) -> Self {
         // TODO: Can we not panic here? (Result? Do nothing and just return self?)
         if self.added >= self.len {
             panic!("Cannot push anymore into tuple builder")
@@ -43,15 +43,18 @@ impl<'data> JanetTupleBuilder<'data> {
     }
 }
 
-/// Tuple are a heterogeneous imutable array in Janet.
+/// Janet [tuples](https://janet-lang.org/docs/data_structures/tuples.html) are immutable,
+/// sequential types that are similar to [Janet arrays].
 ///
 /// # Example
 /// ```rust,ignore
 /// use janetrs::types::{Janet, JanetTuple};
 /// let tuple = JanetTuple::builder(2)
-///     .value(Janet::number(10.0))
-///     .value(Janet::boolean(true));
+///     .put(Janet::number(10.0))
+///     .put(Janet::boolean(true));
 /// ```
+///
+/// [Janet arrays]: ./../array/struct.JanetArray.html
 #[derive(Debug)]
 pub struct JanetTuple<'data> {
     pub(crate) raw: *const CJanet,
@@ -105,9 +108,9 @@ mod tests {
         assert!(tuple.is_empty());
 
         let tuple = JanetTuple::builder(3)
-            .value(Janet::number(10.0))
-            .value(Janet::nil())
-            .value(Janet::boolean(true))
+            .put(Janet::number(10.0))
+            .put(Janet::nil())
+            .put(Janet::boolean(true))
             .finalize();
 
         assert_eq!(3, tuple.len());

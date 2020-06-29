@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 
 use janet_ll::janet_symbol;
 
-
+/// Janet symbol type. Usually used to name things in Janet.
 #[derive(Debug)]
 pub struct JanetSymbol<'data> {
     pub(crate) raw: *const u8,
@@ -39,6 +39,8 @@ impl JanetSymbol<'_> {
     pub fn as_raw(&self) -> *const u8 { self.raw }
 }
 
+/// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
+/// the language, it is a normal string that cen be defined by the user.
 #[derive(Debug)]
 pub struct JanetKeyword<'data> {
     pub(crate) raw: *const u8,
