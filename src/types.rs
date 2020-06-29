@@ -156,10 +156,22 @@ impl Janet {
 impl fmt::Debug for Janet {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // There some overhead for doing this dance, but the only way to get the Janet value from
+        // C API and transform into &str to display it.
+        let fmt_str = if f.alternate() { "%p\0" } else { "%q\0" };
+        let s = unsafe {
+            let jstr = JanetString::from_raw(janet_ll::janet_formatc(
+                fmt_str.as_ptr() as *const i8,
+                self.inner,
+            ));
+            let slice = core::slice::from_raw_parts(jstr.as_raw(), jstr.len() as usize);
+            core::str::from_utf8(slice).map_err(|_| fmt::Error)?
+        };
+
         f.debug_struct("Janet")
             .field("inner", &self.inner)
-            .field("kind", &self.kind())
-            .field("value", &format_args!("{}", self))
+            .field("type", &self.kind())
+            .field("value", &format_args!("{}", s))
             .finish()
     }
 }
