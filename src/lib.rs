@@ -11,8 +11,6 @@
 //!  - Expand the types API. First expose what alread exists from Janet!!!.
 //!  - We still don't know exactly how Janet panics would work on Rust, so we need to
 //!    explore that and documment it
-//!  - Janet requires allocations being possible, how do we enforce `alloc` on `no_std`
-//!    environment?
 //!
 //! ## Some ideas:
 //! For module creation some proc macros to help module creation
@@ -51,7 +49,9 @@
 //!     janet_cfuns(env, "mymod", cfuns);
 //! }
 //! ```
-#![cfg_attr(not(feature = "std"), no_std)]
+
+// Uncomment this if we can exist on no_str
+// #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use janet_ll as janet_sys;
 

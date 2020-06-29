@@ -18,9 +18,8 @@ impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
     #[inline]
     pub fn put(mut self, value: Janet) -> Self {
-        // TODO: Can we not panic here? (Result? Do nothing and just return self?)
         if self.added >= self.len {
-            panic!("Cannot push anymore into tuple builder")
+            return self;
         }
 
         // SAFETY: We assured that if cannot try to write above it's max len in the lines above.
