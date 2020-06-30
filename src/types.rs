@@ -144,6 +144,10 @@ impl Janet {
         }
     }
 
+    /// Return `true` if [`Janet`] is nil type.
+    #[inline]
+    pub fn is_nil(&self) -> bool { matches!(self.kind(), JanetType::Nil) }
+
     /// Returns the type of [`Janet`] object.
     #[inline]
     pub fn kind(&self) -> JanetType { unsafe { janet_type(self.inner) }.into() }

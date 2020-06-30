@@ -3,8 +3,8 @@ use core::marker::PhantomData;
 
 use janet_ll::{
     janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
-    janet_table_get, janet_table_merge_table, janet_table_put, janet_table_remove,
-    JanetTable as CJanetTable,
+    janet_table_get, janet_table_merge_table, janet_table_put, janet_table_rawget,
+    janet_table_remove, JanetTable as CJanetTable,
 };
 
 use super::{Janet, JanetExtend, JanetStruct};
@@ -111,13 +111,57 @@ impl JanetTable<'_> {
 
     /// Returns the value corresponding to the supplied `key`.
     #[inline]
-    pub fn get(&self, key: Janet) -> Janet {
-        unsafe { janet_table_get(self.raw, key.inner).into() }
+    pub fn get(&self, key: Janet) -> Option<Janet> {
+        if key.is_nil() {
+            None
+        } else {
+            let val: Janet = unsafe { janet_table_get(self.raw, key.inner).into() };
+            if val.is_nil() { None } else { Some(val) }
+        }
     }
 
     /// Returns the key-value pair corresponding to the supplied `key`.
     #[inline]
-    pub fn get_key_value(&self, key: Janet) -> (Janet, Janet) { (key, self.get(key)) }
+    pub fn get_key_value(&self, key: Janet) -> Option<(Janet, Janet)> {
+        self.get(key).map(|v| (key, v))
+    }
+
+    /// Returns the value corresponding to the supplied `key` without checking prototype
+    /// tables.
+    #[inline]
+    pub fn raw_get(&self, key: Janet) -> Option<Janet> {
+        if key.is_nil() {
+            None
+        } else {
+            let val: Janet = unsafe { janet_table_rawget(self.raw, key.inner).into() };
+            if val.is_nil() { None } else { Some(val) }
+        }
+    }
+
+    /// Returns the key-value pair corresponding to the supplied `key` without checking
+    /// prototype tables.
+    #[inline]
+    pub fn raw_get_key_value(&self, key: Janet) -> Option<(Janet, Janet)> {
+        self.raw_get(key).map(|v| (key, v))
+    }
+
+    /// Find the bucket that contains the given `key`. Will also return bucket where `key`
+    /// should go if not in the table.
+    #[inline]
+    pub fn find(&self, key: Janet) -> Option<(Janet, Janet)> {
+        if key.is_nil() {
+            None
+        } else {
+            let kv = unsafe { janet_table_find(self.raw, key.inner) };
+
+            if kv.is_null() {
+                None
+            } else {
+                let kv = unsafe { *kv };
+                Some((kv.key.into(), kv.value.into()))
+            }
+        }
+    }
 
     /// Removes `key` from the table, returning the value of the `key`.
     #[inline]
@@ -126,22 +170,16 @@ impl JanetTable<'_> {
     }
 
     /// Insert a `key`-`value` pair into the table.
+    ///
+    /// This functions ignores if `key` is Janet `nil`
     #[inline]
     pub fn insert(&mut self, key: Janet, value: Janet) {
-        unsafe { janet_table_put(self.raw, key.inner, value.inner) }
-    }
-
-    /// Find the key-value pair that contains the suplied `key` in the table.
-    #[inline]
-    pub fn find(&self, key: Janet) -> Option<(Janet, Janet)> {
-        let ans = unsafe { janet_table_find(self.raw, key.into()) };
-
-        if ans.is_null() {
-            None
-        } else {
-            let ans = unsafe { *ans };
-            Some((ans.key.into(), ans.value.into()))
+        // Ignore if key is nil
+        if key.is_nil() {
+            return;
         }
+
+        unsafe { janet_table_put(self.raw, key.inner, value.inner) }
     }
 
     /// Return a raw pointer to the buffer raw structure.
@@ -229,5 +267,29 @@ mod tests {
 
         table.insert(0.into(), true.into());
         assert_eq!(1, table.len())
+    }
+
+    #[test]
+    #[serial]
+    fn get() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::with_capacity(2);
+        table.insert(10.into(), 10.1.into());
+
+        assert_eq!(None, table.get(Janet::nil()));
+        assert_eq!(None, table.get(11.into()));
+        assert_eq!(Some(Janet::number(10.1)), table.get(10.into()));
+    }
+
+    #[test]
+    #[serial]
+    fn raw_get() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::with_capacity(2);
+        table.insert(10.into(), 10.1.into());
+
+        assert_eq!(None, table.raw_get(Janet::nil()));
+        assert_eq!(None, table.raw_get(11.into()));
+        assert_eq!(Some(Janet::number(10.1)), table.raw_get(10.into()));
     }
 }
