@@ -93,7 +93,10 @@ impl JanetArray<'_> {
     /// # Panics
     /// Panics if the number of elements overflow a `i32`.
     #[inline]
-    pub fn push(&mut self, value: Janet) { unsafe { janet_array_push(self.raw, value.inner) }; }
+    pub fn push(&mut self, value: impl Into<Janet>) {
+        let value = value.into();
+        unsafe { janet_array_push(self.raw, value.inner) };
+    }
 
     /// Removes the last element from a array and returns it, or Janet `nil` if it is
     /// empty.
@@ -192,7 +195,7 @@ mod tests {
         assert!(array.is_empty());
 
         for i in 0..10 {
-            array.push(i.into());
+            array.push(i);
         }
 
         assert_eq!(10, array.len());
@@ -205,7 +208,7 @@ mod tests {
         let mut array = JanetArray::new();
 
         for i in 0..10 {
-            array.push(i.into());
+            array.push(i);
         }
 
         for _ in 0..10 {
@@ -223,7 +226,7 @@ mod tests {
         let mut array = JanetArray::new();
 
         for i in 0..10 {
-            array.push(i.into());
+            array.push(i);
         }
 
         assert_eq!(10, array.len());

@@ -23,7 +23,8 @@ impl<'data> JanetStructBuilder<'data> {
     ///
     /// [`builder`]: ./struct.JanetStruct.html#method.builder
     #[inline]
-    pub fn put(self, key: Janet, value: Janet) -> Self {
+    pub fn put(self, key: impl Into<Janet>, value: impl Into<Janet>) -> Self {
+        let (key, value) = (key.into(), value.into());
         unsafe { janet_struct_put(self.raw, key.into(), value.into()) }
 
         self
@@ -83,17 +84,26 @@ impl<'data> JanetStruct<'data> {
 
     /// Returns the value corresponding to the supplied `key`.
     #[inline]
-    pub fn get(&self, key: Janet) -> Janet {
-        unsafe { janet_struct_get(self.raw, key.into()).into() }
+    pub fn get(&self, key: impl Into<Janet>) -> Option<Janet> {
+        let key = key.into();
+        if key.is_nil() {
+            None
+        } else {
+            Some(unsafe { janet_struct_get(self.raw, key.into()).into() })
+        }
     }
 
     /// Returns the key-value pair corresponding to the supplied `key`.
     #[inline]
-    pub fn get_key_value(&self, key: Janet) -> (Janet, Janet) { (key, self.get(key)) }
+    pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+        let key = key.into();
+        self.get(key).map(|v| (key, v))
+    }
 
     /// Find the key-value pair that contains the suplied `key` in the table.
     #[inline]
-    pub fn find(&self, key: Janet) -> Option<(Janet, Janet)> {
+    pub fn find(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+        let key = key.into();
         let ans = unsafe { janet_struct_find(self.raw, key.into()) };
 
         if ans.is_null() {
@@ -130,14 +140,14 @@ mod tests {
         assert!(st.is_empty());
 
         let st = JanetStruct::builder(2)
-            .put(10.0.into(), value1)
-            .put(11.0.into(), value2)
+            .put(10.0, value1)
+            .put(11.0, value2)
             .finalize();
 
         assert_eq!(2, st.len());
-        assert_eq!(value1, st.get(10.0.into()));
-        assert_eq!(value2, st.get(11.0.into()));
-        assert_eq!(Janet::nil(), st.get(12.0.into()));
+        assert_eq!(Some(value1), st.get(10.0));
+        assert_eq!(Some(value2), st.get(11.0));
+        assert_eq!(None, st.get(12.0));
     }
 
     #[test]

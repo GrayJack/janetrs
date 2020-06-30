@@ -111,7 +111,9 @@ impl JanetTable<'_> {
 
     /// Returns the value corresponding to the supplied `key`.
     #[inline]
-    pub fn get(&self, key: Janet) -> Option<Janet> {
+    pub fn get(&self, key: impl Into<Janet>) -> Option<Janet> {
+        let key = key.into();
+
         if key.is_nil() {
             None
         } else {
@@ -122,14 +124,17 @@ impl JanetTable<'_> {
 
     /// Returns the key-value pair corresponding to the supplied `key`.
     #[inline]
-    pub fn get_key_value(&self, key: Janet) -> Option<(Janet, Janet)> {
+    pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+        let key = key.into();
         self.get(key).map(|v| (key, v))
     }
 
     /// Returns the value corresponding to the supplied `key` without checking prototype
     /// tables.
     #[inline]
-    pub fn raw_get(&self, key: Janet) -> Option<Janet> {
+    pub fn raw_get(&self, key: impl Into<Janet>) -> Option<Janet> {
+        let key = key.into();
+
         if key.is_nil() {
             None
         } else {
@@ -141,14 +146,17 @@ impl JanetTable<'_> {
     /// Returns the key-value pair corresponding to the supplied `key` without checking
     /// prototype tables.
     #[inline]
-    pub fn raw_get_key_value(&self, key: Janet) -> Option<(Janet, Janet)> {
+    pub fn raw_get_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+        let key = key.into();
         self.raw_get(key).map(|v| (key, v))
     }
 
     /// Find the bucket that contains the given `key`. Will also return bucket where `key`
     /// should go if not in the table.
     #[inline]
-    pub fn find(&self, key: Janet) -> Option<(Janet, Janet)> {
+    pub fn find(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+        let key = key.into();
+
         if key.is_nil() {
             None
         } else {
@@ -165,7 +173,9 @@ impl JanetTable<'_> {
 
     /// Removes `key` from the table, returning the value of the `key`.
     #[inline]
-    pub fn remove(&mut self, key: Janet) -> Janet {
+    pub fn remove(&mut self, key: impl Into<Janet>) -> Janet {
+        let key = key.into();
+
         unsafe { janet_table_remove(self.raw, key.inner).into() }
     }
 
@@ -173,7 +183,9 @@ impl JanetTable<'_> {
     ///
     /// This functions ignores if `key` is Janet `nil`
     #[inline]
-    pub fn insert(&mut self, key: Janet, value: Janet) {
+    pub fn insert(&mut self, key: impl Into<Janet>, value: impl Into<Janet>) {
+        let (key, value) = (key.into(), value.into());
+
         // Ignore if key is nil
         if key.is_nil() {
             return;
@@ -265,7 +277,7 @@ mod tests {
         let mut table = JanetTable::new();
         assert_eq!(0, table.len());
 
-        table.insert(0.into(), true.into());
+        table.insert(0, true);
         assert_eq!(1, table.len())
     }
 
@@ -274,11 +286,11 @@ mod tests {
     fn get() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
-        table.insert(10.into(), 10.1.into());
+        table.insert(10, 10.1);
 
         assert_eq!(None, table.get(Janet::nil()));
-        assert_eq!(None, table.get(11.into()));
-        assert_eq!(Some(Janet::number(10.1)), table.get(10.into()));
+        assert_eq!(None, table.get(11));
+        assert_eq!(Some(Janet::number(10.1)), table.get(10));
     }
 
     #[test]
@@ -286,10 +298,10 @@ mod tests {
     fn raw_get() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
-        table.insert(10.into(), 10.1.into());
+        table.insert(10, 10.1);
 
         assert_eq!(None, table.raw_get(Janet::nil()));
-        assert_eq!(None, table.raw_get(11.into()));
-        assert_eq!(Some(Janet::number(10.1)), table.raw_get(10.into()));
+        assert_eq!(None, table.raw_get(11));
+        assert_eq!(Some(Janet::number(10.1)), table.raw_get(10));
     }
 }

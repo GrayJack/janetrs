@@ -17,7 +17,9 @@ pub struct JanetTupleBuilder<'data> {
 impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
     #[inline]
-    pub fn put(mut self, value: Janet) -> Self {
+    pub fn put(mut self, value: impl Into<Janet>) -> Self {
+        let value = value.into();
+
         if self.added >= self.len {
             return self;
         }
