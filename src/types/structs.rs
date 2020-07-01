@@ -84,33 +84,85 @@ impl<'data> JanetStruct<'data> {
 
     /// Returns the value corresponding to the supplied `key`.
     #[inline]
-    pub fn get(&self, key: impl Into<Janet>) -> Option<Janet> {
+    pub fn get(&self, key: impl Into<Janet>) -> Option<&Janet> {
+        self.get_key_value(key).map(|(_, v)| v)
+    }
+
+    /// Returns the key-value pair corresponding to the supplied `key`.
+    #[inline]
+    pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(&Janet, &Janet)> {
         let key = key.into();
+
         if key.is_nil() {
             None
         } else {
-            Some(unsafe { janet_struct_get(self.raw, key.into()).into() })
+            let kv = unsafe { janet_struct_find(self.raw, key.into()) };
+
+            if kv.is_null() {
+                None
+            } else {
+                // SAFETY: Safe to deref since it's not null
+                unsafe {
+                    let kv: *const (Janet, Janet) = kv as *const _;
+
+                    if (*kv).1.is_nil() {
+                        None
+                    } else {
+                        Some((&(*kv).0, &(*kv).1))
+                    }
+                }
+            }
+        }
+    }
+
+    /// Returns a owned value corresponding to the supplied `key`.
+    #[inline]
+    pub fn get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
+        let key = key.into();
+
+        if key.is_nil() {
+            None
+        } else {
+            let val: Janet = unsafe { janet_struct_get(self.raw, key.inner).into() };
+
+            if val.is_nil() { None } else { Some(val) }
         }
     }
 
     /// Returns the key-value pair corresponding to the supplied `key`.
     #[inline]
-    pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+    pub fn get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
-        self.get(key).map(|v| (key, v))
+        self.get_owned(key).map(|v| (key, v))
     }
 
-    /// Find the key-value pair that contains the suplied `key` in the table.
+    /// Find the bucket that contains the given `key`.
+    ///
+    /// Notice that if there is no key-value pair in the table, this function will return
+    /// a tuple of mutable references to Janet `nil`.
     #[inline]
-    pub fn find(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+    pub fn find(&self, key: impl Into<Janet>) -> Option<(&Janet, &Janet)> {
         let key = key.into();
-        let ans = unsafe { janet_struct_find(self.raw, key.into()) };
 
-        if ans.is_null() {
+        if key.is_nil() {
             None
         } else {
-            let ans = unsafe { *ans };
-            Some((ans.key.into(), ans.value.into()))
+            let kv = unsafe { janet_struct_find(self.raw, key.into()) };
+
+            if kv.is_null() {
+                None
+            } else {
+                // SAFETY: Safe to deref since it's not null
+                unsafe {
+                    let kv: *const (Janet, Janet) = kv as *const _;
+
+                    if kv.is_null() {
+                        None
+                    } else {
+                        Some((&(*kv).0, &(*kv).1))
+                    }
+                }
+            }
         }
     }
 
@@ -130,7 +182,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn creation() {
+    fn creation_and_get() {
         let _client = JanetClient::init().unwrap();
 
         let value1 = Janet::integer(10);
@@ -145,9 +197,28 @@ mod tests {
             .finalize();
 
         assert_eq!(2, st.len());
-        assert_eq!(Some(value1), st.get(10.0));
-        assert_eq!(Some(value2), st.get(11.0));
+        assert_eq!(Some(&value1), st.get(10.0));
+        assert_eq!(Some(&value2), st.get(11.0));
         assert_eq!(None, st.get(12.0));
+    }
+
+    #[test]
+    #[serial]
+    fn get_owned() {
+        let _client = JanetClient::init().unwrap();
+
+        let value1 = Janet::integer(10);
+        let value2 = Janet::boolean(true);
+
+        let st = JanetStruct::builder(2)
+            .put(10.0, value1)
+            .put(11.0, value2)
+            .finalize();
+
+        assert_eq!(2, st.len());
+        assert_eq!(Some(value1), st.get_owned(10.0));
+        assert_eq!(Some(value2), st.get_owned(11.0));
+        assert_eq!(None, st.get_owned(12.0));
     }
 
     #[test]
@@ -166,8 +237,9 @@ mod tests {
             .put(key2, value2)
             .finalize();
 
-        assert_eq!(Some((key1, value1)), st.find(key1));
-        assert_eq!(Some((key2, value2)), st.find(key2));
-        assert_eq!(Some((Janet::nil(), Janet::nil())), st.find(Janet::nil()));
+        assert_eq!(Some((&key1, &value1)), st.find(key1));
+        assert_eq!(Some((&key2, &value2)), st.find(key2));
+        assert_eq!(Some((&Janet::nil(), &Janet::nil())), st.find(1));
+        assert_eq!(None, st.find(Janet::nil()));
     }
 }

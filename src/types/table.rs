@@ -111,7 +111,71 @@ impl JanetTable<'_> {
 
     /// Returns the value corresponding to the supplied `key`.
     #[inline]
-    pub fn get(&self, key: impl Into<Janet>) -> Option<Janet> {
+    pub fn get(&self, key: impl Into<Janet>) -> Option<&Janet> {
+        self.get_key_value(key).map(|(_, v)| v)
+    }
+
+    /// Returns the key-value pair corresponding to the supplied `key`.
+    #[inline]
+    pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(&Janet, &Janet)> {
+        let key = key.into();
+
+        if key.is_nil() {
+            None
+        } else {
+            let kv: *mut (Janet, Janet) =
+                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+
+            if kv.is_null() {
+                None
+            } else {
+                unsafe {
+                    if (*kv).1.is_nil() {
+                        None
+                    } else {
+                        Some((&(*kv).0, &(*kv).1))
+                    }
+                }
+            }
+        }
+    }
+
+    /// Returns a mutable reference to the value corresponding to the `key`.
+    #[inline]
+    pub fn get_mut(&mut self, key: impl Into<Janet>) -> Option<&mut Janet> {
+        self.get_key_value_mut(key).map(|(_, v)| v)
+    }
+
+    /// Returns the key-value pair corresponding to the supplied `key`, with a mutable
+    /// reference to value.
+    #[inline]
+    pub fn get_key_value_mut(&mut self, key: impl Into<Janet>) -> Option<(&Janet, &mut Janet)> {
+        let key = key.into();
+
+        if key.is_nil() {
+            None
+        } else {
+            let kv: *mut (Janet, Janet) =
+                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+
+            if kv.is_null() {
+                None
+            } else {
+                unsafe {
+                    if (*kv).1.is_nil() {
+                        None
+                    } else {
+                        Some((&(*kv).0, &mut (*kv).1))
+                    }
+                }
+            }
+        }
+    }
+
+    /// Returns the value corresponding to the supplied `key` checking prototype
+    /// tables.
+    #[inline]
+    pub fn get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
 
         if key.is_nil() {
@@ -122,17 +186,18 @@ impl JanetTable<'_> {
         }
     }
 
-    /// Returns the key-value pair corresponding to the supplied `key`.
+    /// Returns the key-value pair corresponding to the supplied `key` checking
+    /// prototype tables.
     #[inline]
-    pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+    pub fn get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
-        self.get(key).map(|v| (key, v))
+        self.get_owned(key).map(|v| (key, v))
     }
 
-    /// Returns the value corresponding to the supplied `key` without checking prototype
-    /// tables.
+    /// Returns the value corresponding to the supplied `key` without checking
+    /// prototype tables.
     #[inline]
-    pub fn raw_get(&self, key: impl Into<Janet>) -> Option<Janet> {
+    pub fn raw_get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
 
         if key.is_nil() {
@@ -143,40 +208,49 @@ impl JanetTable<'_> {
         }
     }
 
-    /// Returns the key-value pair corresponding to the supplied `key` without checking
-    /// prototype tables.
+    /// Returns the key-value pair corresponding to the supplied `key` without
+    /// checking prototype tables.
     #[inline]
-    pub fn raw_get_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+    pub fn raw_get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
-        self.raw_get(key).map(|v| (key, v))
+        self.raw_get_owned(key).map(|v| (key, v))
     }
 
     /// Find the bucket that contains the given `key`. Will also return bucket where `key`
     /// should go if not in the table.
+    ///
+    /// Notice that if there is no key-value pair in the table, this function will return
+    /// a tuple of mutable references to Janet `nil`.
     #[inline]
-    pub fn find(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
+    pub fn find(&self, key: impl Into<Janet>) -> Option<(&mut Janet, &mut Janet)> {
         let key = key.into();
 
         if key.is_nil() {
             None
         } else {
-            let kv = unsafe { janet_table_find(self.raw, key.inner) };
+            let kv: *mut (Janet, Janet) =
+                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
             } else {
-                let kv = unsafe { *kv };
-                Some((kv.key.into(), kv.value.into()))
+                unsafe { Some((&mut (*kv).0, &mut (*kv).1)) }
             }
         }
     }
 
     /// Removes `key` from the table, returning the value of the `key`.
     #[inline]
-    pub fn remove(&mut self, key: impl Into<Janet>) -> Janet {
+    pub fn remove(&mut self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
 
-        unsafe { janet_table_remove(self.raw, key.inner).into() }
+        if key.is_nil() {
+            None
+        } else {
+            let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into() };
+
+            if value.is_nil() { None } else { Some(value) }
+        }
     }
 
     /// Insert a `key`-`value` pair into the table.
@@ -290,18 +364,45 @@ mod tests {
 
         assert_eq!(None, table.get(Janet::nil()));
         assert_eq!(None, table.get(11));
-        assert_eq!(Some(Janet::number(10.1)), table.get(10));
+        assert_eq!(Some(&Janet::number(10.1)), table.get(10));
     }
 
     #[test]
     #[serial]
-    fn raw_get() {
+    fn get_owned() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, 10.1);
 
-        assert_eq!(None, table.raw_get(Janet::nil()));
-        assert_eq!(None, table.raw_get(11));
-        assert_eq!(Some(Janet::number(10.1)), table.raw_get(10));
+        assert_eq!(None, table.get_owned(Janet::nil()));
+        assert_eq!(None, table.get_owned(11));
+        assert_eq!(Some(Janet::number(10.1)), table.get_owned(10));
+    }
+
+    #[test]
+    #[serial]
+    fn raw_get_owned() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::with_capacity(2);
+        table.insert(10, 10.1);
+
+        assert_eq!(None, table.raw_get_owned(Janet::nil()));
+        assert_eq!(None, table.raw_get_owned(11));
+        assert_eq!(Some(Janet::number(10.1)), table.raw_get_owned(10));
+    }
+
+    #[test]
+    #[serial]
+    fn find() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::with_capacity(2);
+        table.insert(10, 10.1);
+
+        assert_eq!(None, table.find(Janet::nil()));
+        assert_eq!(Some((&mut Janet::nil(), &mut Janet::nil())), table.find(11));
+        assert_eq!(
+            Some((&mut Janet::integer(10), &mut Janet::number(10.1))),
+            table.find(10)
+        );
     }
 }
