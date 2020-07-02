@@ -1,5 +1,5 @@
 //! Tuples
-use core::marker::PhantomData;
+use core::{marker::PhantomData, ops::Index};
 
 use janet_ll::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
 
@@ -127,6 +127,21 @@ impl Clone for JanetTuple<'_> {
         }
 
         clone.finalize()
+    }
+}
+
+impl Index<i32> for JanetTuple<'_> {
+    type Output = Janet;
+
+    fn index(&self, index: i32) -> &Self::Output {
+        match self.get(index) {
+            Some(out) => out,
+            None => panic!(
+                "index out of bounds: the len is {} but the index is {}",
+                self.len(),
+                index
+            ),
+        }
     }
 }
 
