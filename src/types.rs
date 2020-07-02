@@ -5,14 +5,15 @@
 use core::{cmp::Ordering, fmt};
 
 use janet_ll::{
-    janet_length, janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer,
-    janet_wrap_fiber, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil, janet_wrap_number,
-    janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table, janet_wrap_tuple,
-    Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY,
-    JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION,
-    JanetType_JANET_FIBER, JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL,
-    JanetType_JANET_NUMBER, JanetType_JANET_POINTER, JanetType_JANET_STRING,
-    JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE, JanetType_JANET_TUPLE,
+    janet_length, janet_truthy, janet_type, janet_wrap_array, janet_wrap_boolean,
+    janet_wrap_buffer, janet_wrap_fiber, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil,
+    janet_wrap_number, janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table,
+    janet_wrap_tuple, Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT,
+    JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER,
+    JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER, JanetType_JANET_FUNCTION,
+    JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER, JanetType_JANET_POINTER,
+    JanetType_JANET_STRING, JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE,
+    JanetType_JANET_TUPLE,
 };
 
 pub mod array;
@@ -168,7 +169,7 @@ impl Janet {
                 | Jt::Buffer
                 | Jt::Abstract
         ) {
-            Some(unsafe { janet_length((*self).into()) })
+            Some(unsafe { janet_length(self.inner) })
         } else {
             None
         }
@@ -183,6 +184,10 @@ impl Janet {
             _ => false,
         }
     }
+
+    /// Returns `true` if the `Janet` value are truthy.
+    #[inline]
+    pub fn is_truthy(&self) -> bool { unsafe { janet_truthy(self.inner) == 0 } }
 
     /// Returns the type of [`Janet`] object.
     #[inline]
