@@ -222,7 +222,7 @@ impl JanetTable<'_> {
     /// Notice that if there is no key-value pair in the table, this function will return
     /// a tuple of mutable references to Janet `nil`.
     #[inline]
-    pub fn find(&self, key: impl Into<Janet>) -> Option<(&mut Janet, &mut Janet)> {
+    pub fn find(&mut self, key: impl Into<Janet>) -> Option<(&mut Janet, &mut Janet)> {
         let key = key.into();
 
         if key.is_nil() {
@@ -247,9 +247,32 @@ impl JanetTable<'_> {
         if key.is_nil() {
             None
         } else {
-            let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into() };
+            // TODO: Remove manual implementation when a new version of janet is released with
+            // `janet_table_remove` fixed
+            let kv: *mut (Janet, Janet) =
+                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
 
-            if value.is_nil() { None } else { Some(value) }
+            if kv.is_null() {
+                None
+            } else {
+                unsafe {
+                    let ret = (*kv).1;
+                    if ret.is_nil() {
+                        None
+                    } else {
+                        (*self.raw).count -= 1;
+                        (*self.raw).deleted += 1;
+
+                        (*kv).0 = Janet::nil();
+                        (*kv).1 = Janet::boolean(false);
+
+                        Some(ret)
+                    }
+                }
+            }
+            // janet_table_remove have a bug the returns the key instead of the value
+            // let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into()
+            // }; if value.is_nil() { None } else { Some(value) }
         }
     }
 
@@ -404,5 +427,32 @@ mod tests {
             Some((&mut Janet::integer(10), &mut Janet::number(10.1))),
             table.find(10)
         );
+    }
+
+    #[test]
+    #[serial]
+    fn remove() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::with_capacity(2);
+        table.insert(10, 10.5);
+        table.insert(12, 1);
+
+        assert_eq!(2, table.len());
+
+        assert_eq!(None, table.remove(Janet::nil()));
+        assert_eq!(0, table.removed());
+        assert_eq!(2, table.len());
+
+        assert_eq!(None, table.remove(13));
+        assert_eq!(0, table.removed());
+        assert_eq!(2, table.len());
+
+        assert_eq!(Some(Janet::number(10.5)), table.remove(10));
+        assert_eq!(1, table.removed());
+        assert_eq!(1, table.len());
+
+        assert_eq!(Some(Janet::integer(1)), table.remove(12));
+        assert_eq!(2, table.removed());
+        assert!(table.is_empty());
     }
 }
