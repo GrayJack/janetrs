@@ -1,11 +1,14 @@
 //! This module should have all Janet type structures.
+//!
+//! TODO: After all Janet types implement [`Clone`], change all functions parameters that
+//! recieves `impl Into<Janet>` to `&impl Into<Janet> + Clone`
 use core::{cmp::Ordering, fmt};
 
 use janet_ll::{
-    janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer, janet_wrap_fiber,
-    janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil, janet_wrap_number, janet_wrap_string,
-    janet_wrap_struct, janet_wrap_symbol, janet_wrap_table, janet_wrap_tuple, Janet as CJanet,
-    JanetType as CJanetType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY,
+    janet_length, janet_type, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer,
+    janet_wrap_fiber, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil, janet_wrap_number,
+    janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table, janet_wrap_tuple,
+    Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT, JanetType_JANET_ARRAY,
     JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER, JanetType_JANET_CFUNCTION,
     JanetType_JANET_FIBER, JanetType_JANET_FUNCTION, JanetType_JANET_KEYWORD, JanetType_JANET_NIL,
     JanetType_JANET_NUMBER, JanetType_JANET_POINTER, JanetType_JANET_STRING,
@@ -148,6 +151,39 @@ impl Janet {
     #[inline]
     pub fn is_nil(&self) -> bool { matches!(self.kind(), JanetType::Nil) }
 
+    /// Returns the length of a [`Janet`] if it is of a applicable type (Abstract, Array,
+    /// Buffer, Keyword, Struct, Symbol, Table, Tuple).
+    #[inline]
+    pub fn len(&self) -> Option<i32> {
+        use JanetType as Jt;
+        if matches!(
+            self.kind(),
+            Jt::String
+                | Jt::Symbol
+                | Jt::Keyword
+                | Jt::Array
+                | Jt::Tuple
+                | Jt::Table
+                | Jt::Struct
+                | Jt::Buffer
+                | Jt::Abstract
+        ) {
+            Some(unsafe { janet_length((*self).into()) })
+        } else {
+            None
+        }
+    }
+
+    /// Returns `true` if `Janet` has a applicable type (Abstract, Array, Buffer, Keyword,
+    /// Struct, Symbol, Table, Tuple) and the length of it is zero, and `false` otherwise.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        match self.len() {
+            Some(0) => true,
+            _ => false,
+        }
+    }
+
     /// Returns the type of [`Janet`] object.
     #[inline]
     pub fn kind(&self) -> JanetType { unsafe { janet_type(self.inner) }.into() }
@@ -196,6 +232,22 @@ impl fmt::Display for Janet {
 
         write!(f, "{}", s)
     }
+}
+
+impl PartialEq<&Janet> for Janet {
+    fn eq(&self, other: &&Janet) -> bool { self.eq(*other) }
+}
+
+impl PartialOrd<&Janet> for Janet {
+    fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> { self.partial_cmp(*other) }
+}
+
+impl PartialEq<Janet> for &Janet {
+    fn eq(&self, other: &Janet) -> bool { (*self).eq(other) }
+}
+
+impl PartialOrd<Janet> for &Janet {
+    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> { (*self).partial_cmp(other) }
 }
 
 impl From<CJanet> for Janet {
