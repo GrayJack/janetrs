@@ -113,7 +113,9 @@ impl JanetTable<'_> {
     /// assert!(table.capacity() >= 20);
     /// ```
     #[inline]
-    pub fn capacity(&self) -> i32 { unsafe { (*self.raw).capacity } }
+    pub fn capacity(&self) -> i32 {
+        unsafe { (*self.raw).capacity }
+    }
 
     /// Returns the number of elements that was removed from the table.
     ///
@@ -130,7 +132,9 @@ impl JanetTable<'_> {
     /// assert!(table.removed() == 1);
     /// ```
     #[inline]
-    pub fn removed(&self) -> i32 { unsafe { (*self.raw).deleted } }
+    pub fn removed(&self) -> i32 {
+        unsafe { (*self.raw).deleted }
+    }
 
     /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
     /// reuse.
@@ -146,7 +150,9 @@ impl JanetTable<'_> {
     /// assert!(table.is_empty());
     /// ```
     #[inline]
-    pub fn clear(&mut self) { unsafe { janet_table_clear(self.raw) } }
+    pub fn clear(&mut self) {
+        unsafe { janet_table_clear(self.raw) }
+    }
 
     /// Returns the number of elements of the table, also refered to as its 'length'.
     ///
@@ -161,7 +167,9 @@ impl JanetTable<'_> {
     /// assert_eq!(table.len(), 1);
     /// ```
     #[inline]
-    pub fn len(&self) -> i32 { unsafe { (*self.raw).count } }
+    pub fn len(&self) -> i32 {
+        unsafe { (*self.raw).count }
+    }
 
     /// Returns `true` if the table contains no elements.
     ///
@@ -176,7 +184,9 @@ impl JanetTable<'_> {
     /// assert_eq!(!table.is_empty());
     /// ```
     #[inline]
-    pub fn is_empty(&self) -> bool { self.len() == 0 }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
     /// Returns the value corresponding to the supplied `key`.
     ///
@@ -534,7 +544,9 @@ impl JanetTable<'_> {
     /// assert!(table.contains_key(11));
     /// ```
     #[inline]
-    pub fn contains_key(&self, key: impl Into<Janet>) -> bool { self.get(key).is_some() }
+    pub fn contains_key(&self, key: impl Into<Janet>) -> bool {
+        self.get(key).is_some()
+    }
 
     /// Return a raw pointer to the buffer raw structure.
     ///
@@ -545,14 +557,18 @@ impl JanetTable<'_> {
     ///
     /// [`as_mut_ptr`]: ./struct.JanetTable.html#method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetTable { self.raw }
+    pub fn as_raw(&self) -> *const CJanetTable {
+        self.raw
+    }
 
     /// Return a raw mutable pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_mut_raw(&mut self) -> *mut CJanetTable { self.raw }
+    pub fn as_mut_raw(&mut self) -> *mut CJanetTable {
+        self.raw
+    }
 }
 
 impl<'data> JanetTable<'data> {
@@ -604,7 +620,9 @@ impl JanetExtend<(Janet, Janet)> for JanetTable<'_> {
 
 impl Default for JanetTable<'_> {
     #[inline]
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl From<JanetStruct<'_>> for JanetTable<'_> {
@@ -616,7 +634,9 @@ impl From<JanetStruct<'_>> for JanetTable<'_> {
 impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
     type Output = Janet;
 
-    fn index(&self, key: T) -> &Self::Output { self.get(key).expect("no entry found for key") }
+    fn index(&self, key: T) -> &Self::Output {
+        self.get(key).expect("no entry found for key")
+    }
 }
 
 /// A view into a single entry in a map, which may either be vacant or occupied.
@@ -778,7 +798,9 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// }
     /// ```
     #[inline]
-    pub fn get(&self) -> &Janet { unsafe { &(*self.elem).1 } }
+    pub fn get(&self) -> &Janet {
+        unsafe { &(*self.elem).1 }
+    }
 
     /// Gets a mutable reference to the value in the entry.
     ///
@@ -806,7 +828,9 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// [`into_mut`]: ./struct.OccupiedEntry.html#method.into_mut
     #[inline]
-    pub fn get_mut(&mut self) -> &mut Janet { unsafe { &mut (*self.elem).1 } }
+    pub fn get_mut(&mut self) -> &mut Janet {
+        unsafe { &mut (*self.elem).1 }
+    }
 
     /// Sets the value of the entry, and returns the entry's old value.
     ///
@@ -852,11 +876,15 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// [`get_mut`]: ./struct.OccupiedEntry.html#method.get_mut
     #[inline]
-    pub fn into_mut(self) -> &'a mut Janet { unsafe { &mut (*self.elem).1 } }
+    pub fn into_mut(self) -> &'a mut Janet {
+        unsafe { &mut (*self.elem).1 }
+    }
 
     /// Gets a reference to the key in the entry.
     #[inline]
-    pub fn key(&self) -> &Janet { unsafe { &(*self.elem).0 } }
+    pub fn key(&self) -> &Janet {
+        unsafe { &(*self.elem).0 }
+    }
 
     /// Takes the value out of the entry, and returns it.
     ///
@@ -874,7 +902,9 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// assert!(!table.contains_key(10));
     /// ```
     #[inline]
-    pub fn remove(self) -> Janet { self.remove_entry().1 }
+    pub fn remove(self) -> Janet {
+        self.remove_entry().1
+    }
 
     /// Take the ownership of the key and value from the table.
     #[inline]
@@ -974,12 +1004,16 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     /// }
     /// ```
     #[inline]
-    pub fn into_key(self) -> Janet { self.key }
+    pub fn into_key(self) -> Janet {
+        self.key
+    }
 
     /// Gets a reference to the key that would be used when inserting a value through the
     /// [`VacantEntry`].
     #[inline]
-    pub fn key(&self) -> &Janet { &self.key }
+    pub fn key(&self) -> &Janet {
+        &self.key
+    }
 }
 
 #[cfg(all(test, feature = "amalgation"))]

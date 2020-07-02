@@ -24,12 +24,16 @@ impl JanetFiber<'_> {
     ///
     /// [`as_mut_ptr`]: ./struct.JanetBuffer.html#method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetFiber { self.raw }
+    pub fn as_raw(&self) -> *const CJanetFiber {
+        self.raw
+    }
 
     /// Return a raw mutable pointer to the fiber raw structure.
     ///
     /// The caller must ensure that the fiber outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_mut_raw(&mut self) -> *mut CJanetFiber { self.raw }
+    pub fn as_mut_raw(&mut self) -> *mut CJanetFiber {
+        self.raw
+    }
 }

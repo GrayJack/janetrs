@@ -36,7 +36,9 @@ impl JanetBuildConfig {
 
     /// Return the version of the Janet.
     #[inline]
-    pub const fn version(&self) -> JanetVersion { self.version }
+    pub const fn version(&self) -> JanetVersion {
+        self.version
+    }
 
     /// Return `true` if Janet single threaded bit is set.
     #[inline]
@@ -96,15 +98,21 @@ impl JanetVersion {
 
     /// Return the Janet major version.
     #[inline]
-    pub const fn major(&self) -> u32 { self.major }
+    pub const fn major(&self) -> u32 {
+        self.major
+    }
 
     /// Return the Janet minor version.
     #[inline]
-    pub const fn minor(&self) -> u32 { self.minor }
+    pub const fn minor(&self) -> u32 {
+        self.minor
+    }
 
     /// Return the Janet patch version.
     #[inline]
-    pub const fn patch(&self) -> u32 { self.patch }
+    pub const fn patch(&self) -> u32 {
+        self.patch
+    }
 }
 
 impl fmt::Display for JanetVersion {

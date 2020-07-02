@@ -58,15 +58,21 @@ impl JanetArray<'_> {
 
     /// Returns the number of elements the array can hold without reallocating.
     #[inline]
-    pub fn capacity(&self) -> i32 { unsafe { (*self.raw).capacity } }
+    pub fn capacity(&self) -> i32 {
+        unsafe { (*self.raw).capacity }
+    }
 
     /// Returns the number of elements in the array, also referred to as its 'length'.
     #[inline]
-    pub fn len(&self) -> i32 { unsafe { (*self.raw).count } }
+    pub fn len(&self) -> i32 {
+        unsafe { (*self.raw).count }
+    }
 
     /// Returns `true` if the array contains no elements.
     #[inline]
-    pub fn is_empty(&self) -> bool { self.len() == 0 }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
     /// Set the length of the array to `new_len`.
     ///
@@ -78,7 +84,9 @@ impl JanetArray<'_> {
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
     #[inline]
-    pub fn set_len(&mut self, new_len: i32) { unsafe { janet_array_setcount(self.raw, new_len) }; }
+    pub fn set_len(&mut self, new_len: i32) {
+        unsafe { janet_array_setcount(self.raw, new_len) };
+    }
 
     /// Ensure that an array has enough space for `check_capacity` elements. If not,
     /// resize the backing memory to `capacity` * `growth` slots. In most cases, `growth`
@@ -101,11 +109,15 @@ impl JanetArray<'_> {
     /// Removes the last element from a array and returns it, or Janet `nil` if it is
     /// empty.
     #[inline]
-    pub fn pop(&mut self) -> Janet { unsafe { janet_array_pop(self.raw).into() } }
+    pub fn pop(&mut self) -> Janet {
+        unsafe { janet_array_pop(self.raw).into() }
+    }
 
     /// Returns the last element in the array without modifying it.
     #[inline]
-    pub fn peek(&mut self) -> Janet { unsafe { janet_array_peek(self.raw).into() } }
+    pub fn peek(&mut self) -> Janet {
+        unsafe { janet_array_peek(self.raw).into() }
+    }
 
     /// Return a raw pointer to the buffer raw structure.
     ///
@@ -116,14 +128,18 @@ impl JanetArray<'_> {
     ///
     /// [`as_mut_ptr`]: ./struct.JanetArray.html#method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetArray { self.raw }
+    pub fn as_raw(&self) -> *const CJanetArray {
+        self.raw
+    }
 
     /// Return a raw mutable pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_mut_raw(&mut self) -> *mut CJanetArray { self.raw }
+    pub fn as_mut_raw(&mut self) -> *mut CJanetArray {
+        self.raw
+    }
 }
 
 impl TryFrom<&[Janet]> for JanetArray<'_> {
@@ -156,7 +172,9 @@ impl TryFrom<&[CJanet]> for JanetArray<'_> {
 
 impl Default for JanetArray<'_> {
     #[inline]
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {

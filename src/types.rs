@@ -150,7 +150,9 @@ impl Janet {
 
     /// Return `true` if [`Janet`] is nil type.
     #[inline]
-    pub fn is_nil(&self) -> bool { matches!(self.kind(), JanetType::Nil) }
+    pub fn is_nil(&self) -> bool {
+        matches!(self.kind(), JanetType::Nil)
+    }
 
     /// Returns the length of a [`Janet`] if it is of a applicable type (Abstract, Array,
     /// Buffer, Keyword, Struct, Symbol, Table, Tuple).
@@ -187,15 +189,21 @@ impl Janet {
 
     /// Returns `true` if the `Janet` value are truthy.
     #[inline]
-    pub fn is_truthy(&self) -> bool { unsafe { janet_truthy(self.inner) == 0 } }
+    pub fn is_truthy(&self) -> bool {
+        unsafe { janet_truthy(self.inner) == 0 }
+    }
 
     /// Returns the type of [`Janet`] object.
     #[inline]
-    pub fn kind(&self) -> JanetType { unsafe { janet_type(self.inner) }.into() }
+    pub fn kind(&self) -> JanetType {
+        unsafe { janet_type(self.inner) }.into()
+    }
 
     /// Returns the raw data of the data
     #[inline]
-    pub const fn raw_data(&self) -> CJanet { self.inner }
+    pub const fn raw_data(&self) -> CJanet {
+        self.inner
+    }
 }
 
 impl fmt::Debug for Janet {
@@ -240,39 +248,55 @@ impl fmt::Display for Janet {
 }
 
 impl PartialEq<&Janet> for Janet {
-    fn eq(&self, other: &&Janet) -> bool { self.eq(*other) }
+    fn eq(&self, other: &&Janet) -> bool {
+        self.eq(*other)
+    }
 }
 
 impl PartialOrd<&Janet> for Janet {
-    fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> { self.partial_cmp(*other) }
+    fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> {
+        self.partial_cmp(*other)
+    }
 }
 
 impl PartialEq<Janet> for &Janet {
-    fn eq(&self, other: &Janet) -> bool { (*self).eq(other) }
+    fn eq(&self, other: &Janet) -> bool {
+        (*self).eq(other)
+    }
 }
 
 impl PartialOrd<Janet> for &Janet {
-    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> { (*self).partial_cmp(other) }
+    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> {
+        (*self).partial_cmp(other)
+    }
 }
 
 impl From<CJanet> for Janet {
     #[inline]
-    fn from(val: CJanet) -> Self { Self { inner: val } }
+    fn from(val: CJanet) -> Self {
+        Self { inner: val }
+    }
 }
 
 impl From<bool> for Janet {
     #[inline]
-    fn from(val: bool) -> Self { Self::boolean(val) }
+    fn from(val: bool) -> Self {
+        Self::boolean(val)
+    }
 }
 
 impl From<i32> for Janet {
     #[inline]
-    fn from(val: i32) -> Self { Self::integer(val) }
+    fn from(val: i32) -> Self {
+        Self::integer(val)
+    }
 }
 
 impl From<f64> for Janet {
     #[inline]
-    fn from(val: f64) -> Self { Self::number(val) }
+    fn from(val: f64) -> Self {
+        Self::number(val)
+    }
 }
 
 impl From<&str> for Janet {
@@ -284,69 +308,97 @@ impl From<&str> for Janet {
 
 impl From<JanetTable<'_>> for Janet {
     #[inline]
-    fn from(val: JanetTable<'_>) -> Self { Self::table(val) }
+    fn from(val: JanetTable<'_>) -> Self {
+        Self::table(val)
+    }
 }
 
 impl From<JanetArray<'_>> for Janet {
     #[inline]
-    fn from(val: JanetArray<'_>) -> Self { Self::array(val) }
+    fn from(val: JanetArray<'_>) -> Self {
+        Self::array(val)
+    }
 }
 
 impl From<JanetBuffer<'_>> for Janet {
     #[inline]
-    fn from(val: JanetBuffer<'_>) -> Self { Self::buffer(val) }
+    fn from(val: JanetBuffer<'_>) -> Self {
+        Self::buffer(val)
+    }
 }
 
 impl From<JanetFiber<'_>> for Janet {
     #[inline]
-    fn from(val: JanetFiber<'_>) -> Self { Self::fiber(val) }
+    fn from(val: JanetFiber<'_>) -> Self {
+        Self::fiber(val)
+    }
 }
 
 impl From<JanetTuple<'_>> for Janet {
     #[inline]
-    fn from(val: JanetTuple<'_>) -> Self { Self::tuple(val) }
+    fn from(val: JanetTuple<'_>) -> Self {
+        Self::tuple(val)
+    }
 }
 
 impl From<JanetString<'_>> for Janet {
     #[inline]
-    fn from(val: JanetString<'_>) -> Self { Self::string(val) }
+    fn from(val: JanetString<'_>) -> Self {
+        Self::string(val)
+    }
 }
 
 impl From<JanetStruct<'_>> for Janet {
-    fn from(val: JanetStruct<'_>) -> Self { Self::structs(val) }
+    fn from(val: JanetStruct<'_>) -> Self {
+        Self::structs(val)
+    }
 }
 
 impl From<JanetSymbol<'_>> for Janet {
-    fn from(val: JanetSymbol<'_>) -> Self { Self::symbol(val) }
+    fn from(val: JanetSymbol<'_>) -> Self {
+        Self::symbol(val)
+    }
 }
 
 impl From<JanetKeyword<'_>> for Janet {
-    fn from(val: JanetKeyword<'_>) -> Self { Self::keyword(val) }
+    fn from(val: JanetKeyword<'_>) -> Self {
+        Self::keyword(val)
+    }
 }
 
 impl From<Janet> for CJanet {
     #[inline]
-    fn from(val: Janet) -> Self { val.inner }
+    fn from(val: Janet) -> Self {
+        val.inner
+    }
 }
 
 impl PartialEq<CJanet> for Janet {
     #[inline]
-    fn eq(&self, other: &CJanet) -> bool { self.inner.eq(other) }
+    fn eq(&self, other: &CJanet) -> bool {
+        self.inner.eq(other)
+    }
 }
 
 impl PartialEq<Janet> for CJanet {
     #[inline]
-    fn eq(&self, other: &Janet) -> bool { self.eq(&other.inner) }
+    fn eq(&self, other: &Janet) -> bool {
+        self.eq(&other.inner)
+    }
 }
 
 impl PartialOrd<CJanet> for Janet {
     #[inline]
-    fn partial_cmp(&self, other: &CJanet) -> Option<Ordering> { self.inner.partial_cmp(other) }
+    fn partial_cmp(&self, other: &CJanet) -> Option<Ordering> {
+        self.inner.partial_cmp(other)
+    }
 }
 
 impl PartialOrd<Janet> for CJanet {
     #[inline]
-    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> { self.partial_cmp(&other.inner) }
+    fn partial_cmp(&self, other: &Janet) -> Option<Ordering> {
+        self.partial_cmp(&other.inner)
+    }
 }
 
 

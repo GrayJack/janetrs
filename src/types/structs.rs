@@ -76,11 +76,15 @@ impl<'data> JanetStruct<'data> {
 
     /// Returns the number of elements in the struct, also referred to as its 'length'.
     #[inline]
-    pub fn len(&self) -> i32 { unsafe { (*janet_struct_head(self.raw)).length } }
+    pub fn len(&self) -> i32 {
+        unsafe { (*janet_struct_head(self.raw)).length }
+    }
 
     /// Returns `true` if the struct contains no elements.
     #[inline]
-    pub fn is_empty(&self) -> bool { self.len() == 0 }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
     /// Returns the value corresponding to the supplied `key`.
     #[inline]
@@ -171,7 +175,9 @@ impl<'data> JanetStruct<'data> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetKV { self.raw }
+    pub fn as_raw(&self) -> *const CJanetKV {
+        self.raw
+    }
 }
 
 impl Clone for JanetStruct<'_> {

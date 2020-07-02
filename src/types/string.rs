@@ -126,20 +126,28 @@ impl<'data> JanetString<'data> {
         }
     }
 
-    /// Returns the number of elements in the tuple, also referred to as its 'length'.
+    /// Returns the length of this [`JanetString`], in bytes, not [`char`]s or graphemes.
+    /// In other words, it may not be what a human considers the length of the string.
     #[inline]
-    pub fn len(&self) -> i32 { unsafe { (*janet_string_head(self.raw)).length } }
+    pub fn len(&self) -> i32 {
+        unsafe { (*janet_string_head(self.raw)).length }
+    }
 
-    /// Returns `true` if the tuple contains no elements.
+    /// Returns `true` if this [`JanetString`] has a length of zero, and `false`
+    /// otherwise.
     #[inline]
-    pub fn is_empty(&self) -> bool { self.len() == 0 }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
     /// Return a raw pointer to the string raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const u8 { self.raw }
+    pub fn as_raw(&self) -> *const u8 {
+        self.raw
+    }
 }
 
 impl Clone for JanetString<'_> {

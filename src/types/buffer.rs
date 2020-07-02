@@ -89,15 +89,21 @@ impl JanetBuffer<'_> {
 
     /// Returns the number of elements the buffer can hold without reallocating.
     #[inline]
-    pub fn capacity(&self) -> i32 { unsafe { (*self.raw).capacity } }
+    pub fn capacity(&self) -> i32 {
+        unsafe { (*self.raw).capacity }
+    }
 
     /// Returns the number of elements in the buffer, also referred to as its 'length'.
     #[inline]
-    pub fn len(&self) -> i32 { unsafe { (*self.raw).count } }
+    pub fn len(&self) -> i32 {
+        unsafe { (*self.raw).count }
+    }
 
     /// Returns `true` if the buffer contains no elements.
     #[inline]
-    pub fn is_empty(&self) -> bool { self.len() == 0 }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
     /// Set the length of the buffer to `new_len`.
     ///
@@ -110,7 +116,9 @@ impl JanetBuffer<'_> {
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
     #[inline]
-    pub fn set_len(&mut self, new_len: i32) { unsafe { janet_buffer_setcount(self.raw, new_len) }; }
+    pub fn set_len(&mut self, new_len: i32) {
+        unsafe { janet_buffer_setcount(self.raw, new_len) };
+    }
 
     /// Ensure that a buffer has enough space for `check_capacity` elements. If not,
     /// resize the backing memory to `capacity` * `growth` slots. In most cases, `growth`
@@ -131,7 +139,9 @@ impl JanetBuffer<'_> {
 
     /// Append the given [`char`] onto the end of the buffer.
     #[inline]
-    pub fn push(&mut self, ch: char) { self.push_u32(ch as u32) }
+    pub fn push(&mut self, ch: char) {
+        self.push_u32(ch as u32)
+    }
 
     /// Append the given byte slice onto the end of the buffer.
     #[inline]
@@ -143,23 +153,33 @@ impl JanetBuffer<'_> {
 
     /// Append the given string slice onto the end of the buffer.
     #[inline]
-    pub fn push_str(&mut self, string: &str) { self.push_bytes(string.as_bytes()) }
+    pub fn push_str(&mut self, string: &str) {
+        self.push_bytes(string.as_bytes())
+    }
 
     /// Append the given [`u8`] onto the end of the buffer.
     #[inline]
-    pub fn push_u8(&mut self, elem: u8) { unsafe { janet_buffer_push_u8(self.raw, elem) } }
+    pub fn push_u8(&mut self, elem: u8) {
+        unsafe { janet_buffer_push_u8(self.raw, elem) }
+    }
 
     /// Append the given [`u16`] onto the end of the buffer.
     #[inline]
-    pub fn push_u16(&mut self, elem: u16) { unsafe { janet_buffer_push_u16(self.raw, elem) } }
+    pub fn push_u16(&mut self, elem: u16) {
+        unsafe { janet_buffer_push_u16(self.raw, elem) }
+    }
 
     /// Append the given [`u32`] onto the end of the buffer.
     #[inline]
-    pub fn push_u32(&mut self, elem: u32) { unsafe { janet_buffer_push_u32(self.raw, elem) } }
+    pub fn push_u32(&mut self, elem: u32) {
+        unsafe { janet_buffer_push_u32(self.raw, elem) }
+    }
 
     /// Append the given [`u64`] onto the end of the buffer.
     #[inline]
-    pub fn push_u64(&mut self, elem: u64) { unsafe { janet_buffer_push_u64(self.raw, elem) } }
+    pub fn push_u64(&mut self, elem: u64) {
+        unsafe { janet_buffer_push_u64(self.raw, elem) }
+    }
 
     /// Append the given c-string slice onto the end of the buffer.
     #[cfg(feature = "std")]
@@ -177,14 +197,18 @@ impl JanetBuffer<'_> {
     ///
     /// [`as_mut_ptr`]: ./struct.JanetBuffer.html#method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetBuffer { self.raw }
+    pub fn as_raw(&self) -> *const CJanetBuffer {
+        self.raw
+    }
 
     /// Return a raw mutable pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_mut_raw(&mut self) -> *mut CJanetBuffer { self.raw }
+    pub fn as_mut_raw(&mut self) -> *mut CJanetBuffer {
+        self.raw
+    }
 }
 
 impl From<&str> for JanetBuffer<'_> {
@@ -206,33 +230,45 @@ impl From<char> for JanetBuffer<'_> {
 
 impl Default for JanetBuffer<'_> {
     #[inline]
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl JanetExtend<char> for JanetBuffer<'_> {
     #[inline]
-    fn extend(&mut self, ch: char) { self.push(ch) }
+    fn extend(&mut self, ch: char) {
+        self.push(ch)
+    }
 }
 
 impl JanetExtend<&char> for JanetBuffer<'_> {
     #[inline]
-    fn extend(&mut self, &ch: &char) { self.push(ch) }
+    fn extend(&mut self, &ch: &char) {
+        self.push(ch)
+    }
 }
 
 impl JanetExtend<&str> for JanetBuffer<'_> {
     #[inline]
-    fn extend(&mut self, string: &str) { self.push_str(string) }
+    fn extend(&mut self, string: &str) {
+        self.push_str(string)
+    }
 }
 
 impl JanetExtend<&[u8]> for JanetBuffer<'_> {
     #[inline]
-    fn extend(&mut self, slice: &[u8]) { self.push_bytes(slice) }
+    fn extend(&mut self, slice: &[u8]) {
+        self.push_bytes(slice)
+    }
 }
 
 #[cfg(feature = "std")]
 impl JanetExtend<&CStr> for JanetBuffer<'_> {
     #[inline]
-    fn extend(&mut self, cstr: &CStr) { self.push_cstr(cstr) }
+    fn extend(&mut self, cstr: &CStr) {
+        self.push_cstr(cstr)
+    }
 }
 
 #[cfg(all(test, feature = "amalgation"))]
