@@ -276,19 +276,27 @@ impl JanetTable<'_> {
         }
     }
 
-    /// Insert a `key`-`value` pair into the table.
+    /// Inserts a key-value pair into the table.
     ///
-    /// This functions ignores if `key` is Janet `nil`
+    /// If the table did not have this `key` present or if the `key` is a Janet `nil`,
+    /// None is returned.
+    ///
+    /// If the map did have this key present, the value is updated, and the old value is
+    /// returned.
     #[inline]
-    pub fn insert(&mut self, key: impl Into<Janet>, value: impl Into<Janet>) {
+    pub fn insert(&mut self, key: impl Into<Janet>, value: impl Into<Janet>) -> Option<Janet> {
         let (key, value) = (key.into(), value.into());
 
         // Ignore if key is nil
         if key.is_nil() {
-            return;
+            return None;
         }
 
-        unsafe { janet_table_put(self.raw, key.inner, value.inner) }
+        let old_value = self.get_owned(key);
+
+        unsafe { janet_table_put(self.raw, key.inner, value.inner) };
+
+        old_value
     }
 
     /// Return a raw pointer to the buffer raw structure.
@@ -369,12 +377,23 @@ mod tests {
 
     #[test]
     #[serial]
-    fn insert_and_length() {
+    fn insert() {
+        let _client = JanetClient::init().unwrap();
+        let mut table = JanetTable::new();
+
+        assert_eq!(None, table.insert(Janet::nil(), true));
+        assert_eq!(None, table.insert(0, true));
+        assert_eq!(Some(Janet::boolean(true)), table.insert(0, false));
+    }
+
+    #[test]
+    #[serial]
+    fn length() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::new();
         assert_eq!(0, table.len());
 
-        table.insert(0, true);
+        assert_eq!(None, table.insert(0, true));
         assert_eq!(1, table.len())
     }
 
