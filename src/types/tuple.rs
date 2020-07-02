@@ -35,6 +35,9 @@ impl<'data> JanetTupleBuilder<'data> {
     }
 
     /// Finalie the build process and create [`JanetTuple`].
+    ///
+    /// If the build is finalized and not all the allocated space was inserted with a
+    /// item, the unnused space will all have value of Janet number zero.
     #[inline]
     pub fn finalize(self) -> JanetTuple<'data> {
         JanetTuple {
@@ -78,6 +81,19 @@ impl<'data> JanetTuple<'data> {
         }
     }
 
+    /// Returns a reference to an element in the tuple.
+    pub fn get(&self, index: i32) -> Option<&Janet> {
+        if index < 0 || index >= self.len() {
+            None
+        } else {
+            // SAFETY: it's safe because we just checked that it is in bounds
+            unsafe {
+                let item = self.raw.offset(index as isize) as *const Janet;
+                Some(&*item)
+            }
+        }
+    }
+
     /// Returns the number of elements in the tuple, also referred to as its 'length'.
     #[inline]
     pub fn len(&self) -> i32 { unsafe { (*janet_tuple_head(self.raw)).length } }
@@ -92,6 +108,20 @@ impl<'data> JanetTuple<'data> {
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_raw(&self) -> *const CJanet { self.raw }
+}
+
+impl Clone for JanetTuple<'_> {
+    fn clone(&self) -> Self {
+        let len = self.len();
+        let mut clone = Self::builder(len);
+
+        for index in 0..len {
+            let item = unsafe { *self.raw.offset(index as isize) };
+            clone = clone.put(item);
+        }
+
+        clone.finalize()
+    }
 }
 
 #[cfg(all(test, feature = "amalgation"))]
@@ -115,5 +145,44 @@ mod tests {
             .finalize();
 
         assert_eq!(3, tuple.len());
+    }
+
+    #[test]
+    #[serial]
+    fn get() {
+        let _client = JanetClient::init().unwrap();
+
+        let tuple = JanetTuple::builder(3)
+            .put(Janet::number(10.0))
+            .put(Janet::nil())
+            .put(Janet::boolean(true))
+            .finalize();
+
+        assert_eq!(None, tuple.get(-1));
+        assert_eq!(Some(&Janet::number(10.0)), tuple.get(0));
+        assert_eq!(Some(&Janet::nil()), tuple.get(1));
+        assert_eq!(Some(&Janet::boolean(true)), tuple.get(2));
+        assert_eq!(None, tuple.get(3));
+    }
+
+    #[test]
+    #[serial]
+    fn clone() {
+        let _client = JanetClient::init().unwrap();
+
+        let tuple = JanetTuple::builder(3)
+            .put(Janet::number(10.0))
+            .put(Janet::nil())
+            .put(Janet::boolean(true))
+            .finalize();
+
+        let clone = tuple.clone();
+
+        assert_ne!(tuple.raw, clone.raw);
+        assert_eq!(tuple.get(-1), clone.get(-1));
+        assert_eq!(tuple.get(0), clone.get(0));
+        assert_eq!(tuple.get(1), clone.get(1));
+        assert_eq!(tuple.get(2), clone.get(2));
+        assert_eq!(tuple.get(3), clone.get(3));
     }
 }

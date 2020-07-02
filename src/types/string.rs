@@ -45,6 +45,9 @@ impl<'data> JanetStringBuilder<'data> {
     }
 
     /// Finalie the build process and create [`JanetString`].
+    ///
+    /// If the build is finalized and not all the allocated space was inserted with a
+    /// item, the unnused space will all be Null characters.
     #[inline]
     pub fn finalize(self) -> JanetString<'data> {
         JanetString {
@@ -137,6 +140,15 @@ impl<'data> JanetString<'data> {
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_raw(&self) -> *const u8 { self.raw }
+}
+
+impl Clone for JanetString<'_> {
+    fn clone(&self) -> Self {
+        Self {
+            raw:     unsafe { janet_string(self.raw, self.len()) },
+            phantom: PhantomData,
+        }
+    }
 }
 
 #[cfg(all(test, feature = "amalgation"))]

@@ -174,6 +174,21 @@ impl<'data> JanetStruct<'data> {
     pub fn as_raw(&self) -> *const CJanetKV { self.raw }
 }
 
+impl Clone for JanetStruct<'_> {
+    fn clone(&self) -> Self {
+        let len = self.len();
+        let mut clone = JanetStruct::builder(len);
+
+        for index in 0..len {
+            let kv = unsafe { *self.raw.offset(index as isize) };
+            let (k, v): (Janet, Janet) = (kv.key.into(), kv.value.into());
+            clone = clone.put(k, v);
+        }
+
+        clone.finalize()
+    }
+}
+
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     use super::*;
@@ -241,5 +256,28 @@ mod tests {
         assert_eq!(Some((&key2, &value2)), st.find(key2));
         assert_eq!(Some((&Janet::nil(), &Janet::nil())), st.find(1));
         assert_eq!(None, st.find(Janet::nil()));
+    }
+
+    #[test]
+    #[serial]
+    fn clone() {
+        let _client = JanetClient::init().unwrap();
+
+        let key1 = Janet::number(10.0);
+        let key2 = Janet::number(11.0);
+
+        let value1 = Janet::integer(10);
+        let value2 = Janet::boolean(true);
+
+        let st = JanetStruct::builder(2)
+            .put(key1, value1)
+            .put(key2, value2)
+            .finalize();
+
+        let clone = st.clone();
+
+        assert_ne!(st.raw, clone.raw);
+        assert_eq!(st.get_key_value(key1), clone.get_key_value(key1));
+        assert_eq!(st.get_key_value(key2), clone.get_key_value(key2));
     }
 }

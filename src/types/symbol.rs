@@ -1,7 +1,7 @@
 //! Module dealing with symbols and keywords
 use core::marker::PhantomData;
 
-use janet_ll::{janet_symbol, janet_symbol_gen};
+use janet_ll::{janet_string_head, janet_symbol, janet_symbol_gen};
 
 /// Janet symbol type. Usually used to name things in Janet.
 #[derive(Debug)]
@@ -42,12 +42,29 @@ impl JanetSymbol<'_> {
         }
     }
 
+    /// Returns the number of elements in the tuple, also referred to as its 'length'.
+    #[inline]
+    pub fn len(&self) -> i32 { unsafe { (*janet_string_head(self.raw)).length } }
+
+    /// Returns `true` if the tuple contains no elements.
+    #[inline]
+    pub fn is_empty(&self) -> bool { self.len() == 0 }
+
     /// Return a raw pointer to the symbol raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_raw(&self) -> *const u8 { self.raw }
+}
+
+impl Clone for JanetSymbol<'_> {
+    fn clone(&self) -> Self {
+        Self {
+            raw:     unsafe { janet_symbol(self.raw, self.len()) },
+            phantom: PhantomData,
+        }
+    }
 }
 
 /// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
@@ -79,10 +96,27 @@ impl JanetKeyword<'_> {
         }
     }
 
+    /// Returns the number of elements in the tuple, also referred to as its 'length'.
+    #[inline]
+    pub fn len(&self) -> i32 { unsafe { (*janet_string_head(self.raw)).length } }
+
+    /// Returns `true` if the tuple contains no elements.
+    #[inline]
+    pub fn is_empty(&self) -> bool { self.len() == 0 }
+
     /// Return a raw pointer to the keyword raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_raw(&self) -> *const u8 { self.raw }
+}
+
+impl Clone for JanetKeyword<'_> {
+    fn clone(&self) -> Self {
+        Self {
+            raw:     unsafe { janet_symbol(self.raw, self.len()) },
+            phantom: PhantomData,
+        }
+    }
 }
