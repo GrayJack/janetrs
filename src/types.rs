@@ -278,6 +278,12 @@ impl From<CJanet> for Janet {
     }
 }
 
+impl From<()> for Janet {
+    fn from(_: ()) -> Self {
+        Self::nil()
+    }
+}
+
 impl From<bool> for Janet {
     #[inline]
     fn from(val: bool) -> Self {
