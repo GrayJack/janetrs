@@ -81,6 +81,20 @@ impl<'data> JanetTuple<'data> {
         }
     }
 
+    /// Creates a tuple where all of it's elements are `elem`.
+    #[inline]
+    pub fn with_default_elem(elem: Janet, len: i32) -> Self {
+        let len = if len < 0 { 0 } else { len };
+
+        let mut tuple = Self::builder(len);
+
+        for _ in 0..len {
+            tuple = tuple.put(elem);
+        }
+
+        tuple.finalize()
+    }
+
     /// Returns a reference to an element in the tuple.
     pub fn get(&self, index: i32) -> Option<&Janet> {
         if index < 0 || index >= self.len() {

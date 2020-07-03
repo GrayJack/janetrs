@@ -57,5 +57,6 @@ pub use janet_ll as janet_sys;
 
 #[cfg(feature = "amalgation")]
 pub mod client;
+mod macros;
 pub mod types;
 pub mod util;
