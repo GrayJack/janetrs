@@ -30,8 +30,14 @@ static INIT: AtomicBool = AtomicBool::new(false);
 pub enum Error {
     /// May happen when trying to initialize two or more [`JanetClient`].
     AlreadyInit,
+    /// May happen when trying to run code that does not compile.
+    CompileError,
     /// May happen when trying to run a Janet code without a environment table.
     EnvNotInit,
+    /// May happen when trying to run code that failed to be parsed.
+    ParseError,
+    /// May happen when the VM errors while running code.
+    RunError,
 }
 
 impl Display for Error {
@@ -39,7 +45,10 @@ impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::AlreadyInit => write!(f, "Janet client already initialized"),
+            Self::CompileError => write!(f, "Failed to compile code"),
             Self::EnvNotInit => write!(f, "The environment table was not initialized"),
+            Self::ParseError => write!(f, "Failed to parse code"),
+            Self::RunError => write!(f, "Runtime VM error"),
         }
     }
 }
@@ -122,7 +131,8 @@ impl JanetClient {
     /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
     /// respectively.
     /// Change that the Client struct holds another struct that configure those two.
-    /// Also, we don't handle the errors of the janet_dobytes function.
+    /// For now, I'm not 100% certain that the return value will not be a bitwise
+    /// OR'd combination of multiple errors.
     #[inline]
     pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<(), Error> {
         let code = code.as_ref();
@@ -132,7 +142,7 @@ impl JanetClient {
         };
 
         // TODO: Handle the value when != than 0
-        let _res = unsafe {
+        let res = unsafe {
             janet_dobytes(
                 env.raw,
                 code.as_ptr(),
@@ -141,7 +151,13 @@ impl JanetClient {
                 ptr::null_mut(),
             )
         };
-        Ok(())
+
+        match res {
+            0x01 => Err(Error::RunError),
+            0x02 => Err(Error::CompileError),
+            0x04 => Err(Error::ParseError),
+            _ => Ok(()),
+        }
     }
 
     /// Run given Janet `code` string.
