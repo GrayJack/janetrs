@@ -61,15 +61,25 @@ impl<'data> JanetStringBuilder<'data> {
 ///
 /// # Example
 /// You can easily create a Janet string from Rust [`str`] and bytes slice with [`new`]:
-/// ```ignore
+/// ```
+/// use janetrs::types::JanetString;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let jstr = JanetString::new("Hello, World");
 /// let jstr2 = JanetString::new(b"Janet! A bottle of water please!");
 /// ```
 ///
 /// You can also use the [`builder`] API to create a in a more dynamic way
-/// ```ignore
-/// let size = 13
-/// let jstr = JanetString::builder(size).put('H').put("ello, ").put(b"World!").finalize();
+/// ```
+/// use janetrs::types::JanetString;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
+/// let size = 13;
+/// let jstr = JanetString::builder(size)
+///     .put("H")
+///     .put("ello, ")
+///     .put(b"World!")
+///     .finalize();
 /// ```
 ///
 /// [Janet buffers]: ./../buffer/struct.JanetBuffer.html

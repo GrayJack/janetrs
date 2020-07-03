@@ -18,11 +18,13 @@ use super::{Janet, JanetExtend};
 /// Arrays are also mutable, meaning that values can be added or removed in place.
 ///
 /// # Examples
-/// ```rust, ignore
-/// # use janetrs::types::JanetArray;
+/// ```
+/// use janetrs::types::JanetArray;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let mut arr = JanetArray::new();
-/// arr.push(10.1.into());
-/// arr.push(12.into());
+/// arr.push(10.1);
+/// arr.push(12);
 ///
 /// assert_eq!(2, arr.len());
 /// ```

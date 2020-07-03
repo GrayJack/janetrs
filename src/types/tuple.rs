@@ -51,8 +51,10 @@ impl<'data> JanetTupleBuilder<'data> {
 /// sequential types that are similar to [Janet arrays].
 ///
 /// # Example
-/// ```rust,ignore
+/// ```
 /// use janetrs::types::{Janet, JanetTuple};
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let tuple = JanetTuple::builder(2)
 ///     .put(Janet::number(10.0))
 ///     .put(Janet::boolean(true));

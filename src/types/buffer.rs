@@ -25,14 +25,20 @@ use super::JanetExtend;
 /// # Examples
 /// You can create a `JanetBuffer` from a Rust string literal.
 ///
-/// ```ignore
+/// ```
+/// use janetrs::types::JanetBuffer;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let hello = JanetBuffer::from("Hello, world!");
 /// ```
 ///
 /// You can append a [`char`] to a JanetBuffer with the [`push`] method, and append a
 /// [`str`] with the [`push_str`] method:
 ///
-/// ```ignore
+/// ```
+/// use janetrs::types::JanetBuffer;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let mut buff = JanetBuffer::from("Hello, ");
 /// buff.push('w');
 /// buff.push_str("orld!");
@@ -41,13 +47,16 @@ use super::JanetExtend;
 /// You can also append a arbitrary sized unsigned integers with [`push_u8`],
 /// [`push_u16`], [`push_u32`], [`push_u64`]:
 ///
-/// ```ignore
+/// ```
+/// use janetrs::types::JanetBuffer;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let mut buff = JanetBuffer::with_capacity(20);
 ///
-/// buff.push_u8(10),
-/// buff.push_u16(1000028472),
-/// buff.push_u32(u32::MAX),
-/// buff.push_u64(u64::MIN),
+/// buff.push_u8(10);
+/// buff.push_u16(60000);
+/// buff.push_u32(u32::MAX);
+/// buff.push_u64(u64::MIN);
 /// ```
 ///
 /// [`JanetStrings`]: ./../string/struct.JanetString.html

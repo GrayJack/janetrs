@@ -20,11 +20,13 @@ use super::{Janet, JanetExtend, JanetStruct};
 /// as keys and values.
 ///
 /// # Examples
-/// ```ignore
+/// ```
+/// use janetrs::types::{Janet, JanetTable};
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
 /// let mut table = JanetTable::new();
 ///
-/// table.insert("key".into(), 10.0.into());
-/// table.insert(10.into(), 20.3.into());
+/// table.insert("key", 10.0);
+/// table.insert(10, 20.3);
 ///
 /// println!("{}", Janet::table(table));
 /// ```
@@ -43,8 +45,9 @@ impl JanetTable<'_> {
     /// second inserted into.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let table = JanetTable::new();
     /// ```
@@ -74,8 +77,9 @@ impl JanetTable<'_> {
     ///  - ...
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let table = JanetTable::with_capacity(20);
     /// ```
@@ -106,8 +110,9 @@ impl JanetTable<'_> {
     /// is guaranteed to be able to hold at least this many.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// assert!(table.capacity() >= 20);
@@ -120,8 +125,9 @@ impl JanetTable<'_> {
     /// Returns the number of elements that was removed from the table.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(2);
     /// table.insert(10, "ten");
@@ -140,8 +146,9 @@ impl JanetTable<'_> {
     /// reuse.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
@@ -157,8 +164,9 @@ impl JanetTable<'_> {
     /// Returns the number of elements of the table, also refered to as its 'length'.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     ///
@@ -174,14 +182,15 @@ impl JanetTable<'_> {
     /// Returns `true` if the table contains no elements.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     ///
     /// assert!(table.is_empty());
     /// table.insert(10, "ten");
-    /// assert_eq!(!table.is_empty());
+    /// assert!(!table.is_empty());
     /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
@@ -191,8 +200,9 @@ impl JanetTable<'_> {
     /// Returns the value corresponding to the supplied `key`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
@@ -208,13 +218,17 @@ impl JanetTable<'_> {
     /// Returns the key-value pair corresponding to the supplied `key`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
     ///
-    /// assert_eq!(table.get_key_value(10), Some((&Janet::integer(10), &Janet::from("ten"))));
+    /// assert_eq!(
+    ///     table.get_key_value(10),
+    ///     Some((&Janet::integer(10), &Janet::from("ten")))
+    /// );
     /// assert_eq!(table.get_key_value(11), None);
     /// ```
     #[inline]
@@ -244,8 +258,9 @@ impl JanetTable<'_> {
     /// Returns a mutable reference to the value corresponding to the `key`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
@@ -265,8 +280,9 @@ impl JanetTable<'_> {
     /// reference to value.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, JanetTable};
+    /// ```
+    /// use janetrs::types::{Janet, JanetString, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(2);
     /// table.insert(10, "ten");
@@ -338,8 +354,9 @@ impl JanetTable<'_> {
     /// tables.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
@@ -363,13 +380,17 @@ impl JanetTable<'_> {
     /// prototype tables.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
     ///
-    /// assert_eq!(table.get_owned_key_value(10), Some((Janet::integer(10), Janet::from("ten"))));
+    /// assert_eq!(
+    ///     table.get_owned_key_value(10),
+    ///     Some((Janet::integer(10), Janet::from("ten")))
+    /// );
     /// assert_eq!(table.get_owned_key_value(11), None);
     /// ```
     #[inline]
@@ -382,8 +403,9 @@ impl JanetTable<'_> {
     /// prototype tables.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
@@ -407,13 +429,17 @@ impl JanetTable<'_> {
     /// checking prototype tables.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
     ///
-    /// assert_eq!(table.raw_get_owned_key_value(10), Some((Janet::integer(10), Janet::from("ten"))));
+    /// assert_eq!(
+    ///     table.raw_get_owned_key_value(10),
+    ///     Some((Janet::integer(10), Janet::from("ten")))
+    /// );
     /// assert_eq!(table.raw_get_owned_key_value(11), None);
     /// ```
     #[inline]
@@ -448,8 +474,9 @@ impl JanetTable<'_> {
     /// Removes `key` from the table, returning the value of the `key`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
     /// table.insert(10, "ten");
@@ -502,8 +529,9 @@ impl JanetTable<'_> {
     /// returned.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     ///
@@ -513,7 +541,7 @@ impl JanetTable<'_> {
     ///
     /// table.insert(37, "b");
     /// assert_eq!(table.insert(37, "c"), Some(Janet::from("b")));
-    /// assert_eq!(table.get(37), Some(Janet::from("c")));
+    /// assert_eq!(table.get(37), Some(&Janet::from("c")));
     /// ```
     #[inline]
     pub fn insert(&mut self, key: impl Into<Janet>, value: impl Into<Janet>) -> Option<Janet> {
@@ -534,14 +562,15 @@ impl JanetTable<'_> {
     /// Returns `true` if the table contains a value for the specified `key`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```
     /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// table.insert(10, "ten");
     ///
     /// assert!(table.contains_key(10));
-    /// assert!(table.contains_key(11));
+    /// assert!(!table.contains_key(11));
     /// ```
     #[inline]
     pub fn contains_key(&self, key: impl Into<Janet>) -> bool {
@@ -668,8 +697,9 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// Sets the value of the entry, and returns an [`OccupiedEntry`].
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, JanetTuple};
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// let entry = table.entry("Hey").insert(10);
@@ -690,8 +720,9 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// Returns a reference to this entry's key.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, JanetTuple};
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     ///
@@ -709,16 +740,17 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// mutable reference to the value in the entry.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, JanetTuple};
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     ///
     /// table.entry(10).or_insert(true);
-    /// assert_eq!(table.get(10), &Janet::boolean(true));
+    /// assert_eq!(table.get(10), Some(&Janet::boolean(true)));
     ///
     /// *table.entry(10).or_insert(10) = Janet::boolean(false);
-    /// assert_eq!(table.get(10), &Janet::boolean(false));
+    /// assert_eq!(table.get(10), Some(&Janet::boolean(false)));
     /// ```
     #[inline]
     pub fn or_insert(self, default: impl Into<Janet>) -> &'a mut Janet {
@@ -732,13 +764,14 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// if empty, and returns a mutable reference to the value in the entry.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, JanetTuple};
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     ///
     /// table.entry(10).or_insert_with(|| Janet::boolean(true));
-    /// assert_eq!(table.get(10), &Janet::boolean(true));
+    /// assert_eq!(table.get(10), Some(&Janet::boolean(true)));
     /// ```
     #[inline]
     pub fn or_insert_with<F>(self, default: F) -> &'a mut Janet
@@ -754,13 +787,16 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// reference to the value in the entry.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, JanetTuple};
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     ///
-    /// table.entry("abc").or_insert_with_key(|key| Janet::from(key.len().unwrap_or(0)));
-    /// assert_eq!(table.get("abc"), &Janet::integer(3));
+    /// table
+    ///     .entry("abc")
+    ///     .or_insert_with_key(|key| Janet::from(key.len().unwrap_or(0)));
+    /// assert_eq!(table.get("abc"), Some(&Janet::integer(3)));
     /// ```
     #[inline]
     pub fn or_insert_with_key<F>(self, default: F) -> &'a mut Janet
@@ -787,13 +823,17 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// Gets a reference to the value in the entry.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// table.entry(10).or_insert(true);
     ///
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
+    /// if let Entry::Occupied(o) = table.entry("poneyland") {
     ///     assert_eq!(o.get(), &Janet::boolean(true));
     /// }
     /// ```
@@ -808,14 +848,18 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// of the [`Entry`] value, see [`into_mut`].
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// table.entry(10).or_insert(true);
     ///
-    /// assert_eq!(o.get(), &Janet::boolean(true));
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
+    /// assert_eq!(table.get(10), Some(&Janet::boolean(true)));
+    /// if let Entry::Occupied(mut o) = table.entry(10) {
     ///     *o.get_mut() = Janet::number(10.0);
     ///     assert_eq!(o.get(), &Janet::number(10.0));
     ///
@@ -835,13 +879,17 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// Sets the value of the entry, and returns the entry's old value.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// table.entry(10).or_insert(true);
     ///
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
+    /// if let Entry::Occupied(mut o) = table.entry(10) {
     ///     assert_eq!(o.insert(Janet::number(10.0)), &Janet::boolean(true));
     /// }
     ///
@@ -861,13 +909,17 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// If you need multiple references to the [`OccupiedEntry`], see get_mut.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// table.entry(10).or_insert(true);
     ///
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
+    /// if let Entry::Occupied(o) = table.entry(10) {
     ///     *o.into_mut() = Janet::integer(11);
     /// }
     ///
@@ -889,14 +941,18 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// Takes the value out of the entry, and returns it.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// table.entry(10).or_insert(true);
     ///
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
-    ///     assert_eq!(o.remove(10), Janet::boolean(true));
+    /// if let Entry::Occupied(o) = table.entry(10) {
+    ///     assert_eq!(o.remove(), Janet::boolean(true));
     /// }
     ///
     /// assert!(!table.contains_key(10));
@@ -950,12 +1006,16 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     /// mutable reference to it.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     ///
-    /// if let Entry::Vacant(o) = map.entry("poneyland") {
+    /// if let Entry::Vacant(o) = table.entry(10) {
     ///     o.insert(20);
     /// }
     ///
@@ -992,8 +1052,12 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     /// Take ownership of the key.
     ///
     /// # Examples
-    /// ```ignore
-    /// use janetrs::types::{Janet, tuple::{JanetTuple, Entry}};
+    /// ```
+    /// use janetrs::types::{
+    ///     table::{Entry, JanetTable},
+    ///     Janet,
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
     /// let key = Janet::number(101.5);

@@ -46,10 +46,13 @@ impl<'data> JanetStructBuilder<'data> {
 /// [`JanetTable`]s, they are backed by an efficient, native hash table.
 ///
 /// # Examples
-/// ```ignore
+/// ```
+/// use janetrs::types::JanetStruct;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
 /// let st = JanetStruct::builder(2)
-///     .put("ten".into(), 10.into())
-///     .put("eleven", 11.into())
+///     .put("ten", 10)
+///     .put("eleven", 11)
 ///     .finalize();
 /// ```
 ///
