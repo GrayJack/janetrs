@@ -2,6 +2,7 @@
 use core::{
     convert::{TryFrom, TryInto},
     marker::PhantomData,
+    ops::{Index, IndexMut},
 };
 
 use janet_ll::{
@@ -119,6 +120,32 @@ impl JanetArray<'_> {
         unsafe { janet_array_peek(self.raw).into() }
     }
 
+    /// Returns a reference to an element in the array at the`index`.
+    #[inline]
+    pub fn get(&self, index: i32) -> Option<&Janet> {
+        if index < 0 || index >= self.len() {
+            None
+        } else {
+            unsafe {
+                let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
+                Some(&(*ptr))
+            }
+        }
+    }
+
+    /// Returns a mutable reference to an element in the array at the`index`.
+    #[inline]
+    pub fn get_mut(&mut self, index: i32) -> Option<&mut Janet> {
+        if index < 0 || index >= self.len() {
+            None
+        } else {
+            unsafe {
+                let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
+                Some(&mut (*ptr))
+            }
+        }
+    }
+
     /// Return a raw pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -181,6 +208,36 @@ impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {
     #[inline]
     fn extend(&mut self, collection: T) {
         collection.as_ref().iter().for_each(|&elem| self.push(elem))
+    }
+}
+
+impl Index<i32> for JanetArray<'_> {
+    type Output = Janet;
+
+    #[inline]
+    fn index(&self, index: i32) -> &Self::Output {
+        match self.get(index) {
+            Some(item) => item,
+            None => panic!(
+                "index out of bounds: the len is {} but the index is {}",
+                self.len(),
+                index
+            ),
+        }
+    }
+}
+
+impl IndexMut<i32> for JanetArray<'_> {
+    fn index_mut(&mut self, index: i32) -> &mut Self::Output {
+        let len = self.len();
+
+        match self.get_mut(index) {
+            Some(item) => item,
+            None => panic!(
+                "index out of bounds: the len is {} but the index is {}",
+                len, index
+            ),
+        }
     }
 }
 
@@ -255,5 +312,32 @@ mod tests {
         assert_eq!(Janet::nil(), array.peek());
         array.set_len(-10);
         assert_eq!(19, array.len());
+    }
+
+    #[test]
+    #[serial]
+    fn get() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = JanetArray::new();
+        array.push(10);
+
+        assert_eq!(None, array.get(-1));
+        assert_eq!(Some(&Janet::integer(10)), array.get(0));
+        assert_eq!(None, array.get(1));
+    }
+
+    #[test]
+    #[serial]
+    fn get_mut() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = JanetArray::new();
+        array.push(10);
+
+        assert_eq!(None, array.get_mut(-1));
+        assert_eq!(Some(&mut Janet::integer(10)), array.get_mut(0));
+        assert_eq!(None, array.get_mut(1));
+
+        *array.get_mut(0).unwrap() = Janet::boolean(true);
+        assert_eq!(Some(&Janet::boolean(true)), array.get(0));
     }
 }
