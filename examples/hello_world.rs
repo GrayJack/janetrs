@@ -5,5 +5,9 @@ fn main() -> Result<(), Error> {
 
     client.run("(print `Hello from Janet!`)")?;
 
+    let out = client.run("(+ 2 2)")?;
+
+    println!("{}", out);
+
     Ok(())
 }

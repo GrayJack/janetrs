@@ -10,8 +10,7 @@ use std::{error::Error as StdError, thread_local};
 
 use janet_ll::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
 
-use crate::types::JanetTable;
-
+use crate::types::{Janet, JanetTable};
 
 // There are platforms where AtomicBool doesn't exist
 // At some point it would be awesome to find what targets doesn't have support for atomics
@@ -134,21 +133,22 @@ impl JanetClient {
     /// For now, I'm not 100% certain that the return value will not be a bitwise
     /// OR'd combination of multiple errors.
     #[inline]
-    pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<(), Error> {
+    pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<Janet, Error> {
         let code = code.as_ref();
         let env = match self.env_table.as_ref() {
             Some(e) => e,
             None => return Err(Error::EnvNotInit),
         };
 
-        // TODO: Handle the value when != than 0
+        let mut out = Janet::nil();
+
         let res = unsafe {
             janet_dobytes(
                 env.raw,
                 code.as_ptr(),
                 code.len() as i32,
                 b"main\0".as_ptr() as *const i8,
-                ptr::null_mut(),
+                &mut out.inner,
             )
         };
 
@@ -156,7 +156,7 @@ impl JanetClient {
             0x01 => Err(Error::RunError),
             0x02 => Err(Error::CompileError),
             0x04 => Err(Error::ParseError),
-            _ => Ok(()),
+            _ => Ok(out),
         }
     }
 
@@ -167,7 +167,7 @@ impl JanetClient {
     /// respectively.
     /// Change that the Client struct holds a nother struct that configure those two.
     #[inline]
-    pub fn run(&self, code: impl AsRef<str>) -> Result<(), Error> {
+    pub fn run(&self, code: impl AsRef<str>) -> Result<Janet, Error> {
         let code = code.as_ref();
         self.run_bytes(code.as_bytes())
     }
