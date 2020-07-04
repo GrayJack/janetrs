@@ -38,7 +38,7 @@ macro_rules! count {
 /// Also note that this macro builds the tuples converting the passed elements to
 /// [`Janet`] using the [`From`] trait, so if you want for a type defined by you to be
 /// used in this macro, implement the [`From`] trait to convert from you type to
-/// [`Janet`].
+/// [`Janet`] or transform to [`Janet`] beforehand.
 ///
 /// [`Janet`]: ./types/struct.Janet.html
 /// [`JanetTuple`]: ./types/tuple/struct.JanetTuple.html
@@ -85,10 +85,10 @@ macro_rules! tuple {
 /// Note that unlike `vec!` from the Rust standard library, this macro doesn't try to
 /// clone the elements passed.
 ///
-/// Also note that this macro builds the tuples converting the passed elements to
+/// Also note that this macro builds the array converting the passed elements to
 /// [`Janet`] using the [`From`] trait, so if you want for a type defined by you to be
 /// used in this macro, implement the [`From`] trait to convert from you type to
-/// [`Janet`].
+/// [`Janet`] or transform to [`Janet`] beforehand.
 ///
 /// [`Janet`]: ./types/struct.Janet.html
 /// [`JanetArray`]: ./types/tuple/struct.JanetArray.html
@@ -110,14 +110,53 @@ macro_rules! array {
     }};
 }
 
+/// Creates a [`JanetStruct`] containing the arguments key-value pairs.
+///
+/// `structs!` allows [`JanetStruct`]s to be defined with a syntax that have key-value
+/// pairs as the items of the struct.
+///
+/// ```
+/// use janetrs::{structs, types::Janet};
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
+/// let st = structs! {
+///     1 => "one",
+///     true => 1,
+/// };
+///
+/// assert_eq!(st.len(), 2);
+/// assert_eq!(st.get(1), Some(&Janet::from("one")));
+/// assert_eq!(st.get(true), Some(&Janet::integer(1)));
+/// ```
+///
+/// Note that this macro builds the struct converting the passed elements to
+/// [`Janet`] using the [`From`] trait, so if you want for a type defined by you to be
+/// used in this macro, implement the [`From`] trait to convert from you type to
+/// [`Janet`] or transform to [`Janet`] beforehand.
+///
+/// [`Janet`]: ./types/struct.Janet.html
+/// [`JanetStruct`]: ./types/tuple/struct.JanetStruct.html
+#[macro_export]
+macro_rules! structs {
+    ($($key: expr => $value: expr),* $(,)?) => {{
+        const LEN: i32 = $crate::count!($($key),*);
+        let st = $crate::types::JanetStruct::builder(LEN)
+            $(.put($crate::types::Janet::from($key), $crate::types::Janet::from($value)))+;
+
+        st.finalize()
+    }};
+}
+
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     // use super::*;
     use crate::types::Janet;
+
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn tuple0() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -133,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn tuple1() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -146,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn array0() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -155,7 +194,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn array1() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -170,7 +209,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn array2() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -182,5 +221,20 @@ mod tests {
         assert_eq!(arr[2], &Janet::number(15.5));
         assert_eq!(arr[3], &Janet::boolean(true));
         assert_eq!(arr[4], &Janet::from("abc"));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn structs() {
+        let _client = crate::client::JanetClient::init().unwrap();
+
+        let st = structs! {
+            1 => "one",
+            true => 1,
+        };
+
+        assert_eq!(st.len(), 2);
+        assert_eq!(st.get(1), Some(&Janet::from("one")));
+        assert_eq!(st.get(true), Some(&Janet::integer(1)));
     }
 }
