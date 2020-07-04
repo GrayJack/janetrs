@@ -147,6 +147,45 @@ macro_rules! structs {
     }};
 }
 
+/// Creates a [`JanetTable`] containing the arguments key-value pairs.
+///
+/// `table!` allows [`JanetTable`]s to be defined with a syntax that have key-value
+/// pairs as the items of the struct.
+///
+/// ```
+/// use janetrs::{table, types::Janet};
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
+/// let table = table! {
+///     1 => "one",
+///     true => 1,
+/// };
+///
+/// assert_eq!(table.len(), 2);
+/// assert_eq!(table.get(1), Some(&Janet::from("one")));
+/// assert_eq!(table.get(true), Some(&Janet::integer(1)));
+/// ```
+///
+/// Note that this macro builds the struct converting the passed elements to
+/// [`Janet`] using the [`From`] trait, so if you want for a type defined by you to be
+/// used in this macro, implement the [`From`] trait to convert from you type to
+/// [`Janet`] or transform to [`Janet`] beforehand.
+///
+/// [`Janet`]: ./types/struct.Janet.html
+/// [`JanetTable`]: ./types/tuple/struct.JanetTable.html
+#[macro_export]
+macro_rules! table {
+    () => ($crate::types::JanetTable::new());
+
+    ($($key: expr => $value: expr),+ $(,)?) => {{
+        const LEN: i32 = $crate::count!($($key),*);
+        let mut table = $crate::types::JanetTable::with_capacity(LEN);
+        $(let _ = table.insert($crate::types::Janet::from($key), $crate::types::Janet::from($value));)+
+
+        table
+    }};
+}
+
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     // use super::*;
@@ -236,5 +275,23 @@ mod tests {
         assert_eq!(st.len(), 2);
         assert_eq!(st.get(1), Some(&Janet::from("one")));
         assert_eq!(st.get(true), Some(&Janet::integer(1)));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn table() {
+        let _client = crate::client::JanetClient::init().unwrap();
+
+        let table = table! {};
+        assert!(table.is_empty());
+
+        let table = table! {
+            1 => "one",
+            true => 1,
+        };
+
+        assert_eq!(table.len(), 2);
+        assert_eq!(table.get(1), Some(&Janet::from("one")));
+        assert_eq!(table.get(true), Some(&Janet::integer(1)));
     }
 }
