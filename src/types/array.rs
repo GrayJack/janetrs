@@ -191,10 +191,21 @@ impl<'data> JanetArray<'data> {
     }
 }
 
+impl Clone for JanetArray<'_> {
+    fn clone(&self) -> Self {
+        let mut clone = Self::with_capacity(self.len());
+
+        self.into_iter().for_each(|&j| clone.push(j));
+
+        clone
+    }
+}
+
 impl<'data> IntoIterator for JanetArray<'data> {
     type IntoIter = IntoIter<'data>;
     type Item = Janet;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         let len = self.len();
 
@@ -210,6 +221,7 @@ impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
     type IntoIter = Iter<'a, 'data>;
     type Item = &'a Janet;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         let len = self.len();
 
@@ -225,6 +237,7 @@ impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
     type IntoIter = IterMut<'a, 'data>;
     type Item = &'a mut Janet;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         let len = self.len();
 
