@@ -476,13 +476,14 @@ impl FusedIterator for IntoIter<'_> {}
 
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     use super::*;
     use crate::{array, client::JanetClient};
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn creation() {
         let _client = JanetClient::init().unwrap();
         let array = JanetArray::new();
@@ -494,7 +495,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn insert_and_length() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -509,7 +510,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn pop_and_peek() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -527,7 +528,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn set_length() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -547,7 +548,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn get() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -559,7 +560,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn get_mut() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -574,7 +575,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn iter_iterator() {
         let _client = JanetClient::init().unwrap();
         let array = array![1, "hey", true];
@@ -588,7 +589,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn iter_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let numbers = array![1, 2, 3, 4, 5, 6];
@@ -606,7 +607,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn itermut_iterator() {
         let _client = JanetClient::init().unwrap();
         let mut array = array![1, "hey", true];
@@ -620,7 +621,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn itermut_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let mut numbers = array![1, 2, 3, 4, 5, 6];
@@ -638,7 +639,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter_iterator() {
         let _client = JanetClient::init().unwrap();
         let array = array![1, "hey", true];
@@ -652,7 +653,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let numbers = array![1, 2, 3, 4, 5, 6];
@@ -670,7 +671,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn collect() {
         let _client = JanetClient::init().unwrap();
         let vec = vec![Janet::nil(); 100];

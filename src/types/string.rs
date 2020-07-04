@@ -176,10 +176,12 @@ impl Clone for JanetString<'_> {
 mod tests {
     use super::*;
     use crate::client::JanetClient;
+
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn creation_new() {
         let _client = JanetClient::init().unwrap();
 
@@ -191,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn creation_builder() {
         let _client = JanetClient::init().unwrap();
 
@@ -209,7 +211,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn builder_no_panic() {
         let _client = JanetClient::init().unwrap();
 
@@ -229,7 +231,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn equal() {
         let _client = JanetClient::init().unwrap();
 
@@ -240,7 +242,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn ord() {
         let _client = JanetClient::init().unwrap();
 

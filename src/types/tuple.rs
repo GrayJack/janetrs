@@ -168,10 +168,12 @@ impl Index<i32> for JanetTuple<'_> {
 mod tests {
     use super::*;
     use crate::{client::JanetClient, types::Janet};
+
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn builder() {
         let _client = JanetClient::init().unwrap();
 
@@ -188,7 +190,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn get() {
         let _client = JanetClient::init().unwrap();
 
@@ -206,7 +208,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn clone() {
         let _client = JanetClient::init().unwrap();
 

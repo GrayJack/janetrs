@@ -286,10 +286,12 @@ impl JanetExtend<&CStr> for JanetBuffer<'_> {
 mod tests {
     use super::*;
     use crate::client::JanetClient;
+
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn creation() {
         let _client = JanetClient::init().unwrap();
 
@@ -303,7 +305,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn pushs_and_length() {
         let _client = JanetClient::init().unwrap();
 
@@ -321,7 +323,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn set_length() {
         let _client = JanetClient::init().unwrap();
         let mut buffer = JanetBuffer::new();

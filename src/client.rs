@@ -190,12 +190,13 @@ impl Drop for JanetClient {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     use super::*;
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn double_init() {
         let c1 = JanetClient::init();
         let c2 = JanetClient::init();
@@ -207,7 +208,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn env_not_init() {
         let client = JanetClient::init().unwrap();
 

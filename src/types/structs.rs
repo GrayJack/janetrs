@@ -202,10 +202,12 @@ impl Clone for JanetStruct<'_> {
 mod tests {
     use super::*;
     use crate::{client::JanetClient, types::Janet};
+
+    #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn creation_and_get() {
         let _client = JanetClient::init().unwrap();
 
@@ -227,7 +229,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn get_owned() {
         let _client = JanetClient::init().unwrap();
 
@@ -246,7 +248,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn find() {
         let _client = JanetClient::init().unwrap();
 
@@ -268,7 +270,7 @@ mod tests {
     }
 
     #[test]
-    #[serial]
+    #[cfg_attr(not(feature = "std"), serial)]
     fn clone() {
         let _client = JanetClient::init().unwrap();
 
