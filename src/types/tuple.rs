@@ -1,5 +1,9 @@
 //! Tuples
-use core::{marker::PhantomData, ops::Index};
+use core::{
+    iter::{FromIterator, FusedIterator},
+    marker::PhantomData,
+    ops::Index,
+};
 
 use janet_ll::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
 
@@ -123,6 +127,16 @@ impl<'data> JanetTuple<'data> {
         self.len() == 0
     }
 
+    /// Creates a iterator over the reference of the array itens.
+    #[inline]
+    pub fn iter(&self) -> Iter<'_, '_> {
+        Iter {
+            tup: self,
+            index_head: 0,
+            index_tail: self.len(),
+        }
+    }
+
     /// Return a raw pointer to the tuple raw structure.
     ///
     /// The caller must ensure that the fiber outlives the pointer this function returns,
@@ -139,12 +153,60 @@ impl Clone for JanetTuple<'_> {
         let len = self.len();
         let mut clone = Self::builder(len);
 
-        for index in 0..len {
-            let item = unsafe { *self.raw.offset(index as isize) };
-            clone = clone.put(item);
+        for elem in self.into_iter().cloned() {
+            clone = clone.put(elem);
         }
 
         clone.finalize()
+    }
+}
+
+impl<'data> IntoIterator for JanetTuple<'data> {
+    type IntoIter = IntoIter<'data>;
+    type Item = Janet;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+        IntoIter {
+            tup: self,
+            index_head: 0,
+            index_tail: len,
+        }
+    }
+}
+
+impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
+    type IntoIter = Iter<'a, 'data>;
+    type Item = &'a Janet;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+        Iter {
+            tup: self,
+            index_head: 0,
+            index_tail: len,
+        }
+    }
+}
+
+impl FromIterator<Janet> for JanetTuple<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = Janet>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (lower, upper) = iter.size_hint();
+
+        let mut new = if let Some(upper) = upper {
+            Self::builder(upper as i32)
+        } else {
+            Self::builder(lower as i32)
+        };
+
+        for i in iter {
+            new = new.put(i);
+        }
+        new.finalize()
     }
 }
 
@@ -164,10 +226,100 @@ impl Index<i32> for JanetTuple<'_> {
     }
 }
 
+/// An iterator over a reference to the [`JanetTuple`] elements.
+#[derive(Clone)]
+pub struct Iter<'a, 'data> {
+    tup: &'a JanetTuple<'data>,
+    index_head: i32,
+    index_tail: i32,
+}
+
+impl<'a> Iterator for Iter<'a, '_> {
+    type Item = &'a Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index_head >= self.index_tail {
+            None
+        } else {
+            let ret = self.tup.get(self.index_head);
+            self.index_head += 1;
+            ret
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = self.tup.len() as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl DoubleEndedIterator for Iter<'_, '_> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.index_head == self.index_tail {
+            None
+        } else {
+            self.index_tail -= 1;
+            self.tup.get(self.index_tail)
+        }
+    }
+}
+
+impl ExactSizeIterator for Iter<'_, '_> {}
+
+impl FusedIterator for Iter<'_, '_> {}
+
+/// An iterator that moves out of a [`JanetTuple`].
+#[derive(Clone)]
+pub struct IntoIter<'data> {
+    tup: JanetTuple<'data>,
+    index_head: i32,
+    index_tail: i32,
+}
+
+impl<'a> Iterator for IntoIter<'_> {
+    type Item = Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index_head >= self.index_tail {
+            None
+        } else {
+            let ret = self.tup.get(self.index_head).cloned();
+            self.index_head += 1;
+            ret
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = self.tup.len() as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl DoubleEndedIterator for IntoIter<'_> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.index_head == self.index_tail {
+            None
+        } else {
+            self.index_tail -= 1;
+            self.tup.get(self.index_tail).cloned()
+        }
+    }
+}
+
+impl ExactSizeIterator for IntoIter<'_> {}
+
+impl FusedIterator for IntoIter<'_> {}
+
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, types::Janet};
+    use crate::{client::JanetClient, tuple, types::Janet};
 
     #[cfg(not(feature = "std"))]
     use serial_test::serial;
@@ -226,5 +378,79 @@ mod tests {
         assert_eq!(tuple.get(1), clone.get(1));
         assert_eq!(tuple.get(2), clone.get(2));
         assert_eq!(tuple.get(3), clone.get(3));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn iter_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let array = tuple![1, "hey", true];
+
+        let mut iter = array.iter();
+
+        assert_eq!(Some(&Janet::integer(1)), iter.next());
+        assert_eq!(Some(&Janet::from("hey")), iter.next());
+        assert_eq!(Some(&Janet::boolean(true)), iter.next());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn iter_double_ended_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let numbers = tuple![1, 2, 3, 4, 5, 6];
+
+        let mut iter = numbers.iter();
+
+        assert_eq!(Some(&Janet::integer(1)), iter.next());
+        assert_eq!(Some(&Janet::integer(6)), iter.next_back());
+        assert_eq!(Some(&Janet::integer(5)), iter.next_back());
+        assert_eq!(Some(&Janet::integer(2)), iter.next());
+        assert_eq!(Some(&Janet::integer(3)), iter.next());
+        assert_eq!(Some(&Janet::integer(4)), iter.next());
+        assert_eq!(None, iter.next());
+        assert_eq!(None, iter.next_back());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn intoiter_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let array = tuple![1, "hey", true];
+
+        let mut iter = array.into_iter();
+
+        assert_eq!(Some(Janet::integer(1)), iter.next());
+        assert_eq!(Some(Janet::from("hey")), iter.next());
+        assert_eq!(Some(Janet::boolean(true)), iter.next());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn intoiter_double_ended_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let numbers = tuple![1, 2, 3, 4, 5, 6];
+
+        let mut iter = numbers.into_iter();
+
+        assert_eq!(Some(Janet::integer(1)), iter.next());
+        assert_eq!(Some(Janet::integer(6)), iter.next_back());
+        assert_eq!(Some(Janet::integer(5)), iter.next_back());
+        assert_eq!(Some(Janet::integer(2)), iter.next());
+        assert_eq!(Some(Janet::integer(3)), iter.next());
+        assert_eq!(Some(Janet::integer(4)), iter.next());
+        assert_eq!(None, iter.next());
+        assert_eq!(None, iter.next_back());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn collect() {
+        let _client = JanetClient::init().unwrap();
+        let vec = vec![Janet::nil(); 100];
+
+        let jarr: JanetTuple<'_> = vec.into_iter().collect();
+        assert_eq!(jarr.len(), 100);
     }
 }

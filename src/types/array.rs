@@ -149,6 +149,7 @@ impl<'data> JanetArray<'data> {
         }
     }
 
+    /// Creates a iterator over the reference of the array itens.
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {
         Iter {
@@ -158,6 +159,7 @@ impl<'data> JanetArray<'data> {
         }
     }
 
+    /// Creates a iterator over the mutable reference of the array itens.
     #[inline]
     pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, 'data> {
         let len = self.len();
@@ -343,6 +345,7 @@ impl IndexMut<i32> for JanetArray<'_> {
 }
 
 /// An iterator over a reference to the [`JanetArray`] elements.
+#[derive(Clone)]
 pub struct Iter<'a, 'data> {
     arr: &'a JanetArray<'data>,
     index_head: i32,
@@ -431,6 +434,7 @@ impl ExactSizeIterator for IterMut<'_, '_> {}
 impl FusedIterator for IterMut<'_, '_> {}
 
 /// An iterator that moves out of a [`JanetArray`].
+#[derive(Clone)]
 pub struct IntoIter<'data> {
     arr: JanetArray<'data>,
     index_head: i32,
