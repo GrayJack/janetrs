@@ -2,8 +2,8 @@
 //!
 //! A crate with high level bindings to Janet C API.
 //!
-//! Notice that most docs will fail if the feature "almagation" aren't set, because most
-//! of then need it for the Janet runtime to function properly.
+//! Notice that most doc tests will fail if the feature "almagation" aren't set, because
+//! most of then need it for the Janet runtime to function properly.
 //!
 //! TODO: Explain crate features
 //!

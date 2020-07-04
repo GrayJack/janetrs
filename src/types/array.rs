@@ -1,6 +1,7 @@
 //! Janet dynamic array
 use core::{
     convert::{TryFrom, TryInto},
+    iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::{Index, IndexMut},
 };
@@ -34,7 +35,7 @@ pub struct JanetArray<'data> {
     phantom: PhantomData<&'data ()>,
 }
 
-impl JanetArray<'_> {
+impl<'data> JanetArray<'data> {
     /// Creates a empty [`JanetArray`].
     ///
     /// It is initially created with capacity 0, so it will not allocate until it is
@@ -137,7 +138,7 @@ impl JanetArray<'_> {
 
     /// Returns a mutable reference to an element in the array at the`index`.
     #[inline]
-    pub fn get_mut(&mut self, index: i32) -> Option<&mut Janet> {
+    pub fn get_mut(&mut self, index: i32) -> Option<&'data mut Janet> {
         if index < 0 || index >= self.len() {
             None
         } else {
@@ -145,6 +146,25 @@ impl JanetArray<'_> {
                 let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
                 Some(&mut (*ptr))
             }
+        }
+    }
+
+    #[inline]
+    pub fn iter(&self) -> Iter<'_, '_> {
+        Iter {
+            arr: self,
+            index_head: 0,
+            index_tail: self.len(),
+        }
+    }
+
+    #[inline]
+    pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, 'data> {
+        let len = self.len();
+        IterMut {
+            arr: self,
+            index_head: 0,
+            index_tail: len,
         }
     }
 
@@ -168,6 +188,69 @@ impl JanetArray<'_> {
     #[inline]
     pub fn as_mut_raw(&mut self) -> *mut CJanetArray {
         self.raw
+    }
+}
+
+impl<'data> IntoIterator for JanetArray<'data> {
+    type IntoIter = IntoIter<'data>;
+    type Item = Janet;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+
+        IntoIter {
+            arr: self,
+            index_head: 0,
+            index_tail: len,
+        }
+    }
+}
+
+impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
+    type IntoIter = Iter<'a, 'data>;
+    type Item = &'a Janet;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+
+        Iter {
+            arr: self,
+            index_head: 0,
+            index_tail: len,
+        }
+    }
+}
+
+impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
+    type IntoIter = IterMut<'a, 'data>;
+    type Item = &'a mut Janet;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+
+        IterMut {
+            arr: self,
+            index_head: 0,
+            index_tail: len,
+        }
+    }
+}
+
+impl FromIterator<Janet> for JanetArray<'_> {
+    fn from_iter<T: IntoIterator<Item = Janet>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (lower, upper) = iter.size_hint();
+
+        let mut arr = if let Some(upper) = upper {
+            Self::with_capacity(upper as i32)
+        } else {
+            Self::with_capacity(lower as i32)
+        };
+
+        for item in iter {
+            arr.push(item);
+        }
+        arr
     }
 }
 
@@ -243,13 +326,141 @@ impl IndexMut<i32> for JanetArray<'_> {
     }
 }
 
+/// An iterator over a reference to the [`JanetArray`] elements.
+pub struct Iter<'a, 'data> {
+    arr: &'a JanetArray<'data>,
+    index_head: i32,
+    index_tail: i32,
+}
+
+impl<'a> Iterator for Iter<'a, '_> {
+    type Item = &'a Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index_head >= self.index_tail {
+            None
+        } else {
+            let ret = self.arr.get(self.index_head);
+            self.index_head += 1;
+            ret
+        }
+    }
+}
+
+impl DoubleEndedIterator for Iter<'_, '_> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.index_head == self.index_tail {
+            None
+        } else {
+            self.index_tail -= 1;
+            self.arr.get(self.index_tail)
+        }
+    }
+}
+
+impl ExactSizeIterator for Iter<'_, '_> {
+    #[inline]
+    fn len(&self) -> usize {
+        self.arr.len() as usize
+    }
+}
+
+impl FusedIterator for Iter<'_, '_> {}
+
+/// An iterator over a mutable reference to the [`JanetArray`] elements.
+pub struct IterMut<'a, 'data> {
+    arr: &'a mut JanetArray<'data>,
+    index_head: i32,
+    index_tail: i32,
+}
+
+impl<'a, 'data> Iterator for IterMut<'a, 'data> {
+    type Item = &'a mut Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index_head >= self.index_tail {
+            None
+        } else {
+            let ret = self.arr.get_mut(self.index_head);
+            self.index_head += 1;
+            ret
+        }
+    }
+}
+
+impl<'a, 'data> DoubleEndedIterator for IterMut<'a, 'data> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.index_head == self.index_tail {
+            None
+        } else {
+            self.index_tail -= 1;
+            self.arr.get_mut(self.index_tail)
+        }
+    }
+}
+
+impl ExactSizeIterator for IterMut<'_, '_> {
+    #[inline]
+    fn len(&self) -> usize {
+        self.arr.len() as usize
+    }
+}
+
+impl FusedIterator for IterMut<'_, '_> {}
+
+/// An iterator that moves out of a [`JanetArray`].
+pub struct IntoIter<'data> {
+    arr: JanetArray<'data>,
+    index_head: i32,
+    index_tail: i32,
+}
+
+impl<'a> Iterator for IntoIter<'_> {
+    type Item = Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index_head >= self.index_tail {
+            None
+        } else {
+            let ret = self.arr.get(self.index_head).cloned();
+            self.index_head += 1;
+            ret
+        }
+    }
+}
+
+impl DoubleEndedIterator for IntoIter<'_> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.index_head == self.index_tail {
+            None
+        } else {
+            self.index_tail -= 1;
+            self.arr.get(self.index_tail).cloned()
+        }
+    }
+}
+
+impl ExactSizeIterator for IntoIter<'_> {
+    #[inline]
+    fn len(&self) -> usize {
+        self.arr.len() as usize
+    }
+}
+
+impl FusedIterator for IntoIter<'_> {}
 
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     use serial_test::serial;
 
     use super::*;
-    use crate::client::JanetClient;
+    use crate::{array, client::JanetClient};
 
     #[test]
     #[serial]
@@ -341,5 +552,111 @@ mod tests {
 
         *array.get_mut(0).unwrap() = Janet::boolean(true);
         assert_eq!(Some(&Janet::boolean(true)), array.get(0));
+    }
+
+    #[test]
+    #[serial]
+    fn iter_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let array = array![1, "hey", true];
+
+        let mut iter = array.iter();
+
+        assert_eq!(Some(&Janet::integer(1)), iter.next());
+        assert_eq!(Some(&Janet::from("hey")), iter.next());
+        assert_eq!(Some(&Janet::boolean(true)), iter.next());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[serial]
+    fn iter_double_ended_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let numbers = array![1, 2, 3, 4, 5, 6];
+
+        let mut iter = numbers.iter();
+
+        assert_eq!(Some(&Janet::integer(1)), iter.next());
+        assert_eq!(Some(&Janet::integer(6)), iter.next_back());
+        assert_eq!(Some(&Janet::integer(5)), iter.next_back());
+        assert_eq!(Some(&Janet::integer(2)), iter.next());
+        assert_eq!(Some(&Janet::integer(3)), iter.next());
+        assert_eq!(Some(&Janet::integer(4)), iter.next());
+        assert_eq!(None, iter.next());
+        assert_eq!(None, iter.next_back());
+    }
+
+    #[test]
+    #[serial]
+    fn itermut_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = array![1, "hey", true];
+
+        let mut iter = array.iter_mut();
+
+        assert_eq!(Some(&mut Janet::integer(1)), iter.next());
+        assert_eq!(Some(&mut Janet::from("hey")), iter.next());
+        assert_eq!(Some(&mut Janet::boolean(true)), iter.next());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[serial]
+    fn itermut_double_ended_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let mut numbers = array![1, 2, 3, 4, 5, 6];
+
+        let mut iter = numbers.iter_mut();
+
+        assert_eq!(Some(&mut Janet::integer(1)), iter.next());
+        assert_eq!(Some(&mut Janet::integer(6)), iter.next_back());
+        assert_eq!(Some(&mut Janet::integer(5)), iter.next_back());
+        assert_eq!(Some(&mut Janet::integer(2)), iter.next());
+        assert_eq!(Some(&mut Janet::integer(3)), iter.next());
+        assert_eq!(Some(&mut Janet::integer(4)), iter.next());
+        assert_eq!(None, iter.next());
+        assert_eq!(None, iter.next_back());
+    }
+
+    #[test]
+    #[serial]
+    fn intoiter_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let array = array![1, "hey", true];
+
+        let mut iter = array.into_iter();
+
+        assert_eq!(Some(Janet::integer(1)), iter.next());
+        assert_eq!(Some(Janet::from("hey")), iter.next());
+        assert_eq!(Some(Janet::boolean(true)), iter.next());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[serial]
+    fn intoiter_double_ended_iterator() {
+        let _client = JanetClient::init().unwrap();
+        let numbers = array![1, 2, 3, 4, 5, 6];
+
+        let mut iter = numbers.into_iter();
+
+        assert_eq!(Some(Janet::integer(1)), iter.next());
+        assert_eq!(Some(Janet::integer(6)), iter.next_back());
+        assert_eq!(Some(Janet::integer(5)), iter.next_back());
+        assert_eq!(Some(Janet::integer(2)), iter.next());
+        assert_eq!(Some(Janet::integer(3)), iter.next());
+        assert_eq!(Some(Janet::integer(4)), iter.next());
+        assert_eq!(None, iter.next());
+        assert_eq!(None, iter.next_back());
+    }
+
+    #[test]
+    #[serial]
+    fn collect() {
+        let _client = JanetClient::init().unwrap();
+        let vec = vec![Janet::nil(); 100];
+
+        let jarr: JanetArray<'_> = vec.into_iter().collect();
+        assert_eq!(jarr.len(), 100);
     }
 }
