@@ -360,13 +360,13 @@ mod tests {
         assert!(test.is_empty());
 
         test.push('a');
-        assert_eq!(4, test.len());
+        assert_eq!(1, test.len());
 
         test.push_bytes(b"bytes");
-        assert_eq!(9, test.len());
+        assert_eq!(6, test.len());
 
         test.push_u8(b'a');
-        assert_eq!(10, test.len());
+        assert_eq!(7, test.len());
     }
 
     #[test]
@@ -379,7 +379,7 @@ mod tests {
             buffer.push(i.into());
         }
 
-        assert_eq!(40, buffer.len());
+        assert_eq!(10, buffer.len());
         buffer.set_len(0);
         assert_eq!(0, buffer.len());
         buffer.set_len(19);
