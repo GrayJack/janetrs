@@ -15,6 +15,14 @@ impl JanetSymbol<'_> {
     ///
     /// If the given `name` is bigger than i32::MAX the generated symbol will have a name
     /// trucated to that max size. That's unrealistic thought.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetSymbol;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetSymbol::new("name");
+    /// ```
     #[inline]
     pub fn new(name: impl AsRef<[u8]>) -> Self {
         let val = name.as_ref();
@@ -34,6 +42,14 @@ impl JanetSymbol<'_> {
     /// Generate a unique Janet symbol. This is used in the library function gensym. The
     /// symbol will be of the format _XXXXXX, where X is a base64 digit, and prefix is
     /// the argument passed. No prefix for speed.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetSymbol;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetSymbol::unique();
+    /// ```
     #[inline]
     pub fn unique() -> Self {
         Self {
@@ -44,6 +60,15 @@ impl JanetSymbol<'_> {
 
     /// Returns the length of this [`JanetSymbol`], in bytes, not [`char`]s or graphemes.
     /// In other words, it may not be what a human considers the length of the string.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetSymbol;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetSymbol::new("name");
+    /// assert_eq!(s.len(), 4);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*janet_string_head(self.raw)).length }
@@ -51,6 +76,15 @@ impl JanetSymbol<'_> {
 
     /// Returns `true` if this [`JanetSymbol`] has a length of zero, and `false`
     /// otherwise.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetSymbol;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetSymbol::new("name");
+    /// assert!(!s.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
@@ -89,6 +123,14 @@ impl JanetKeyword<'_> {
     ///
     /// If the given `name` is bigger than i32::MAX the generated symbol will have a name
     /// trucated to that max size. That's unrealistic thought.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetKeyword;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let k = JanetKeyword::new("name");
+    /// ```
     #[inline]
     pub fn new(name: impl AsRef<[u8]>) -> Self {
         let val = name.as_ref();
@@ -107,6 +149,15 @@ impl JanetKeyword<'_> {
 
     /// Returns the length of this [`JanetKeyword`], in bytes, not [`char`]s or graphemes.
     /// In other words, it may not be what a human considers the length of the string.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetKeyword;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let k = JanetKeyword::new("name");
+    /// assert_eq!(k.len(), 4);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*janet_string_head(self.raw)).length }
@@ -114,6 +165,15 @@ impl JanetKeyword<'_> {
 
     /// Returns `true` if this [`JanetKeyword`] has a length of zero, and `false`
     /// otherwise.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetKeyword;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let k = JanetKeyword::new("name");
+    /// assert!(!k.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0

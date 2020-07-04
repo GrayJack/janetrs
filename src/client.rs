@@ -171,6 +171,10 @@ impl JanetClient {
         let code = code.as_ref();
         self.run_bytes(code.as_bytes())
     }
+
+    pub fn env(&self) -> Option<&JanetTable<'_>> {
+        self.env_table.as_ref()
+    }
 }
 
 impl Drop for JanetClient {

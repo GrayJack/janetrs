@@ -40,6 +40,14 @@ impl<'data> JanetArray<'data> {
     ///
     /// It is initially created with capacity 0, so it will not allocate until it is
     /// first pushed into.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = JanetArray::new();
+    /// ```
     #[inline]
     pub fn new() -> Self {
         Self {
@@ -52,6 +60,14 @@ impl<'data> JanetArray<'data> {
     ///
     /// When `capacity` is lesser than zero, it's the same as calling with `capacity`
     /// equals to zero.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = JanetArray::with_capacity(20);
+    /// ```
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
@@ -61,18 +77,51 @@ impl<'data> JanetArray<'data> {
     }
 
     /// Returns the number of elements the array can hold without reallocating.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = JanetArray::with_capacity(20);
+    /// assert_eq!(arr.capacity(), 20);
+    /// ```
     #[inline]
     pub fn capacity(&self) -> i32 {
         unsafe { (*self.raw).capacity }
     }
 
     /// Returns the number of elements in the array, also referred to as its 'length'.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    /// assert_eq!(arr.len(), 0);
+    ///
+    /// arr.push(10);
+    /// assert_eq!(arr.len(), 1);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*self.raw).count }
     }
 
     /// Returns `true` if the array contains no elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    /// assert!(arr.is_empty());
+    ///
+    /// arr.push(10);
+    /// assert!(!arr.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
@@ -95,6 +144,18 @@ impl<'data> JanetArray<'data> {
     /// Ensure that an array has enough space for `check_capacity` elements. If not,
     /// resize the backing memory to `capacity` * `growth` slots. In most cases, `growth`
     /// should be `1` or `2`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    /// assert_eq!(arr.capacity(), 0);
+    ///
+    /// arr.ensure(2, 2);
+    /// assert_eq!(arr.capacity(), 4);
+    /// ```
     #[inline]
     pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
         unsafe { janet_array_ensure(self.raw, check_capacity, growth) };
@@ -104,6 +165,17 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Panics
     /// Panics if the number of elements overflow a `i32`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetArray};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    ///
+    /// arr.push(10);
+    /// assert_eq!(arr[0], &Janet::integer(10));
+    /// ```
     #[inline]
     pub fn push(&mut self, value: impl Into<Janet>) {
         let value = value.into();
@@ -112,18 +184,56 @@ impl<'data> JanetArray<'data> {
 
     /// Removes the last element from a array and returns it, or Janet `nil` if it is
     /// empty.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetArray};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    ///
+    /// arr.push(10);
+    /// assert_eq!(arr.len(), 1);
+    /// assert_eq!(arr.pop(), Janet::integer(10));
+    /// assert!(arr.is_empty())
+    /// ```
     #[inline]
     pub fn pop(&mut self) -> Janet {
         unsafe { janet_array_pop(self.raw).into() }
     }
 
-    /// Returns the last element in the array without modifying it.
+    /// Returns a copy of the last element in the array without modifying it.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetArray};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    ///
+    /// arr.push(10);
+    /// assert_eq!(arr.len(), 1);
+    /// assert_eq!(arr.peek(), Janet::integer(10));
+    /// assert_eq!(arr.len(), 1);
+    /// ```
     #[inline]
     pub fn peek(&mut self) -> Janet {
         unsafe { janet_array_peek(self.raw).into() }
     }
 
     /// Returns a reference to an element in the array at the`index`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetArray};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    ///
+    /// arr.push(10);
+    /// assert_eq!(arr.get(0), Some(&Janet::integer(10)));
+    /// assert_eq!(arr.get(1), None);
+    /// ```
     #[inline]
     pub fn get(&self, index: i32) -> Option<&Janet> {
         if index < 0 || index >= self.len() {
@@ -137,6 +247,22 @@ impl<'data> JanetArray<'data> {
     }
 
     /// Returns a mutable reference to an element in the array at the`index`.
+    /// Returns a reference to an element in the array at the`index`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetArray};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = JanetArray::new();
+    ///
+    /// arr.push(10);
+    /// assert_eq!(arr.get_mut(0), Some(&mut Janet::integer(10)));
+    /// assert_eq!(arr.get(1), None);
+    ///
+    /// *arr.get_mut(0).unwrap() = Janet::boolean(true);
+    /// assert_eq!(arr[0], &Janet::boolean(true));
+    /// ```
     #[inline]
     pub fn get_mut(&mut self, index: i32) -> Option<&'data mut Janet> {
         if index < 0 || index >= self.len() {
@@ -150,6 +276,18 @@ impl<'data> JanetArray<'data> {
     }
 
     /// Creates a iterator over the reference of the array itens.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![1, 2, "janet"];
+    ///
+    /// for elem in arr.iter() {
+    ///     println!("{}", elem);
+    /// }
+    /// ```
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {
         Iter {
@@ -160,6 +298,18 @@ impl<'data> JanetArray<'data> {
     }
 
     /// Creates a iterator over the mutable reference of the array itens.
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1, 2, "janet"];
+    ///
+    /// for elem in arr.iter_mut() {
+    ///     *elem = Janet::from("Janet");
+    /// }
+    ///
+    /// assert!(arr.iter().all(|j| j == Janet::from("Janet")));
+    /// ```
     #[inline]
     pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, 'data> {
         let len = self.len();

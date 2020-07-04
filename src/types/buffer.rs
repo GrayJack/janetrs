@@ -76,6 +76,14 @@ impl JanetBuffer<'_> {
     ///
     /// It is initially created with capacity 0, so it will not allocate until it is
     /// first pushed into.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let buff = JanetBuffer::new();
+    /// ```
     #[inline]
     pub fn new() -> Self {
         Self {
@@ -88,6 +96,14 @@ impl JanetBuffer<'_> {
     ///
     /// When `capacity` is lesser than zero, it's the same as calling with `capacity`
     /// equals to zero.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let buff = JanetBuffer::with_capacity(10);
+    /// ```
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
@@ -103,12 +119,34 @@ impl JanetBuffer<'_> {
     }
 
     /// Returns the number of elements in the buffer, also referred to as its 'length'.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut buff = JanetBuffer::new();
+    /// assert_eq!(buff.len(), 0);
+    /// buff.push('c');
+    /// assert_eq!(buff.len(), 1);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*self.raw).count }
     }
 
     /// Returns `true` if the buffer contains no elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut buff = JanetBuffer::new();
+    /// assert!(buff.is_empty());
+    /// buff.push('1');
+    /// assert!(!buff.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
@@ -149,15 +187,24 @@ impl JanetBuffer<'_> {
     /// Append the given [`char`] onto the end of the buffer.
     #[inline]
     pub fn push(&mut self, ch: char) {
-        self.push_u32(ch as u32)
+        let mut buff = [0; 4];
+        let s = ch.encode_utf8(&mut buff);
+        self.push_str(s);
     }
 
     /// Append the given byte slice onto the end of the buffer.
+    ///
+    /// If the `bytes` have a length bigger than `i32::MAX`, it will push only the first
+    /// `i32::MAX` values.
     #[inline]
     pub fn push_bytes(&mut self, bytes: &[u8]) {
-        // TODO: Check if bytes length is bigger than i32::MAX, if it is, panic!
-        // But should panic be rust panic or Janet panic?
-        unsafe { janet_buffer_push_bytes(self.raw, bytes.as_ptr(), bytes.len() as i32) }
+        let len = if bytes.len() > i32::MAX as usize {
+            i32::MAX
+        } else {
+            bytes.len() as i32
+        };
+
+        unsafe { janet_buffer_push_bytes(self.raw, bytes.as_ptr(), len) }
     }
 
     /// Append the given string slice onto the end of the buffer.

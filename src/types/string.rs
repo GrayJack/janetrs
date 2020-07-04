@@ -94,6 +94,14 @@ pub struct JanetString<'data> {
 
 impl<'data> JanetString<'data> {
     /// Create a [`JanetString`] from a given `buffer`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("Hey there!");
+    /// ```
     #[inline]
     pub fn new(buffer: impl AsRef<[u8]>) -> Self {
         let buffer = buffer.as_ref();
@@ -140,6 +148,15 @@ impl<'data> JanetString<'data> {
 
     /// Returns the length of this [`JanetString`], in bytes, not [`char`]s or graphemes.
     /// In other words, it may not be what a human considers the length of the string.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("Hey there!");
+    /// assert_eq!(s.len(), 10);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*janet_string_head(self.raw)).length }
@@ -147,6 +164,18 @@ impl<'data> JanetString<'data> {
 
     /// Returns `true` if this [`JanetString`] has a length of zero, and `false`
     /// otherwise.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("Hey there!");
+    /// assert!(!s.is_empty());
+    ///
+    /// let s = JanetString::new("");
+    /// assert!(s.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0

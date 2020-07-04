@@ -78,24 +78,78 @@ impl<'data> JanetStruct<'data> {
     }
 
     /// Returns the number of elements in the struct, also referred to as its 'length'.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetStruct;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = JanetStruct::builder(2)
+    ///     .put(10, "ten")
+    ///     .put(11, "eleven")
+    ///     .finalize();
+    /// assert_eq!(st.len(), 2);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*janet_struct_head(self.raw)).length }
     }
 
     /// Returns `true` if the struct contains no elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetStruct;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = JanetStruct::builder(2)
+    ///     .put(10, "ten")
+    ///     .put(11, "eleven")
+    ///     .finalize();
+    /// assert!(!st.is_empty());
+    ///
+    /// let st = JanetStruct::builder(0).finalize();
+    /// assert!(st.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// Returns the value corresponding to the supplied `key`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetStruct};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = JanetStruct::builder(2)
+    ///     .put(10, "ten")
+    ///     .put(11, "eleven")
+    ///     .finalize();
+    /// assert_eq!(st.get(10), Some(&Janet::from("ten")));
+    /// ```
     #[inline]
     pub fn get(&self, key: impl Into<Janet>) -> Option<&Janet> {
         self.get_key_value(key).map(|(_, v)| v)
     }
 
     /// Returns the key-value pair corresponding to the supplied `key`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetStruct};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = JanetStruct::builder(2)
+    ///     .put(10, "ten")
+    ///     .put(11, "eleven")
+    ///     .finalize();
+    /// assert_eq!(
+    ///     st.get_key_value(10),
+    ///     Some((&Janet::integer(10), &Janet::from("ten")))
+    /// );
+    /// ```
     #[inline]
     pub fn get_key_value(&self, key: impl Into<Janet>) -> Option<(&Janet, &Janet)> {
         let key = key.into();
@@ -123,6 +177,18 @@ impl<'data> JanetStruct<'data> {
     }
 
     /// Returns a owned value corresponding to the supplied `key`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetStruct};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = JanetStruct::builder(2)
+    ///     .put(10, "ten")
+    ///     .put(11, "eleven")
+    ///     .finalize();
+    /// assert_eq!(st.get_owned(10), Some(Janet::from("ten")));
+    /// ```
     #[inline]
     pub fn get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
@@ -137,6 +203,14 @@ impl<'data> JanetStruct<'data> {
     }
 
     /// Returns the key-value pair corresponding to the supplied `key`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetStruct};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = JanetStruct::builder(2).put(10, "ten").put(11, "eleven").finalize();
+    /// assert_eq!(st.get_owned_key_value(10), Some((Janet::integer(10), Janet::from("ten"))));
     #[inline]
     pub fn get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
@@ -184,6 +258,7 @@ impl<'data> JanetStruct<'data> {
 }
 
 impl Clone for JanetStruct<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn clone(&self) -> Self {
         let len = self.len();
         let mut clone = JanetStruct::builder(len);

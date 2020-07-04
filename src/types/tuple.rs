@@ -102,6 +102,16 @@ impl<'data> JanetTuple<'data> {
     }
 
     /// Returns a reference to an element in the tuple.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetTuple};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let tup = JanetTuple::builder(2).put("hey").put(11).finalize();
+    /// assert_eq!(tup.get(0), Some(&Janet::from("hey")));
+    /// assert_eq!(tup.get(1), Some(&Janet::integer(11)));
+    /// ```
     #[inline]
     pub fn get(&self, index: i32) -> Option<&Janet> {
         if index < 0 || index >= self.len() {
@@ -116,12 +126,33 @@ impl<'data> JanetTuple<'data> {
     }
 
     /// Returns the number of elements in the tuple, also referred to as its 'length'.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetTuple;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let tup = JanetTuple::builder(2).put("hey").put(11).finalize();
+    /// assert_eq!(tup.len(), 2);
+    /// ```
     #[inline]
     pub fn len(&self) -> i32 {
         unsafe { (*janet_tuple_head(self.raw)).length }
     }
 
     /// Returns `true` if the tuple contains no elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetTuple;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let tup = JanetTuple::builder(2).put("hey").put(11).finalize();
+    /// assert!(!tup.is_empty());
+    ///
+    /// let tup = JanetTuple::builder(0).finalize();
+    /// assert!(tup.is_empty());
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
