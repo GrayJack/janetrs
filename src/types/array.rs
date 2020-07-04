@@ -192,6 +192,7 @@ impl<'data> JanetArray<'data> {
 }
 
 impl Clone for JanetArray<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn clone(&self) -> Self {
         let mut clone = Self::with_capacity(self.len());
 
@@ -250,6 +251,7 @@ impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
 }
 
 impl FromIterator<Janet> for JanetArray<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = Janet>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (lower, upper) = iter.size_hint();
@@ -270,7 +272,7 @@ impl FromIterator<Janet> for JanetArray<'_> {
 impl TryFrom<&[Janet]> for JanetArray<'_> {
     type Error = core::num::TryFromIntError;
 
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn try_from(slice: &[Janet]) -> Result<Self, Self::Error> {
         let len = slice.len().try_into()?;
         let mut j_array = Self::with_capacity(len);
@@ -326,6 +328,7 @@ impl Index<i32> for JanetArray<'_> {
 }
 
 impl IndexMut<i32> for JanetArray<'_> {
+    #[inline]
     fn index_mut(&mut self, index: i32) -> &mut Self::Output {
         let len = self.len();
 
@@ -359,6 +362,12 @@ impl<'a> Iterator for Iter<'a, '_> {
             ret
         }
     }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = self.arr.len() as usize;
+        (exact, Some(exact))
+    }
 }
 
 impl DoubleEndedIterator for Iter<'_, '_> {
@@ -373,12 +382,7 @@ impl DoubleEndedIterator for Iter<'_, '_> {
     }
 }
 
-impl ExactSizeIterator for Iter<'_, '_> {
-    #[inline]
-    fn len(&self) -> usize {
-        self.arr.len() as usize
-    }
-}
+impl ExactSizeIterator for Iter<'_, '_> {}
 
 impl FusedIterator for Iter<'_, '_> {}
 
@@ -402,6 +406,12 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
             ret
         }
     }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = self.arr.len() as usize;
+        (exact, Some(exact))
+    }
 }
 
 impl<'a, 'data> DoubleEndedIterator for IterMut<'a, 'data> {
@@ -416,12 +426,7 @@ impl<'a, 'data> DoubleEndedIterator for IterMut<'a, 'data> {
     }
 }
 
-impl ExactSizeIterator for IterMut<'_, '_> {
-    #[inline]
-    fn len(&self) -> usize {
-        self.arr.len() as usize
-    }
-}
+impl ExactSizeIterator for IterMut<'_, '_> {}
 
 impl FusedIterator for IterMut<'_, '_> {}
 
@@ -445,6 +450,12 @@ impl<'a> Iterator for IntoIter<'_> {
             ret
         }
     }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = self.arr.len() as usize;
+        (exact, Some(exact))
+    }
 }
 
 impl DoubleEndedIterator for IntoIter<'_> {
@@ -459,12 +470,7 @@ impl DoubleEndedIterator for IntoIter<'_> {
     }
 }
 
-impl ExactSizeIterator for IntoIter<'_> {
-    #[inline]
-    fn len(&self) -> usize {
-        self.arr.len() as usize
-    }
-}
+impl ExactSizeIterator for IntoIter<'_> {}
 
 impl FusedIterator for IntoIter<'_> {}
 
