@@ -147,7 +147,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// Notice that if there is no key-value pair in the table, this function will return
     /// a tuple of mutable references to Janet `nil`.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn find(&self, key: impl Into<Janet>) -> Option<(&Janet, &Janet)> {
         let key = key.into();
 

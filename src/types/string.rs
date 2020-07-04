@@ -14,6 +14,7 @@ pub struct JanetStringBuilder<'data> {
 
 impl<'data> JanetStringBuilder<'data> {
     /// Add data to the string builder.
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn put(mut self, data: impl AsRef<[u8]>) -> Self {
         let data = data.as_ref();
 
@@ -114,6 +115,7 @@ impl<'data> JanetString<'data> {
     /// # Safety
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
+    #[inline]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
         Self {
             raw,
@@ -161,6 +163,7 @@ impl<'data> JanetString<'data> {
 }
 
 impl Clone for JanetString<'_> {
+    #[inline]
     fn clone(&self) -> Self {
         Self {
             raw:     unsafe { janet_string(self.raw, self.len()) },

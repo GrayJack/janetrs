@@ -11,6 +11,11 @@ readme = "README.md"
 edition = "2018"
 keywords = ["janet", "embedding"]
 
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu", "x86_64-unknown-freebsd",
+    "x86_64-unknown-netbsd", "x86_64-apple-darwin", "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu"]
+all-features = true
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -20,11 +25,13 @@ janet-ll = { git = "https://github.com/GrayJack/janet-ll", rev = "dev" }
 serial_test = "~0.4.0"
 
 [features]
-default = []
+default = ["std"]
 # To use Error trait and alocations
 std = []
 # Use to have Janet client
 amalgation = ["janet-ll/link-amalg"]
+# Inline more functions
+inline-more = []
 
 [[example]]
 name = "hello_world"

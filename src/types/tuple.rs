@@ -16,7 +16,7 @@ pub struct JanetTupleBuilder<'data> {
 
 impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn put(mut self, value: impl Into<Janet>) -> Self {
         let value = value.into();
 
@@ -98,6 +98,7 @@ impl<'data> JanetTuple<'data> {
     }
 
     /// Returns a reference to an element in the tuple.
+    #[inline]
     pub fn get(&self, index: i32) -> Option<&Janet> {
         if index < 0 || index >= self.len() {
             None
@@ -133,6 +134,7 @@ impl<'data> JanetTuple<'data> {
 }
 
 impl Clone for JanetTuple<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn clone(&self) -> Self {
         let len = self.len();
         let mut clone = Self::builder(len);
@@ -149,6 +151,7 @@ impl Clone for JanetTuple<'_> {
 impl Index<i32> for JanetTuple<'_> {
     type Output = Janet;
 
+    #[inline]
     fn index(&self, index: i32) -> &Self::Output {
         match self.get(index) {
             Some(out) => out,

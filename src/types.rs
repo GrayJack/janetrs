@@ -207,7 +207,7 @@ impl Janet {
 }
 
 impl fmt::Debug for Janet {
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // There some overhead for doing this dance, but the only way to get the Janet value from
         // C API and transform into &str to display it.
@@ -248,24 +248,28 @@ impl fmt::Display for Janet {
 }
 
 impl PartialEq<&Janet> for Janet {
+    #[inline]
     fn eq(&self, other: &&Janet) -> bool {
         self.eq(*other)
     }
 }
 
 impl PartialOrd<&Janet> for Janet {
+    #[inline]
     fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> {
         self.partial_cmp(*other)
     }
 }
 
 impl PartialEq<Janet> for &Janet {
+    #[inline]
     fn eq(&self, other: &Janet) -> bool {
         (*self).eq(other)
     }
 }
 
 impl PartialOrd<Janet> for &Janet {
+    #[inline]
     fn partial_cmp(&self, other: &Janet) -> Option<Ordering> {
         (*self).partial_cmp(other)
     }
@@ -279,6 +283,7 @@ impl From<CJanet> for Janet {
 }
 
 impl From<()> for Janet {
+    #[inline]
     fn from(_: ()) -> Self {
         Self::nil()
     }
@@ -306,6 +311,7 @@ impl From<f64> for Janet {
 }
 
 impl From<&str> for Janet {
+    #[inline]
     fn from(val: &str) -> Self {
         let s = JanetString::new(val);
         Self::string(s)
@@ -355,18 +361,21 @@ impl From<JanetString<'_>> for Janet {
 }
 
 impl From<JanetStruct<'_>> for Janet {
+    #[inline]
     fn from(val: JanetStruct<'_>) -> Self {
         Self::structs(val)
     }
 }
 
 impl From<JanetSymbol<'_>> for Janet {
+    #[inline]
     fn from(val: JanetSymbol<'_>) -> Self {
         Self::symbol(val)
     }
 }
 
 impl From<JanetKeyword<'_>> for Janet {
+    #[inline]
     fn from(val: JanetKeyword<'_>) -> Self {
         Self::keyword(val)
     }

@@ -67,6 +67,7 @@ impl JanetSymbol<'_> {
 }
 
 impl Clone for JanetSymbol<'_> {
+    #[inline]
     fn clone(&self) -> Self {
         Self {
             raw:     unsafe { janet_symbol(self.raw, self.len()) },
@@ -129,6 +130,7 @@ impl JanetKeyword<'_> {
 }
 
 impl Clone for JanetKeyword<'_> {
+    #[inline]
     fn clone(&self) -> Self {
         Self {
             raw:     unsafe { janet_symbol(self.raw, self.len()) },

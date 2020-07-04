@@ -453,7 +453,7 @@ impl JanetTable<'_> {
     ///
     /// Notice that if there is no key-value pair in the table, this function will return
     /// a tuple of mutable references to Janet `nil`.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn find(&mut self, key: impl Into<Janet>) -> Option<(&mut Janet, &mut Janet)> {
         let key = key.into();
 
@@ -602,6 +602,7 @@ impl JanetTable<'_> {
 
 impl<'data> JanetTable<'data> {
     /// Gets the given `key`'s corresponding entry in the table for in-place manipulation.
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn entry(&mut self, key: impl Into<Janet>) -> Entry<'_, 'data> {
         let key = key.into();
 
@@ -655,6 +656,7 @@ impl Default for JanetTable<'_> {
 }
 
 impl From<JanetStruct<'_>> for JanetTable<'_> {
+    #[inline]
     fn from(val: JanetStruct<'_>) -> Self {
         unsafe { Self::from_raw(janet_struct_to_table(val.raw)) }
     }
@@ -663,6 +665,7 @@ impl From<JanetStruct<'_>> for JanetTable<'_> {
 impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
     type Output = Janet;
 
+    #[inline]
     fn index(&self, key: T) -> &Self::Output {
         self.get(key).expect("no entry found for key")
     }
@@ -895,7 +898,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// assert_eq!(table.get(10), Some(&Janet::number(10.0)));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn insert(&mut self, value: impl Into<Janet>) -> Janet {
         let mut value = value.into();
         let old_value = self.get_mut();
@@ -963,7 +966,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     }
 
     /// Take the ownership of the key and value from the table.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn remove_entry(self) -> (Janet, Janet) {
         unsafe {
             let copy = ((*self.elem).0, (*self.elem).1);
@@ -974,7 +977,7 @@ impl<'a> OccupiedEntry<'a, '_> {
 
     /// Replaces the entry, returning the old key and value. The new key in the table will
     /// be the key used to create this entry.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn replace_entry(self, value: impl Into<Janet>) -> (Janet, Janet) {
         let value = value.into();
 
@@ -987,7 +990,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     }
 
     /// Replaces the key in the table with the key used to create this entry.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn replace_key(self) -> Janet {
         let mut entry = unsafe { *self.elem };
         core::mem::replace(&mut entry.0, self.key.unwrap())
@@ -1021,7 +1024,7 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     ///
     /// assert_eq!(table.get(10), Some(&Janet::integer(20)));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn insert(self, value: impl Into<Janet>) -> &'a mut Janet {
         let value = value.into();
         self.table.insert(self.key, value);
@@ -1030,7 +1033,7 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
 
     /// Sets the `value` of the entry with the [`VacantEntry`]'s key, and return a
     /// [`OccupiedEntry`].
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn insert_entry(self, value: impl Into<Janet>) -> OccupiedEntry<'a, 'data> {
         let value = value.into();
 

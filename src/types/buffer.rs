@@ -221,6 +221,7 @@ impl JanetBuffer<'_> {
 }
 
 impl From<&str> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn from(string: &str) -> Self {
         let cap = string.len();
         let mut buff = JanetBuffer::with_capacity(cap as i32);
@@ -230,6 +231,7 @@ impl From<&str> for JanetBuffer<'_> {
 }
 
 impl From<char> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn from(ch: char) -> Self {
         let mut buff = JanetBuffer::with_capacity(4);
         buff.push(ch);

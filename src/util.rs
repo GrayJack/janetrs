@@ -137,6 +137,7 @@ impl PartialEq<[u32; 3]> for JanetVersion {
 }
 
 impl PartialEq<&str> for JanetVersion {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn eq(&self, other: &&str) -> bool {
         if other.split('.').count() > 3 {
             false
@@ -166,7 +167,7 @@ impl PartialOrd for JanetVersion {
 }
 
 impl PartialOrd<(u32, u32, u32)> for JanetVersion {
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn partial_cmp(&self, (major, minor, patch): &(u32, u32, u32)) -> Option<Ordering> {
         match self.major.cmp(major) {
             Ordering::Equal => match self.minor.cmp(minor) {
@@ -179,7 +180,7 @@ impl PartialOrd<(u32, u32, u32)> for JanetVersion {
 }
 
 impl PartialOrd<[u32; 3]> for JanetVersion {
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn partial_cmp(&self, [major, minor, patch]: &[u32; 3]) -> Option<Ordering> {
         match self.major.cmp(major) {
             Ordering::Equal => match self.minor.cmp(minor) {
@@ -192,6 +193,7 @@ impl PartialOrd<[u32; 3]> for JanetVersion {
 }
 
 impl PartialOrd<&str> for JanetVersion {
+    #[cfg_attr(feature = "inline-more", inline)]
     fn partial_cmp(&self, other: &&str) -> Option<Ordering> {
         let [major, minor, patch] = {
             let iter = other.split('.');
