@@ -1,5 +1,5 @@
 //! Janet Struct
-use core::marker::PhantomData;
+use core::{iter::FusedIterator, marker::PhantomData};
 
 use janet_ll::{
     janet_struct_begin, janet_struct_end, janet_struct_find, janet_struct_get, janet_struct_head,
@@ -247,6 +247,62 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
+    /// Creates a iterator over the refernece of the struct keys.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::structs;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = structs! { 1 => "10", true => 10.0};
+    ///
+    /// for key in st.keys() {
+    ///     println!("Key: {}", key);
+    /// }
+    /// ```
+    pub fn keys(&self) -> Keys<'_, '_> {
+        Keys { inner: self.iter() }
+    }
+
+    /// Creates a iterator over the refernece of the struct values.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::structs;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = structs! { 1 => "10", true => 10.0};
+    ///
+    /// for val in st.values() {
+    ///     println!("Value: {}", val);
+    /// }
+    /// ```
+    pub fn values(&self) -> Values<'_, '_> {
+        Values { inner: self.iter() }
+    }
+
+    /// Creates a iterator over the reference of the struct key-value pairs.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::structs;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = structs! { 1 => "10", true => 10.0};
+    ///
+    /// for (k, v) in st.iter() {
+    ///     println!("Key: {}\tValue: {}", k, v);
+    /// }
+    /// ```
+    #[inline]
+    pub fn iter(&self) -> Iter<'_, '_> {
+        Iter {
+            st:     self,
+            offset: 0,
+            end:    self.len() as isize,
+        }
+    }
+
     /// Return a raw pointer to the struct raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -273,10 +329,156 @@ impl Clone for JanetStruct<'_> {
     }
 }
 
+impl<'data> IntoIterator for JanetStruct<'data> {
+    type IntoIter = IntoIter<'data>;
+    type Item = (Janet, Janet);
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len() as isize;
+
+        IntoIter {
+            st:     self,
+            offset: 0,
+            end:    len,
+        }
+    }
+}
+
+impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
+    type IntoIter = Iter<'a, 'data>;
+    type Item = (&'a Janet, &'a Janet);
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len() as isize;
+
+        Iter {
+            st:     self,
+            offset: 0,
+            end:    len,
+        }
+    }
+}
+
+/// An iterator over a reference to the [`JanetStruct`] key-value pairs.
+#[derive(Clone)]
+pub struct Iter<'a, 'data> {
+    st:     &'a JanetStruct<'data>,
+    offset: isize,
+    end:    isize,
+}
+
+impl<'a, 'data> Iterator for Iter<'a, 'data> {
+    type Item = (&'a Janet, &'a Janet);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.offset >= self.end {
+            None
+        } else {
+            let ptr: *const (Janet, Janet) = unsafe { self.st.raw.offset(self.offset) as *const _ };
+            self.offset += 1;
+            Some(unsafe { (&(*ptr).0, &(*ptr).1) })
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = (self.end - self.offset) as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl ExactSizeIterator for Iter<'_, '_> {}
+
+impl FusedIterator for Iter<'_, '_> {}
+
+/// An iterator over a reference to the [`JanetStruct`] keys.
+#[derive(Clone)]
+pub struct Keys<'a, 'data> {
+    inner: Iter<'a, 'data>,
+}
+
+impl<'a> Iterator for Keys<'a, '_> {
+    type Item = &'a Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(k, _)| k)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl ExactSizeIterator for Keys<'_, '_> {}
+
+impl FusedIterator for Keys<'_, '_> {}
+
+/// An iterator over a reference to the [`JanetStruct`] values.
+#[derive(Clone)]
+pub struct Values<'a, 'data> {
+    inner: Iter<'a, 'data>,
+}
+
+impl<'a> Iterator for Values<'a, '_> {
+    type Item = &'a Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(_, v)| v)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl ExactSizeIterator for Values<'_, '_> {}
+
+impl FusedIterator for Values<'_, '_> {}
+
+/// An iterator that moves out of a [`JanetStruct`].
+#[derive(Clone)]
+pub struct IntoIter<'data> {
+    st:     JanetStruct<'data>,
+    offset: isize,
+    end:    isize,
+}
+
+impl Iterator for IntoIter<'_> {
+    type Item = (Janet, Janet);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.offset == self.end {
+            None
+        } else {
+            let ptr: *const (Janet, Janet) = unsafe { self.st.raw.offset(self.offset) as *const _ };
+            self.offset += 1;
+            Some(unsafe { ((*ptr).0, (*ptr).1) })
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = (self.end - self.offset) as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl ExactSizeIterator for IntoIter<'_> {}
+
+impl FusedIterator for IntoIter<'_> {}
+
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, types::Janet};
+    use crate::{client::JanetClient, structs, types::Janet};
 
     #[cfg(not(feature = "std"))]
     use serial_test::serial;
@@ -365,5 +567,37 @@ mod tests {
         assert_ne!(st.raw, clone.raw);
         assert_eq!(st.get_key_value(key1), clone.get_key_value(key1));
         assert_eq!(st.get_key_value(key2), clone.get_key_value(key2));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn iter() {
+        let _client = JanetClient::init().unwrap();
+
+        let st = structs! {10 => "dez", 11 => "onze"};
+        let mut iter = st.iter();
+
+        assert_eq!(
+            iter.next(),
+            Some((&Janet::integer(11), &Janet::from("onze")))
+        );
+        assert_eq!(
+            iter.next(),
+            Some((&Janet::integer(10), &Janet::from("dez")))
+        );
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn intoiter() {
+        let _client = JanetClient::init().unwrap();
+
+        let st = structs! {10 => "dez", 11 => "onze"};
+        let mut iter = st.into_iter();
+
+        assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
+        assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
+        assert_eq!(iter.next(), None);
     }
 }
