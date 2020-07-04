@@ -518,7 +518,7 @@ impl<'a> Iterator for Iter<'a, '_> {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.arr.len() as usize;
+        let exact = (self.index_tail - self.index_head) as usize;
         (exact, Some(exact))
     }
 }
@@ -562,7 +562,7 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.arr.len() as usize;
+        let exact = (self.index_tail - self.index_head) as usize;
         (exact, Some(exact))
     }
 }
@@ -607,7 +607,7 @@ impl<'a> Iterator for IntoIter<'_> {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.arr.len() as usize;
+        let exact = (self.index_tail - self.index_head) as usize;
         (exact, Some(exact))
     }
 }
@@ -832,5 +832,19 @@ mod tests {
 
         let jarr: JanetArray<'_> = vec.into_iter().collect();
         assert_eq!(jarr.len(), 100);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn size_hint() {
+        let _client = JanetClient::init().unwrap();
+        let mut iter = array![Janet::nil(); 100].into_iter();
+
+        // The code for all the iterators of the array are the same
+        assert_eq!(iter.len(), 100);
+        let _ = iter.next();
+        assert_eq!(iter.len(), 99);
+        let _ = iter.next_back();
+        assert_eq!(iter.len(), 98);
     }
 }
