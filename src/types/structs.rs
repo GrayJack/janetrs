@@ -450,6 +450,12 @@ pub struct Iter<'a, 'data> {
     end:    isize,
 }
 
+impl Debug for Iter<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.st.clone()).finish()
+    }
+}
+
 impl<'a, 'data> Iterator for Iter<'a, 'data> {
     type Item = (&'a Janet, &'a Janet);
 
@@ -481,6 +487,12 @@ pub struct Keys<'a, 'data> {
     inner: Iter<'a, 'data>,
 }
 
+impl Debug for Keys<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.inner.st.clone()).finish()
+    }
+}
+
 impl<'a> Iterator for Keys<'a, '_> {
     type Item = &'a Janet;
 
@@ -503,6 +515,12 @@ impl FusedIterator for Keys<'_, '_> {}
 #[derive(Clone)]
 pub struct Values<'a, 'data> {
     inner: Iter<'a, 'data>,
+}
+
+impl Debug for Values<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.inner.st.clone()).finish()
+    }
 }
 
 impl<'a> Iterator for Values<'a, '_> {
@@ -529,6 +547,12 @@ pub struct IntoIter<'data> {
     st:     JanetStruct<'data>,
     offset: isize,
     end:    isize,
+}
+
+impl Debug for IntoIter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.st.clone()).finish()
+    }
 }
 
 impl Iterator for IntoIter<'_> {

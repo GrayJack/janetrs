@@ -1297,6 +1297,12 @@ pub struct Iter<'a, 'data> {
     end:    isize,
 }
 
+impl Debug for Iter<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.table.clone()).finish()
+    }
+}
+
 impl<'a, 'data> Iterator for Iter<'a, 'data> {
     type Item = (&'a Janet, &'a Janet);
 
@@ -1327,6 +1333,12 @@ impl FusedIterator for Iter<'_, '_> {}
 #[derive(Clone)]
 pub struct Keys<'a, 'data> {
     inner: Iter<'a, 'data>,
+}
+
+impl Debug for Keys<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.inner.table.clone()).finish()
+    }
 }
 
 impl<'a> Iterator for Keys<'a, '_> {
@@ -1367,6 +1379,12 @@ impl<'a> Iterator for Values<'a, '_> {
     }
 }
 
+impl Debug for Values<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.inner.table.clone()).finish()
+    }
+}
+
 impl ExactSizeIterator for Values<'_, '_> {}
 
 impl FusedIterator for Values<'_, '_> {}
@@ -1376,6 +1394,12 @@ pub struct IterMut<'a, 'data> {
     table:  &'a JanetTable<'data>,
     offset: isize,
     end:    isize,
+}
+
+impl Debug for IterMut<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.table.clone()).finish()
+    }
 }
 
 impl<'a, 'data> Iterator for IterMut<'a, 'data> {
@@ -1409,6 +1433,12 @@ pub struct ValuesMut<'a, 'data> {
     inner: IterMut<'a, 'data>,
 }
 
+impl Debug for ValuesMut<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.inner.table.clone()).finish()
+    }
+}
+
 impl<'data> Iterator for ValuesMut<'_, 'data> {
     type Item = &'data mut Janet;
 
@@ -1433,6 +1463,12 @@ pub struct IntoIter<'data> {
     table:  JanetTable<'data>,
     offset: isize,
     end:    isize,
+}
+
+impl Debug for IntoIter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.table.clone()).finish()
+    }
 }
 
 impl Iterator for IntoIter<'_> {

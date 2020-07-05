@@ -272,6 +272,12 @@ pub struct Iter<'a, 'data> {
     index_tail: i32,
 }
 
+impl Debug for Iter<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.tup.clone()).finish()
+    }
+}
+
 impl<'a> Iterator for Iter<'a, '_> {
     type Item = &'a Janet;
 
@@ -315,6 +321,12 @@ pub struct IntoIter<'data> {
     tup: JanetTuple<'data>,
     index_head: i32,
     index_tail: i32,
+}
+
+impl Debug for IntoIter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.tup.clone()).finish()
+    }
 }
 
 impl<'a> Iterator for IntoIter<'_> {

@@ -509,6 +509,12 @@ pub struct Iter<'a, 'data> {
     index_tail: i32,
 }
 
+impl Debug for Iter<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.arr.clone()).finish()
+    }
+}
+
 impl<'a> Iterator for Iter<'a, '_> {
     type Item = &'a Janet;
 
@@ -574,6 +580,12 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
     }
 }
 
+impl Debug for IterMut<'_, '_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.arr.clone()).finish()
+    }
+}
+
 impl<'a, 'data> DoubleEndedIterator for IterMut<'a, 'data> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -596,6 +608,12 @@ pub struct IntoIter<'data> {
     arr: JanetArray<'data>,
     index_head: i32,
     index_tail: i32,
+}
+
+impl Debug for IntoIter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.arr.clone()).finish()
+    }
 }
 
 impl<'a> Iterator for IntoIter<'_> {
