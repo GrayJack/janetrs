@@ -1,5 +1,6 @@
 //! Janet Struct
 use core::{
+    fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
 };
@@ -60,7 +61,6 @@ impl<'data> JanetStructBuilder<'data> {
 /// ```
 ///
 /// [`JanetTable`]: ./../table/struct.JanetTable.html
-#[derive(Debug)]
 pub struct JanetStruct<'data> {
     pub(crate) raw: *const CJanetKV,
     phantom: PhantomData<&'data ()>,
@@ -250,6 +250,41 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
+    /// Returns `true` if the struct contains a value for the specified `key`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{structs, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = structs! {10 => "ten"};
+    ///
+    /// assert!(st.contains_key(10));
+    /// assert!(!st.contains_key(11));
+    /// ```
+    #[inline]
+    pub fn contains_key(&self, key: impl Into<Janet>) -> bool {
+        self.get(key).is_some()
+    }
+
+    /// Returns `true` if the struct contais a given value.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{structs, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let st = structs! {10 => "ten"};
+    ///
+    /// assert!(st.contains("ten"));
+    /// assert!(!st.contains(11));
+    /// ```
+    #[inline]
+    pub fn contains(&self, value: impl Into<Janet>) -> bool {
+        let value = value.into();
+        self.values().any(|&v| v == value)
+    }
+
     /// Creates a iterator over the refernece of the struct keys.
     ///
     /// # Examples
@@ -313,6 +348,13 @@ impl<'data> JanetStruct<'data> {
     #[inline]
     pub fn as_raw(&self) -> *const CJanetKV {
         self.raw
+    }
+}
+
+impl Debug for JanetStruct<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_map().entries(self.iter()).finish()
     }
 }
 

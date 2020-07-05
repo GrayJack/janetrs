@@ -20,6 +20,7 @@ all-features = true
 
 [dependencies]
 janet-ll = { git = "https://github.com/GrayJack/janet-ll", rev = "dev" }
+bstr = "0.2.13"
 
 [dev-dependencies]
 serial_test = "~0.4.0"

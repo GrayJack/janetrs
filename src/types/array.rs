@@ -1,6 +1,7 @@
 //! Janet dynamic array
 use core::{
     convert::{TryFrom, TryInto},
+    fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::{Index, IndexMut},
@@ -29,7 +30,6 @@ use super::{Janet, JanetExtend};
 ///
 /// assert_eq!(2, arr.len());
 /// ```
-#[derive(Debug)]
 pub struct JanetArray<'data> {
     pub raw: *mut CJanetArray,
     phantom: PhantomData<&'data ()>,
@@ -340,6 +340,13 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub fn as_mut_raw(&mut self) -> *mut CJanetArray {
         self.raw
+    }
+}
+
+impl Debug for JanetArray<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
     }
 }
 

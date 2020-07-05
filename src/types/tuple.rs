@@ -1,5 +1,6 @@
 //! Tuples
 use core::{
+    fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::Index,
@@ -65,7 +66,6 @@ impl<'data> JanetTupleBuilder<'data> {
 /// ```
 ///
 /// [Janet arrays]: ./../array/struct.JanetArray.html
-#[derive(Debug)]
 pub struct JanetTuple<'data> {
     pub(crate) raw: *const CJanet,
     phantom: PhantomData<&'data ()>,
@@ -175,6 +175,13 @@ impl<'data> JanetTuple<'data> {
     #[inline]
     pub fn as_raw(&self) -> *const CJanet {
         self.raw
+    }
+}
+
+impl Debug for JanetTuple<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
     }
 }
 

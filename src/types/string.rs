@@ -1,7 +1,12 @@
 //! Janet String
-use core::marker::PhantomData;
+use core::{
+    fmt::{self, Debug, Display},
+    marker::PhantomData,
+};
 
 use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
+
+use bstr::BStr;
 
 /// Builder for [`JanetString`]s.
 #[derive(Debug)]
@@ -86,7 +91,6 @@ impl<'data> JanetStringBuilder<'data> {
 /// [Janet buffers]: ./../buffer/struct.JanetBuffer.html
 /// [`builder`]: ./struct.JanetString.html#method.builder
 /// [`new`]: ./struct.JanetString.html#method.new
-#[derive(Debug)]
 pub struct JanetString<'data> {
     pub(crate) raw: *const u8,
     phantom: PhantomData<&'data ()>,
@@ -188,6 +192,19 @@ impl<'data> JanetString<'data> {
     #[inline]
     pub fn as_raw(&self) -> *const u8 {
         self.raw
+    }
+}
+
+impl Debug for JanetString<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let slice = unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) };
+        let bstr: &BStr = slice.as_ref();
+
+        if f.alternate() {
+            write!(f, "{:#?}", bstr)
+        } else {
+            write!(f, "{:?}", bstr)
+        }
     }
 }
 

@@ -1,5 +1,9 @@
 //! Janet dynamic buffer (string)
-use core::marker::PhantomData;
+use core::{
+    fmt::{self, Debug},
+    iter::FromIterator,
+    marker::PhantomData,
+};
 
 #[cfg(feature = "std")]
 use std::ffi::CStr;
@@ -12,6 +16,8 @@ use janet_ll::{
 
 #[cfg(feature = "std")]
 use janet_ll::janet_buffer_push_cstring;
+
+use bstr::BStr;
 
 use super::JanetExtend;
 
@@ -264,6 +270,19 @@ impl JanetBuffer<'_> {
     #[inline]
     pub fn as_mut_raw(&mut self) -> *mut CJanetBuffer {
         self.raw
+    }
+}
+
+impl Debug for JanetBuffer<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let slice = unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) };
+        let bstr: &BStr = slice.as_ref();
+
+        if f.alternate() {
+            write!(f, "{:#?}", bstr)
+        } else {
+            write!(f, "{:?}", bstr)
+        }
     }
 }
 

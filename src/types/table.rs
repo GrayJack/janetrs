@@ -1,5 +1,6 @@
 //! Janet table structure.
 use core::{
+    fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::Index,
@@ -36,7 +37,6 @@ use super::{Janet, JanetExtend, JanetStruct};
 /// ```
 ///
 /// [table]: https://janet-lang.org/docs/data_structures/tables.html
-#[derive(Debug)]
 pub struct JanetTable<'data> {
     pub(crate) raw: *mut CJanetTable,
     phatom: PhantomData<&'data ()>,
@@ -583,6 +583,25 @@ impl<'data> JanetTable<'data> {
         self.get(key).is_some()
     }
 
+    /// Returns `true` if the table contais a given value.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = JanetTable::new();
+    /// table.insert(10, "ten");
+    ///
+    /// assert!(table.contains("ten"));
+    /// assert!(!table.contains(11));
+    /// ```
+    #[inline]
+    pub fn contains(&self, value: impl Into<Janet>) -> bool {
+        let value = value.into();
+        self.values().any(|&v| v == value)
+    }
+
     /// Creates a iterator over the refernece of the table keys.
     ///
     /// # Examples
@@ -726,6 +745,13 @@ impl<'data> JanetTable<'data> {
         } else {
             Entry::Vacant(VacantEntry { key, table: self })
         }
+    }
+}
+
+impl Debug for JanetTable<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_map().entries(self.iter()).finish()
     }
 }
 
