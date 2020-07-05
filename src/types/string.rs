@@ -208,6 +208,15 @@ impl Debug for JanetString<'_> {
     }
 }
 
+impl Display for JanetString<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let slice = unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) };
+        let bstr: &BStr = slice.as_ref();
+
+        write!(f, "{}", bstr)
+    }
+}
+
 impl Clone for JanetString<'_> {
     #[inline]
     fn clone(&self) -> Self {

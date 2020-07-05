@@ -1,6 +1,6 @@
 //! Janet dynamic buffer (string)
 use core::{
-    fmt::{self, Debug},
+    fmt::{self, Debug, Display},
     iter::FromIterator,
     marker::PhantomData,
 };
@@ -283,6 +283,15 @@ impl Debug for JanetBuffer<'_> {
         } else {
             write!(f, "{:?}", bstr)
         }
+    }
+}
+
+impl Display for JanetBuffer<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let slice = unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) };
+        let bstr: &BStr = slice.as_ref();
+
+        write!(f, "{}", bstr)
     }
 }
 
