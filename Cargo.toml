@@ -19,7 +19,7 @@ all-features = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-janet-ll = { git = "https://github.com/GrayJack/janet-ll", rev = "dev" }
+janet-ll = { git = "https://github.com/GrayJack/janet-ll", branch = "dev" }
 bstr = "0.2.13"
 
 [dev-dependencies]
