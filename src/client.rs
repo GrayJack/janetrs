@@ -172,8 +172,14 @@ impl JanetClient {
         self.run_bytes(code.as_bytes())
     }
 
-    pub fn env(&self) -> Option<&JanetTable<'_>> {
+    /// Return a reference of the environment table of the runtime if it exist.
+    pub fn env(&self) -> Option<&JanetTable<'static>> {
         self.env_table.as_ref()
+    }
+
+    /// Return a mutable reference of the environment table of the runtime if it exist.
+    pub fn env_mut(&mut self) -> Option<&mut JanetTable<'static>> {
+        self.env_table.as_mut()
     }
 }
 
