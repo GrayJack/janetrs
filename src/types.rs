@@ -526,9 +526,9 @@ macro_rules! impl_string_like {
                     let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
 
                     Some(match cmp_res {
-                        -1 => Ordering::Less,
                         0 => Ordering::Equal,
-                        1 => Ordering::Greater,
+                        _ if cmp_res < 0  => Ordering::Less,
+                        _ if cmp_res > 0 => Ordering::Greater,
                         _ => return None,
                     })
                 }
@@ -574,9 +574,9 @@ macro_rules! impl_part {
                 let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
 
                 Some(match cmp_res {
-                    -1 => Ordering::Less,
                     0 => Ordering::Equal,
-                    1 => Ordering::Greater,
+                    _ if cmp_res < 0 => Ordering::Less,
+                    _ if cmp_res > 0 => Ordering::Greater,
                     _ => return None,
                 })
             }
@@ -588,9 +588,9 @@ macro_rules! impl_part {
                 let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
 
                 Some(match cmp_res {
-                    -1 => Ordering::Less,
                     0 => Ordering::Equal,
-                    1 => Ordering::Greater,
+                    _ if cmp_res < 0 => Ordering::Less,
+                    _ if cmp_res > 0 => Ordering::Greater,
                     _ => return None,
                 })
             }
