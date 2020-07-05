@@ -408,16 +408,16 @@ impl FromIterator<Janet> for JanetArray<'_> {
         let iter = iter.into_iter();
         let (lower, upper) = iter.size_hint();
 
-        let mut arr = if let Some(upper) = upper {
+        let mut new = if let Some(upper) = upper {
             Self::with_capacity(upper as i32)
         } else {
             Self::with_capacity(lower as i32)
         };
 
         for item in iter {
-            arr.push(item);
+            new.push(item);
         }
-        arr
+        new
     }
 }
 

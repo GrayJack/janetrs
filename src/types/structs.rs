@@ -1,12 +1,15 @@
 //! Janet Struct
-use core::{iter::FusedIterator, marker::PhantomData};
+use core::{
+    iter::{FromIterator, FusedIterator},
+    marker::PhantomData,
+};
 
 use janet_ll::{
     janet_struct_begin, janet_struct_end, janet_struct_find, janet_struct_get, janet_struct_head,
     janet_struct_put, JanetKV as CJanetKV,
 };
 
-use super::Janet;
+use super::{Janet, JanetTable};
 
 #[derive(Debug)]
 pub struct JanetStructBuilder<'data> {
@@ -329,6 +332,19 @@ impl Clone for JanetStruct<'_> {
     }
 }
 
+impl From<JanetTable<'_>> for JanetStruct<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from(table: JanetTable<'_>) -> Self {
+        let mut st = Self::builder(table.len());
+
+        for (k, v) in table.into_iter() {
+            st = st.put(k, v);
+        }
+
+        st.finalize()
+    }
+}
+
 impl<'data> IntoIterator for JanetStruct<'data> {
     type IntoIter = IntoIter<'data>;
     type Item = (Janet, Janet);
@@ -358,6 +374,25 @@ impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
             offset: 0,
             end:    len,
         }
+    }
+}
+
+impl FromIterator<(Janet, Janet)> for JanetStruct<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = (Janet, Janet)>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (lower, upper) = iter.size_hint();
+
+        let mut new = if let Some(upper) = upper {
+            Self::builder(upper as i32)
+        } else {
+            Self::builder(lower as i32)
+        };
+
+        for (k, v) in iter {
+            new = new.put(k, v);
+        }
+        new.finalize()
     }
 }
 

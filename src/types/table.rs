@@ -1,5 +1,9 @@
 //! Janet table structure.
-use core::{iter::FusedIterator, marker::PhantomData, ops::Index};
+use core::{
+    iter::{FromIterator, FusedIterator},
+    marker::PhantomData,
+    ops::Index,
+};
 
 use janet_ll::{
     janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
@@ -821,6 +825,25 @@ impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
             offset: 0,
             end:    len,
         }
+    }
+}
+
+impl FromIterator<(Janet, Janet)> for JanetTable<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = (Janet, Janet)>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (lower, upper) = iter.size_hint();
+
+        let mut new = if let Some(upper) = upper {
+            Self::with_capacity(upper as i32)
+        } else {
+            Self::with_capacity(lower as i32)
+        };
+
+        for (k, v) in iter {
+            let _ = new.insert(k, v);
+        }
+        new
     }
 }
 
