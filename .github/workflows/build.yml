@@ -49,4 +49,4 @@ jobs:
         override: true
         profile: minimal
     - name: Check and Run tests
-       run: cargo test --all-features --verbose
+      run: cargo test --all-features --verbose
