@@ -1,5 +1,5 @@
 //! Janet table structure.
-use core::{marker::PhantomData, ops::Index};
+use core::{iter::FusedIterator, marker::PhantomData, ops::Index};
 
 use janet_ll::{
     janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
@@ -38,7 +38,7 @@ pub struct JanetTable<'data> {
     phatom: PhantomData<&'data ()>,
 }
 
-impl JanetTable<'_> {
+impl<'data> JanetTable<'data> {
     /// Create a empty [`JanetTable`].
     ///
     /// It is initially created with capacity 1, so it will not allocate until it is
@@ -272,7 +272,7 @@ impl JanetTable<'_> {
     /// assert_eq!(table.get(10), Some(&Janet::boolean(true)));
     /// ```
     #[inline]
-    pub fn get_mut(&mut self, key: impl Into<Janet>) -> Option<&mut Janet> {
+    pub fn get_mut(&mut self, key: impl Into<Janet>) -> Option<&'data mut Janet> {
         self.get_key_value_mut(key).map(|(_, v)| v)
     }
 
@@ -301,7 +301,9 @@ impl JanetTable<'_> {
     /// assert_eq!(table.get_key_value_mut(11), None);
     /// ```
     #[inline]
-    pub fn get_key_value_mut(&mut self, key: impl Into<Janet>) -> Option<(&Janet, &mut Janet)> {
+    pub fn get_key_value_mut(
+        &mut self, key: impl Into<Janet>,
+    ) -> Option<(&Janet, &'data mut Janet)> {
         let key = key.into();
 
         if key.is_nil() {
@@ -330,7 +332,7 @@ impl JanetTable<'_> {
     /// # SAFETY
     /// This function doesn't check for null pointer and if the key or value ar Janet nil
     #[inline]
-    unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &mut Janet {
+    unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &'data mut Janet {
         self.get_key_value_mut_unchecked(key).1
     }
 
@@ -342,7 +344,7 @@ impl JanetTable<'_> {
     #[inline]
     unsafe fn get_key_value_mut_unchecked(
         &mut self, key: impl Into<Janet>,
-    ) -> (&Janet, &mut Janet) {
+    ) -> (&Janet, &'data mut Janet) {
         let key = key.into();
 
         let kv: *mut (Janet, Janet) = janet_table_find(self.raw, key.inner) as *mut _;
@@ -577,6 +579,109 @@ impl JanetTable<'_> {
         self.get(key).is_some()
     }
 
+    /// Creates a iterator over the refernece of the table keys.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::table;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let table = table! { 1 => "10", true => 10.0};
+    ///
+    /// for key in table.keys() {
+    ///     println!("Key: {}", key);
+    /// }
+    /// ```
+    pub fn keys(&self) -> Keys<'_, '_> {
+        Keys { inner: self.iter() }
+    }
+
+    /// Creates a iterator over the refernece of the table values.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::table;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let table = table! { 1 => "10", true => 10.0};
+    ///
+    /// for val in table.values() {
+    ///     println!("Value: {}", val);
+    /// }
+    /// ```
+    pub fn values(&self) -> Values<'_, '_> {
+        Values { inner: self.iter() }
+    }
+
+    /// Creates a iterator over the mutable refernece of the table values.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{table, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! { 1 => "10", true => 10.0};
+    ///
+    /// for val in table.values_mut() {
+    ///     *val = Janet::number(100.0);
+    /// }
+    ///
+    /// assert!(table.values().all(|v| *v == Janet::number(100.0)));
+    /// ```
+    pub fn values_mut(&mut self) -> ValuesMut<'_, '_> {
+        ValuesMut {
+            inner: self.iter_mut(),
+        }
+    }
+
+    /// Creates a iterator over the reference of the table key-value pairs.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::table;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let table = table! { 1 => "10", true => 10.0};
+    ///
+    /// for (k, v) in table.iter() {
+    ///     println!("Key: {}\tValue: {}", k, v);
+    /// }
+    /// ```
+    #[inline]
+    pub fn iter(&self) -> Iter<'_, '_> {
+        Iter {
+            table:  self,
+            offset: 0,
+            end:    self.len() as isize,
+        }
+    }
+
+    /// Creates a iterator over the reference of the table keys and mutable reference
+    /// of the table values.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{table, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! { 1 => "10", true => 10.0};
+    ///
+    /// for (k, val) in table.iter_mut() {
+    ///     *val = Janet::number(100.0);
+    /// }
+    ///
+    /// assert!(table.values().all(|v| *v == Janet::number(100.0)));
+    /// ```
+    #[inline]
+    pub fn iter_mut(&mut self) -> IterMut<'_, '_> {
+        let len = self.len() as isize;
+        IterMut {
+            table:  self,
+            offset: 0,
+            end:    len,
+        }
+    }
+
     /// Return a raw pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -668,6 +773,54 @@ impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
     #[inline]
     fn index(&self, key: T) -> &Self::Output {
         self.get(key).expect("no entry found for key")
+    }
+}
+
+impl<'data> IntoIterator for JanetTable<'data> {
+    type IntoIter = IntoIter<'data>;
+    type Item = (Janet, Janet);
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len() as isize;
+
+        IntoIter {
+            table:  self,
+            offset: 0,
+            end:    len,
+        }
+    }
+}
+
+impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
+    type IntoIter = Iter<'a, 'data>;
+    type Item = (&'a Janet, &'a Janet);
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len() as isize;
+
+        Iter {
+            table:  self,
+            offset: 0,
+            end:    len,
+        }
+    }
+}
+
+impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
+    type IntoIter = IterMut<'a, 'data>;
+    type Item = (&'a Janet, &'data mut Janet);
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len() as isize;
+
+        IterMut {
+            table:  self,
+            offset: 0,
+            end:    len,
+        }
     }
 }
 
@@ -1083,13 +1236,185 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     }
 }
 
+/// An iterator over a reference to the [`JanetTable`] key-value pairs.
+#[derive(Clone)]
+pub struct Iter<'a, 'data> {
+    table:  &'a JanetTable<'data>,
+    offset: isize,
+    end:    isize,
+}
+
+impl<'a, 'data> Iterator for Iter<'a, 'data> {
+    type Item = (&'a Janet, &'a Janet);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.offset >= self.end {
+            None
+        } else {
+            let ptr: *const (Janet, Janet) =
+                unsafe { (*self.table.raw).data.offset(self.offset) as *const _ };
+            self.offset += 1;
+            Some(unsafe { (&(*ptr).0, &(*ptr).1) })
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = (self.end - self.offset) as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl ExactSizeIterator for Iter<'_, '_> {}
+
+impl FusedIterator for Iter<'_, '_> {}
+
+/// An iterator over a reference to the [`JanetTable`] keys.
+#[derive(Clone)]
+pub struct Keys<'a, 'data> {
+    inner: Iter<'a, 'data>,
+}
+
+impl<'a> Iterator for Keys<'a, '_> {
+    type Item = &'a Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(k, _)| k)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl ExactSizeIterator for Keys<'_, '_> {}
+
+impl FusedIterator for Keys<'_, '_> {}
+
+/// An iterator over a reference to the [`JanetTable`] values.
+#[derive(Clone)]
+pub struct Values<'a, 'data> {
+    inner: Iter<'a, 'data>,
+}
+
+impl<'a> Iterator for Values<'a, '_> {
+    type Item = &'a Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(_, v)| v)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl ExactSizeIterator for Values<'_, '_> {}
+
+impl FusedIterator for Values<'_, '_> {}
+
+/// An iterator over a mutable reference to the [`JanetTable`] key-value pairs.
+pub struct IterMut<'a, 'data> {
+    table:  &'a JanetTable<'data>,
+    offset: isize,
+    end:    isize,
+}
+
+impl<'a, 'data> Iterator for IterMut<'a, 'data> {
+    type Item = (&'a Janet, &'data mut Janet);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.offset >= self.end {
+            None
+        } else {
+            let ptr: *mut (Janet, Janet) =
+                unsafe { (*self.table.raw).data.offset(self.offset) as *mut _ };
+            self.offset += 1;
+            Some(unsafe { (&(*ptr).0, &mut (*ptr).1) })
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = (self.end - self.offset) as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl ExactSizeIterator for IterMut<'_, '_> {}
+
+impl FusedIterator for IterMut<'_, '_> {}
+
+/// An Iterator over a mutable reference to the [`JanetTable`] values.
+pub struct ValuesMut<'a, 'data> {
+    inner: IterMut<'a, 'data>,
+}
+
+impl<'data> Iterator for ValuesMut<'_, 'data> {
+    type Item = &'data mut Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(_, v)| v)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.inner.size_hint()
+    }
+}
+
+impl ExactSizeIterator for ValuesMut<'_, '_> {}
+
+impl FusedIterator for ValuesMut<'_, '_> {}
+
+/// An iterator that moves out of a [`JanetTable`].
+#[derive(Clone)]
+pub struct IntoIter<'data> {
+    table:  JanetTable<'data>,
+    offset: isize,
+    end:    isize,
+}
+
+impl Iterator for IntoIter<'_> {
+    type Item = (Janet, Janet);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.offset == self.end {
+            None
+        } else {
+            let ptr: *const (Janet, Janet) =
+                unsafe { (*self.table.raw).data.offset(self.offset) as *const _ };
+            self.offset += 1;
+            Some(unsafe { ((*ptr).0, (*ptr).1) })
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = (self.end - self.offset) as usize;
+        (exact, Some(exact))
+    }
+}
+
+impl ExactSizeIterator for IntoIter<'_> {}
+
+impl FusedIterator for IntoIter<'_> {}
+
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     #[cfg(not(feature = "std"))]
     use serial_test::serial;
 
     use super::*;
-    use crate::{client::JanetClient, types::JanetString};
+    use crate::{client::JanetClient, table, types::JanetString};
 
     #[test]
     #[cfg_attr(not(feature = "std"), serial)]
@@ -1325,5 +1650,56 @@ mod tests {
         assert_eq!(&Janet::integer(10), entry.key());
         assert_eq!(&Janet::from("não dez"), entry.get());
         assert_eq!(&mut Janet::from("não dez"), entry.get_mut());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn iter() {
+        let _client = JanetClient::init().unwrap();
+
+        let table = table! {10 => "dez", 11 => "onze"};
+        let mut iter = table.iter();
+
+        assert_eq!(
+            iter.next(),
+            Some((&Janet::integer(10), &Janet::from("dez")))
+        );
+        assert_eq!(
+            iter.next(),
+            Some((&Janet::integer(11), &Janet::from("onze")))
+        );
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn itermut() {
+        let _client = JanetClient::init().unwrap();
+
+        let mut table = table! {10 => "dez", 11 => "onze"};
+        let mut iter = table.iter_mut();
+
+        assert_eq!(
+            iter.next(),
+            Some((&Janet::integer(10), &mut Janet::from("dez")))
+        );
+        assert_eq!(
+            iter.next(),
+            Some((&Janet::integer(11), &mut Janet::from("onze")))
+        );
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn intoiter() {
+        let _client = JanetClient::init().unwrap();
+
+        let table = table! {10 => "dez", 11 => "onze"};
+        let mut iter = table.into_iter();
+
+        assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
+        assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
+        assert_eq!(iter.next(), None);
     }
 }
