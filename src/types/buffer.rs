@@ -295,6 +295,18 @@ impl Display for JanetBuffer<'_> {
     }
 }
 
+impl Clone for JanetBuffer<'_> {
+    #[inline]
+    fn clone(&self) -> Self {
+        let len = self.len();
+        let mut clone = Self::with_capacity(len);
+        let slice = unsafe { core::slice::from_raw_parts((*self.raw).data, len as usize) };
+        clone.push_bytes(slice);
+
+        clone
+    }
+}
+
 impl From<&str> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from(string: &str) -> Self {
