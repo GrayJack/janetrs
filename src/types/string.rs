@@ -1,6 +1,7 @@
 //! Janet String
 use core::{
     fmt::{self, Debug, Display},
+    iter::FromIterator,
     marker::PhantomData,
 };
 
@@ -48,6 +49,14 @@ impl<'data> JanetStringBuilder<'data> {
         }
 
         self
+    }
+
+    /// Add a [`char`] to the string builder.
+    #[inline]
+    pub fn put_char(self, ch: char) -> Self {
+        let mut buff = [0; 4];
+        let s = ch.encode_utf8(&mut buff);
+        self.put(s)
     }
 
     /// Finalie the build process and create [`JanetString`].
@@ -224,6 +233,88 @@ impl Clone for JanetString<'_> {
             raw:     unsafe { janet_string(self.raw, self.len()) },
             phantom: PhantomData,
         }
+    }
+}
+
+
+impl FromIterator<char> for JanetString<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = char>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (len, _) = iter.size_hint();
+        let len = if len >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            len as i32
+        };
+        let mut s = Self::builder(len);
+
+        for ch in iter {
+            s = s.put_char(ch);
+        }
+
+        s.finalize()
+    }
+}
+
+impl<'a> FromIterator<&'a char> for JanetString<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = &'a char>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (len, _) = iter.size_hint();
+        let len = if len >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            len as i32
+        };
+        let mut new = Self::builder(len);
+
+        for &ch in iter {
+            new = new.put_char(ch);
+        }
+
+        new.finalize()
+    }
+}
+
+impl<'a> FromIterator<&'a str> for JanetString<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = &'a str>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (len, _) = iter.size_hint();
+        let len = if len >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            len as i32
+        };
+        let mut new = Self::builder(len);
+
+        for s in iter {
+            new = new.put(s);
+        }
+
+        new.finalize()
+    }
+}
+
+#[cfg(feature = "std")]
+impl FromIterator<String> for JanetString<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (len, _) = iter.size_hint();
+        let len = if len >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            len as i32
+        };
+        let mut new = Self::builder(len);
+
+        for s in iter {
+            new = new.put(&s);
+        }
+
+        new.finalize()
     }
 }
 
