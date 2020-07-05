@@ -9,6 +9,8 @@ use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_
 
 use bstr::BStr;
 
+use super::JanetBuffer;
+
 /// Builder for [`JanetString`]s.
 #[derive(Debug)]
 pub struct JanetStringBuilder<'data> {
@@ -236,6 +238,13 @@ impl Clone for JanetString<'_> {
     }
 }
 
+impl From<JanetBuffer<'_>> for JanetString<'_> {
+    #[inline]
+    fn from(buff: JanetBuffer<'_>) -> Self {
+        let slice = unsafe { core::slice::from_raw_parts((*buff.raw).data, buff.len() as usize) };
+        JanetString::new(slice)
+    }
+}
 
 impl FromIterator<char> for JanetString<'_> {
     #[cfg_attr(feature = "inline-more", inline)]

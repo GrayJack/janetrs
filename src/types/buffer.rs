@@ -19,7 +19,7 @@ use janet_ll::janet_buffer_push_cstring;
 
 use bstr::BStr;
 
-use super::JanetExtend;
+use super::{JanetExtend, JanetString};
 
 /// Janet [buffers](https://janet-lang.org/docs/data_structures/buffers.html) are the mutable
 /// version of [`JanetStrings`]. Since Janet strings can hold any sequence of bytes,
@@ -326,6 +326,16 @@ impl From<char> for JanetBuffer<'_> {
     }
 }
 
+impl From<JanetString<'_>> for JanetBuffer<'_> {
+    #[inline]
+    fn from(s: JanetString<'_>) -> Self {
+        let slice = unsafe { core::slice::from_raw_parts(s.raw, s.len() as usize) };
+        let mut buff = Self::with_capacity(s.len());
+        buff.push_bytes(slice);
+        buff
+    }
+}
+
 impl Default for JanetBuffer<'_> {
     #[inline]
     fn default() -> Self {
@@ -453,7 +463,7 @@ impl JanetExtend<&CStr> for JanetBuffer<'_> {
 #[cfg(all(test, feature = "amalgation"))]
 mod tests {
     use super::*;
-    use crate::client::JanetClient;
+    use crate::{client::JanetClient, types::JanetString};
 
     #[cfg(not(feature = "std"))]
     use serial_test::serial;
@@ -507,5 +517,18 @@ mod tests {
         assert_eq!(19, buffer.len());
         buffer.set_len(-10);
         assert_eq!(19, buffer.len());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn clone() {
+        let _client = JanetClient::init().unwrap();
+        let mut buffer = JanetBuffer::new();
+        buffer.push_str("abcdefg");
+
+        let clone = JanetString::from(buffer.clone());
+        let buffer = JanetString::from(buffer);
+
+        assert_eq!(clone, buffer);
     }
 }
