@@ -282,6 +282,20 @@ impl From<CJanet> for Janet {
     }
 }
 
+impl From<&CJanet> for Janet {
+    #[inline]
+    fn from(val: &CJanet) -> Self {
+        Self { inner: *val }
+    }
+}
+
+impl From<&Janet> for Janet {
+    #[inline]
+    fn from(val: &Janet) -> Self {
+        *val
+    }
+}
+
 impl From<()> for Janet {
     #[inline]
     fn from(_: ()) -> Self {
@@ -296,6 +310,13 @@ impl From<bool> for Janet {
     }
 }
 
+impl From<&bool> for Janet {
+    #[inline]
+    fn from(val: &bool) -> Self {
+        Self::boolean(*val)
+    }
+}
+
 impl From<i32> for Janet {
     #[inline]
     fn from(val: i32) -> Self {
@@ -303,10 +324,24 @@ impl From<i32> for Janet {
     }
 }
 
+impl From<&i32> for Janet {
+    #[inline]
+    fn from(val: &i32) -> Self {
+        Self::integer(*val)
+    }
+}
+
 impl From<f64> for Janet {
     #[inline]
     fn from(val: f64) -> Self {
         Self::number(val)
+    }
+}
+
+impl From<&f64> for Janet {
+    #[inline]
+    fn from(val: &f64) -> Self {
+        Self::number(*val)
     }
 }
 
@@ -325,6 +360,13 @@ impl From<JanetTable<'_>> for Janet {
     }
 }
 
+impl From<&JanetTable<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetTable<'_>) -> Self {
+        Self::table(val.clone())
+    }
+}
+
 impl From<JanetArray<'_>> for Janet {
     #[inline]
     fn from(val: JanetArray<'_>) -> Self {
@@ -332,10 +374,24 @@ impl From<JanetArray<'_>> for Janet {
     }
 }
 
+impl From<&JanetArray<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetArray<'_>) -> Self {
+        Self::array(val.clone())
+    }
+}
+
 impl From<JanetBuffer<'_>> for Janet {
     #[inline]
     fn from(val: JanetBuffer<'_>) -> Self {
         Self::buffer(val)
+    }
+}
+
+impl From<&JanetBuffer<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetBuffer<'_>) -> Self {
+        Self::buffer(val.clone())
     }
 }
 
@@ -353,10 +409,24 @@ impl From<JanetTuple<'_>> for Janet {
     }
 }
 
+impl From<&JanetTuple<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetTuple<'_>) -> Self {
+        Self::tuple(val.clone())
+    }
+}
+
 impl From<JanetString<'_>> for Janet {
     #[inline]
     fn from(val: JanetString<'_>) -> Self {
         Self::string(val)
+    }
+}
+
+impl From<&JanetString<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetString<'_>) -> Self {
+        Self::string(val.clone())
     }
 }
 
@@ -367,10 +437,24 @@ impl From<JanetStruct<'_>> for Janet {
     }
 }
 
+impl From<&JanetStruct<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetStruct<'_>) -> Self {
+        Self::structs(val.clone())
+    }
+}
+
 impl From<JanetSymbol<'_>> for Janet {
     #[inline]
     fn from(val: JanetSymbol<'_>) -> Self {
         Self::symbol(val)
+    }
+}
+
+impl From<&JanetSymbol<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetSymbol<'_>) -> Self {
+        Self::symbol(val.clone())
     }
 }
 
@@ -381,9 +465,23 @@ impl From<JanetKeyword<'_>> for Janet {
     }
 }
 
+impl From<&JanetKeyword<'_>> for Janet {
+    #[inline]
+    fn from(val: &JanetKeyword<'_>) -> Self {
+        Self::keyword(val.clone())
+    }
+}
+
 impl From<Janet> for CJanet {
     #[inline]
     fn from(val: Janet) -> Self {
+        val.inner
+    }
+}
+
+impl From<&Janet> for CJanet {
+    #[inline]
+    fn from(val: &Janet) -> Self {
         val.inner
     }
 }
@@ -413,6 +511,34 @@ impl PartialOrd<Janet> for CJanet {
     #[inline]
     fn partial_cmp(&self, other: &Janet) -> Option<Ordering> {
         self.partial_cmp(&other.inner)
+    }
+}
+
+impl PartialEq<&CJanet> for Janet {
+    #[inline]
+    fn eq(&self, other: &&CJanet) -> bool {
+        self.inner.eq(*other)
+    }
+}
+
+impl PartialEq<&Janet> for CJanet {
+    #[inline]
+    fn eq(&self, other: &&Janet) -> bool {
+        self.eq(&(*other).inner)
+    }
+}
+
+impl PartialOrd<&CJanet> for Janet {
+    #[inline]
+    fn partial_cmp(&self, other: &&CJanet) -> Option<Ordering> {
+        self.inner.partial_cmp(*other)
+    }
+}
+
+impl PartialOrd<&Janet> for CJanet {
+    #[inline]
+    fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> {
+        self.partial_cmp(&(*other).inner)
     }
 }
 
