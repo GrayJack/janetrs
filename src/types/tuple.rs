@@ -229,9 +229,9 @@ impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
     }
 }
 
-impl FromIterator<Janet> for JanetTuple<'_> {
+impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
-    fn from_iter<T: IntoIterator<Item = Janet>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (lower, upper) = iter.size_hint();
 

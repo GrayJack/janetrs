@@ -409,9 +409,9 @@ impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
     }
 }
 
-impl FromIterator<Janet> for JanetArray<'_> {
+impl<U: Into<Janet>> FromIterator<U> for JanetArray<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
-    fn from_iter<T: IntoIterator<Item = Janet>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (lower, upper) = iter.size_hint();
 
@@ -839,6 +839,13 @@ mod tests {
 
         let jarr: JanetArray<'_> = vec.into_iter().collect();
         assert_eq!(jarr.len(), 100);
+        assert!(jarr.iter().all(|j| j == Janet::nil()));
+
+        let vec = vec![101.0; 100];
+
+        let jarr: JanetArray<'_> = vec.into_iter().collect();
+        assert_eq!(jarr.len(), 100);
+        assert!(jarr.iter().all(|j| j == Janet::number(101.0)));
     }
 
     #[test]
