@@ -17,7 +17,7 @@ use janet_ll::{
 #[cfg(feature = "std")]
 use janet_ll::janet_buffer_push_cstring;
 
-use bstr::BStr;
+use bstr::{BStr, ByteSlice, CharIndices, Chars};
 
 use super::{JanetExtend, JanetString};
 
@@ -277,6 +277,56 @@ impl JanetBuffer<'_> {
         unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) }
     }
 
+    /// Creates an iterator over the Unicode scalar values in this buffer. If invalid
+    /// UTF-8 is encountered, then the Unicode replacement codepoint is yielded instead.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from(&b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61"[..]);
+    ///
+    /// let chars: Vec<char> = s.chars().collect();
+    /// assert_eq!(vec!['☃', '\u{FFFD}', '𝞃', '\u{FFFD}', 'a'], chars);
+    /// ```
+    #[inline]
+    pub fn chars(&self) -> Chars {
+        self.as_bytes().as_bstr().chars()
+    }
+
+    /// Creates an iterator over the Unicode scalar values in this janet buffer along with
+    /// their starting and ending byte index positions. If invalid UTF-8 is encountered,
+    /// then the Unicode replacement codepoint is yielded instead.
+    ///
+    /// Note that this is slightly different from the `CharIndices` iterator provided by
+    /// the standard library. Aside from working on possibly invalid UTF-8, this
+    /// iterator provides both the corresponding starting and ending byte indices of
+    /// each codepoint yielded. The ending position is necessary to slice the original
+    /// byte string when invalid UTF-8 bytes are converted into a Unicode replacement
+    /// codepoint, since a single replacement codepoint can substitute anywhere from 1
+    /// to 3 invalid bytes (inclusive).
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from(&b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61"[..]);
+    ///
+    /// let chars: Vec<(usize, usize, char)> = s.char_indices().collect();
+    /// assert_eq!(chars, vec![
+    ///     (0, 3, '☃'),
+    ///     (3, 4, '\u{FFFD}'),
+    ///     (4, 8, '𝞃'),
+    ///     (8, 10, '\u{FFFD}'),
+    ///     (10, 11, 'a'),
+    /// ]);
+    /// ```
+    pub fn char_indices(&self) -> CharIndices {
+        self.as_bytes().as_bstr().char_indices()
+    }
+
     /// Return a raw pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -350,11 +400,29 @@ impl Clone for JanetBuffer<'_> {
     }
 }
 
+impl From<&[u8]> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from(bytes: &[u8]) -> Self {
+        let len = if bytes.len() >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            bytes.len() as i32
+        };
+        let mut buff = Self::with_capacity(len);
+        buff.push_bytes(bytes);
+        buff
+    }
+}
+
 impl From<&str> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from(string: &str) -> Self {
-        let cap = string.len();
-        let mut buff = JanetBuffer::with_capacity(cap as i32);
+        let cap = if string.len() >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            string.len() as i32
+        };
+        let mut buff = JanetBuffer::with_capacity(cap);
         buff.push_str(string);
         buff
     }

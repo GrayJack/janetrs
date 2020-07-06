@@ -7,7 +7,7 @@ use core::{
 
 use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
 
-use bstr::BStr;
+use bstr::{BStr, ByteSlice, CharIndices, Chars};
 
 use super::JanetBuffer;
 
@@ -210,6 +210,56 @@ impl<'data> JanetString<'data> {
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+    }
+
+    /// Creates an iterator over the Unicode scalar values in this string. If invalid
+    /// UTF-8 is encountered, then the Unicode replacement codepoint is yielded instead.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61");
+    ///
+    /// let chars: Vec<char> = s.chars().collect();
+    /// assert_eq!(vec!['☃', '\u{FFFD}', '𝞃', '\u{FFFD}', 'a'], chars);
+    /// ```
+    #[inline]
+    pub fn chars(&self) -> Chars {
+        self.as_bytes().as_bstr().chars()
+    }
+
+    /// Creates an iterator over the Unicode scalar values in this janet string along with
+    /// their starting and ending byte index positions. If invalid UTF-8 is encountered,
+    /// then the Unicode replacement codepoint is yielded instead.
+    ///
+    /// Note that this is slightly different from the `CharIndices` iterator provided by
+    /// the standard library. Aside from working on possibly invalid UTF-8, this
+    /// iterator provides both the corresponding starting and ending byte indices of
+    /// each codepoint yielded. The ending position is necessary to slice the original
+    /// byte string when invalid UTF-8 bytes are converted into a Unicode replacement
+    /// codepoint, since a single replacement codepoint can substitute anywhere from 1
+    /// to 3 invalid bytes (inclusive).
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61");
+    ///
+    /// let chars: Vec<(usize, usize, char)> = s.char_indices().collect();
+    /// assert_eq!(chars, vec![
+    ///     (0, 3, '☃'),
+    ///     (3, 4, '\u{FFFD}'),
+    ///     (4, 8, '𝞃'),
+    ///     (8, 10, '\u{FFFD}'),
+    ///     (10, 11, 'a'),
+    /// ]);
+    /// ```
+    pub fn char_indices(&self) -> CharIndices {
+        self.as_bytes().as_bstr().char_indices()
     }
 
     /// Return a raw pointer to the string raw structure.
