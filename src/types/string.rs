@@ -196,20 +196,44 @@ impl<'data> JanetString<'data> {
         self.len() == 0
     }
 
+    /// Returns a byte slice of the [`JanetString`] contents.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("hello");
+    ///
+    /// assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
+    /// ```
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+    }
+
     /// Return a raw pointer to the string raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const u8 {
+    pub const fn as_raw(&self) -> *const u8 {
+        self.raw
+    }
+
+    /// Converts a string to a raw pointer.
+    ///
+    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    #[inline]
+    pub const fn as_ptr(&self) -> *const u8 {
         self.raw
     }
 }
 
 impl Debug for JanetString<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let slice = unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) };
-        let bstr: &BStr = slice.as_ref();
+        let bstr: &BStr = self.as_bytes().as_ref();
 
         if f.alternate() {
             write!(f, "{:#?}", bstr)
@@ -221,8 +245,7 @@ impl Debug for JanetString<'_> {
 
 impl Display for JanetString<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let slice = unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) };
-        let bstr: &BStr = slice.as_ref();
+        let bstr: &BStr = self.as_bytes().as_ref();
 
         write!(f, "{}", bstr)
     }
@@ -241,8 +264,22 @@ impl Clone for JanetString<'_> {
 impl From<JanetBuffer<'_>> for JanetString<'_> {
     #[inline]
     fn from(buff: JanetBuffer<'_>) -> Self {
-        let slice = unsafe { core::slice::from_raw_parts((*buff.raw).data, buff.len() as usize) };
+        let slice = buff.as_bytes();
         JanetString::new(slice)
+    }
+}
+
+impl AsRef<[u8]> for JanetString<'_> {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsRef<BStr> for JanetString<'_> {
+    #[inline]
+    fn as_ref(&self) -> &BStr {
+        self.as_bytes().as_ref()
     }
 }
 

@@ -250,6 +250,22 @@ impl JanetBuffer<'_> {
         unsafe { janet_buffer_push_cstring(self.raw, cstr.as_ptr()) }
     }
 
+    /// Returns a byte slice of the [`JanetString`] contents.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from("hello");
+    ///
+    /// assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
+    /// ```
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) }
+    }
+
     /// Return a raw pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -271,12 +287,29 @@ impl JanetBuffer<'_> {
     pub fn as_mut_raw(&mut self) -> *mut CJanetBuffer {
         self.raw
     }
+
+    /// Converts a buffer to a raw pointer.
+    ///
+    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    #[inline]
+    pub fn as_ptr(&self) -> *const u8 {
+        unsafe { (*self.raw).data }
+    }
+
+    /// Converts a mutable buffer slice to a raw pointer.
+    ///
+    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    #[inline]
+    pub fn as_ptr_mut(&mut self) -> *mut u8 {
+        unsafe { (*self.raw).data }
+    }
 }
 
 impl Debug for JanetBuffer<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let slice = unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) };
-        let bstr: &BStr = slice.as_ref();
+        let bstr: &BStr = self.as_bytes().as_ref();
 
         if f.alternate() {
             write!(f, "{:#?}", bstr)
@@ -288,8 +321,7 @@ impl Debug for JanetBuffer<'_> {
 
 impl Display for JanetBuffer<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let slice = unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) };
-        let bstr: &BStr = slice.as_ref();
+        let bstr: &BStr = self.as_bytes().as_ref();
 
         write!(f, "{}", bstr)
     }
@@ -300,7 +332,7 @@ impl Clone for JanetBuffer<'_> {
     fn clone(&self) -> Self {
         let len = self.len();
         let mut clone = Self::with_capacity(len);
-        let slice = unsafe { core::slice::from_raw_parts((*self.raw).data, len as usize) };
+        let slice = self.as_bytes();
         clone.push_bytes(slice);
 
         clone
@@ -329,7 +361,7 @@ impl From<char> for JanetBuffer<'_> {
 impl From<JanetString<'_>> for JanetBuffer<'_> {
     #[inline]
     fn from(s: JanetString<'_>) -> Self {
-        let slice = unsafe { core::slice::from_raw_parts(s.raw, s.len() as usize) };
+        let slice = s.as_bytes();
         let mut buff = Self::with_capacity(s.len());
         buff.push_bytes(slice);
         buff
@@ -340,6 +372,20 @@ impl Default for JanetBuffer<'_> {
     #[inline]
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl AsRef<[u8]> for JanetBuffer<'_> {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsRef<BStr> for JanetBuffer<'_> {
+    #[inline]
+    fn as_ref(&self) -> &BStr {
+        self.as_bytes().as_ref()
     }
 }
 
