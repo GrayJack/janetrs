@@ -168,6 +168,8 @@ impl JanetBuffer<'_> {
     /// name.
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
+    ///
+    /// Note that this method has no effect on the allocated capacity of the buffer.
     #[inline]
     pub fn set_len(&mut self, new_len: i32) {
         unsafe { janet_buffer_setcount(self.raw, new_len) };
@@ -188,6 +190,15 @@ impl JanetBuffer<'_> {
     #[inline]
     pub fn reserve(&mut self, additional: i32) {
         unsafe { janet_buffer_extra(self.raw, additional) };
+    }
+
+    /// Truncates this [`JAnetString`], removing all contents.
+    ///
+    /// While this means the string will have a length of zero, it does not touch its
+    /// capacity.
+    #[inline]
+    pub fn clear(&mut self) {
+        self.set_len(0);
     }
 
     /// Append the given [`char`] onto the end of the buffer.
@@ -250,7 +261,7 @@ impl JanetBuffer<'_> {
         unsafe { janet_buffer_push_cstring(self.raw, cstr.as_ptr()) }
     }
 
-    /// Returns a byte slice of the [`JanetString`] contents.
+    /// Returns a byte slice of the [`JanetBuffer`] contents.
     ///
     /// # Examples
     /// ```
@@ -576,5 +587,20 @@ mod tests {
         let buffer = JanetString::from(buffer);
 
         assert_eq!(clone, buffer);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn clear() {
+        let _client = JanetClient::init().unwrap();
+        let mut buffer = JanetBuffer::from("Hello!");
+
+        assert_eq!(buffer.len(), 6);
+        assert_eq!(buffer.capacity(), 6);
+
+        buffer.clear();
+
+        assert!(buffer.is_empty());
+        assert_eq!(buffer.capacity(), 6);
     }
 }
