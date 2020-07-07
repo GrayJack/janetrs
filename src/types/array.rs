@@ -254,6 +254,21 @@ impl<'data> JanetArray<'data> {
         }
     }
 
+    /// Returns `true` if the array contains an element with the given `value`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![1.0, "foo", 4.0];
+    /// assert!(arr.contains("foo"));
+    /// ```
+    pub fn contains(&self, value: impl Into<Janet>) -> bool {
+        let value = value.into();
+        self.iter().any(|&elem| elem == value)
+    }
+
     /// Returns a mutable reference to an element in the array at the`index`.
     /// Returns a reference to an element in the array at the`index`.
     ///

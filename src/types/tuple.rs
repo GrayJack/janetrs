@@ -158,6 +158,21 @@ impl<'data> JanetTuple<'data> {
         self.len() == 0
     }
 
+    /// Returns `true` if the tuple contains an element with the given `value`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::tuple;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let tup = tuple![1.0, "foo", 4.0];
+    /// assert!(tup.contains("foo"));
+    /// ```
+    pub fn contains(&self, value: impl Into<Janet>) -> bool {
+        let value = value.into();
+        self.iter().any(|&elem| elem == value)
+    }
+
     /// Creates a iterator over the reference of the array itens.
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {
