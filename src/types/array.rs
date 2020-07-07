@@ -385,6 +385,55 @@ impl<'data> JanetArray<'data> {
         ret
     }
 
+    /// Shortens the array, keeping the first `len` elements and dropping the rest.
+    ///
+    /// If `len` is greater than the array's current length or `len` is lesser than 0,
+    /// this has no effect.
+    ///
+    /// # Examples
+    ///
+    /// Truncating a five element vector to two elements:
+    ///
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1, 2, 3, 4, 5];
+    /// arr.truncate(2);
+    /// assert_eq!(arr.len(), 2);
+    /// ```
+    ///
+    /// No truncation occurs when `len` is greater than the vector's current
+    /// length:
+    ///
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1, 2, 3];
+    /// arr.truncate(8);
+    /// assert_eq!(arr.len(), 3);
+    /// ```
+    ///
+    /// Truncating when `len == 0` is equivalent to calling the [`clear`]
+    /// method.
+    ///
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1, 2, 3];
+    /// arr.truncate(0);
+    /// assert!(arr.is_empty());
+    /// ```
+    ///
+    /// [`clear`]: #method.clear
+    pub fn truncate(&mut self, len: i32) {
+        if len <= self.len() && len >= 0 {
+            self.set_len(len);
+        }
+    }
+
     /// Creates a iterator over the reference of the array itens.
     ///
     /// # Examples
