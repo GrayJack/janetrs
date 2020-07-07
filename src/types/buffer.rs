@@ -192,7 +192,7 @@ impl JanetBuffer<'_> {
         unsafe { janet_buffer_extra(self.raw, additional) };
     }
 
-    /// Truncates this [`JAnetString`], removing all contents.
+    /// Truncates this [`JanetBuffer`], removing all contents.
     ///
     /// While this means the string will have a length of zero, it does not touch its
     /// capacity.

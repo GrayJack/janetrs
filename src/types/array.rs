@@ -31,7 +31,7 @@ use super::{Janet, JanetExtend};
 /// assert_eq!(2, arr.len());
 /// ```
 pub struct JanetArray<'data> {
-    pub raw: *mut CJanetArray,
+    pub(crate) raw: *mut CJanetArray,
     phantom: PhantomData<&'data ()>,
 }
 
@@ -161,6 +161,14 @@ impl<'data> JanetArray<'data> {
         unsafe { janet_array_ensure(self.raw, check_capacity, growth) };
     }
 
+    /// Clears the array, removing all values.
+    ///
+    /// Note that this method has no effect on the allocated capacity of the array.
+    #[inline]
+    pub fn clear(&mut self) {
+        self.set_len(0);
+    }
+
     /// Appends an element to the back of the array.
     ///
     /// # Panics
@@ -273,6 +281,93 @@ impl<'data> JanetArray<'data> {
                 Some(&mut (*ptr))
             }
         }
+    }
+
+    /// Moves all the elements of `other` into the array, leaving `other` empty.
+    ///
+    /// # Panics
+    /// Panics if the number of elements overflow a `i32`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr1 = array![1, 2, 3];
+    /// let mut arr2 = array![4, 5, 6];
+    ///
+    /// assert_eq!(arr1.len(), 3);
+    /// assert!(!arr2.is_empty());
+    /// arr1.append(&mut arr2);
+    /// assert_eq!(arr1.len(), 6);
+    /// assert!(arr2.is_empty());
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn append(&mut self, other: &mut Self) {
+        other.iter().for_each(|&j| self.push(j));
+        other.clear()
+    }
+
+    /// Inserts an element at position `index` within the array, shifting all elements
+    /// after it to the right.
+    ///
+    /// # Panics
+    /// Panics if `index < 0` or `index > len`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut array = array![1, 2];
+    /// array.insert(1, 3) // now it's `[1, 3, 2]`
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn insert(&mut self, index: i32, element: impl Into<Janet>) {
+        if index < 0 || index > self.len() + 1 {
+            panic!(
+                "insertion index (is {}) should be >= 0 and <= {})",
+                index,
+                self.len()
+            );
+        } else {
+            self.set_len(self.len() + 1);
+
+            // shift all elements from index to the last one
+            for i in (index..self.len()).rev() {
+                self[i] = self[i - 1];
+            }
+            self[index] = element.into();
+        }
+    }
+
+    /// Removes and returns the element at position index within the vector, shifting all
+    /// elements after it to the left.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of the bounds.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1, "2", 3.0];
+    /// let rmed = arr.remove(1);
+    /// assert_eq!(rmed, Janet::from("2"));
+    /// assert_eq!(arr.len(), 2);
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn remove(&mut self, index: i32) -> Janet {
+        let ret = self[index];
+
+        for i in index..self.len() - 1 {
+            self[i] = self[i + 1]
+        }
+
+        self.set_len(self.len() - 1);
+
+        ret
     }
 
     /// Creates a iterator over the reference of the array itens.
@@ -878,5 +973,50 @@ mod tests {
         assert_eq!(iter.len(), 99);
         let _ = iter.next_back();
         assert_eq!(iter.len(), 98);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn insert() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = array![1, 2, 3, 4];
+
+        assert_eq!(array.len(), 4);
+        assert_eq!(array[1], &Janet::integer(2));
+        assert_eq!(array[2], &Janet::integer(3));
+
+        array.insert(1, 10);
+
+        assert_eq!(array.len(), 5);
+        assert_eq!(array[1], &Janet::integer(10));
+        assert_eq!(array[2], &Janet::integer(2));
+        assert_eq!(array[3], &Janet::integer(3));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn remove() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = array![1, 2, 3, 4];
+
+        assert_eq!(array.len(), 4);
+        let rm = array.remove(1);
+        assert_eq!(array.len(), 3);
+        assert_eq!(rm, Janet::integer(2));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn clear() {
+        let _client = JanetClient::init().unwrap();
+        let mut array = array![1, 2, 3, 4, "5", 6.0];
+
+        assert_eq!(array.len(), 6);
+        assert_eq!(array.capacity(), 6);
+
+        array.clear();
+
+        assert!(array.is_empty());
+        assert_eq!(array.capacity(), 6);
     }
 }
