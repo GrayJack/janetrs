@@ -227,7 +227,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[inline]
     pub fn chars(&self) -> Chars {
-        self.as_bytes().as_bstr().chars()
+        self.as_bytes().chars()
     }
 
     /// Creates an iterator over the Unicode scalar values in this janet string along with
@@ -238,7 +238,7 @@ impl<'data> JanetString<'data> {
     /// the standard library. Aside from working on possibly invalid UTF-8, this
     /// iterator provides both the corresponding starting and ending byte indices of
     /// each codepoint yielded. The ending position is necessary to slice the original
-    /// byte string when invalid UTF-8 bytes are converted into a Unicode replacement
+    /// string when invalid UTF-8 bytes are converted into a Unicode replacement
     /// codepoint, since a single replacement codepoint can substitute anywhere from 1
     /// to 3 invalid bytes (inclusive).
     ///
@@ -258,8 +258,413 @@ impl<'data> JanetString<'data> {
     ///     (10, 11, 'a'),
     /// ]);
     /// ```
+    #[inline]
     pub fn char_indices(&self) -> CharIndices {
-        self.as_bytes().as_bstr().char_indices()
+        self.as_bytes().char_indices()
+    }
+
+    /// Creates an iterator over the grapheme clusters in this string along with
+    /// their starting and ending byte index positions. If invalid UTF-8 is encountered,
+    /// then the Unicode replacement codepoint is yielded instead.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to get the byte offsets of each individual
+    /// grapheme cluster:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
+    /// let graphemes: Vec<(usize, usize, &str)> = s.grapheme_indices().collect();
+    /// assert_eq!(vec![(0, 5, "à̖"), (5, 13, "🇺🇸")], graphemes);
+    /// ```
+    ///
+    /// This example shows what happens when invalid UTF-8 is enountered. Note
+    /// that the offsets are valid indices into the original string, and do
+    /// not necessarily correspond to the length of the `&str` returned!
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut bytes = JanetString::new();
+    /// bytes.push_str("a\u{0300}\u{0316}");
+    /// bytes.push_u8(b'\xFF');
+    /// bytes.push_str("\u{1F1FA}\u{1F1F8}");
+    ///
+    /// let graphemes: Vec<(usize, usize, &str)> = bytes.grapheme_indices().collect();
+    /// assert_eq!(graphemes, vec![
+    ///     (0, 5, "à̖"),
+    ///     (5, 6, "\u{FFFD}"),
+    ///     (6, 14, "🇺🇸")
+    /// ]);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn grapheme_indices(&self) -> GraphemeIndices {
+        self.as_bytes().grapheme_indices()
+    }
+
+    /// Creates an iterator over the grapheme clusters in this string.
+    /// If invalid UTF-8 is encountered, then the Unicode replacement codepoint
+    /// is yielded instead.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how multiple codepoints can combine to form a
+    /// single grapheme cluster:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
+    /// let graphemes: Vec<&str> = s.graphemes().collect();
+    /// assert_eq!(vec!["à̖", "🇺🇸"], graphemes);
+    /// ```
+    ///
+    /// This shows that graphemes can be iterated over in reverse:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
+    /// let graphemes: Vec<&str> = s.graphemes().rev().collect();
+    /// assert_eq!(vec!["🇺🇸", "à̖"], graphemes);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn graphemes(&self) -> Graphemes {
+        self.as_bytes().graphemes()
+    }
+
+    /// Creates an iterator over all lines in a string, without their
+    /// terminators.
+    ///
+    /// For this iterator, the only line terminators recognized are `\r\n` and
+    /// `\n`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(
+    ///     &b"\
+    /// foo
+    ///
+    /// bar\r
+    /// baz
+    ///
+    ///
+    /// quux"[..],
+    /// );
+    /// let lines: Vec<&[u8]> = s.lines().collect();
+    /// assert_eq!(lines, vec![
+    ///     &b"foo"[..],
+    ///     &b""[..],
+    ///     &b"bar"[..],
+    ///     &b"baz"[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b"quux"[..],
+    /// ]);
+    /// ```
+    #[inline]
+    pub fn lines(&self) -> Lines {
+        self.as_bytes().lines()
+    }
+
+    /// Creates an iterator over all lines in a string, including their
+    /// terminators.
+    ///
+    /// For this iterator, the only line terminator recognized is `\n`. (Since
+    /// line terminators are included, this also handles `\r\n` line endings.)
+    ///
+    /// Line terminators are only included if they are present in the original
+    /// string. For example, the last line in a string may not end
+    /// with a line terminator.
+    ///
+    /// Concatenating all elements yielded by this iterator is guaranteed to
+    /// yield the original string.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(
+    ///     &b"\
+    /// foo
+    ///
+    /// bar\r
+    /// baz
+    ///
+    ///
+    /// quux"[..],
+    /// );
+    /// let lines: Vec<&[u8]> = s.lines_with_terminator().collect();
+    /// assert_eq!(lines, vec![
+    ///     &b"foo\n"[..],
+    ///     &b"\n"[..],
+    ///     &b"bar\r\n"[..],
+    ///     &b"baz\n"[..],
+    ///     &b"\n"[..],
+    ///     &b"\n"[..],
+    ///     &b"quux"[..],
+    /// ]);
+    /// ```
+    #[inline]
+    pub fn lines_with_terminator(&self) -> LinesWithTerminator {
+        self.as_bytes().lines_with_terminator()
+    }
+
+    /// Creates an iterator over the sentences in this string along with
+    /// their starting and ending byte index positions.
+    ///
+    /// Typically, a sentence will include its trailing punctuation and
+    /// whitespace. Concatenating all elements yielded by the iterator
+    /// results in the original string (modulo Unicode replacement codepoint
+    /// substitutions if invalid UTF-8 is encountered).
+    ///
+    /// Since sentences are made up of one or more codepoints, this iterator
+    /// yields `&str` elements. When invalid UTF-8 is encountered, replacement
+    /// codepoints are substituted.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"I want this. Not that. Right now."[..]);
+    /// let sentences: Vec<(usize, usize, &str)> = s.sentence_indices().collect();
+    /// assert_eq!(sentences, vec![
+    ///     (0, 13, "I want this. "),
+    ///     (13, 23, "Not that. "),
+    ///     (23, 33, "Right now."),
+    /// ]);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn sentence_indices(&self) -> SentenceIndices {
+        self.as_bytes().sentence_indices()
+    }
+
+    /// Creates an iterator over the sentences in this string.
+    ///
+    /// Typically, a sentence will include its trailing punctuation and
+    /// whitespace. Concatenating all elements yielded by the iterator
+    /// results in the original string (modulo Unicode replacement codepoint
+    /// substitutions if invalid UTF-8 is encountered).
+    ///
+    /// Since sentences are made up of one or more codepoints, this iterator
+    /// yields `&str` elements. When invalid UTF-8 is encountered, replacement
+    /// codepoints are substituted.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"I want this. Not that. Right now."[..]);
+    /// let sentences: Vec<&str> = s.sentences().collect();
+    /// assert_eq!(
+    ///     sentences,
+    ///     vec!["I want this. ", "Not that. ", "Right now.",]
+    /// );
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn sentences(&self) -> Sentences {
+        self.as_bytes().sentences()
+    }
+
+    /// Creates an iterator over chunks of valid UTF-8.
+    ///
+    /// The iterator returned yields chunks of valid UTF-8 separated by invalid
+    /// UTF-8 bytes, if they exist. Invalid UTF-8 bytes are always 1-3 bytes,
+    /// which are determined via the "substitution of maximal subparts"
+    /// strategy described in the docs for the
+    /// [`to_str_lossy`] method.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"foo\xFD\xFEbar\xFF"[..]);
+    ///
+    /// let (mut valid_chunks, mut invalid_chunks) = (vec![], vec![]);
+    /// for chunk in s.utf8_chunks() {
+    ///     if !chunk.valid().is_empty() {
+    ///         valid_chunks.push(chunk.valid());
+    ///     }
+    ///     if !chunk.invalid().is_empty() {
+    ///         invalid_chunks.push(chunk.invalid());
+    ///     }
+    /// }
+    ///
+    /// assert_eq!(valid_chunks, vec!["foo", "bar"]);
+    /// assert_eq!(invalid_chunks, vec![b"\xFD", b"\xFE", b"\xFF"]);
+    /// ```
+    ///
+    /// [`to_str_lossy`]: #method.to_str_lossy
+    #[inline]
+    pub fn utf8_chunks(&self) -> Utf8Chunks {
+        self.as_bytes().utf8_chunks()
+    }
+
+    /// Creates an iterator over the words in this string along with
+    /// their starting and ending byte index positions.
+    ///
+    /// This is similar to [`words_with_break_indices`], except it only returns elements
+    /// that contain a "word" character. A word character is defined by UTS #18 (Annex
+    /// C) to be the combination of the `Alphabetic` and `Join_Control` properties,
+    /// along with the `Decimal_Number`, `Mark` and `Connector_Punctuation` general
+    /// categories.
+    ///
+    /// Since words are made up of one or more codepoints, this iterator
+    /// yields `&str` elements. When invalid UTF-8 is encountered, replacement
+    /// codepoints are substituted.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to get the byte offsets of each individual
+    /// word:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"can't jump 32.3 feet"[..]);
+    /// let words: Vec<(usize, usize, &str)> = s.word_indices().collect();
+    /// assert_eq!(words, vec![
+    ///     (0, 5, "can't"),
+    ///     (6, 10, "jump"),
+    ///     (11, 15, "32.3"),
+    ///     (16, 20, "feet"),
+    /// ]);
+    /// ```
+    ///
+    /// [`words_with_break_indices`]: #method.words_with_break_indices
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn word_indices(&self) -> WordIndices {
+        self.as_bytes().word_indices()
+    }
+
+    /// Creates an iterator over the words in this string. If invalid
+    /// UTF-8 is encountered, then the Unicode replacement codepoint is yielded
+    /// instead.
+    ///
+    /// This is similar to [`words_with_breaks`], except it only returns elements that
+    /// contain a "word" character. A word character is defined by UTS #18 (Annex C)
+    /// to be the combination of the `Alphabetic` and `Join_Control` properties, along
+    /// with the `Decimal_Number`, `Mark` and `Connector_Punctuation` general
+    /// categories.
+    ///
+    /// Since words are made up of one or more codepoints, this iterator
+    /// yields `&str` elements. When invalid UTF-8 is encountered, replacement
+    /// codepoints are substituted.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&br#"The quick ("brown") fox can't jump 32.3 feet, right?"#[..]);
+    /// let words: Vec<&str> = s.words().collect();
+    /// assert_eq!(words, vec![
+    ///     "The", "quick", "brown", "fox", "can't", "jump", "32.3", "feet", "right",
+    /// ]);
+    /// ```
+    /// [`words_with_breaks`]: #method.words_with_breaks
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn words(&self) -> Words {
+        self.as_bytes().words()
+    }
+
+    /// Creates an iterator over the words and their byte offsets in this
+    /// string, along with all breaks between the words. Concatenating
+    /// all elements yielded by the iterator results in the original string
+    /// (modulo Unicode replacement codepoint substitutions if invalid UTF-8 is
+    /// encountered).
+    ///
+    /// Since words are made up of one or more codepoints, this iterator
+    /// yields `&str` elements. When invalid UTF-8 is encountered, replacement
+    /// codepoints are substituted.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to get the byte offsets of each individual
+    /// word:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"can't jump 32.3 feet"[..]);
+    /// let words: Vec<(usize, usize, &str)> = s.words_with_break_indices().collect();
+    /// assert_eq!(words, vec![
+    ///     (0, 5, "can't"),
+    ///     (5, 6, " "),
+    ///     (6, 10, "jump"),
+    ///     (10, 11, " "),
+    ///     (11, 15, "32.3"),
+    ///     (15, 16, " "),
+    ///     (16, 20, "feet"),
+    /// ]);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn words_with_break_indices(&self) -> WordsWithBreakIndices {
+        self.as_bytes().words_with_break_indices()
+    }
+
+    /// Creates an iterator over the words in this string, along with
+    /// all breaks between the words. Concatenating all elements yielded by
+    /// the iterator results in the original string (modulo Unicode replacement
+    /// codepoint substitutions if invalid UTF-8 is encountered).
+    ///
+    /// Since words are made up of one or more codepoints, this iterator
+    /// yields `&str` elements. When invalid UTF-8 is encountered, replacement
+    /// codepoints are substituted.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&br#"The quick ("brown") fox can't jump 32.3 feet, right?"#[..]);
+    /// let words: Vec<&str> = s.words_with_breaks().collect();
+    /// assert_eq!(words, vec![
+    ///     "The", " ", "quick", " ", "(", "\"", "brown", "\"", ")", " ", "fox", " ", "can't", " ",
+    ///     "jump", " ", "32.3", " ", "feet", ",", " ", "right", "?",
+    /// ]);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn words_with_breaks(&self) -> WordsWithBreaks {
+        self.as_bytes().words_with_breaks()
     }
 
     /// Return a raw pointer to the string raw structure.
