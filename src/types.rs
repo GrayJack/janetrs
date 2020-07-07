@@ -234,9 +234,15 @@ impl fmt::Display for Janet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // There some overhead for doing this dance, but the only way to get the Janet value from
         // C API and transform into &str to display it.
+        let fmt = if matches!(self.kind(), JanetType::String | JanetType::Buffer) {
+            "%V\0"
+        } else {
+            "%q\0"
+        };
+
         let s = unsafe {
             let jstr = JanetString::from_raw(janet_ll::janet_formatc(
-                "%q\0".as_ptr() as *const i8,
+                fmt.as_ptr() as *const i8,
                 self.inner,
             ));
             let slice = core::slice::from_raw_parts(jstr.as_raw(), jstr.len() as usize);
