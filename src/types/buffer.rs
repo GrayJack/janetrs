@@ -22,7 +22,8 @@ use janet_ll::{
 use janet_ll::janet_buffer_push_cstring;
 
 use bstr::{
-    BStr, ByteSlice, Bytes, CharIndices, Chars, Lines, LinesWithTerminator, Utf8Chunks, Utf8Error,
+    BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Lines, LinesWithTerminator,
+    Utf8Chunks, Utf8Error,
 };
 
 #[cfg(feature = "unicode")]
@@ -296,7 +297,7 @@ impl JanetBuffer<'_> {
     /// use janetrs::types::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
-    /// let buff = JanetBuffer::from("hello");
+    /// let mut buff = JanetBuffer::from("hello");
     ///
     /// assert_eq!(&mut [104, 101, 108, 108, 111], buff.as_bytes_mut());
     /// ```
@@ -555,6 +556,86 @@ impl JanetBuffer<'_> {
     #[inline]
     pub fn char_indices(&self) -> CharIndices {
         self.as_bytes().char_indices()
+    }
+
+    /// Creates an iterator over the fields in a string, separated by
+    /// contiguous whitespace.
+    ///
+    /// # Example
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("  foo\tbar\t\u{2003}\nquux   \n");
+    /// let fields: Vec<&[u8]> = s.fields().collect();
+    /// assert_eq!(fields, vec![
+    ///     "foo".as_bytes(),
+    ///     "bar".as_bytes(),
+    ///     "quux".as_bytes()
+    /// ]);
+    /// ```
+    ///
+    /// A string consisting of just whitespace yields no elements:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     0,
+    ///     JanetString::new(&"  \n\t\u{2003}\n  \t").fields().count()
+    /// );
+    /// ```
+    #[inline]
+    pub fn fields(&self) -> Fields {
+        self.as_bytes().fields()
+    }
+
+    /// Creates an iterator over the fields in a string, separated by
+    /// contiguous codepoints satisfying the given predicate.
+    ///
+    /// If this string is not valid UTF-8, then the given closure will
+    /// be called with a Unicode replacement codepoint when invalid UTF-8
+    /// bytes are seen.
+    ///
+    /// # Example
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("123foo999999bar1quux123456");
+    /// let fields: Vec<&[u8]> = s.fields_with(|c| c.is_numeric()).collect();
+    /// assert_eq!(fields, vec![
+    ///     "foo".as_bytes(),
+    ///     "bar".as_bytes(),
+    ///     "quux".as_bytes()
+    /// ]);
+    /// ```
+    ///
+    /// A string consisting of all codepoints satisfying the predicate
+    /// yields no elements:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     0,
+    ///     JanetString::new("1911354563")
+    ///         .fields_with(|c| c.is_numeric())
+    ///         .count()
+    /// );
+    /// ```
+    #[inline]
+    pub fn fields_with<F>(&self, f: F) -> FieldsWith<F>
+    where F: FnMut(char) -> bool {
+        self.as_bytes().fields_with(f)
     }
 
     /// Creates an iterator over the grapheme clusters in this buffer along with

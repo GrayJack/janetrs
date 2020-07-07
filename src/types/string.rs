@@ -11,7 +11,8 @@ use std::{borrow::Cow, ffi::OsStr, path::Path};
 use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
 
 use bstr::{
-    BStr, ByteSlice, Bytes, CharIndices, Chars, Lines, LinesWithTerminator, Utf8Chunks, Utf8Error,
+    BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Lines, LinesWithTerminator,
+    Utf8Chunks, Utf8Error,
 };
 
 #[cfg(feature = "unicode")]
@@ -475,6 +476,86 @@ impl<'data> JanetString<'data> {
         self.as_bytes().char_indices()
     }
 
+    /// Creates an iterator over the fields in a string, separated by
+    /// contiguous whitespace.
+    ///
+    /// # Example
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("  foo\tbar\t\u{2003}\nquux   \n");
+    /// let fields: Vec<&[u8]> = s.fields().collect();
+    /// assert_eq!(fields, vec![
+    ///     "foo".as_bytes(),
+    ///     "bar".as_bytes(),
+    ///     "quux".as_bytes()
+    /// ]);
+    /// ```
+    ///
+    /// A string consisting of just whitespace yields no elements:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     0,
+    ///     JanetString::new(&"  \n\t\u{2003}\n  \t").fields().count()
+    /// );
+    /// ```
+    #[inline]
+    pub fn fields(&self) -> Fields {
+        self.as_bytes().fields()
+    }
+
+    /// Creates an iterator over the fields in a string, separated by
+    /// contiguous codepoints satisfying the given predicate.
+    ///
+    /// If this string is not valid UTF-8, then the given closure will
+    /// be called with a Unicode replacement codepoint when invalid UTF-8
+    /// bytes are seen.
+    ///
+    /// # Example
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("123foo999999bar1quux123456");
+    /// let fields: Vec<&[u8]> = s.fields_with(|c| c.is_numeric()).collect();
+    /// assert_eq!(fields, vec![
+    ///     "foo".as_bytes(),
+    ///     "bar".as_bytes(),
+    ///     "quux".as_bytes()
+    /// ]);
+    /// ```
+    ///
+    /// A string consisting of all codepoints satisfying the predicate
+    /// yields no elements:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     0,
+    ///     JanetString::new("1911354563")
+    ///         .fields_with(|c| c.is_numeric())
+    ///         .count()
+    /// );
+    /// ```
+    #[inline]
+    pub fn fields_with<F>(&self, f: F) -> FieldsWith<F>
+    where F: FnMut(char) -> bool {
+        self.as_bytes().fields_with(f)
+    }
+
     /// Creates an iterator over the grapheme clusters in this string along with
     /// their starting and ending byte index positions. If invalid UTF-8 is encountered,
     /// then the Unicode replacement codepoint is yielded instead.
@@ -491,27 +572,6 @@ impl<'data> JanetString<'data> {
     /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
     /// let graphemes: Vec<(usize, usize, &str)> = s.grapheme_indices().collect();
     /// assert_eq!(vec![(0, 5, "à̖"), (5, 13, "🇺🇸")], graphemes);
-    /// ```
-    ///
-    /// This example shows what happens when invalid UTF-8 is enountered. Note
-    /// that the offsets are valid indices into the original string, and do
-    /// not necessarily correspond to the length of the `&str` returned!
-    ///
-    /// ```
-    /// use janetrs::types::JanetString;
-    /// # let _client = janetrs::client::JanetClient::init().unwrap();
-    ///
-    /// let mut bytes = JanetString::new();
-    /// bytes.push_str("a\u{0300}\u{0316}");
-    /// bytes.push_u8(b'\xFF');
-    /// bytes.push_str("\u{1F1FA}\u{1F1F8}");
-    ///
-    /// let graphemes: Vec<(usize, usize, &str)> = bytes.grapheme_indices().collect();
-    /// assert_eq!(graphemes, vec![
-    ///     (0, 5, "à̖"),
-    ///     (5, 6, "\u{FFFD}"),
-    ///     (6, 14, "🇺🇸")
-    /// ]);
     /// ```
     #[cfg(feature = "unicode")]
     #[inline]
