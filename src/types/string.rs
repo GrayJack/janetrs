@@ -5,9 +5,20 @@ use core::{
     marker::PhantomData,
 };
 
+#[cfg(feature = "std")]
+use std::{borrow::Cow, ffi::OsStr, path::Path};
+
 use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
 
-use bstr::{BStr, ByteSlice, CharIndices, Chars};
+use bstr::{
+    BStr, ByteSlice, Bytes, CharIndices, Chars, Lines, LinesWithTerminator, Utf8Chunks, Utf8Error,
+};
+
+#[cfg(feature = "unicode")]
+use bstr::{
+    GraphemeIndices, Graphemes, SentenceIndices, Sentences, WordIndices, Words,
+    WordsWithBreakIndices, WordsWithBreaks,
+};
 
 use super::JanetBuffer;
 
@@ -210,6 +221,207 @@ impl<'data> JanetString<'data> {
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+    }
+
+    /// Returns `true` if and only if this string contains the given `needle`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("Hey there");
+    ///
+    /// assert!(s.contains("the"))
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn contains(&self, needle: impl AsRef<[u8]>) -> bool {
+        self.as_bytes().contains_str(needle)
+    }
+
+    /// Returns `true` if and only if this string has the given `prefix`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert!(JanetString::new("foo bar").starts_with("foo"));
+    /// assert!(!JanetString::new("foo bar").starts_with("bar"));
+    /// assert!(!JanetString::new("foo bar").starts_with("foobar"));
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn starts_with(&self, prefix: impl AsRef<[u8]>) -> bool {
+        self.as_bytes().starts_with_str(prefix)
+    }
+
+    /// Returns `true` if and only if this string has the given `suffix`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert!(!JanetString::new("foo bar").ends_with("foo"));
+    /// assert!(JanetString::new("foo bar").ends_with("bar"));
+    /// assert!(!JanetString::new("foo bar").ends_with("foobar"));
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn ends_with(&self, suffix: impl AsRef<[u8]>) -> bool {
+        self.as_bytes().ends_with_str(suffix)
+    }
+
+    /// Safely convert this string into a `&str` if it's valid UTF-8.
+    ///
+    /// If this string is not valid UTF-8, then an error is returned. The
+    /// error returned indicates the first invalid byte found and the length
+    /// of the error.
+    ///
+    /// In cases where a lossy conversion to `&str` is acceptable, then use one
+    /// of the [`to_str_lossy`](#method.to_str_lossy) or
+    /// [`to_str_lossy_into`](#method.to_str_lossy_into) methods.
+    #[inline]
+    pub fn to_str(&self) -> Result<&str, Utf8Error> {
+        self.as_bytes().to_str()
+    }
+
+    /// Unsafely convert this string into a `&str`, without checking for
+    /// valid UTF-8.
+    ///
+    /// # Safety
+    ///
+    /// Callers *must* ensure that this string is valid UTF-8 before
+    /// calling this method. Converting a string into a `&str` that is
+    /// not valid UTF-8 is considered undefined behavior.
+    ///
+    /// This routine is useful in performance sensitive contexts where the
+    /// UTF-8 validity of the string is already known and it is
+    /// undesirable to pay the cost of an additional UTF-8 validation check
+    /// that [`to_str`](#method.to_str) performs.
+    #[inline]
+    pub unsafe fn to_str_unchecked(&self) -> &str {
+        self.as_bytes().to_str_unchecked()
+    }
+
+    /// Convert this string to a valid UTF-8 string by replacing invalid
+    /// UTF-8 bytes with the Unicode replacement codepoint (`U+FFFD`).
+    ///
+    /// If the string is already valid UTF-8, then no copying or
+    /// allocation is performed and a borrrowed string slice is returned. If
+    /// the string is not valid UTF-8, then an owned string string is
+    /// returned with invalid bytes replaced by the replacement codepoint.
+    ///
+    /// This method uses the "substitution of maximal subparts" (Unicode
+    /// Standard, Chapter 3, Section 9) strategy for inserting the replacement
+    /// codepoint. Specifically, a replacement codepoint is inserted whenever a
+    /// byte is found that cannot possibly lead to a valid code unit sequence.
+    /// If there were previous bytes that represented a prefix of a well-formed
+    /// code unit sequence, then all of those bytes are substituted with a
+    /// single replacement codepoint. The "substitution of maximal subparts"
+    /// strategy is the same strategy used by
+    /// [W3C's Encoding standard](https://www.w3.org/TR/encoding/).
+    /// For a more precise description of the maximal subpart strategy, see
+    /// the Unicode Standard, Chapter 3, Section 9. See also
+    /// [Public Review Issue #121](http://www.unicode.org/review/pr-121.html).
+    ///
+    /// N.B. Rust's standard library also appears to use the same strategy,
+    /// but it does not appear to be an API guarantee.
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn to_str_lossy(&self) -> Cow<str> {
+        self.as_bytes().to_str_lossy()
+    }
+
+    /// Copy the contents of this string into the given owned string
+    /// string, while replacing invalid UTF-8 code unit sequences with the
+    /// Unicode replacement codepoint (`U+FFFD`).
+    ///
+    /// This method uses the same "substitution of maximal subparts" strategy
+    /// for inserting the replacement codepoint as the
+    /// [`to_str_lossy`](trait.ByteSlice.html#method.to_str_lossy) method.
+    ///
+    /// This routine is useful for amortizing allocation. However, unlike
+    /// `to_str_lossy`, this routine will _always_ copy the contents of this
+    /// string into the destination string, even if this string is
+    /// valid UTF-8.
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn to_str_lossy_into(&self, dest: &mut String) {
+        self.as_bytes().to_str_lossy_into(dest)
+    }
+
+    /// Create an OS string slice from this string.
+    ///
+    /// On Unix, this always succeeds and is zero cost. On non-Unix systems,
+    /// this returns a UTF-8 decoding error if this string is not valid
+    /// UTF-8. (For example, on Windows, file paths are allowed to be a
+    /// sequence of arbitrary 16-bit integers. There is no obvious mapping from
+    /// an arbitrary sequence of 8-bit integers to an arbitrary sequence of
+    /// 16-bit integers.)
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn to_os_str(&self) -> Result<&OsStr, Utf8Error> {
+        self.as_bytes().to_os_str()
+    }
+
+    /// Lossily create an OS string slice from this string.
+    ///
+    /// On Unix, this always succeeds and is zero cost. On non-Unix systems,
+    /// this will perform a UTF-8 check and lossily convert this string
+    /// into valid UTF-8 using the Unicode replacement codepoint.
+    ///
+    /// Note that this can prevent the correct roundtripping of file paths on
+    /// non-Unix systems such as Windows, where file paths are an arbitrary
+    /// sequence of 16-bit integers.
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn to_os_str_lossy(&self) -> Cow<OsStr> {
+        self.as_bytes().to_os_str_lossy()
+    }
+
+    /// Create a path slice from this string.
+    ///
+    /// On Unix, this always succeeds and is zero cost. On non-Unix systems,
+    /// this returns a UTF-8 decoding error if this string is not valid
+    /// UTF-8. (For example, on Windows, file paths are allowed to be a
+    /// sequence of arbitrary 16-bit integers. There is no obvious mapping from
+    /// an arbitrary sequence of 8-bit integers to an arbitrary sequence of
+    /// 16-bit integers.)
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn to_path(&self) -> Result<&Path, Utf8Error> {
+        self.as_bytes().to_path()
+    }
+
+    /// Lossily create a path slice from this string.
+    ///
+    /// On Unix, this always succeeds and is zero cost. On non-Unix systems,
+    /// this will perform a UTF-8 check and lossily convert this string
+    /// into valid UTF-8 using the Unicode replacement codepoint.
+    ///
+    /// Note that this can prevent the correct roundtripping of file paths on
+    /// non-Unix systems such as Windows, where file paths are an arbitrary
+    /// sequence of 16-bit integers.
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn to_path_lossy(&self) -> Cow<Path> {
+        self.as_bytes().to_path_lossy()
+    }
+
+    /// Creates an iterator over the bytes of the [`JanetString`].
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("Hello");
+    ///
+    /// assert_eq!(s.bytes().collect::<Vec<u8>>(), b"Hello");
+    /// ```
+    #[inline]
+    pub fn bytes(&self) -> Bytes {
+        self.as_bytes().bytes()
     }
 
     /// Creates an iterator over the Unicode scalar values in this string. If invalid
