@@ -354,6 +354,51 @@ impl JanetBuffer<'_> {
         self.as_bytes().ends_with_str(suffix)
     }
 
+    /// Returns `true` if and only if every byte in this buffer is ASCII.
+    ///
+    /// ASCII is an encoding that defines 128 codepoints. A byte corresponds to
+    /// an ASCII codepoint if and only if it is in the inclusive range
+    /// `[0, 127]`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert!(JanetBuffer::from("abc").is_ascii());
+    /// assert!(!JanetBuffer::from("☃βツ").is_ascii());
+    /// ```
+    #[inline]
+    pub fn is_ascii(&self) -> bool {
+        self.as_bytes().is_ascii()
+    }
+
+    /// Returns `true` if and only if the entire buffer is valid UTF-8.
+    ///
+    /// If you need location information about where a buffer's first
+    /// invalid UTF-8 byte is, then use the [`to_str`](#method.to_str) method.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert!(JanetBuffer::from("abc").is_utf8());
+    /// assert!(JanetBuffer::from("☃βツ").is_utf8());
+    /// // invalid bytes
+    /// assert!(!JanetBuffer::from(&b"abc\xFF"[..]).is_utf8());
+    /// // surrogate encoding
+    /// assert!(!JanetBuffer::from(&b"\xED\xA0\x80"[..]).is_utf8());
+    /// // incomplete sequence
+    /// assert!(!JanetBuffer::from(&b"\xF0\x9D\x9Ca"[..]).is_utf8());
+    /// // overlong sequence
+    /// assert!(!JanetBuffer::from(&b"\xF0\x82\x82\xAC"[..]).is_utf8());
+    /// ```
+    #[inline]
+    pub fn is_utf8(&self) -> bool {
+        self.as_bytes().is_utf8()
+    }
+
     /// Safely convert this buffer into a `&str` if it's valid UTF-8.
     ///
     /// If this buffer is not valid UTF-8, then an error is returned. The
@@ -558,7 +603,7 @@ impl JanetBuffer<'_> {
         self.as_bytes().char_indices()
     }
 
-    /// Creates an iterator over the fields in a string, separated by
+    /// Creates an iterator over the fields in a buffer, separated by
     /// contiguous whitespace.
     ///
     /// # Example
@@ -566,11 +611,11 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::types::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
-    /// let s = JanetString::new("  foo\tbar\t\u{2003}\nquux   \n");
-    /// let fields: Vec<&[u8]> = s.fields().collect();
+    /// let buff = JanetBuffer::from("  foo\tbar\t\u{2003}\nquux   \n");
+    /// let fields: Vec<&[u8]> = buff.fields().collect();
     /// assert_eq!(fields, vec![
     ///     "foo".as_bytes(),
     ///     "bar".as_bytes(),
@@ -578,15 +623,15 @@ impl JanetBuffer<'_> {
     /// ]);
     /// ```
     ///
-    /// A string consisting of just whitespace yields no elements:
+    /// A buffer consisting of just whitespace yields no elements:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::types::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
     ///     0,
-    ///     JanetString::new(&"  \n\t\u{2003}\n  \t").fields().count()
+    ///     JanetBuffer::from(&"  \n\t\u{2003}\n  \t").fields().count()
     /// );
     /// ```
     #[inline]
@@ -594,7 +639,7 @@ impl JanetBuffer<'_> {
         self.as_bytes().fields()
     }
 
-    /// Creates an iterator over the fields in a string, separated by
+    /// Creates an iterator over the fields in a buffer, separated by
     /// contiguous codepoints satisfying the given predicate.
     ///
     /// If this string is not valid UTF-8, then the given closure will
@@ -606,11 +651,11 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::types::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
-    /// let s = JanetString::new("123foo999999bar1quux123456");
-    /// let fields: Vec<&[u8]> = s.fields_with(|c| c.is_numeric()).collect();
+    /// let buff = JanetBuffer::from("123foo999999bar1quux123456");
+    /// let fields: Vec<&[u8]> = buff.fields_with(|c| c.is_numeric()).collect();
     /// assert_eq!(fields, vec![
     ///     "foo".as_bytes(),
     ///     "bar".as_bytes(),
@@ -618,16 +663,16 @@ impl JanetBuffer<'_> {
     /// ]);
     /// ```
     ///
-    /// A string consisting of all codepoints satisfying the predicate
+    /// A buffer consisting of all codepoints satisfying the predicate
     /// yields no elements:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::types::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
     ///     0,
-    ///     JanetString::new("1911354563")
+    ///     JanetBuffer::from("1911354563")
     ///         .fields_with(|c| c.is_numeric())
     ///         .count()
     /// );

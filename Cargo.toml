@@ -26,7 +26,7 @@ bstr = { version = "0.2.13", default-features = false}
 serial_test = "~0.4.0"
 
 [features]
-default = ["std"]
+default = ["std", "unicode"]
 # To use Error trait and alocations
 std = ["bstr/std"]
 # Use to have Janet client

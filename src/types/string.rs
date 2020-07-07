@@ -272,6 +272,51 @@ impl<'data> JanetString<'data> {
         self.as_bytes().ends_with_str(suffix)
     }
 
+    /// Returns `true` if and only if every byte in this string is ASCII.
+    ///
+    /// ASCII is an encoding that defines 128 codepoints. A byte corresponds to
+    /// an ASCII codepoint if and only if it is in the inclusive range
+    /// `[0, 127]`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert!(JanetString::new("abc").is_ascii());
+    /// assert!(!JanetString::new("☃βツ").is_ascii());
+    /// ```
+    #[inline]
+    pub fn is_ascii(&self) -> bool {
+        self.as_bytes().is_ascii()
+    }
+
+    /// Returns `true` if and only if the entire string is valid UTF-8.
+    ///
+    /// If you need location information about where a string's first
+    /// invalid UTF-8 byte is, then use the [`to_str`](#method.to_str) method.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert!(JanetString::new("abc").is_utf8());
+    /// assert!(JanetString::new("☃βツ").is_utf8());
+    /// // invalid bytes
+    /// assert!(!JanetString::new(&b"abc\xFF"[..]).is_utf8());
+    /// // surrogate encoding
+    /// assert!(!JanetString::new(&b"\xED\xA0\x80"[..]).is_utf8());
+    /// // incomplete sequence
+    /// assert!(!JanetString::new(&b"\xF0\x9D\x9Ca"[..]).is_utf8());
+    /// // overlong sequence
+    /// assert!(!JanetString::new(&b"\xF0\x82\x82\xAC"[..]).is_utf8());
+    /// ```
+    #[inline]
+    pub fn is_utf8(&self) -> bool {
+        self.as_bytes().is_utf8()
+    }
+
     /// Safely convert this string into a `&str` if it's valid UTF-8.
     ///
     /// If this string is not valid UTF-8, then an error is returned. The
