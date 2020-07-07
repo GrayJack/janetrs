@@ -20,7 +20,7 @@ all-features = true
 
 [dependencies]
 janet-ll = { git = "https://github.com/GrayJack/janet-ll", branch = "dev" }
-bstr = "0.2.13"
+bstr = { version = "0.2.13", default-features = false}
 
 [dev-dependencies]
 serial_test = "~0.4.0"
@@ -28,11 +28,13 @@ serial_test = "~0.4.0"
 [features]
 default = ["std"]
 # To use Error trait and alocations
-std = []
+std = ["bstr/std"]
 # Use to have Janet client
 amalgation = ["janet-ll/link-amalg"]
 # Inline more functions
 inline-more = []
+# Unicode conveniences
+unicode = ["bstr/unicode"]
 
 [[example]]
 name = "hello_world"
