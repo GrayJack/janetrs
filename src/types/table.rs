@@ -765,21 +765,29 @@ impl Clone for JanetTable<'_> {
     }
 }
 
+impl Extend<(Janet, Janet)> for JanetTable<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = (Janet, Janet)>>(&mut self, iter: T) {
+        iter.into_iter().for_each(|(k, v)| {
+            self.insert(k, v);
+        })
+    }
+}
+
+impl<'a> Extend<(&'a Janet, &'a Janet)> for JanetTable<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = (&'a Janet, &'a Janet)>>(&mut self, iter: T) {
+        iter.into_iter().for_each(|(&k, &v)| {
+            self.insert(k, v);
+        })
+    }
+}
+
 impl JanetExtend<JanetTable<'_>> for JanetTable<'_> {
     /// Extend the table with all key-value pairs of the `other` table.
     #[inline]
     fn extend(&mut self, other: JanetTable<'_>) {
         unsafe { janet_table_merge_table(self.raw, other.raw) }
-    }
-}
-
-impl JanetExtend<(Janet, Janet)> for JanetTable<'_> {
-    /// Extend the table with a given key-value pair.
-    #[inline]
-    fn extend(&mut self, (key, value): (Janet, Janet)) {
-        let mut other = Self::with_capacity(1);
-        other.insert(key, value);
-        self.extend(other);
     }
 }
 
