@@ -142,8 +142,8 @@ impl<'data> JanetArray<'data> {
     }
 
     /// Ensure that an array has enough space for `check_capacity` elements. If not,
-    /// resize the backing memory to `capacity` * `growth` slots. In most cases, `growth`
-    /// should be `1` or `2`.
+    /// resize the backing memory to `check_capacity` * `growth` slots. In most cases,
+    /// `growth` should be `1` or `2`.
     ///
     /// # Examples
     /// ```
@@ -159,6 +159,61 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
         unsafe { janet_array_ensure(self.raw, check_capacity, growth) };
+    }
+
+    /// Reserves capacity for at least `additional` more elements to be inserted
+    /// in the given `JanetArray`. The collection may reserve more space to avoid
+    /// frequent reallocations. After calling `reserve`, capacity will be
+    /// greater than or equal to `self.len() + additional`. Does nothing if
+    /// capacity is already sufficient.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity exceeds `i32::MAX` bytes.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1];
+    /// arr.reserve(10);
+    /// assert!(arr.capacity() >= 11);
+    /// ```
+    #[inline]
+    pub fn reserve(&mut self, additional: i32) {
+        if self.len() + additional > self.capacity() {
+            self.ensure(self.len() + additional, 2);
+        }
+    }
+
+    /// Reserves the minimum capacity for exactly `additional` more elements to
+    /// be inserted in the given `JanetArray`. After calling `reserve_exact`,
+    /// capacity will be greater than or equal to `self.len() + additional`.
+    /// Does nothing if the capacity is already sufficient.
+    ///
+    /// Note that the allocator may give the collection more space than it
+    /// requests. Therefore, capacity can not be relied upon to be precisely
+    /// minimal. Prefer `reserve` if future insertions are expected.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity overflows `i32`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut arr = array![1];
+    /// arr.reserve_exact(10);
+    /// assert!(arr.capacity() == 11);
+    /// ```
+    #[inline]
+    pub fn reserve_exact(&mut self, additional: i32) {
+        if self.len() + additional > self.capacity() {
+            self.ensure(self.len() + additional, 1);
+        }
     }
 
     /// Clears the array, removing all values.
@@ -633,6 +688,24 @@ impl Default for JanetArray<'_> {
     #[inline]
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Extend<Janet> for JanetArray<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = Janet>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve_exact(iter.size_hint().0 as i32);
+        iter.for_each(|val| self.push(val));
+    }
+}
+
+impl<'a> Extend<&'a Janet> for JanetArray<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = &'a Janet>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve_exact(iter.size_hint().0 as i32);
+        iter.for_each(|&val| self.push(val));
     }
 }
 
