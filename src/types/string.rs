@@ -5,6 +5,8 @@ use core::{
     marker::PhantomData,
 };
 
+use alloc::string::String;
+
 #[cfg(feature = "std")]
 use std::{borrow::Cow, ffi::OsStr, path::Path};
 
@@ -1469,6 +1471,26 @@ impl FromIterator<char> for JanetString<'_> {
     }
 }
 
+impl<'a> FromIterator<&'a u8> for JanetString<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = &'a u8>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (len, _) = iter.size_hint();
+        let len = if len >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            len as i32
+        };
+        let mut new = Self::builder(len);
+
+        for &byte in iter {
+            new = new.put(&[byte]);
+        }
+
+        new.finalize()
+    }
+}
+
 impl<'a> FromIterator<&'a char> for JanetString<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = &'a char>>(iter: T) -> Self {
@@ -1509,7 +1531,6 @@ impl<'a> FromIterator<&'a str> for JanetString<'_> {
     }
 }
 
-#[cfg(feature = "std")]
 impl FromIterator<String> for JanetString<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {

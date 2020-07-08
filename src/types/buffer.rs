@@ -5,6 +5,8 @@ use core::{
     marker::PhantomData,
 };
 
+use alloc::string::String;
+
 #[cfg(feature = "std")]
 use std::{
     borrow::Cow,
@@ -1647,6 +1649,26 @@ impl FromIterator<char> for JanetBuffer<'_> {
     }
 }
 
+impl<'a> FromIterator<&'a u8> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from_iter<T: IntoIterator<Item = &'a u8>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let (len, _) = iter.size_hint();
+        let len = if len >= i32::MAX as usize {
+            i32::MAX
+        } else {
+            len as i32
+        };
+        let mut buffer = JanetBuffer::with_capacity(len);
+
+        for &byte in iter {
+            buffer.push_u8(byte);
+        }
+
+        buffer
+    }
+}
+
 impl<'a> FromIterator<&'a char> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = &'a char>>(iter: T) -> Self {
@@ -1687,7 +1709,6 @@ impl<'a> FromIterator<&'a str> for JanetBuffer<'_> {
     }
 }
 
-#[cfg(feature = "std")]
 impl FromIterator<String> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
