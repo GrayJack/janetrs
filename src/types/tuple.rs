@@ -8,7 +8,7 @@ use core::{
 
 use janet_ll::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
 
-use super::Janet;
+use super::{Janet, JanetArray};
 
 /// Builder for [`JanetTuple`]s.
 #[derive(Debug)]
@@ -211,6 +211,20 @@ impl Clone for JanetTuple<'_> {
         }
 
         clone.finalize()
+    }
+}
+
+impl AsRef<[Janet]> for JanetTuple<'_> {
+    #[inline]
+    fn as_ref(&self) -> &[Janet] {
+        unsafe { core::slice::from_raw_parts(self.raw as *const _, self.len() as usize) }
+    }
+}
+
+impl From<JanetArray<'_>> for JanetTuple<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from(arr: JanetArray<'_>) -> Self {
+        arr.into_iter().collect()
     }
 }
 

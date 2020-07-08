@@ -32,9 +32,9 @@
 //!  - [ ] JanetPointer
 //!  - [ ] Janet Typed Array
 //!
-//!  [ ]: Lacking
-//!  [I]: Incomplete
-//!  [X]: Done
+//!  `[ ]: Lacking`
+//!  `[I]: Incomplete`
+//!  `[X]: Done`
 //!
 //! ### TODO: Lib level
 //!  - Better docs.

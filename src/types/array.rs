@@ -12,7 +12,7 @@ use janet_ll::{
     janet_array_push, janet_array_setcount, Janet as CJanet, JanetArray as CJanetArray,
 };
 
-use super::{Janet, JanetExtend};
+use super::{Janet, JanetExtend, JanetTuple};
 
 /// Janet [arrays](https://janet-lang.org/docs/data_structures/arrays.html) are a fundamental
 /// datatype in Janet. Janet Arrays are values that contain a sequence of other values.
@@ -520,6 +520,13 @@ impl Clone for JanetArray<'_> {
     }
 }
 
+impl AsRef<[Janet]> for JanetArray<'_> {
+    #[inline]
+    fn as_ref(&self) -> &[Janet] {
+        unsafe { core::slice::from_raw_parts((*self.raw).data as *mut Janet, self.len() as usize) }
+    }
+}
+
 impl<'data> IntoIterator for JanetArray<'data> {
     type IntoIter = IntoIter<'data>;
     type Item = Janet;
@@ -584,6 +591,13 @@ impl<U: Into<Janet>> FromIterator<U> for JanetArray<'_> {
             new.push(item);
         }
         new
+    }
+}
+
+impl From<JanetTuple<'_>> for JanetArray<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from(tup: JanetTuple<'_>) -> Self {
+        tup.into_iter().collect()
     }
 }
 
