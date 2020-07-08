@@ -198,13 +198,39 @@ impl JanetBuffer<'_> {
         unsafe { janet_buffer_ensure(self.raw, check_capacity, growth) };
     }
 
-    /// Ensures that this buffer's capacity is `additional` bytes larger than its length.
+    /// Ensures that this `JanetBuffer`'s capacity is at least `additional` bytes
+    /// larger than its length.
+    ///
+    /// The capacity may be increased by more than `additional` bytes if it
+    /// chooses, to prevent frequent reallocations.
+    ///
+    /// If you do not want this "at least" behavior, see the [`reserve_exact`]
+    /// method.
     ///
     /// # Panics
+    ///
     /// Panics if the new capacity overflows [`i32`].
+    ///
+    /// [`reserve_exact`]: #method.reserve_exact
     #[inline]
     pub fn reserve(&mut self, additional: i32) {
         unsafe { janet_buffer_extra(self.raw, additional) };
+    }
+
+    /// Ensures that this `JanetBuffer`'s capacity is `additional` bytes
+    /// larger than its length.
+    ///
+    /// Consider using the [`reserve`] method unless you absolutely know
+    /// better than the allocator.
+    ///
+    /// [`reserve`]: #method.reserve
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity overflows `usize`.
+    #[inline]
+    pub fn reserve_exact(&mut self, additional: i32) {
+        self.ensure(self.len() + additional, 1);
     }
 
     /// Truncates this [`JanetBuffer`], removing all contents.
@@ -1726,6 +1752,69 @@ impl FromIterator<String> for JanetBuffer<'_> {
         }
 
         buffer
+    }
+}
+
+impl Extend<u8> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = u8>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve_exact(iter.size_hint().0 as i32);
+        iter.for_each(|byte| self.push_u8(byte));
+    }
+}
+
+impl<'a> Extend<&'a u8> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = &'a u8>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve_exact(iter.size_hint().0 as i32);
+        iter.for_each(|&byte| self.push_u8(byte));
+    }
+}
+
+impl Extend<char> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = char>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve_exact(iter.size_hint().0 as i32);
+        iter.for_each(|ch| self.push(ch));
+    }
+}
+
+impl<'a> Extend<&'a char> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = &'a char>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve_exact(iter.size_hint().0 as i32);
+        iter.for_each(|&ch| self.push(ch));
+    }
+}
+
+impl<'a> Extend<&'a [u8]> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = &'a [u8]>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve(iter.size_hint().0 as i32);
+        iter.for_each(|bs| self.push_bytes(bs));
+    }
+}
+
+impl<'a> Extend<&'a str> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = &'a str>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve(iter.size_hint().0 as i32);
+        iter.for_each(|s| self.push_str(s));
+    }
+}
+
+impl Extend<String> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn extend<T: IntoIterator<Item = String>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.reserve(iter.size_hint().0 as i32);
+        iter.for_each(|s| self.push_str(&s));
     }
 }
 
