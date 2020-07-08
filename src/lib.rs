@@ -2,16 +2,42 @@
 //!
 //! A crate with high level bindings to Janet C API.
 //!
+//! ## Goals
+//! Provide a safe and ergonomic interface to the Janet C API to create Janet clients and
+//! Janet modules/libraries using Rust.
+//!
+//! This project still are in it's early stages, so breaking changes may happen, there is
+//! no minimal supported Rust version (MSRV) yet.
+//!
 //! Notice that most doc tests will fail if the feature "almagation" aren't set, because
 //! most of then need it for the Janet runtime to function properly.
 //!
-//! TODO: Explain crate features
+//! ## Cargo Features
 //!
-//! ## TODO: Lib level
-//!  - Better docs, the docs sucks right now for the top-level modules docs and for the
-//!    types. For the functions is kinda ok, but there is no examples, and improvements
-//!    are welcome.
-//!  - Expand the types API. First expose what alread exists from Janet!!!.
+//! - `std`: Enable some trait impl for types that only exist on the `std` and the Error
+//! trait
+//! - `unicode`: Enable more methods for JanetString and JanetBuffer
+//! - `inline-more`: More agressive inlining
+//! - `amalgation`: Link the Janet runtime to the package, enabling to use the client
+//!   module
+//!
+//! ## Licensing
+//! This software is licensed under the terms of the [MIT Public License](./LICENSE).
+//!
+//! ### TODO: Types: Lacking or Incomplete
+//!  - [ ] JanetAbstract
+//!  - [ ] JanetCFunction
+//!  - [I] JanetFiber
+//!  - [ ] JanetFunction
+//!  - [ ] JanetPointer
+//!  - [ ] Janet Typed Array
+//!
+//!  [ ]: Lacking
+//!  [I]: Incomplete
+//!  [X]: Done
+//!
+//! ### TODO: Lib level
+//!  - Better docs.
 //!  - We still don't know exactly how Janet panics would work on Rust, so we need to
 //!    explore that and documment it
 //!
@@ -52,9 +78,10 @@
 //!     janet_cfuns(env, "mymod", cfuns);
 //! }
 //! ```
+#![cfg_attr(not(feature = "std"), no_std)]
 
-// Uncomment this if we can exist on no_str
-// #![cfg_attr(not(feature = "std"), no_std)]
+// Janet requires allocation
+extern crate alloc;
 
 pub use janet_ll as janet_sys;
 
