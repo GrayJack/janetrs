@@ -11,8 +11,8 @@ use std::{borrow::Cow, ffi::OsStr, path::Path};
 use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
 
 use bstr::{
-    BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Lines, LinesWithTerminator,
-    Utf8Chunks, Utf8Error,
+    BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
+    LinesWithTerminator, Utf8Chunks, Utf8Error,
 };
 
 #[cfg(feature = "unicode")]
@@ -452,6 +452,400 @@ impl<'data> JanetString<'data> {
     #[inline]
     pub fn to_path_lossy(&self) -> Cow<Path> {
         self.as_bytes().to_path_lossy()
+    }
+
+    /// Returns the index of the first occurrence of the given `needle`.
+    ///
+    /// The `needle` may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the `needle` and the haystack. That is, this runs
+    /// in `O(needle.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("foo bar baz");
+    /// assert_eq!(Some(0), s.find("foo"));
+    /// assert_eq!(Some(4), s.find("bar"));
+    /// assert_eq!(None, s.find("quux"));
+    /// ```
+    #[inline]
+    pub fn find(&self, needle: impl AsRef<[u8]>) -> Option<usize> {
+        self.as_bytes().find(needle)
+    }
+
+    /// Returns the index of the last occurrence of the given `needle`.
+    ///
+    /// The `needle` may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the `needle` and the haystack. That is, this runs
+    /// in `O(needle.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("foo bar baz");
+    /// assert_eq!(Some(0), s.rfind("foo"));
+    /// assert_eq!(Some(4), s.rfind("bar"));
+    /// assert_eq!(Some(8), s.rfind("ba"));
+    /// assert_eq!(None, s.rfind("quux"));
+    /// ```
+    #[inline]
+    pub fn rfind(&self, needle: impl AsRef<[u8]>) -> Option<usize> {
+        self.as_bytes().rfind(needle)
+    }
+
+    /// Returns the index of the first occurrence of the given byte. If the
+    /// byte does not occur in this string, then `None` is returned.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(Some(10), JanetString::new("foo bar baz").find_byte(b'z'));
+    /// assert_eq!(None, JanetString::new("foo bar baz").find_byte(b'y'));
+    /// ```
+    #[inline]
+    pub fn find_byte(&self, byte: u8) -> Option<usize> {
+        self.as_bytes().find_byte(byte)
+    }
+
+    /// Returns the index of the last occurrence of the given `byte`. If the
+    /// `byte` does not occur in this string, then `None` is returned.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(Some(10), JanetString::new("foo bar baz").rfind_byte(b'z'));
+    /// assert_eq!(None, JanetString::new("foo bar baz").rfind_byte(b'y'));
+    /// ```
+    #[inline]
+    pub fn rfind_byte(&self, byte: u8) -> Option<usize> {
+        self.as_bytes().rfind_byte(byte)
+    }
+
+    /// Returns the index of the first occurrence of the given codepoint.
+    /// If the codepoint does not occur in this string, then `None` is
+    /// returned.
+    ///
+    /// Note that if one searches for the replacement codepoint, `\u{FFFD}`,
+    /// then only explicit occurrences of that encoding will be found. Invalid
+    /// UTF-8 sequences will not be matched.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(Some(10), JanetString::new("foo bar baz").find_char('z'));
+    /// assert_eq!(Some(4), JanetString::new("αβγγδ").find_char('γ'));
+    /// assert_eq!(None, JanetString::new("foo bar baz").find_char('y'));
+    /// ```
+    #[inline]
+    pub fn find_char(&self, ch: char) -> Option<usize> {
+        self.find(ch.encode_utf8(&mut [0; 4]))
+    }
+
+    /// Returns the index of the last occurrence of the given codepoint.
+    /// If the codepoint does not occur in this string, then `None` is
+    /// returned.
+    ///
+    /// Note that if one searches for the replacement codepoint, `\u{FFFD}`,
+    /// then only explicit occurrences of that encoding will be found. Invalid
+    /// UTF-8 sequences will not be matched.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(Some(10), JanetString::new("foo bar baz").rfind_char('z'));
+    /// assert_eq!(Some(6), JanetString::new("αβγγδ").rfind_char('γ'));
+    /// assert_eq!(None, JanetString::new("foo bar baz").rfind_char('y'));
+    /// ```
+    #[inline]
+    pub fn rfind_char(&self, ch: char) -> Option<usize> {
+        self.rfind(ch.encode_utf8(&mut [0; 4]))
+    }
+
+    /// Returns the index of the first occurrence of any of the bytes in the
+    /// provided set.
+    ///
+    /// The `byteset` may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`, but
+    /// note that passing a `&str` which contains multibyte characters may not
+    /// behave as you expect: each byte in the `&str` is treated as an
+    /// individual member of the byte set.
+    ///
+    /// Note that order is irrelevant for the `byteset` parameter, and
+    /// duplicate bytes present in its body are ignored.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the set of bytes and the haystack. That is, this
+    /// runs in `O(byteset.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(JanetString::new("foo bar baz").find_byteset(b"zr"), Some(6));
+    /// assert_eq!(
+    ///     JanetString::new("foo baz bar").find_byteset(b"bzr"),
+    ///     Some(4)
+    /// );
+    /// assert_eq!(None, JanetString::new("foo baz bar").find_byteset(b"\t\n"));
+    /// ```
+    #[inline]
+    pub fn find_byteset(&self, byteset: impl AsRef<[u8]>) -> Option<usize> {
+        self.as_bytes().find_byteset(byteset)
+    }
+
+    /// Returns the index of the first occurrence of a byte that is not a member
+    /// of the provided set.
+    ///
+    /// The `byteset` may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`, but
+    /// note that passing a `&str` which contains multibyte characters may not
+    /// behave as you expect: each byte in the `&str` is treated as an
+    /// individual member of the byte set.
+    ///
+    /// Note that order is irrelevant for the `byteset` parameter, and
+    /// duplicate bytes present in its body are ignored.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the set of bytes and the haystack. That is, this
+    /// runs in `O(byteset.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     JanetString::new("foo bar baz").find_not_byteset(b"fo "),
+    ///     Some(4)
+    /// );
+    /// assert_eq!(
+    ///     JanetString::new("\t\tbaz bar").find_not_byteset(b" \t\r\n"),
+    ///     Some(2)
+    /// );
+    /// assert_eq!(
+    ///     JanetString::new("foo\nbaz\tbar").find_not_byteset(b"\t\n"),
+    ///     Some(0)
+    /// );
+    /// ```
+    #[inline]
+    pub fn find_not_byteset(&self, byteset: impl AsRef<[u8]>) -> Option<usize> {
+        self.as_bytes().find_not_byteset(byteset)
+    }
+
+    /// Returns the index of the last occurrence of any of the bytes in the
+    /// provided set.
+    ///
+    /// The `byteset` may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`, but
+    /// note that passing a `&str` which contains multibyte characters may not
+    /// behave as you expect: each byte in the `&str` is treated as an
+    /// individual member of the byte set.
+    ///
+    /// Note that order is irrelevant for the `byteset` parameter, and duplicate
+    /// bytes present in its body are ignored.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the set of bytes and the haystack. That is, this
+    /// runs in `O(byteset.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     JanetString::new("foo bar baz").rfind_byteset(b"agb"),
+    ///     Some(9)
+    /// );
+    /// assert_eq!(
+    ///     JanetString::new("foo baz bar").rfind_byteset(b"rabz "),
+    ///     Some(10)
+    /// );
+    /// assert_eq!(
+    ///     JanetString::new("foo baz bar").rfind_byteset(b"\n123"),
+    ///     None
+    /// );
+    /// ```
+    #[inline]
+    pub fn rfind_byteset(&self, byteset: impl AsRef<[u8]>) -> Option<usize> {
+        self.as_bytes().rfind_byteset(byteset)
+    }
+
+    /// Returns the index of the last occurrence of a byte that is not a member
+    /// of the provided set.
+    ///
+    /// The `byteset` may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`, but
+    /// note that passing a `&str` which contains multibyte characters may not
+    /// behave as you expect: each byte in the `&str` is treated as an
+    /// individual member of the byte set.
+    ///
+    /// Note that order is irrelevant for the `byteset` parameter, and
+    /// duplicate bytes present in its body are ignored.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the set of bytes and the haystack. That is, this
+    /// runs in `O(byteset.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     JanetString::new("foo bar baz,\t").rfind_not_byteset(b",\t"),
+    ///     Some(10)
+    /// );
+    /// assert_eq!(
+    ///     JanetString::new("foo baz bar").rfind_not_byteset(b"rabz "),
+    ///     Some(2)
+    /// );
+    /// assert_eq!(
+    ///     None,
+    ///     JanetString::new("foo baz bar").rfind_not_byteset(b"barfoz ")
+    /// );
+    /// ```
+    #[inline]
+    pub fn rfind_not_byteset(&self, byteset: impl AsRef<[u8]>) -> Option<usize> {
+        self.as_bytes().rfind_not_byteset(byteset)
+    }
+
+    /// Creates an iterator of the non-overlapping occurrences of the given
+    /// `needle`. The iterator yields byte offset positions indicating the start
+    /// of each match.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the needle and the haystack. That is, this runs
+    /// in `O(needle.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("foo bar foo foo quux foo");
+    /// let matches: Vec<usize> = s.find_iter("foo").collect();
+    /// assert_eq!(matches, vec![0, 8, 12, 21]);
+    /// ```
+    ///
+    /// An empty string matches at every position, including the position
+    /// immediately following the last byte:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let matches: Vec<usize> = JanetString::new("foo").find_iter("").collect();
+    /// assert_eq!(matches, vec![0, 1, 2, 3]);
+    ///
+    /// let matches: Vec<usize> = JanetString::new("").find_iter("").collect();
+    /// assert_eq!(matches, vec![0]);
+    /// ```
+    #[inline]
+    pub fn find_iter<'a, B: ?Sized + AsRef<[u8]>>(&'a self, needle: &'a B) -> Find<'a> {
+        self.as_bytes().find_iter(needle)
+    }
+
+    /// Creates an iterator of the non-overlapping occurrences of the given
+    /// `needle` in reverse. The iterator yields byte offset positions indicating
+    /// the start of each match.
+    ///
+    /// # Complexity
+    ///
+    /// This routine is guaranteed to have worst case linear time complexity
+    /// with respect to both the needle and the haystack. That is, this runs
+    /// in `O(needle.len() + haystack.len())` time.
+    ///
+    /// This routine is also guaranteed to have worst case constant space
+    /// complexity.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("foo bar foo foo quux foo");
+    /// let matches: Vec<usize> = s.rfind_iter("foo").collect();
+    /// assert_eq!(matches, vec![21, 12, 8, 0]);
+    /// ```
+    ///
+    /// An empty string matches at every position, including the position
+    /// immediately following the last byte:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let matches: Vec<usize> = JanetString::new("foo").rfind_iter("").collect();
+    /// assert_eq!(matches, vec![3, 2, 1, 0]);
+    ///
+    /// let matches: Vec<usize> = JanetString::new("").rfind_iter("").collect();
+    /// assert_eq!(matches, vec![0]);
+    /// ```
+    #[inline]
+    pub fn rfind_iter<'a, B>(&'a self, needle: &'a B) -> FindReverse<'a>
+    where B: ?Sized + AsRef<[u8]> {
+        self.as_bytes().rfind_iter(needle)
     }
 
     /// Creates an iterator over the bytes of the [`JanetString`].
