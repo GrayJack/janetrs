@@ -2,7 +2,7 @@
 //! janet modules.
 use core::{cmp::Ordering, fmt};
 
-use janet_ll::{
+use evil_janet::{
     JANET_CURRENT_CONFIG_BITS, JANET_VERSION_MAJOR, JANET_VERSION_MINOR, JANET_VERSION_PATCH,
 };
 

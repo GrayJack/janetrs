@@ -5,7 +5,7 @@
 //!  * Add methods for JanetFiber using the Janet C API
 use core::marker::PhantomData;
 
-use janet_ll::JanetFiber as CJanetFiber;
+use evil_janet::JanetFiber as CJanetFiber;
 
 /// TODO: A proper docs
 #[derive(Debug)]

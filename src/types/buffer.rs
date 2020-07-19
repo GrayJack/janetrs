@@ -14,14 +14,14 @@ use std::{
     path::Path,
 };
 
-use janet_ll::{
+use evil_janet::{
     janet_buffer, janet_buffer_ensure, janet_buffer_extra, janet_buffer_push_bytes,
     janet_buffer_push_u16, janet_buffer_push_u32, janet_buffer_push_u64, janet_buffer_push_u8,
     janet_buffer_setcount, JanetBuffer as CJanetBuffer,
 };
 
 #[cfg(feature = "std")]
-use janet_ll::janet_buffer_push_cstring;
+use evil_janet::janet_buffer_push_cstring;
 
 use bstr::{
     BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,

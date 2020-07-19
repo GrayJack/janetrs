@@ -6,7 +6,7 @@ use core::{
     ops::Index,
 };
 
-use janet_ll::{
+use evil_janet::{
     janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
     janet_table_get, janet_table_merge_table, janet_table_put, janet_table_rawget,
     JanetTable as CJanetTable,

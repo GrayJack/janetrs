@@ -8,7 +8,7 @@ use core::{
 #[cfg(feature = "std")]
 use std::{error::Error as StdError, thread_local};
 
-use janet_ll::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
+use evil_janet::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
 
 use crate::types::{Janet, JanetTable};
 

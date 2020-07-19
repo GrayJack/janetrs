@@ -7,7 +7,7 @@ use core::{
     ops::{Index, IndexMut},
 };
 
-use janet_ll::{
+use evil_janet::{
     janet_array, janet_array_ensure, janet_array_n, janet_array_peek, janet_array_pop,
     janet_array_push, janet_array_setcount, Janet as CJanet, JanetArray as CJanetArray,
 };
@@ -245,7 +245,7 @@ impl<'data> JanetArray<'data> {
         unsafe { janet_array_push(self.raw, value.inner) };
     }
 
-    /// Removes the last element from a array and returns it, or Janet `nil` if it is
+    /// Removes the last element from a array and returns it, or None if it is
     /// empty.
     ///
     /// # Examples
@@ -257,12 +257,16 @@ impl<'data> JanetArray<'data> {
     ///
     /// arr.push(10);
     /// assert_eq!(arr.len(), 1);
-    /// assert_eq!(arr.pop(), Janet::integer(10));
+    /// assert_eq!(arr.pop(), Some(Janet::integer(10)));
     /// assert!(arr.is_empty())
     /// ```
     #[inline]
-    pub fn pop(&mut self) -> Janet {
-        unsafe { janet_array_pop(self.raw).into() }
+    pub fn pop(&mut self) -> Option<Janet> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(unsafe { janet_array_pop(self.raw).into() })
+        }
     }
 
     /// Returns a copy of the last element in the array without modifying it.
@@ -579,6 +583,15 @@ impl AsRef<[Janet]> for JanetArray<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
         unsafe { core::slice::from_raw_parts((*self.raw).data as *mut Janet, self.len() as usize) }
+    }
+}
+
+impl AsMut<[Janet]> for JanetArray<'_> {
+    #[inline]
+    fn as_mut(&mut self) -> &mut [Janet] {
+        unsafe {
+            core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len() as usize)
+        }
     }
 }
 
@@ -946,7 +959,7 @@ mod tests {
 
         for _ in 0..10 {
             let last_peek = array.peek();
-            let poped_last = array.pop();
+            let poped_last = array.pop().unwrap();
 
             assert_eq!(last_peek, poped_last);
         }

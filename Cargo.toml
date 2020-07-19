@@ -13,13 +13,15 @@ keywords = ["janet", "embedding"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu", "x86_64-unknown-freebsd",
-    "x86_64-unknown-netbsd", "x86_64-apple-darwin", "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu"]
+    "x86_64-unknown-netbsd", "x86_64-apple-darwin", "x86_64-sun-solaris",
+    "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu",
+    "x86_64-pc-windows-gnu", "x86_64-pc-windows-msvc"]
 all-features = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-janet-ll = { git = "https://github.com/GrayJack/janet-ll", branch = "dev" }
+evil-janet = "1.11"
 bstr = { version = "0.2.13", default-features = false}
 
 [dev-dependencies]
@@ -30,7 +32,7 @@ default = ["std", "unicode"]
 # To use Error trait and alocations
 std = ["bstr/std"]
 # Use to have Janet client
-amalgation = ["janet-ll/link-amalg"]
+amalgation = ["evil-janet/link-amalg"]
 # Inline more functions
 inline-more = []
 # Unicode conveniences

@@ -6,7 +6,7 @@ use core::{
     ops::Index,
 };
 
-use janet_ll::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
+use evil_janet::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
 
 use super::{Janet, JanetArray};
 

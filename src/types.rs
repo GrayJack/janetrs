@@ -4,7 +4,7 @@
 //! recieves `impl Into<Janet>` to `&impl Into<Janet> + Clone`
 use core::{cmp::Ordering, fmt};
 
-use janet_ll::{
+use evil_janet::{
     janet_length, janet_truthy, janet_type, janet_wrap_array, janet_wrap_boolean,
     janet_wrap_buffer, janet_wrap_fiber, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil,
     janet_wrap_number, janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table,
@@ -213,7 +213,7 @@ impl fmt::Debug for Janet {
         // C API and transform into &str to display it.
         let fmt_str = if f.alternate() { "%p\0" } else { "%q\0" };
         let s = unsafe {
-            let jstr = JanetString::from_raw(janet_ll::janet_formatc(
+            let jstr = JanetString::from_raw(evil_janet::janet_formatc(
                 fmt_str.as_ptr() as *const i8,
                 self.inner,
             ));
@@ -241,7 +241,7 @@ impl fmt::Display for Janet {
         };
 
         let s = unsafe {
-            let jstr = JanetString::from_raw(janet_ll::janet_formatc(
+            let jstr = JanetString::from_raw(evil_janet::janet_formatc(
                 fmt.as_ptr() as *const i8,
                 self.inner,
             ));
@@ -647,7 +647,7 @@ macro_rules! impl_string_like {
 
             impl PartialEq for $ty {
                 #[inline]
-                fn eq(&self, other: &Self) -> bool { unsafe { janet_ll::janet_string_equal(self.raw, other.raw) != 0 } }
+                fn eq(&self, other: &Self) -> bool { unsafe { evil_janet::janet_string_equal(self.raw, other.raw) != 0 } }
             }
 
             impl Eq for $ty {}
@@ -655,7 +655,7 @@ macro_rules! impl_string_like {
             impl PartialOrd for $ty {
                 #[inline]
                 fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                    let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
+                    let cmp_res = unsafe { evil_janet::janet_string_compare(self.raw, other.raw) };
 
                     Some(match cmp_res {
                         0 => Ordering::Equal,
@@ -689,21 +689,21 @@ macro_rules! impl_part {
         impl PartialEq<$t1> for $t2 {
             #[inline]
             fn eq(&self, other: &$t1) -> bool {
-                unsafe { janet_ll::janet_string_equal(self.raw, other.raw) != 0 }
+                unsafe { evil_janet::janet_string_equal(self.raw, other.raw) != 0 }
             }
         }
 
         impl PartialEq<$t2> for $t1 {
             #[inline]
             fn eq(&self, other: &$t2) -> bool {
-                unsafe { janet_ll::janet_string_equal(self.raw, other.raw) != 0 }
+                unsafe { evil_janet::janet_string_equal(self.raw, other.raw) != 0 }
             }
         }
 
         impl PartialOrd<$t1> for $t2 {
             #[inline]
             fn partial_cmp(&self, other: &$t1) -> Option<Ordering> {
-                let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
+                let cmp_res = unsafe { evil_janet::janet_string_compare(self.raw, other.raw) };
 
                 Some(match cmp_res {
                     0 => Ordering::Equal,
@@ -717,7 +717,7 @@ macro_rules! impl_part {
         impl PartialOrd<$t2> for $t1 {
             #[inline]
             fn partial_cmp(&self, other: &$t2) -> Option<Ordering> {
-                let cmp_res = unsafe { janet_ll::janet_string_compare(self.raw, other.raw) };
+                let cmp_res = unsafe { evil_janet::janet_string_compare(self.raw, other.raw) };
 
                 Some(match cmp_res {
                     0 => Ordering::Equal,

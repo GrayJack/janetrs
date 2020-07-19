@@ -10,7 +10,7 @@ use alloc::string::String;
 #[cfg(feature = "std")]
 use std::{borrow::Cow, ffi::OsStr, path::Path};
 
-use janet_ll::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
+use evil_janet::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
 
 use bstr::{
     BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
@@ -801,7 +801,8 @@ impl<'data> JanetString<'data> {
     /// assert_eq!(matches, vec![0]);
     /// ```
     #[inline]
-    pub fn find_iter<'a, B: ?Sized + AsRef<[u8]>>(&'a self, needle: &'a B) -> Find<'a> {
+    pub fn find_iter<'a, B>(&'a self, needle: &'a B) -> Find<'a>
+    where B: ?Sized + AsRef<[u8]> {
         self.as_bytes().find_iter(needle)
     }
 

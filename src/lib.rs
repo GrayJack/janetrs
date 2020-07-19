@@ -83,7 +83,7 @@
 // Janet requires allocation
 extern crate alloc;
 
-pub use janet_ll as janet_sys;
+pub use evil_janet as lowlevel;
 
 #[cfg(feature = "amalgation")]
 pub mod client;

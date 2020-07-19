@@ -1,6 +1,6 @@
 # JanetRS
 
-[![Hits-of-Code](https://hitsofcode.com/github/GrayJack/janetrs)](https://hitsofcode.com/view/github/GrayJack/janetrs
+[![Hits-of-Code](https://hitsofcode.com/github/GrayJack/janetrs)](https://hitsofcode.com/view/github/GrayJack/janetrs)
 [![Build Status](https://github.com/GrayJack/janetrs/workflows/Check%20and%20Test/badge.svg)](https://github.com/GrayJack/janetrs/actions)
 [![Docs dev branch](https://img.shields.io/badge/Docs-dev%20branch-blue)](https://grayjack.github.io/janetrs/janetrs/index.html)
 
@@ -9,10 +9,10 @@ A crate with high level bindings to Janet C API.
 ## Goals
 Provide a safe and ergonomic interface to the Janet C API to create Janet clients and
 Janet modules/libraries using Rust.
-This project still are in it's early stages, so breaking changes may happen, there is
-no minimal supported Rust version (MSRV) yet.
+This project still are in it's early stages and not production ready, so breaking changes may
+happen, there is no minimal supported Rust version (MSRV) yet.
 Notice that most doc tests will fail if the feature "almagation" aren't set, because
-most of then need it for the Janet runtime to function properly.
+most of then need the Janet runtime to function properly.
 
 ## Cargo Features
 - `std`: Enable some trait impl for types that only exist on the `std` and the Error

@@ -5,7 +5,7 @@ use core::{
     marker::PhantomData,
 };
 
-use janet_ll::{
+use evil_janet::{
     janet_struct_begin, janet_struct_end, janet_struct_find, janet_struct_get, janet_struct_head,
     janet_struct_put, JanetKV as CJanetKV,
 };

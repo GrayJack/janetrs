@@ -1,7 +1,7 @@
 //! Module dealing with symbols and keywords
 use core::marker::PhantomData;
 
-use janet_ll::{janet_string_head, janet_symbol, janet_symbol_gen};
+use evil_janet::{janet_string_head, janet_symbol, janet_symbol_gen};
 
 /// Janet symbol type. Usually used to name things in Janet.
 #[derive(Debug)]
