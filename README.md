@@ -1,8 +1,9 @@
 # JanetRS
 
-[![Hits-of-Code](https://hitsofcode.com/github/GrayJack/janetrs)](https://hitsofcode.com/view/github/GrayJack/janetrs)
 [![Build Status](https://github.com/GrayJack/janetrs/workflows/Check%20and%20Test/badge.svg)](https://github.com/GrayJack/janetrs/actions)
 [![Docs dev branch](https://img.shields.io/badge/Docs-dev%20branch-blue)](https://grayjack.github.io/janetrs/janetrs/index.html)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENCE)
+
 
 A crate with high level bindings to Janet C API.
 
