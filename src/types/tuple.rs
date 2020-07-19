@@ -217,6 +217,8 @@ impl Clone for JanetTuple<'_> {
 impl AsRef<[Janet]> for JanetTuple<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
+        // Safety: Janet uses i32 as max size for all collections and indexing, so it always has
+        // len lesser than isize::MAX
         unsafe { core::slice::from_raw_parts(self.raw as *const _, self.len() as usize) }
     }
 }

@@ -1,5 +1,10 @@
 //! This module should have all Janet type structures.
 //!
+//! # Lifetimes
+//! There is some commom naming patterns when looking at the type definitions
+//!
+//!  - `'data` is the lifetime of data that is owned by the Janet GC.
+//!
 //! TODO: After all Janet types implement [`Clone`], change all functions parameters that
 //! recieves `impl Into<Janet>` to `&impl Into<Janet> + Clone`
 use core::{cmp::Ordering, fmt};
@@ -572,7 +577,6 @@ pub enum JanetType {
 }
 
 
-// TODO: Change to TryFrom
 impl From<CJanetType> for JanetType {
     #[allow(non_upper_case_globals)]
     #[inline]
@@ -594,9 +598,7 @@ impl From<CJanetType> for JanetType {
             JanetType_JANET_SYMBOL => Self::Symbol,
             JanetType_JANET_TABLE => Self::Table,
             JanetType_JANET_TUPLE => Self::Tuple,
-            _ => panic!(
-                "Invalid raw type. Either Janet gave a wrong number, or Janet has a new type."
-            ),
+            _ => unreachable!(),
         }
     }
 }

@@ -306,6 +306,7 @@ impl<'data> JanetArray<'data> {
         if index < 0 || index >= self.len() {
             None
         } else {
+            // SAFETY: it's safe because we just checked that it is in bounds
             unsafe {
                 let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
                 Some(&(*ptr))
@@ -350,6 +351,7 @@ impl<'data> JanetArray<'data> {
         if index < 0 || index >= self.len() {
             None
         } else {
+            // SAFETY: it's safe because we just checked that it is in bounds
             unsafe {
                 let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
                 Some(&mut (*ptr))
@@ -435,6 +437,7 @@ impl<'data> JanetArray<'data> {
     pub fn remove(&mut self, index: i32) -> Janet {
         let ret = self[index];
 
+        // Shift all elements to the right
         for i in index..self.len() - 1 {
             self[i] = self[i + 1]
         }
@@ -582,6 +585,8 @@ impl Clone for JanetArray<'_> {
 impl AsRef<[Janet]> for JanetArray<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
+        // Safety: Janet uses i32 as max size for all collections and indexing, so it always has
+        // len lesser than isize::MAX
         unsafe { core::slice::from_raw_parts((*self.raw).data as *mut Janet, self.len() as usize) }
     }
 }
@@ -589,6 +594,8 @@ impl AsRef<[Janet]> for JanetArray<'_> {
 impl AsMut<[Janet]> for JanetArray<'_> {
     #[inline]
     fn as_mut(&mut self) -> &mut [Janet] {
+        // Safety: Janet uses i32 as max size for all collections and indexing, so it always has
+        // len lesser than isize::MAX and we have exclusive access to the data
         unsafe {
             core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len() as usize)
         }

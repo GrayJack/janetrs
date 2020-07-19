@@ -167,6 +167,14 @@ impl<'data> JanetStruct<'data> {
             } else {
                 // SAFETY: Safe to deref since it's not null
                 unsafe {
+                    // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                    // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                    // types are represented in memory the same way
+                    // 2. A C struct are represented the same way in memory as tuple with the same
+                    // number of the struct fields of the same type of the
+                    // struct fields
+                    //
+                    // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
                     let kv: *const (Janet, Janet) = kv as *const _;
 
                     if (*kv).1.is_nil() {
@@ -238,6 +246,14 @@ impl<'data> JanetStruct<'data> {
             } else {
                 // SAFETY: Safe to deref since it's not null
                 unsafe {
+                    // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                    // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                    // types are represented in memory the same way
+                    // 2. A C struct are represented the same way in memory as tuple with the same
+                    // number of the struct fields of the same type of the
+                    // struct fields
+                    //
+                    // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
                     let kv: *const (Janet, Janet) = kv as *const _;
 
                     if kv.is_null() {
@@ -464,6 +480,13 @@ impl<'a, 'data> Iterator for Iter<'a, 'data> {
         if self.offset >= self.end {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let ptr: *const (Janet, Janet) = unsafe { self.st.raw.offset(self.offset) as *const _ };
             self.offset += 1;
             Some(unsafe { (&(*ptr).0, &(*ptr).1) })
@@ -563,6 +586,13 @@ impl Iterator for IntoIter<'_> {
         if self.offset == self.end {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let ptr: *const (Janet, Janet) = unsafe { self.st.raw.offset(self.offset) as *const _ };
             self.offset += 1;
             Some(unsafe { ((*ptr).0, (*ptr).1) })
