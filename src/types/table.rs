@@ -4,12 +4,13 @@ use core::{
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::Index,
+    ptr::NonNull,
 };
 
 use evil_janet::{
     janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
     janet_table_get, janet_table_merge_table, janet_table_put, janet_table_rawget,
-    JanetTable as CJanetTable,
+    janet_table_remove, JanetTable as CJanetTable,
 };
 // janet_table_remove
 
@@ -242,12 +243,20 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let kv: *mut (Janet, Janet) =
                 unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
             } else {
+                // SAFETY: kv is safe to deref because we checked that it's not a null pointer.
                 unsafe {
                     if (*kv).1.is_nil() {
                         None
@@ -313,12 +322,20 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let kv: *mut (Janet, Janet) =
                 unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
             } else {
+                // SAFETY: kv is safe to deref because we checked that it's not a null pointer.
                 unsafe {
                     if (*kv).1.is_nil() {
                         None
@@ -466,12 +483,20 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let kv: *mut (Janet, Janet) =
                 unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
             } else {
+                // SAFETY: This is safe because we have a exclusive access to the structure
                 unsafe { Some((&mut (*kv).0, &mut (*kv).1)) }
             }
         }
@@ -497,32 +522,9 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
-            // TODO: Remove manual implementation when a new version of janet is released with
-            // `janet_table_remove` fixed
-            let kv: *mut (Janet, Janet) =
-                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+            let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into() };
 
-            if kv.is_null() {
-                None
-            } else {
-                unsafe {
-                    let ret = (*kv).1;
-                    if ret.is_nil() {
-                        None
-                    } else {
-                        (*self.raw).count -= 1;
-                        (*self.raw).deleted += 1;
-
-                        (*kv).0 = Janet::nil();
-                        (*kv).1 = Janet::boolean(false);
-
-                        Some(ret)
-                    }
-                }
-            }
-            // janet_table_remove have a bug the returns the key instead of the value
-            // let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into()
-            // }; if value.is_nil() { None } else { Some(value) }
+            if value.is_nil() { None } else { Some(value) }
         }
     }
 
@@ -735,7 +737,18 @@ impl<'data> JanetTable<'data> {
         let key = key.into();
 
         if self.get(key).is_some() {
-            let elem = unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+            // SAFETY: We just checked that the table has the key, so there is no way that the
+            // pointer will be NULL
+            //
+            // It's also safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+            let elem =
+                unsafe { NonNull::new_unchecked(janet_table_find(self.raw, key.inner) as *mut _) };
 
             Entry::Occupied(OccupiedEntry {
                 key: Some(key),
@@ -1032,7 +1045,7 @@ impl<'a, 'data> Entry<'a, 'data> {
 #[derive(Debug)]
 pub struct OccupiedEntry<'a, 'data> {
     key:   Option<Janet>,
-    elem:  *mut (Janet, Janet),
+    elem:  NonNull<(Janet, Janet)>,
     table: &'a mut JanetTable<'data>,
 }
 
@@ -1056,7 +1069,9 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// ```
     #[inline]
     pub fn get(&self) -> &Janet {
-        unsafe { &(*self.elem).1 }
+        // SAFETY: This is safe because `OccupiedEntry` cannot be created by a user and all
+        // functions that creates then must create then with the `elem` field not NULL
+        unsafe { &(*self.elem.as_ptr()).1 }
     }
 
     /// Gets a mutable reference to the value in the entry.
@@ -1090,7 +1105,12 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// [`into_mut`]: ./struct.OccupiedEntry.html#method.into_mut
     #[inline]
     pub fn get_mut(&mut self) -> &mut Janet {
-        unsafe { &mut (*self.elem).1 }
+        // SAFETY: This is safe to not check if the pointer is not null because `OccupiedEntry`
+        // cannot be created by a user and all functions that creates then must create
+        // then with the `elem` field not NULL
+        // This is also safe to do return as exclusive borrow because we have a exclusive access
+        // to the value
+        unsafe { &mut (*self.elem.as_ptr()).1 }
     }
 
     /// Sets the value of the entry, and returns the entry's old value.
@@ -1123,7 +1143,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// Converts the [`OccupiedEntry`] into a mutable reference to the value in the entry
     /// with a lifetime bound to the table itself.
     ///
-    /// If you need multiple references to the [`OccupiedEntry`], see get_mut.
+    /// If you need multiple references to the [`OccupiedEntry`], see [`get_mut`].
     ///
     /// # Examples
     /// ```
@@ -1143,16 +1163,16 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// assert_eq!(table.get(10), Some(&Janet::integer(11)));
     /// ```
     ///
-    /// [`get_mut`]: ./struct.OccupiedEntry.html#method.get_mut
+    /// [`get_mut`]: #method.get_mut
     #[inline]
     pub fn into_mut(self) -> &'a mut Janet {
-        unsafe { &mut (*self.elem).1 }
+        unsafe { &mut (*self.elem.as_ptr()).1 }
     }
 
     /// Gets a reference to the key in the entry.
     #[inline]
     pub fn key(&self) -> &Janet {
-        unsafe { &(*self.elem).0 }
+        unsafe { &(*self.elem.as_ptr()).0 }
     }
 
     /// Takes the value out of the entry, and returns it.
@@ -1182,11 +1202,10 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// Take the ownership of the key and value from the table.
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn remove_entry(self) -> (Janet, Janet) {
-        unsafe {
-            let copy = ((*self.elem).0, (*self.elem).1);
-            self.table.remove((*self.elem).0);
-            copy
-        }
+        // SAFETY: Safe to deref because `elem` is not null
+        let copy = unsafe { *self.elem.as_ptr() };
+        self.table.remove(&copy.0);
+        copy
     }
 
     /// Replaces the entry, returning the old key and value. The new key in the table will
@@ -1195,7 +1214,8 @@ impl<'a> OccupiedEntry<'a, '_> {
     pub fn replace_entry(self, value: impl Into<Janet>) -> (Janet, Janet) {
         let value = value.into();
 
-        let mut entry = unsafe { *self.elem };
+        // SAFETY: Safe to deref because `elem` is not null
+        let mut entry = unsafe { *self.elem.as_ptr() };
 
         let old_key = core::mem::replace(&mut entry.0, self.key.unwrap());
         let old_value = core::mem::replace(&mut entry.1, value);
@@ -1206,7 +1226,8 @@ impl<'a> OccupiedEntry<'a, '_> {
     /// Replaces the key in the table with the key used to create this entry.
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn replace_key(self) -> Janet {
-        let mut entry = unsafe { *self.elem };
+        // SAFETY: Safe to deref because `elem` is not null
+        let mut entry = unsafe { *self.elem.as_ptr() };
         core::mem::replace(&mut entry.0, self.key.unwrap())
     }
 }
@@ -1242,6 +1263,8 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     pub fn insert(self, value: impl Into<Janet>) -> &'a mut Janet {
         let value = value.into();
         self.table.insert(self.key, value);
+
+        // SAFETY: We just inserted the key-value pair, therefore it certainly is in the table.
         unsafe { self.table.get_mut_unchecked(self.key) }
     }
 
@@ -1252,12 +1275,22 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
         let value = value.into();
 
         self.table.insert(self.key, value);
-        let elem: *mut (Janet, Janet) =
-            unsafe { janet_table_find(self.table.raw, self.key.inner) as *mut _ };
 
-        if elem.is_null() {
-            panic!("The pointer is NULL! It should not be since we just inserted to table!!");
-        }
+        // SAFETY: We inserted the key-value pair in the table in the line above, that means we
+        // will always find the pair in the table, so there is no way that the pointer
+        // will be NULL
+        //
+        //
+        // It's also safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // are represented in memory the same way
+        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // the struct fields of the same type of the struct fields
+        //
+        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+        let elem = unsafe {
+            NonNull::new_unchecked(janet_table_find(self.table.raw, self.key.inner) as *mut _)
+        };
 
         OccupiedEntry {
             key: None,
@@ -1319,9 +1352,19 @@ impl<'a, 'data> Iterator for Iter<'a, 'data> {
         if self.offset >= self.end {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+            //
+            // It's safe to get the data at the `self.offset` because we checked it's in the bounds
             let ptr: *const (Janet, Janet) =
                 unsafe { (*self.table.raw).data.offset(self.offset) as *const _ };
             self.offset += 1;
+
             Some(unsafe { (&(*ptr).0, &(*ptr).1) })
         }
     }
@@ -1418,6 +1461,15 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
         if self.offset >= self.end {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+            //
+            // It's safe to get the data at the `self.offset` because we checked it's in the bounds
             let ptr: *mut (Janet, Janet) =
                 unsafe { (*self.table.raw).data.offset(self.offset) as *mut _ };
             self.offset += 1;
@@ -1487,6 +1539,15 @@ impl Iterator for IntoIter<'_> {
         if self.offset == self.end {
             None
         } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+            //
+            // It's safe to get the data at the `self.offset` because we checked it's in the bounds
             let ptr: *const (Janet, Janet) =
                 unsafe { (*self.table.raw).data.offset(self.offset) as *const _ };
             self.offset += 1;
