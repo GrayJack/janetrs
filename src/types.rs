@@ -184,11 +184,13 @@ impl Janet {
         }
     }
 
+    /// Wraps a value into a [`Janet`].
     #[inline]
     pub fn wrap(value: impl Into<Janet>) -> Self {
         value.into()
     }
 
+    /// Tries to unwrap the [`Janet`] into a concrete type that implements [`TryFrom`]<[`Janet`]>.
     #[inline]
     pub fn unwrap<T: TryFrom<Self>>(self) -> Result<T, T::Error> {
         T::try_from(self)

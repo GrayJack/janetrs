@@ -80,7 +80,7 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
-    /// Create a new [`JanetTuple`] with a `raw` pointer.
+    /// Create a new [`JanetStruct`] with a `raw` pointer.
     ///
     /// # Safety
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
