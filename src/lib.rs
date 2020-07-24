@@ -31,6 +31,7 @@
 //!  - [ ] JanetFunction
 //!  - [ ] JanetPointer
 //!  - [ ] Janet Typed Array
+//!  - [ ] GC functions
 //!
 //!  `[ ]: Lacking`
 //!  `[I]: Incomplete`

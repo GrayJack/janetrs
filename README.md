@@ -34,6 +34,7 @@ This software is licensed under the terms of the [MIT Public License](./LICENSE)
  - [ ] JanetFunction
  - [ ] JanetPointer
  - [ ] Janet Typed Array
+ - [ ] GC functions
 
  [ ]: Lacking
  [I]: Incomplete

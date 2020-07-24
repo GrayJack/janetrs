@@ -5,8 +5,21 @@
 //!  * Add methods for JanetFiber using the Janet C API
 use core::marker::PhantomData;
 
-use evil_janet::JanetFiber as CJanetFiber;
+use evil_janet::{
+    janet_current_fiber, janet_fiber_status, janet_root_fiber, JanetFiber as CJanetFiber,
+    JanetFiberStatus_JANET_STATUS_ALIVE, JanetFiberStatus_JANET_STATUS_DEAD,
+    JanetFiberStatus_JANET_STATUS_DEBUG, JanetFiberStatus_JANET_STATUS_ERROR,
+    JanetFiberStatus_JANET_STATUS_NEW, JanetFiberStatus_JANET_STATUS_PENDING,
+    JanetFiberStatus_JANET_STATUS_USER0, JanetFiberStatus_JANET_STATUS_USER1,
+    JanetFiberStatus_JANET_STATUS_USER2, JanetFiberStatus_JANET_STATUS_USER3,
+    JanetFiberStatus_JANET_STATUS_USER4, JanetFiberStatus_JANET_STATUS_USER5,
+    JanetFiberStatus_JANET_STATUS_USER6, JanetFiberStatus_JANET_STATUS_USER7,
+    JanetFiberStatus_JANET_STATUS_USER8, JanetFiberStatus_JANET_STATUS_USER9,
+};
 
+/// A lightweight green thread in Janet. It does not correspond to operating system
+/// threads.
+///
 /// TODO: A proper docs
 #[derive(Debug)]
 #[repr(transparent)]
@@ -16,6 +29,24 @@ pub struct JanetFiber<'data> {
 }
 
 impl JanetFiber<'_> {
+    /// Get the current [`JanetFiber`].
+    #[inline]
+    pub fn current() -> Self {
+        Self {
+            raw:     unsafe { janet_current_fiber() },
+            phantom: PhantomData,
+        }
+    }
+
+    /// Get the root [`JanetFiber`].
+    #[inline]
+    pub fn root() -> Self {
+        Self {
+            raw:     unsafe { janet_root_fiber() },
+            phantom: PhantomData,
+        }
+    }
+
     /// Create a new [`JanetFiber`] with a `raw` pointer.
     ///
     /// # Safety
@@ -27,6 +58,13 @@ impl JanetFiber<'_> {
             raw,
             phantom: PhantomData,
         }
+    }
+
+    /// Returns the fiber status.
+    #[inline]
+    pub fn status(&self) -> FiberStatus {
+        let raw_status = unsafe { janet_fiber_status(self.raw) };
+        FiberStatus::from(raw_status)
     }
 
     /// Return a raw pointer to the fiber raw structure.
@@ -49,5 +87,62 @@ impl JanetFiber<'_> {
     #[inline]
     pub fn as_mut_raw(&mut self) -> *mut CJanetFiber {
         self.raw
+    }
+}
+
+/// This tipe represents a the status of a [`JanetFiber`].
+///
+/// It mostly corresponds to signals.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[repr(u32)]
+pub enum FiberStatus {
+    Dead  = JanetFiberStatus_JANET_STATUS_DEAD,
+    Error = JanetFiberStatus_JANET_STATUS_ERROR,
+    Debug = JanetFiberStatus_JANET_STATUS_DEBUG,
+    Pending = JanetFiberStatus_JANET_STATUS_PENDING,
+    User0 = JanetFiberStatus_JANET_STATUS_USER0,
+    User1 = JanetFiberStatus_JANET_STATUS_USER1,
+    User2 = JanetFiberStatus_JANET_STATUS_USER2,
+    User3 = JanetFiberStatus_JANET_STATUS_USER3,
+    User4 = JanetFiberStatus_JANET_STATUS_USER4,
+    User5 = JanetFiberStatus_JANET_STATUS_USER5,
+    User6 = JanetFiberStatus_JANET_STATUS_USER6,
+    User7 = JanetFiberStatus_JANET_STATUS_USER7,
+    User8 = JanetFiberStatus_JANET_STATUS_USER8,
+    User9 = JanetFiberStatus_JANET_STATUS_USER9,
+    New   = JanetFiberStatus_JANET_STATUS_NEW,
+    Alive = JanetFiberStatus_JANET_STATUS_ALIVE,
+}
+
+#[allow(non_upper_case_globals)]
+impl From<u32> for FiberStatus {
+    #[inline]
+    fn from(val: u32) -> Self {
+        match val {
+            JanetFiberStatus_JANET_STATUS_DEAD => Self::Dead,
+            JanetFiberStatus_JANET_STATUS_ERROR => Self::Error,
+            JanetFiberStatus_JANET_STATUS_DEBUG => Self::Debug,
+            JanetFiberStatus_JANET_STATUS_PENDING => Self::Pending,
+            JanetFiberStatus_JANET_STATUS_USER0 => Self::User0,
+            JanetFiberStatus_JANET_STATUS_USER1 => Self::User1,
+            JanetFiberStatus_JANET_STATUS_USER2 => Self::User2,
+            JanetFiberStatus_JANET_STATUS_USER3 => Self::User3,
+            JanetFiberStatus_JANET_STATUS_USER4 => Self::User4,
+            JanetFiberStatus_JANET_STATUS_USER5 => Self::User5,
+            JanetFiberStatus_JANET_STATUS_USER6 => Self::User6,
+            JanetFiberStatus_JANET_STATUS_USER7 => Self::User7,
+            JanetFiberStatus_JANET_STATUS_USER8 => Self::User8,
+            JanetFiberStatus_JANET_STATUS_USER9 => Self::User9,
+            JanetFiberStatus_JANET_STATUS_NEW => Self::New,
+            JanetFiberStatus_JANET_STATUS_ALIVE => Self::Alive,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<FiberStatus> for u32 {
+    #[inline]
+    fn from(val: FiberStatus) -> Self {
+        val as u32
     }
 }
