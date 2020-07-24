@@ -38,6 +38,7 @@ use super::{Janet, JanetExtend, JanetStruct};
 /// ```
 ///
 /// [table]: https://janet-lang.org/docs/data_structures/tables.html
+#[repr(transparent)]
 pub struct JanetTable<'data> {
     pub(crate) raw: *mut CJanetTable,
     phatom: PhantomData<&'data ()>,

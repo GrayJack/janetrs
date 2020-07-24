@@ -66,6 +66,7 @@ impl<'data> JanetTupleBuilder<'data> {
 /// ```
 ///
 /// [Janet arrays]: ./../array/struct.JanetArray.html
+#[repr(transparent)]
 pub struct JanetTuple<'data> {
     pub(crate) raw: *const CJanet,
     phantom: PhantomData<&'data ()>,

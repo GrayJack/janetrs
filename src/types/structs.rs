@@ -61,6 +61,7 @@ impl<'data> JanetStructBuilder<'data> {
 /// ```
 ///
 /// [`JanetTable`]: ./../table/struct.JanetTable.html
+#[repr(transparent)]
 pub struct JanetStruct<'data> {
     pub(crate) raw: *const CJanetKV,
     phantom: PhantomData<&'data ()>,

@@ -9,6 +9,7 @@ use evil_janet::JanetFiber as CJanetFiber;
 
 /// TODO: A proper docs
 #[derive(Debug)]
+#[repr(transparent)]
 pub struct JanetFiber<'data> {
     pub(crate) raw: *mut CJanetFiber,
     phantom: PhantomData<&'data ()>,

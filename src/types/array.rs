@@ -30,6 +30,7 @@ use super::{Janet, JanetExtend, JanetTuple};
 ///
 /// assert_eq!(2, arr.len());
 /// ```
+#[repr(transparent)]
 pub struct JanetArray<'data> {
     pub(crate) raw: *mut CJanetArray,
     phantom: PhantomData<&'data ()>,

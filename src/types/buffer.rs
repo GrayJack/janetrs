@@ -87,6 +87,7 @@ use super::{JanetExtend, JanetString};
 /// [`push_u16`]: ./struct.JanetBuffer.html#method.push_u16
 /// [`push_u32`]: ./struct.JanetBuffer.html#method.push_u32
 /// [`push_u64`]: ./struct.JanetBuffer.html#method.push_u64
+#[repr(transparent)]
 pub struct JanetBuffer<'data> {
     pub(crate) raw: *mut CJanetBuffer,
     phantom: PhantomData<&'data ()>,

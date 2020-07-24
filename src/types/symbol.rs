@@ -5,6 +5,7 @@ use evil_janet::{janet_string_head, janet_symbol, janet_symbol_gen};
 
 /// Janet symbol type. Usually used to name things in Janet.
 #[derive(Debug)]
+#[repr(transparent)]
 pub struct JanetSymbol<'data> {
     pub(crate) raw: *const u8,
     phantom: PhantomData<&'data ()>,
@@ -126,6 +127,7 @@ impl Clone for JanetSymbol<'_> {
 /// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
 /// the language, it is a normal string that cen be defined by the user.
 #[derive(Debug)]
+#[repr(transparent)]
 pub struct JanetKeyword<'data> {
     pub(crate) raw: *const u8,
     phantom: PhantomData<&'data ()>,

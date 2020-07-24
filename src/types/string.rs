@@ -114,8 +114,9 @@ impl<'data> JanetStringBuilder<'data> {
 /// ```
 ///
 /// [Janet buffers]: ./../buffer/struct.JanetBuffer.html
-/// [`builder`]: ./struct.JanetString.html#method.builder
-/// [`new`]: ./struct.JanetString.html#method.new
+/// [`builder`]: #method.builder
+/// [`new`]: #method.new
+#[repr(transparent)]
 pub struct JanetString<'data> {
     pub(crate) raw: *const u8,
     phantom: PhantomData<&'data ()>,
