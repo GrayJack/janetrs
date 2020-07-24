@@ -23,7 +23,8 @@ impl JanetFiber<'_> {
     #[inline]
     pub const unsafe fn from_raw(raw: *mut CJanetFiber) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 

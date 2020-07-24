@@ -109,7 +109,8 @@ impl<'data> JanetTuple<'data> {
     #[inline]
     pub const unsafe fn from_raw(raw: *const CJanet) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 

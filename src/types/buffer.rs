@@ -141,7 +141,8 @@ impl JanetBuffer<'_> {
     #[inline]
     pub const unsafe fn from_raw(raw: *mut CJanetBuffer) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 

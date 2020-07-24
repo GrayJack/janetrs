@@ -84,7 +84,8 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub const unsafe fn from_raw(raw: *mut CJanetArray) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 

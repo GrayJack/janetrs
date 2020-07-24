@@ -88,7 +88,8 @@ impl<'data> JanetStruct<'data> {
     #[inline]
     pub const unsafe fn from_raw(raw: *const CJanetKV) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 

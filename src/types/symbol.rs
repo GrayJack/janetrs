@@ -66,7 +66,8 @@ impl JanetSymbol<'_> {
     #[inline]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 
@@ -167,7 +168,8 @@ impl JanetKeyword<'_> {
     #[inline]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
         Self {
-            raw, phantom: PhantomData
+            raw,
+            phantom: PhantomData,
         }
     }
 

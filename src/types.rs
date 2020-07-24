@@ -190,7 +190,8 @@ impl Janet {
         value.into()
     }
 
-    /// Tries to unwrap the [`Janet`] into a concrete type that implements [`TryFrom`]<[`Janet`]>.
+    /// Tries to unwrap the [`Janet`] into a concrete type that implements
+    /// [`TryFrom`]<[`Janet`]>.
     #[inline]
     pub fn unwrap<T: TryFrom<Self>>(self) -> Result<T, T::Error> {
         T::try_from(self)
