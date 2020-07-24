@@ -29,21 +29,31 @@ pub struct JanetFiber<'data> {
 }
 
 impl JanetFiber<'_> {
-    /// Get the current [`JanetFiber`].
+    /// Return the current [`JanetFiber`] if it exists.
     #[inline]
-    pub fn current() -> Self {
-        Self {
-            raw:     unsafe { janet_current_fiber() },
-            phantom: PhantomData,
+    pub fn current() -> Option<Self> {
+        let f = unsafe { janet_current_fiber() };
+        if f.is_null() {
+            None
+        } else {
+            Some(Self {
+                raw:     f,
+                phantom: PhantomData,
+            })
         }
     }
 
-    /// Get the root [`JanetFiber`].
+    /// Return the root [`JanetFiber`] if it exists.
     #[inline]
-    pub fn root() -> Self {
-        Self {
-            raw:     unsafe { janet_root_fiber() },
-            phantom: PhantomData,
+    pub fn root() -> Option<Self> {
+        let f = unsafe { janet_root_fiber() };
+        if f.is_null() {
+            None
+        } else {
+            Some(Self {
+                raw:     f,
+                phantom: PhantomData,
+            })
         }
     }
 

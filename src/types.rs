@@ -734,7 +734,6 @@ impl PartialOrd<&Janet> for CJanet {
     }
 }
 
-
 /// Representation of all Janet types.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[repr(u32)]
@@ -756,7 +755,6 @@ pub enum JanetType {
     Table  = JanetType_JANET_TABLE,
     Tuple  = JanetType_JANET_TUPLE,
 }
-
 
 impl From<CJanetType> for JanetType {
     #[allow(non_upper_case_globals)]
@@ -787,27 +785,9 @@ impl From<CJanetType> for JanetType {
 impl From<JanetType> for CJanetType {
     #[inline]
     fn from(val: JanetType) -> Self {
-        match val {
-            JanetType::Abstract => JanetType_JANET_ABSTRACT,
-            JanetType::Array => JanetType_JANET_ARRAY,
-            JanetType::Boolean => JanetType_JANET_BOOLEAN,
-            JanetType::Buffer => JanetType_JANET_BUFFER,
-            JanetType::CFunction => JanetType_JANET_CFUNCTION,
-            JanetType::Fiber => JanetType_JANET_FIBER,
-            JanetType::Function => JanetType_JANET_FUNCTION,
-            JanetType::Keyword => JanetType_JANET_KEYWORD,
-            JanetType::Nil => JanetType_JANET_NIL,
-            JanetType::Number => JanetType_JANET_NUMBER,
-            JanetType::Pointer => JanetType_JANET_POINTER,
-            JanetType::String => JanetType_JANET_STRING,
-            JanetType::Struct => JanetType_JANET_STRUCT,
-            JanetType::Symbol => JanetType_JANET_SYMBOL,
-            JanetType::Table => JanetType_JANET_TABLE,
-            JanetType::Tuple => JanetType_JANET_TUPLE,
-        }
+        val as u32
     }
 }
-
 
 /// Trait that express the ability of a Janet collection to extend it with another
 /// collection.
