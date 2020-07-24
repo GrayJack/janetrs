@@ -351,25 +351,6 @@ impl From<&Janet> for Janet {
     }
 }
 
-impl From<()> for Janet {
-    #[inline]
-    fn from(_: ()) -> Self {
-        Self::nil()
-    }
-}
-
-impl TryFrom<Janet> for () {
-    type Error = JanetConversionError;
-
-    fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        if value.is_nil() {
-            Ok(())
-        } else {
-            Err(JanetConversionError)
-        }
-    }
-}
-
 impl From<bool> for Janet {
     #[inline]
     fn from(val: bool) -> Self {
