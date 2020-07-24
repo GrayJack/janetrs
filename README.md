@@ -78,3 +78,7 @@ JANET_MODULE_ENTRY(JanetTable *env) {
     janet_cfuns(env, "mymod", cfuns);
 }
 ```
+
+# Acknowledgments
+ * [Calvin Rose](https://github.com/bakpakin) for creating this amazing language called Janet
+ * [andrewchambers](https://github.com/andrewchambers) for janet_ll crate and discuss with us some ideas for the abstractions of this crate
