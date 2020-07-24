@@ -80,6 +80,18 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
+    /// Create a new [`JanetTuple`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    #[inline]
+    pub const unsafe fn from_raw(raw: *const CJanetKV) -> Self {
+        Self {
+            raw, phantom: PhantomData
+        }
+    }
+
     /// Returns the number of elements in the struct, also referred to as its 'length'.
     ///
     /// # Examples

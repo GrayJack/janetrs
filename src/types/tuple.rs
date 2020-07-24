@@ -101,6 +101,18 @@ impl<'data> JanetTuple<'data> {
         tuple.finalize()
     }
 
+    /// Create a new [`JanetTuple`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    #[inline]
+    pub const unsafe fn from_raw(raw: *const CJanet) -> Self {
+        Self {
+            raw, phantom: PhantomData
+        }
+    }
+
     /// Returns a reference to an element in the tuple.
     ///
     /// # Examples

@@ -7,10 +7,20 @@
 //!
 //! TODO: After all Janet types implement [`Clone`], change all functions parameters that
 //! recieves `impl Into<Janet>` to `&impl Into<Janet> + Clone`
-use core::{cmp::Ordering, fmt};
+use core::{
+    cmp::Ordering,
+    convert::TryFrom,
+    fmt::{self, Display},
+};
+
+#[cfg(feature = "std")]
+use std::error;
 
 use evil_janet::{
-    janet_length, janet_truthy, janet_type, janet_wrap_array, janet_wrap_boolean,
+    janet_length, janet_truthy, janet_type, janet_unwrap_array, janet_unwrap_boolean,
+    janet_unwrap_buffer, janet_unwrap_fiber, janet_unwrap_integer, janet_unwrap_keyword,
+    janet_unwrap_number, janet_unwrap_string, janet_unwrap_struct, janet_unwrap_symbol,
+    janet_unwrap_table, janet_unwrap_tuple, janet_wrap_array, janet_wrap_boolean,
     janet_wrap_buffer, janet_wrap_fiber, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil,
     janet_wrap_number, janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table,
     janet_wrap_tuple, Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT,
@@ -38,6 +48,27 @@ pub use structs::JanetStruct;
 pub use symbol::{JanetKeyword, JanetSymbol};
 pub use table::JanetTable;
 pub use tuple::JanetTuple;
+
+
+/// The error when converting [`Janet`]s to C Janet types.
+///
+/// This error only occurs when the [`Janet`] and the type it was being converted doesn't
+/// match.
+#[derive(Debug, PartialEq, PartialOrd, Eq, Ord, Hash, Default)]
+pub struct JanetConversionError;
+
+#[cfg(feature = "std")]
+impl error::Error for JanetConversionError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        None
+    }
+}
+
+impl Display for JanetConversionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Error converting Janet to concrete type")
+    }
+}
 
 /// Central structure for Janet.
 ///
@@ -151,6 +182,16 @@ impl Janet {
         Self {
             inner: unsafe { janet_wrap_keyword(value.raw) },
         }
+    }
+
+    #[inline]
+    pub fn wrap(value: impl Into<Janet>) -> Self {
+        value.into()
+    }
+
+    #[inline]
+    pub fn unwrap<T: TryFrom<Self>>(self) -> Result<T, T::Error> {
+        T::try_from(self)
     }
 
     /// Return `true` if [`Janet`] is nil type.
@@ -314,6 +355,18 @@ impl From<()> for Janet {
     }
 }
 
+impl TryFrom<Janet> for () {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if value.is_nil() {
+            Ok(())
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<bool> for Janet {
     #[inline]
     fn from(val: bool) -> Self {
@@ -325,6 +378,18 @@ impl From<&bool> for Janet {
     #[inline]
     fn from(val: &bool) -> Self {
         Self::boolean(*val)
+    }
+}
+
+impl TryFrom<Janet> for bool {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Boolean) {
+            Ok(unsafe { janet_unwrap_boolean(value.inner) } != 0)
+        } else {
+            Err(JanetConversionError)
+        }
     }
 }
 
@@ -342,6 +407,18 @@ impl From<&i32> for Janet {
     }
 }
 
+impl TryFrom<Janet> for i32 {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Number) {
+            Ok(unsafe { janet_unwrap_integer(value.inner) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<f64> for Janet {
     #[inline]
     fn from(val: f64) -> Self {
@@ -353,6 +430,18 @@ impl From<&f64> for Janet {
     #[inline]
     fn from(val: &f64) -> Self {
         Self::number(*val)
+    }
+}
+
+impl TryFrom<Janet> for f64 {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Number) {
+            Ok(unsafe { janet_unwrap_number(value.inner) })
+        } else {
+            Err(JanetConversionError)
+        }
     }
 }
 
@@ -378,6 +467,18 @@ impl From<&JanetTable<'_>> for Janet {
     }
 }
 
+impl TryFrom<Janet> for JanetTable<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Table) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_table(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<JanetArray<'_>> for Janet {
     #[inline]
     fn from(val: JanetArray<'_>) -> Self {
@@ -389,6 +490,18 @@ impl From<&JanetArray<'_>> for Janet {
     #[inline]
     fn from(val: &JanetArray<'_>) -> Self {
         Self::array(val.clone())
+    }
+}
+
+impl TryFrom<Janet> for JanetArray<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Array) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_array(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
     }
 }
 
@@ -406,10 +519,34 @@ impl From<&JanetBuffer<'_>> for Janet {
     }
 }
 
+impl TryFrom<Janet> for JanetBuffer<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Buffer) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_buffer(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<JanetFiber<'_>> for Janet {
     #[inline]
     fn from(val: JanetFiber<'_>) -> Self {
         Self::fiber(val)
+    }
+}
+
+impl TryFrom<Janet> for JanetFiber<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Fiber) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_fiber(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
     }
 }
 
@@ -427,6 +564,18 @@ impl From<&JanetTuple<'_>> for Janet {
     }
 }
 
+impl TryFrom<Janet> for JanetTuple<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Tuple) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_tuple(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<JanetString<'_>> for Janet {
     #[inline]
     fn from(val: JanetString<'_>) -> Self {
@@ -438,6 +587,18 @@ impl From<&JanetString<'_>> for Janet {
     #[inline]
     fn from(val: &JanetString<'_>) -> Self {
         Self::string(val.clone())
+    }
+}
+
+impl TryFrom<Janet> for JanetString<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::String) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_string(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
     }
 }
 
@@ -455,6 +616,18 @@ impl From<&JanetStruct<'_>> for Janet {
     }
 }
 
+impl TryFrom<Janet> for JanetStruct<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Struct) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_struct(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<JanetSymbol<'_>> for Janet {
     #[inline]
     fn from(val: JanetSymbol<'_>) -> Self {
@@ -469,6 +642,18 @@ impl From<&JanetSymbol<'_>> for Janet {
     }
 }
 
+impl TryFrom<Janet> for JanetSymbol<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Symbol) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_symbol(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<JanetKeyword<'_>> for Janet {
     #[inline]
     fn from(val: JanetKeyword<'_>) -> Self {
@@ -480,6 +665,18 @@ impl From<&JanetKeyword<'_>> for Janet {
     #[inline]
     fn from(val: &JanetKeyword<'_>) -> Self {
         Self::keyword(val.clone())
+    }
+}
+
+impl TryFrom<Janet> for JanetKeyword<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Keyword) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_keyword(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
     }
 }
 

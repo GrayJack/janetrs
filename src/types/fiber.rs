@@ -15,6 +15,18 @@ pub struct JanetFiber<'data> {
 }
 
 impl JanetFiber<'_> {
+    /// Create a new [`JanetTuple`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    #[inline]
+    pub const unsafe fn from_raw(raw: *mut CJanetFiber) -> Self {
+        Self {
+            raw, phantom: PhantomData
+        }
+    }
+
     /// Return a raw pointer to the fiber raw structure.
     ///
     /// The caller must ensure that the fiber outlives the pointer this function returns,

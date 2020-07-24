@@ -58,6 +58,18 @@ impl JanetSymbol<'_> {
         }
     }
 
+    /// Create a new [`JanetSymbol`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    #[inline]
+    pub const unsafe fn from_raw(raw: *const u8) -> Self {
+        Self {
+            raw, phantom: PhantomData
+        }
+    }
+
     /// Returns the length of this [`JanetSymbol`], in bytes, not [`char`]s or graphemes.
     /// In other words, it may not be what a human considers the length of the string.
     ///
@@ -144,6 +156,18 @@ impl JanetKeyword<'_> {
         Self {
             raw:     unsafe { janet_symbol(val.as_ptr(), len) },
             phantom: PhantomData,
+        }
+    }
+
+    /// Create a new [`JanetKeyword`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    #[inline]
+    pub const unsafe fn from_raw(raw: *const u8) -> Self {
+        Self {
+            raw, phantom: PhantomData
         }
     }
 

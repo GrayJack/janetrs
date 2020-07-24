@@ -133,6 +133,18 @@ impl JanetBuffer<'_> {
         }
     }
 
+    /// Create a new [`JanetBuffer`] with a `raw` pointer.
+    ///
+    /// # Safety
+    /// This function do not check if the given `raw` is `NULL` or not. Use at your
+    /// own risk.
+    #[inline]
+    pub const unsafe fn from_raw(raw: *mut CJanetBuffer) -> Self {
+        Self {
+            raw, phantom: PhantomData
+        }
+    }
+
     /// Returns the number of elements the buffer can hold without reallocating.
     #[inline]
     pub fn capacity(&self) -> i32 {
