@@ -28,7 +28,7 @@
 //!  - [ ] JanetAbstract
 //!  - [ ] JanetCFunction
 //!  - [I] JanetFiber
-//!  - [ ] JanetFunction
+//!  - [I] JanetFunction
 //!  - [ ] JanetPointer
 //!  - [ ] Janet Typed Array
 //!  - [ ] GC functions

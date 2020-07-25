@@ -18,22 +18,19 @@ use std::error;
 
 use evil_janet::{
     janet_length, janet_truthy, janet_type, janet_unwrap_array, janet_unwrap_boolean,
-    janet_unwrap_buffer, janet_unwrap_fiber, janet_unwrap_integer, janet_unwrap_keyword,
-    janet_unwrap_number, janet_unwrap_string, janet_unwrap_struct, janet_unwrap_symbol,
-    janet_unwrap_table, janet_unwrap_tuple, janet_wrap_array, janet_wrap_boolean,
-    janet_wrap_buffer, janet_wrap_fiber, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil,
-    janet_wrap_number, janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table,
-    janet_wrap_tuple, Janet as CJanet, JanetType as CJanetType, JanetType_JANET_ABSTRACT,
-    JanetType_JANET_ARRAY, JanetType_JANET_BOOLEAN, JanetType_JANET_BUFFER,
-    JanetType_JANET_CFUNCTION, JanetType_JANET_FIBER, JanetType_JANET_FUNCTION,
-    JanetType_JANET_KEYWORD, JanetType_JANET_NIL, JanetType_JANET_NUMBER, JanetType_JANET_POINTER,
-    JanetType_JANET_STRING, JanetType_JANET_STRUCT, JanetType_JANET_SYMBOL, JanetType_JANET_TABLE,
-    JanetType_JANET_TUPLE,
+    janet_unwrap_buffer, janet_unwrap_fiber, janet_unwrap_function, janet_unwrap_integer,
+    janet_unwrap_keyword, janet_unwrap_number, janet_unwrap_string, janet_unwrap_struct,
+    janet_unwrap_symbol, janet_unwrap_table, janet_unwrap_tuple, janet_wrap_array,
+    janet_wrap_boolean, janet_wrap_buffer, janet_wrap_fiber, janet_wrap_function,
+    janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil, janet_wrap_number, janet_wrap_string,
+    janet_wrap_struct, janet_wrap_symbol, janet_wrap_table, janet_wrap_tuple, Janet as CJanet,
+    JanetType as CJanetType,
 };
 
 pub mod array;
 pub mod buffer;
 pub mod fiber;
+pub mod function;
 pub mod string;
 pub mod structs;
 pub mod symbol;
@@ -43,6 +40,7 @@ pub mod tuple;
 pub use array::JanetArray;
 pub use buffer::JanetBuffer;
 pub use fiber::JanetFiber;
+pub use function::JanetFunction;
 pub use string::JanetString;
 pub use structs::JanetStruct;
 pub use symbol::{JanetKeyword, JanetSymbol};
@@ -58,11 +56,7 @@ pub use tuple::JanetTuple;
 pub struct JanetConversionError;
 
 #[cfg(feature = "std")]
-impl error::Error for JanetConversionError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        None
-    }
-}
+impl error::Error for JanetConversionError {}
 
 impl Display for JanetConversionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -136,14 +130,6 @@ impl Janet {
         }
     }
 
-    /// Create a fiber [`Janet`] with `value`.
-    #[inline]
-    pub fn fiber(value: JanetFiber<'_>) -> Self {
-        Self {
-            inner: unsafe { janet_wrap_fiber(value.raw) },
-        }
-    }
-
     /// Create a tuple [`Janet`] with `value`.
     #[inline]
     pub fn tuple(value: JanetTuple<'_>) -> Self {
@@ -181,6 +167,22 @@ impl Janet {
     pub fn keyword(value: JanetKeyword<'_>) -> Self {
         Self {
             inner: unsafe { janet_wrap_keyword(value.raw) },
+        }
+    }
+
+    /// Create a fiber [`Janet`] with `value`.
+    #[inline]
+    pub fn fiber(value: JanetFiber<'_>) -> Self {
+        Self {
+            inner: unsafe { janet_wrap_fiber(value.raw) },
+        }
+    }
+
+    /// Create a function [`Janet`] with `value`.
+    #[inline]
+    pub fn function(value: JanetFunction<'_>) -> Self {
+        Self {
+            inner: unsafe { janet_wrap_function(value.raw) },
         }
     }
 
@@ -664,6 +666,24 @@ impl TryFrom<Janet> for JanetKeyword<'_> {
     }
 }
 
+impl From<JanetFunction<'_>> for Janet {
+    fn from(val: JanetFunction<'_>) -> Self {
+        Self::function(val)
+    }
+}
+
+impl TryFrom<Janet> for JanetFunction<'_> {
+    type Error = JanetConversionError;
+
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if matches!(value.kind(), JanetType::Function) {
+            Ok(unsafe { Self::from_raw(janet_unwrap_function(value.inner)) })
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
 impl From<Janet> for CJanet {
     #[inline]
     fn from(val: Janet) -> Self {
@@ -738,22 +758,22 @@ impl PartialOrd<&Janet> for CJanet {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[repr(u32)]
 pub enum JanetType {
-    Abstract = JanetType_JANET_ABSTRACT,
-    Array  = JanetType_JANET_ARRAY,
-    Boolean = JanetType_JANET_BOOLEAN,
-    Buffer = JanetType_JANET_BUFFER,
-    CFunction = JanetType_JANET_CFUNCTION,
-    Fiber  = JanetType_JANET_FIBER,
-    Function = JanetType_JANET_FUNCTION,
-    Keyword = JanetType_JANET_KEYWORD,
-    Nil    = JanetType_JANET_NIL,
-    Number = JanetType_JANET_NUMBER,
-    Pointer = JanetType_JANET_POINTER,
-    String = JanetType_JANET_STRING,
-    Struct = JanetType_JANET_STRUCT,
-    Symbol = JanetType_JANET_SYMBOL,
-    Table  = JanetType_JANET_TABLE,
-    Tuple  = JanetType_JANET_TUPLE,
+    Abstract = evil_janet::JanetType_JANET_ABSTRACT,
+    Array  = evil_janet::JanetType_JANET_ARRAY,
+    Boolean = evil_janet::JanetType_JANET_BOOLEAN,
+    Buffer = evil_janet::JanetType_JANET_BUFFER,
+    CFunction = evil_janet::JanetType_JANET_CFUNCTION,
+    Fiber  = evil_janet::JanetType_JANET_FIBER,
+    Function = evil_janet::JanetType_JANET_FUNCTION,
+    Keyword = evil_janet::JanetType_JANET_KEYWORD,
+    Nil    = evil_janet::JanetType_JANET_NIL,
+    Number = evil_janet::JanetType_JANET_NUMBER,
+    Pointer = evil_janet::JanetType_JANET_POINTER,
+    String = evil_janet::JanetType_JANET_STRING,
+    Struct = evil_janet::JanetType_JANET_STRUCT,
+    Symbol = evil_janet::JanetType_JANET_SYMBOL,
+    Table  = evil_janet::JanetType_JANET_TABLE,
+    Tuple  = evil_janet::JanetType_JANET_TUPLE,
 }
 
 impl From<CJanetType> for JanetType {
@@ -761,22 +781,22 @@ impl From<CJanetType> for JanetType {
     #[inline]
     fn from(raw: CJanetType) -> Self {
         match raw {
-            JanetType_JANET_ABSTRACT => Self::Abstract,
-            JanetType_JANET_ARRAY => Self::Array,
-            JanetType_JANET_BOOLEAN => Self::Boolean,
-            JanetType_JANET_BUFFER => Self::Buffer,
-            JanetType_JANET_CFUNCTION => Self::CFunction,
-            JanetType_JANET_FIBER => Self::Fiber,
-            JanetType_JANET_FUNCTION => Self::Function,
-            JanetType_JANET_KEYWORD => Self::Keyword,
-            JanetType_JANET_NIL => Self::Nil,
-            JanetType_JANET_NUMBER => Self::Number,
-            JanetType_JANET_POINTER => Self::Pointer,
-            JanetType_JANET_STRING => Self::String,
-            JanetType_JANET_STRUCT => Self::Struct,
-            JanetType_JANET_SYMBOL => Self::Symbol,
-            JanetType_JANET_TABLE => Self::Table,
-            JanetType_JANET_TUPLE => Self::Tuple,
+            evil_janet::JanetType_JANET_ABSTRACT => Self::Abstract,
+            evil_janet::JanetType_JANET_ARRAY => Self::Array,
+            evil_janet::JanetType_JANET_BOOLEAN => Self::Boolean,
+            evil_janet::JanetType_JANET_BUFFER => Self::Buffer,
+            evil_janet::JanetType_JANET_CFUNCTION => Self::CFunction,
+            evil_janet::JanetType_JANET_FIBER => Self::Fiber,
+            evil_janet::JanetType_JANET_FUNCTION => Self::Function,
+            evil_janet::JanetType_JANET_KEYWORD => Self::Keyword,
+            evil_janet::JanetType_JANET_NIL => Self::Nil,
+            evil_janet::JanetType_JANET_NUMBER => Self::Number,
+            evil_janet::JanetType_JANET_POINTER => Self::Pointer,
+            evil_janet::JanetType_JANET_STRING => Self::String,
+            evil_janet::JanetType_JANET_STRUCT => Self::Struct,
+            evil_janet::JanetType_JANET_SYMBOL => Self::Symbol,
+            evil_janet::JanetType_JANET_TABLE => Self::Table,
+            evil_janet::JanetType_JANET_TUPLE => Self::Tuple,
             _ => unreachable!(),
         }
     }
@@ -785,6 +805,53 @@ impl From<CJanetType> for JanetType {
 impl From<JanetType> for CJanetType {
     #[inline]
     fn from(val: JanetType) -> Self {
+        val as u32
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[repr(u32)]
+pub enum JanetSignal {
+    Ok    = evil_janet::JanetSignal_JANET_SIGNAL_OK,
+    Error = evil_janet::JanetSignal_JANET_SIGNAL_ERROR,
+    Debug = evil_janet::JanetSignal_JANET_SIGNAL_DEBUG,
+    Yield = evil_janet::JanetSignal_JANET_SIGNAL_YIELD,
+    User0 = evil_janet::JanetSignal_JANET_SIGNAL_USER0,
+    User1 = evil_janet::JanetSignal_JANET_SIGNAL_USER1,
+    User2 = evil_janet::JanetSignal_JANET_SIGNAL_USER2,
+    User3 = evil_janet::JanetSignal_JANET_SIGNAL_USER3,
+    User4 = evil_janet::JanetSignal_JANET_SIGNAL_USER4,
+    User5 = evil_janet::JanetSignal_JANET_SIGNAL_USER5,
+    User6 = evil_janet::JanetSignal_JANET_SIGNAL_USER6,
+    User7 = evil_janet::JanetSignal_JANET_SIGNAL_USER7,
+    User8 = evil_janet::JanetSignal_JANET_SIGNAL_USER8,
+    User9 = evil_janet::JanetSignal_JANET_SIGNAL_USER9,
+}
+
+impl From<u32> for JanetSignal {
+    fn from(val: u32) -> Self {
+        match val {
+            evil_janet::JanetSignal_JANET_SIGNAL_OK => Self::Ok,
+            evil_janet::JanetSignal_JANET_SIGNAL_ERROR => Self::Error,
+            evil_janet::JanetSignal_JANET_SIGNAL_DEBUG => Self::Debug,
+            evil_janet::JanetSignal_JANET_SIGNAL_YIELD => Self::Yield,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER0 => Self::User0,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER1 => Self::User1,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER2 => Self::User2,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER3 => Self::User3,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER4 => Self::User4,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER5 => Self::User5,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER6 => Self::User6,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER7 => Self::User7,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER8 => Self::User8,
+            evil_janet::JanetSignal_JANET_SIGNAL_USER9 => Self::User9,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<JanetSignal> for u32 {
+    fn from(val: JanetSignal) -> Self {
         val as u32
     }
 }

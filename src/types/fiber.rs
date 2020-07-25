@@ -44,6 +44,8 @@ impl JanetFiber<'_> {
     }
 
     /// Return the root [`JanetFiber`] if it exists.
+    ///
+    /// The root fiber is the oldest ancestor that does not have a parent.
     #[inline]
     pub fn root() -> Option<Self> {
         let f = unsafe { janet_root_fiber() };
