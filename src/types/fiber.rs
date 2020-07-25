@@ -3,19 +3,14 @@
 //! TODO:
 //!  * Add JanetFiberStatus and the respective From implementations
 //!  * Add methods for JanetFiber using the Janet C API
-use core::marker::PhantomData;
+use core::{iter::FusedIterator, marker::PhantomData};
 
 use evil_janet::{
-    janet_current_fiber, janet_fiber_status, janet_root_fiber, JanetFiber as CJanetFiber,
-    JanetFiberStatus_JANET_STATUS_ALIVE, JanetFiberStatus_JANET_STATUS_DEAD,
-    JanetFiberStatus_JANET_STATUS_DEBUG, JanetFiberStatus_JANET_STATUS_ERROR,
-    JanetFiberStatus_JANET_STATUS_NEW, JanetFiberStatus_JANET_STATUS_PENDING,
-    JanetFiberStatus_JANET_STATUS_USER0, JanetFiberStatus_JANET_STATUS_USER1,
-    JanetFiberStatus_JANET_STATUS_USER2, JanetFiberStatus_JANET_STATUS_USER3,
-    JanetFiberStatus_JANET_STATUS_USER4, JanetFiberStatus_JANET_STATUS_USER5,
-    JanetFiberStatus_JANET_STATUS_USER6, JanetFiberStatus_JANET_STATUS_USER7,
-    JanetFiberStatus_JANET_STATUS_USER8, JanetFiberStatus_JANET_STATUS_USER9,
+    janet_continue, janet_current_fiber, janet_fiber, janet_fiber_status, janet_root_fiber,
+    JanetFiber as CJanetFiber,
 };
+
+use super::{Janet, JanetFunction, JanetSignal};
 
 /// A lightweight green thread in Janet. It does not correspond to operating system
 /// threads.
@@ -28,7 +23,23 @@ pub struct JanetFiber<'data> {
     phantom: PhantomData<&'data ()>,
 }
 
-impl JanetFiber<'_> {
+impl<'data> JanetFiber<'data> {
+    /// Create a new [`JanetFiber`] from a [`JanetFunction`] and it's arguments.
+    ///
+    /// In case any passed argument is invalid, returns `None`.
+    pub fn new(f: &mut JanetFunction, args: impl AsRef<[Janet]>) -> Option<Self> {
+        let args = args.as_ref();
+        let raw = unsafe { janet_fiber(f.raw, 64, args.len() as i32, args.as_ptr() as *const _) };
+        if raw.is_null() {
+            None
+        } else {
+            Some(Self {
+                raw,
+                phantom: PhantomData,
+            })
+        }
+    }
+
     /// Return the current [`JanetFiber`] if it exists.
     #[inline]
     pub fn current() -> Option<Self> {
@@ -79,6 +90,123 @@ impl JanetFiber<'_> {
         FiberStatus::from(raw_status)
     }
 
+    /// Creates a iterator that can execute the fiber function untill it's done.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{
+    ///     client::JanetClient,
+    ///     types::{JanetFiber, JanetFunction},
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let _client = JanetClient::init()?.with_default_env();
+    ///
+    /// let f = _client.run(
+    ///     "(fn []
+    ///         (yield 1)
+    ///         (yield 2)
+    ///         (yield 3)
+    ///         (yield 4)
+    ///         5)",
+    /// )?;
+    /// let mut f_concrete: JanetFunction = f.unwrap()?;
+    ///
+    /// let mut fiber = JanetFiber::new(&mut f_concrete, &[]).unwrap();
+    /// fiber.exec().for_each(|j| println!("{}", j));
+    /// # Ok(()) }
+    /// ```
+    #[inline]
+    pub fn exec<'a>(&'a mut self) -> Exec<'a, 'data> {
+        Exec {
+            fiber:      self,
+            input:      Janet::nil(),
+            first_time: true,
+        }
+    }
+
+    /// Creates a iterator that can execute the fiber function untill it's done, modifying
+    /// the input to `input`.
+    ///
+    /// A `input` of value of Janet nil is the same as calling the [`exec`] method.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{
+    ///     client::JanetClient,
+    ///     types::{Janet, JanetFiber, JanetFunction},
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let _client = JanetClient::init()?.with_default_env();
+    ///
+    /// let f = _client.run(
+    ///     "(fn [x]
+    ///         (yield (+ x 1))
+    ///         (yield (+ x 2))
+    ///         (yield (* x 2))
+    ///         (yield (* x 3))
+    ///         x)",
+    /// )?;
+    /// let mut f_concrete: JanetFunction = f.unwrap()?;
+    ///
+    /// let mut fiber = JanetFiber::new(&mut f_concrete, &[10.into()]).unwrap();
+    /// fiber
+    ///     .exec_input(Janet::integer(12))
+    ///     .for_each(|j| println!("{}", j));
+    /// # Ok(()) }
+    /// ```
+    ///
+    /// [`exec`]: #method.exec
+    #[inline]
+    pub fn exec_input<'a>(&'a mut self, input: Janet) -> Exec<'a, 'data> {
+        Exec {
+            fiber: self,
+            input,
+            first_time: true,
+        }
+    }
+
+    /// Creates a iterator that can execute the fiber function untill it's done, modifying
+    /// the input with the given function.
+    ///
+    /// A `F` that returns the value of Janet nil is the same as calling the [`exec`]
+    /// method.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{
+    ///     client::JanetClient,
+    ///     types::{Janet, JanetFiber, JanetFunction},
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let _client = JanetClient::init()?.with_default_env();
+    ///
+    /// let f = _client.run(
+    ///     "(fn [x]
+    ///         (yield (+ x 1))
+    ///         (yield (+ x 2))
+    ///         (yield (* x 2))
+    ///         (yield (* x 3))
+    ///         x)",
+    /// )?;
+    /// let mut f_concrete: JanetFunction = f.unwrap()?;
+    ///
+    /// let mut fiber = JanetFiber::new(&mut f_concrete, &[10.into()]).unwrap();
+    /// fiber
+    ///     .exec_with(|| Janet::integer(3))
+    ///     .for_each(|j| println!("{}", j));
+    /// # Ok(()) }
+    /// ```
+    /// [`exec`]: #method.exec
+    #[inline]
+    pub fn exec_with<'a, F>(&'a mut self, f: F) -> Exec<'a, 'data>
+    where F: FnOnce() -> Janet {
+        Exec {
+            fiber:      self,
+            input:      f(),
+            first_time: true,
+        }
+    }
+
     /// Return a raw pointer to the fiber raw structure.
     ///
     /// The caller must ensure that the fiber outlives the pointer this function returns,
@@ -102,28 +230,63 @@ impl JanetFiber<'_> {
     }
 }
 
+/// An iterator that executes the function related to the fiber untill it completes.
+#[derive(Debug)]
+pub struct Exec<'a, 'data> {
+    fiber:      &'a mut JanetFiber<'data>,
+    input:      Janet,
+    first_time: bool,
+}
+
+impl<'a, 'data> Iterator for Exec<'a, 'data> {
+    type Item = Janet;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut out = Janet::nil();
+        let sig = unsafe { janet_continue(self.fiber.raw, self.input.inner, &mut out.inner) };
+        let sig = JanetSignal::from(sig);
+        if matches!(sig, JanetSignal::Ok | JanetSignal::Yield)
+            && !matches!(
+                self.fiber.status(),
+                FiberStatus::Alive | FiberStatus::Dead | FiberStatus::Error
+            )
+        {
+            Some(out)
+        } else if self.first_time {
+            self.first_time = false;
+
+            Some(out)
+        } else {
+            None
+        }
+    }
+}
+
+impl FusedIterator for Exec<'_, '_> {}
+
 /// This tipe represents a the status of a [`JanetFiber`].
 ///
 /// It mostly corresponds to signals.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[repr(u32)]
 pub enum FiberStatus {
-    Dead  = JanetFiberStatus_JANET_STATUS_DEAD,
-    Error = JanetFiberStatus_JANET_STATUS_ERROR,
-    Debug = JanetFiberStatus_JANET_STATUS_DEBUG,
-    Pending = JanetFiberStatus_JANET_STATUS_PENDING,
-    User0 = JanetFiberStatus_JANET_STATUS_USER0,
-    User1 = JanetFiberStatus_JANET_STATUS_USER1,
-    User2 = JanetFiberStatus_JANET_STATUS_USER2,
-    User3 = JanetFiberStatus_JANET_STATUS_USER3,
-    User4 = JanetFiberStatus_JANET_STATUS_USER4,
-    User5 = JanetFiberStatus_JANET_STATUS_USER5,
-    User6 = JanetFiberStatus_JANET_STATUS_USER6,
-    User7 = JanetFiberStatus_JANET_STATUS_USER7,
-    User8 = JanetFiberStatus_JANET_STATUS_USER8,
-    User9 = JanetFiberStatus_JANET_STATUS_USER9,
-    New   = JanetFiberStatus_JANET_STATUS_NEW,
-    Alive = JanetFiberStatus_JANET_STATUS_ALIVE,
+    Dead  = evil_janet::JanetFiberStatus_JANET_STATUS_DEAD,
+    Error = evil_janet::JanetFiberStatus_JANET_STATUS_ERROR,
+    Debug = evil_janet::JanetFiberStatus_JANET_STATUS_DEBUG,
+    Pending = evil_janet::JanetFiberStatus_JANET_STATUS_PENDING,
+    User0 = evil_janet::JanetFiberStatus_JANET_STATUS_USER0,
+    User1 = evil_janet::JanetFiberStatus_JANET_STATUS_USER1,
+    User2 = evil_janet::JanetFiberStatus_JANET_STATUS_USER2,
+    User3 = evil_janet::JanetFiberStatus_JANET_STATUS_USER3,
+    User4 = evil_janet::JanetFiberStatus_JANET_STATUS_USER4,
+    User5 = evil_janet::JanetFiberStatus_JANET_STATUS_USER5,
+    User6 = evil_janet::JanetFiberStatus_JANET_STATUS_USER6,
+    User7 = evil_janet::JanetFiberStatus_JANET_STATUS_USER7,
+    User8 = evil_janet::JanetFiberStatus_JANET_STATUS_USER8,
+    User9 = evil_janet::JanetFiberStatus_JANET_STATUS_USER9,
+    New   = evil_janet::JanetFiberStatus_JANET_STATUS_NEW,
+    Alive = evil_janet::JanetFiberStatus_JANET_STATUS_ALIVE,
 }
 
 #[allow(non_upper_case_globals)]
@@ -131,22 +294,22 @@ impl From<u32> for FiberStatus {
     #[inline]
     fn from(val: u32) -> Self {
         match val {
-            JanetFiberStatus_JANET_STATUS_DEAD => Self::Dead,
-            JanetFiberStatus_JANET_STATUS_ERROR => Self::Error,
-            JanetFiberStatus_JANET_STATUS_DEBUG => Self::Debug,
-            JanetFiberStatus_JANET_STATUS_PENDING => Self::Pending,
-            JanetFiberStatus_JANET_STATUS_USER0 => Self::User0,
-            JanetFiberStatus_JANET_STATUS_USER1 => Self::User1,
-            JanetFiberStatus_JANET_STATUS_USER2 => Self::User2,
-            JanetFiberStatus_JANET_STATUS_USER3 => Self::User3,
-            JanetFiberStatus_JANET_STATUS_USER4 => Self::User4,
-            JanetFiberStatus_JANET_STATUS_USER5 => Self::User5,
-            JanetFiberStatus_JANET_STATUS_USER6 => Self::User6,
-            JanetFiberStatus_JANET_STATUS_USER7 => Self::User7,
-            JanetFiberStatus_JANET_STATUS_USER8 => Self::User8,
-            JanetFiberStatus_JANET_STATUS_USER9 => Self::User9,
-            JanetFiberStatus_JANET_STATUS_NEW => Self::New,
-            JanetFiberStatus_JANET_STATUS_ALIVE => Self::Alive,
+            evil_janet::JanetFiberStatus_JANET_STATUS_DEAD => Self::Dead,
+            evil_janet::JanetFiberStatus_JANET_STATUS_ERROR => Self::Error,
+            evil_janet::JanetFiberStatus_JANET_STATUS_DEBUG => Self::Debug,
+            evil_janet::JanetFiberStatus_JANET_STATUS_PENDING => Self::Pending,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER0 => Self::User0,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER1 => Self::User1,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER2 => Self::User2,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER3 => Self::User3,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER4 => Self::User4,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER5 => Self::User5,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER6 => Self::User6,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER7 => Self::User7,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER8 => Self::User8,
+            evil_janet::JanetFiberStatus_JANET_STATUS_USER9 => Self::User9,
+            evil_janet::JanetFiberStatus_JANET_STATUS_NEW => Self::New,
+            evil_janet::JanetFiberStatus_JANET_STATUS_ALIVE => Self::Alive,
             _ => unreachable!(),
         }
     }
@@ -156,5 +319,44 @@ impl From<FiberStatus> for u32 {
     #[inline]
     fn from(val: FiberStatus) -> Self {
         val as u32
+    }
+}
+
+
+#[cfg(all(test, feature = "amalgation"))]
+mod tests {
+    use super::*;
+    use crate::client::JanetClient;
+
+    use core::convert::TryFrom;
+
+    #[cfg(not(feature = "std"))]
+    use serial_test::serial;
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn exec_iterator() {
+        let client = JanetClient::init().unwrap().with_default_env();
+
+        let fun = client
+            .run(
+                "(fn [x]
+                   (yield x)
+                   (yield (+ x 1))
+                   (yield (+ x 2))
+                   (yield (* x 2))
+                   x)",
+            )
+            .unwrap();
+        let mut fun = JanetFunction::try_from(fun).unwrap();
+        let mut fiber = JanetFiber::new(&mut fun, &[Janet::number(10.0)]).unwrap();
+        let mut iter = fiber.exec();
+        assert_eq!(Some(Janet::number(10.0)), iter.next());
+        assert_eq!(Some(Janet::number(11.0)), iter.next());
+        assert_eq!(Some(Janet::number(12.0)), iter.next());
+        assert_eq!(Some(Janet::number(20.0)), iter.next());
+        assert_eq!(Some(Janet::number(10.0)), iter.next());
+        assert_eq!(None, iter.next());
+        assert_eq!(None, iter.next());
     }
 }
