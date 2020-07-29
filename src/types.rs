@@ -232,10 +232,7 @@ impl Janet {
     /// Struct, Symbol, Table, Tuple) and the length of it is zero, and `false` otherwise.
     #[inline]
     pub fn is_empty(&self) -> bool {
-        match self.len() {
-            Some(0) => true,
-            _ => false,
-        }
+        matches!(self.len(), Some(0))
     }
 
     /// Returns `true` if the `Janet` value are truthy.
