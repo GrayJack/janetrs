@@ -11,17 +11,42 @@ use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
 
 use super::{Janet, JanetFiber, JanetSignal};
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
-pub struct CallError;
+#[derive(Debug)]
+pub enum CallError<'data> {
+    Arity,
+    Yield,
+    Run {
+        fiber: JanetFiber<'data>,
+        error: Janet,
+    },
+}
 
-impl Display for CallError {
+impl CallError<'_> {
+    /// Display the stacktrace in the Stderr
+    #[inline]
+    pub fn stacktrace(&mut self) {
+        if let Self::Run { fiber, error } = self {
+            fiber.display_stacktrace(*error)
+        }
+    }
+}
+
+impl Display for CallError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Failed to execute the Janet function.")
+        match self {
+            Self::Arity => write!(f, "Wrong number of arguments"),
+            Self::Yield => write!(
+                f,
+                "This function can yield more than one result. In those cases it's recommended to \
+                 create a JanetFiber to execute all its steps"
+            ),
+            Self::Run { .. } => write!(f, "Failed to execute the Janet function."),
+        }
     }
 }
 
 #[cfg(feature = "std")]
-impl error::Error for CallError {}
+impl error::Error for CallError<'_> {}
 
 #[repr(transparent)]
 pub struct JanetFunction<'data> {
@@ -48,25 +73,36 @@ impl JanetFunction<'_> {
     /// If the executions was successful returns a tuple with the output and the signal of
     /// the execution, otherwise return the [`JanetSignal`] returned by the call.
     #[inline]
-    pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<(Janet, JanetSignal), CallError> {
+    pub fn call<'fiber>(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError<'fiber>> {
         let args = args.as_ref();
         let mut out = Janet::nil();
+        let fiber = ptr::null_mut();
         let raw_sig = unsafe {
             janet_pcall(
                 self.raw,
                 args.len() as i32,
                 args.as_ptr() as *const _,
                 &mut out.inner,
-                ptr::null_mut(),
+                fiber,
             )
         };
 
         let sig = JanetSignal::from(raw_sig);
 
-        if let JanetSignal::Error = sig {
-            Err(CallError)
-        } else {
-            Ok((out, sig))
+        match sig {
+            JanetSignal::Ok | JanetSignal::User9 => Ok(out),
+            JanetSignal::Yield => Err(CallError::Yield),
+            _ => {
+                // SAFETY: We checked if the pointer are null
+                let fiber = unsafe {
+                    if fiber.is_null() || (*fiber).is_null() {
+                        return Err(CallError::Arity);
+                    } else {
+                        JanetFiber::from_raw(*fiber)
+                    }
+                };
+                Err(CallError::Run { fiber, error: out })
+            },
         }
     }
 
@@ -75,9 +111,9 @@ impl JanetFunction<'_> {
     /// If the executions was successful returns a tuple with the output and the signal of
     /// the execution, otherwise return the [`JanetSignal`] returned by the call.
     #[inline]
-    pub fn call_with_fiber(
-        &mut self, fiber: &mut JanetFiber<'_>, args: impl AsRef<[Janet]>,
-    ) -> Result<(Janet, JanetSignal), CallError> {
+    pub fn call_with_fiber<'fiber>(
+        &mut self, mut fiber: JanetFiber<'fiber>, args: impl AsRef<[Janet]>,
+    ) -> Result<Janet, CallError<'fiber>> {
         let args = args.as_ref();
         let mut out = Janet::nil();
         let raw_sig = unsafe {
@@ -92,10 +128,17 @@ impl JanetFunction<'_> {
 
         let sig = JanetSignal::from(raw_sig);
 
-        if let JanetSignal::Error = sig {
-            Err(CallError)
-        } else {
-            Ok((out, sig))
+        match sig {
+            JanetSignal::Ok | JanetSignal::User9 => Ok(out),
+            JanetSignal::Yield => Err(CallError::Yield),
+            _ => {
+                let fiber = if fiber.raw.is_null() {
+                    return Err(CallError::Arity);
+                } else {
+                    unsafe { JanetFiber::from_raw(fiber.raw) }
+                };
+                Err(CallError::Run { fiber, error: out })
+            },
         }
     }
 

@@ -7,7 +7,7 @@ use core::{iter::FusedIterator, marker::PhantomData};
 
 use evil_janet::{
     janet_continue, janet_current_fiber, janet_fiber, janet_fiber_status, janet_root_fiber,
-    JanetFiber as CJanetFiber,
+    janet_stacktrace, JanetFiber as CJanetFiber,
 };
 
 use super::{Janet, JanetFunction, JanetSignal};
@@ -118,9 +118,8 @@ impl<'data> JanetFiber<'data> {
     #[inline]
     pub fn exec<'a>(&'a mut self) -> Exec<'a, 'data> {
         Exec {
-            fiber:      self,
-            input:      Janet::nil(),
-            first_time: true,
+            fiber: self,
+            input: Janet::nil(),
         }
     }
 
@@ -158,12 +157,8 @@ impl<'data> JanetFiber<'data> {
     /// [`exec`]: #method.exec
     #[inline]
     pub fn exec_input<'a>(&'a mut self, input: Janet) -> Exec<'a, 'data> {
-        Exec {
-            fiber: self,
-            input,
-            first_time: true,
+        Exec { fiber: self, input }
         }
-    }
 
     /// Creates a iterator that can execute the fiber function untill it's done, modifying
     /// the input with the given function.
@@ -201,9 +196,8 @@ impl<'data> JanetFiber<'data> {
     pub fn exec_with<'a, F>(&'a mut self, f: F) -> Exec<'a, 'data>
     where F: FnOnce() -> Janet {
         Exec {
-            fiber:      self,
-            input:      f(),
-            first_time: true,
+            fiber: self,
+            input: f(),
         }
     }
 
@@ -230,12 +224,17 @@ impl<'data> JanetFiber<'data> {
     }
 }
 
+impl JanetFiber<'_> {
+    #[inline]
+    pub(crate) fn display_stacktrace(&mut self, err: Janet) {
+        unsafe { janet_stacktrace(self.raw, err.inner) }
+    }
+}
 /// An iterator that executes the function related to the fiber untill it completes.
 #[derive(Debug)]
 pub struct Exec<'a, 'data> {
-    fiber:      &'a mut JanetFiber<'data>,
-    input:      Janet,
-    first_time: bool,
+    fiber: &'a mut JanetFiber<'data>,
+    input: Janet,
 }
 
 impl<'a, 'data> Iterator for Exec<'a, 'data> {
@@ -246,18 +245,13 @@ impl<'a, 'data> Iterator for Exec<'a, 'data> {
         let mut out = Janet::nil();
         let sig = unsafe { janet_continue(self.fiber.raw, self.input.inner, &mut out.inner) };
         let sig = JanetSignal::from(sig);
-        if matches!(sig, JanetSignal::Ok | JanetSignal::Yield)
-            && !matches!(
-                self.fiber.status(),
-                FiberStatus::Alive | FiberStatus::Dead | FiberStatus::Error
-            )
-        {
-            Some(out)
-        } else if self.first_time {
-            self.first_time = false;
-
+        if matches!(
+            sig,
+            JanetSignal::Ok | JanetSignal::Yield | JanetSignal::User9
+        ) {
             Some(out)
         } else {
+            self.fiber.display_stacktrace(out);
             None
         }
     }
