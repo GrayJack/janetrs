@@ -158,7 +158,7 @@ impl<'data> JanetFiber<'data> {
     #[inline]
     pub fn exec_input<'a>(&'a mut self, input: Janet) -> Exec<'a, 'data> {
         Exec { fiber: self, input }
-        }
+    }
 
     /// Creates a iterator that can execute the fiber function untill it's done, modifying
     /// the input with the given function.
