@@ -1405,11 +1405,7 @@ impl Debug for JanetString<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
 
-        if f.alternate() {
-            write!(f, "{:#?}", bstr)
-        } else {
-            write!(f, "{:?}", bstr)
-        }
+        Debug::fmt(bstr, f)
     }
 }
 
@@ -1417,7 +1413,7 @@ impl Display for JanetString<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
 
-        write!(f, "{}", bstr)
+        Display::fmt(bstr, f)
     }
 }
 
