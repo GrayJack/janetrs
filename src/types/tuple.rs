@@ -319,7 +319,7 @@ pub struct Iter<'a, 'data> {
 
 impl Debug for Iter<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.tup.clone()).finish()
+        f.debug_list().entries(self.tup.as_ref()).finish()
     }
 }
 
@@ -370,7 +370,7 @@ pub struct IntoIter<'data> {
 
 impl Debug for IntoIter<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.tup.clone()).finish()
+        f.debug_list().entries(self.tup.as_ref()).finish()
     }
 }
 
