@@ -186,7 +186,7 @@ macro_rules! table {
     }};
 }
 
-#[cfg(all(test, feature = "amalgation"))]
+#[cfg(all(test, any(feature = "amalgation", feature = "system")))]
 mod tests {
     // use super::*;
     use crate::types::Janet;

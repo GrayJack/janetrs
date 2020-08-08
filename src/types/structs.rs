@@ -624,7 +624,7 @@ impl ExactSizeIterator for IntoIter<'_> {}
 
 impl FusedIterator for IntoIter<'_> {}
 
-#[cfg(all(test, feature = "amalgation"))]
+#[cfg(all(test, any(feature = "amalgation", feature = "system")))]
 mod tests {
     use super::*;
     use crate::{client::JanetClient, structs, types::Janet};

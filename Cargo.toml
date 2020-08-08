@@ -16,12 +16,13 @@ targets = ["x86_64-unknown-linux-gnu", "x86_64-unknown-freebsd",
     "x86_64-unknown-netbsd", "x86_64-apple-darwin", "x86_64-sun-solaris",
     "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu",
     "x86_64-pc-windows-gnu", "x86_64-pc-windows-msvc"]
-all-features = true
+all-features = false
+features = ["amalgation"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-evil-janet = "1.11"
+evil-janet = "1.11.4"
 bstr = { version = "0.2.13", default-features = false}
 
 [dev-dependencies]
@@ -37,6 +38,8 @@ amalgation = ["evil-janet/link-amalg"]
 inline-more = []
 # Unicode conveniences
 unicode = ["bstr/unicode"]
+# Use system libjanet (not recommended generally)
+system = ["evil-janet/system"]
 
 [[example]]
 name = "hello_world"
