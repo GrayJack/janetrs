@@ -7,14 +7,14 @@ use core::{
 
 use evil_janet::{
     janet_struct_begin, janet_struct_end, janet_struct_find, janet_struct_get, janet_struct_head,
-    janet_struct_put, JanetKV as CJanetKV,
+    janet_struct_put, JanetKV,
 };
 
 use super::{Janet, JanetTable};
 
 #[derive(Debug)]
 pub struct JanetStructBuilder<'data> {
-    raw:     *mut CJanetKV,
+    raw:     *mut JanetKV,
     phantom: PhantomData<&'data ()>,
 }
 
@@ -63,7 +63,7 @@ impl<'data> JanetStructBuilder<'data> {
 /// [`JanetTable`]: ./../table/struct.JanetTable.html
 #[repr(transparent)]
 pub struct JanetStruct<'data> {
-    pub(crate) raw: *const CJanetKV,
+    pub(crate) raw: *const JanetKV,
     phantom: PhantomData<&'data ()>,
 }
 
@@ -87,11 +87,17 @@ impl<'data> JanetStruct<'data> {
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
     #[inline]
-    pub const unsafe fn from_raw(raw: *const CJanetKV) -> Self {
+    pub const unsafe fn from_raw(raw: *const JanetKV) -> Self {
         Self {
             raw,
             phantom: PhantomData,
         }
+    }
+
+    /// Returns the number of elements the struct can hold.
+    #[inline]
+    pub fn capacity(&self) -> i32 {
+        unsafe { (*janet_struct_head(self.raw)).capacity }
     }
 
     /// Returns the number of elements in the struct, also referred to as its 'length'.
@@ -364,10 +370,12 @@ impl<'data> JanetStruct<'data> {
     /// ```
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {
+        let cap = self.capacity() as isize;
+
         Iter {
-            st:     self,
-            offset: 0,
-            end:    self.len() as isize,
+            st:  self,
+            kv:  self.raw,
+            end: unsafe { self.raw.offset(cap) },
         }
     }
 
@@ -376,7 +384,7 @@ impl<'data> JanetStruct<'data> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetKV {
+    pub fn as_raw(&self) -> *const JanetKV {
         self.raw
     }
 }
@@ -423,13 +431,11 @@ impl<'data> IntoIterator for JanetStruct<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len() as isize;
+        let cap = self.capacity() as isize;
+        let kv = self.raw;
+        let end = unsafe { self.raw.offset(cap) };
 
-        IntoIter {
-            st:     self,
-            offset: 0,
-            end:    len,
-        }
+        IntoIter { st: self, kv, end }
     }
 }
 
@@ -439,12 +445,12 @@ impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len() as isize;
+        let cap = self.capacity() as isize;
 
         Iter {
-            st:     self,
-            offset: 0,
-            end:    len,
+            st:  self,
+            kv:  self.raw,
+            end: unsafe { self.raw.offset(cap) },
         }
     }
 }
@@ -475,14 +481,14 @@ where
 /// An iterator over a reference to the [`JanetStruct`] key-value pairs.
 #[derive(Clone)]
 pub struct Iter<'a, 'data> {
-    st:     &'a JanetStruct<'data>,
-    offset: isize,
-    end:    isize,
+    st:  &'a JanetStruct<'data>,
+    kv:  *const JanetKV,
+    end: *const JanetKV,
 }
 
 impl Debug for Iter<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.st.clone()).finish()
+        f.debug_list().entries(self.st.iter()).finish()
     }
 }
 
@@ -491,25 +497,33 @@ impl<'a, 'data> Iterator for Iter<'a, 'data> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset >= self.end {
-            None
-        } else {
-            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
-            // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
-            // the struct fields of the same type of the struct fields
-            //
-            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-            let ptr: *const (Janet, Janet) = unsafe { self.st.raw.offset(self.offset) as *const _ };
-            self.offset += 1;
-            Some(unsafe { (&(*ptr).0, &(*ptr).1) })
+        unsafe {
+            while self.kv < self.end {
+                // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // types are represented in memory the same way
+                // 2. A C struct are represented the same way in memory as tuple with the same
+                // number of the struct fields of the same type of the struct fields
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                // It's safe to get the data at the `self.offset` because we checked it's in the
+                // bounds
+                let ptr = self.kv as *const (Janet, Janet);
+
+                if !(*ptr).0.is_nil() {
+                    // Add for the next before returning
+                    self.kv = self.kv.add(1);
+                    return Some((&(*ptr).0, &(*ptr).1));
+                }
+                self.kv = self.kv.add(1);
+            }
         }
+
+        None
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = (self.end - self.offset) as usize;
+        let exact = self.end as usize - self.kv as usize;
         (exact, Some(exact))
     }
 }
@@ -526,7 +540,7 @@ pub struct Keys<'a, 'data> {
 
 impl Debug for Keys<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.inner.st.clone()).finish()
+        f.debug_list().entries(self.inner.st.keys()).finish()
     }
 }
 
@@ -556,7 +570,7 @@ pub struct Values<'a, 'data> {
 
 impl Debug for Values<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.inner.st.clone()).finish()
+        f.debug_list().entries(self.inner.st.values()).finish()
     }
 }
 
@@ -581,14 +595,14 @@ impl FusedIterator for Values<'_, '_> {}
 /// An iterator that moves out of a [`JanetStruct`].
 #[derive(Clone)]
 pub struct IntoIter<'data> {
-    st:     JanetStruct<'data>,
-    offset: isize,
-    end:    isize,
+    st:  JanetStruct<'data>,
+    kv:  *const JanetKV,
+    end: *const JanetKV,
 }
 
 impl Debug for IntoIter<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.st.clone()).finish()
+        f.debug_list().entries(self.st.iter()).finish()
     }
 }
 
@@ -597,25 +611,33 @@ impl Iterator for IntoIter<'_> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset == self.end {
-            None
-        } else {
-            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
-            // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
-            // the struct fields of the same type of the struct fields
-            //
-            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-            let ptr: *const (Janet, Janet) = unsafe { self.st.raw.offset(self.offset) as *const _ };
-            self.offset += 1;
-            Some(unsafe { ((*ptr).0, (*ptr).1) })
+        unsafe {
+            while self.kv < self.end {
+                // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // types are represented in memory the same way
+                // 2. A C struct are represented the same way in memory as tuple with the same
+                // number of the struct fields of the same type of the struct fields
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                // It's safe to get the data at the `self.offset` because we checked it's in the
+                // bounds
+                let ptr = self.kv as *const (Janet, Janet);
+
+                if !(*ptr).0.is_nil() {
+                    // Add for the next before returning
+                    self.kv = self.kv.add(1);
+                    return Some(((*ptr).0, (*ptr).1));
+                }
+                self.kv = self.kv.add(1);
+            }
         }
+
+        None
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = (self.end - self.offset) as usize;
+        let exact = self.end as usize - self.kv as usize;
         (exact, Some(exact))
     }
 }
