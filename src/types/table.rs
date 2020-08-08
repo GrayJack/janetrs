@@ -10,7 +10,7 @@ use core::{
 use evil_janet::{
     janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
     janet_table_get, janet_table_merge_table, janet_table_put, janet_table_rawget,
-    janet_table_remove, JanetTable as CJanetTable,
+    janet_table_remove, JanetKV, JanetTable as CJanetTable,
 };
 // janet_table_remove
 
@@ -676,9 +676,9 @@ impl<'data> JanetTable<'data> {
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {
         Iter {
-            table:  self,
-            offset: 0,
-            end:    self.len() as isize,
+            table: self,
+            kv:    unsafe { (*self.raw).data },
+            end:   unsafe { (*self.raw).data.offset(self.capacity() as isize) },
         }
     }
 
@@ -700,11 +700,12 @@ impl<'data> JanetTable<'data> {
     /// ```
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<'_, '_> {
-        let len = self.len() as isize;
+        let cap = self.capacity() as isize;
+
         IterMut {
-            table:  self,
-            offset: 0,
-            end:    len,
+            table: self,
+            kv:    unsafe { (*self.raw).data },
+            end:   unsafe { (*self.raw).data.offset(cap) },
         }
     }
 
@@ -834,12 +835,14 @@ impl<'data> IntoIterator for JanetTable<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len() as isize;
+        let cap = self.capacity() as isize;
+        let kv = unsafe { (*self.raw).data };
+        let end = unsafe { (*self.raw).data.offset(cap) };
 
         IntoIter {
-            table:  self,
-            offset: 0,
-            end:    len,
+            table: self,
+            kv,
+            end,
         }
     }
 }
@@ -850,12 +853,12 @@ impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len() as isize;
+        let cap = self.capacity() as isize;
 
         Iter {
-            table:  self,
-            offset: 0,
-            end:    len,
+            table: self,
+            kv:    unsafe { (*self.raw).data },
+            end:   unsafe { (*self.raw).data.offset(cap) },
         }
     }
 }
@@ -866,12 +869,12 @@ impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len() as isize;
+        let cap = self.capacity() as isize;
 
         IterMut {
-            table:  self,
-            offset: 0,
-            end:    len,
+            table: self,
+            kv:    unsafe { (*self.raw).data },
+            end:   unsafe { (*self.raw).data.offset(cap) },
         }
     }
 }
@@ -1334,14 +1337,14 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
 /// An iterator over a reference to the [`JanetTable`] key-value pairs.
 #[derive(Clone)]
 pub struct Iter<'a, 'data> {
-    table:  &'a JanetTable<'data>,
-    offset: isize,
-    end:    isize,
+    table: &'a JanetTable<'data>,
+    kv:    *const JanetKV,
+    end:   *const JanetKV,
 }
 
 impl Debug for Iter<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.table.clone()).finish()
+        f.debug_list().entries(self.table.iter()).finish()
     }
 }
 
@@ -1350,29 +1353,33 @@ impl<'a, 'data> Iterator for Iter<'a, 'data> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset >= self.end {
-            None
-        } else {
-            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
-            // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
-            // the struct fields of the same type of the struct fields
-            //
-            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-            //
-            // It's safe to get the data at the `self.offset` because we checked it's in the bounds
-            let ptr: *const (Janet, Janet) =
-                unsafe { (*self.table.raw).data.offset(self.offset) as *const _ };
-            self.offset += 1;
+        unsafe {
+            while self.kv < self.end {
+                // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // types are represented in memory the same way
+                // 2. A C struct are represented the same way in memory as tuple with the same
+                // number of the struct fields of the same type of the struct fields
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                // It's safe to get the data at the `self.offset` because we checked it's in the
+                // bounds
+                let ptr = self.kv as *const (Janet, Janet);
 
-            Some(unsafe { (&(*ptr).0, &(*ptr).1) })
+                if !(*ptr).0.is_nil() {
+                    // Add for the next before returning
+                    self.kv = self.kv.add(1);
+                    return Some((&(*ptr).0, &(*ptr).1));
+                }
+                self.kv = self.kv.add(1);
+            }
         }
+
+        None
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = (self.end - self.offset) as usize;
+        let exact = self.end as usize - self.kv as usize;
         (exact, Some(exact))
     }
 }
@@ -1389,7 +1396,7 @@ pub struct Keys<'a, 'data> {
 
 impl Debug for Keys<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.inner.table.clone()).finish()
+        f.debug_list().entries(self.inner.table.keys()).finish()
     }
 }
 
@@ -1433,7 +1440,7 @@ impl<'a> Iterator for Values<'a, '_> {
 
 impl Debug for Values<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.inner.table.clone()).finish()
+        f.debug_list().entries(self.inner.table.values()).finish()
     }
 }
 
@@ -1443,14 +1450,14 @@ impl FusedIterator for Values<'_, '_> {}
 
 /// An iterator over a mutable reference to the [`JanetTable`] key-value pairs.
 pub struct IterMut<'a, 'data> {
-    table:  &'a JanetTable<'data>,
-    offset: isize,
-    end:    isize,
+    table: &'a JanetTable<'data>,
+    kv:    *mut JanetKV,
+    end:   *mut JanetKV,
 }
 
 impl Debug for IterMut<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.table.clone()).finish()
+        f.debug_list().entries(self.table.iter()).finish()
     }
 }
 
@@ -1459,28 +1466,33 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset >= self.end {
-            None
-        } else {
-            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
-            // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
-            // the struct fields of the same type of the struct fields
-            //
-            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-            //
-            // It's safe to get the data at the `self.offset` because we checked it's in the bounds
-            let ptr: *mut (Janet, Janet) =
-                unsafe { (*self.table.raw).data.offset(self.offset) as *mut _ };
-            self.offset += 1;
-            Some(unsafe { (&(*ptr).0, &mut (*ptr).1) })
+        unsafe {
+            while self.kv < self.end {
+                // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // types are represented in memory the same way
+                // 2. A C struct are represented the same way in memory as tuple with the same
+                // number of the struct fields of the same type of the struct fields
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                // It's safe to get the data at the `self.offset` because we checked it's in the
+                // bounds
+                let ptr = self.kv as *mut (Janet, Janet);
+
+                if !(*ptr).0.is_nil() {
+                    // Add for the next before returning
+                    self.kv = self.kv.add(1);
+                    return Some((&(*ptr).0, &mut (*ptr).1));
+                }
+                self.kv = self.kv.add(1);
+            }
         }
+
+        None
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = (self.end - self.offset) as usize;
+        let exact = self.end as usize - self.kv as usize;
         (exact, Some(exact))
     }
 }
@@ -1521,14 +1533,14 @@ impl FusedIterator for ValuesMut<'_, '_> {}
 /// An iterator that moves out of a [`JanetTable`].
 #[derive(Clone)]
 pub struct IntoIter<'data> {
-    table:  JanetTable<'data>,
-    offset: isize,
-    end:    isize,
+    table: JanetTable<'data>,
+    kv:    *mut JanetKV,
+    end:   *mut JanetKV,
 }
 
 impl Debug for IntoIter<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_list().entries(self.table.clone()).finish()
+        f.debug_list().entries(self.table.iter()).finish()
     }
 }
 
@@ -1537,28 +1549,33 @@ impl Iterator for IntoIter<'_> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset == self.end {
-            None
-        } else {
-            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
-            // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
-            // the struct fields of the same type of the struct fields
-            //
-            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-            //
-            // It's safe to get the data at the `self.offset` because we checked it's in the bounds
-            let ptr: *const (Janet, Janet) =
-                unsafe { (*self.table.raw).data.offset(self.offset) as *const _ };
-            self.offset += 1;
-            Some(unsafe { ((*ptr).0, (*ptr).1) })
+        unsafe {
+            while self.kv < self.end {
+                // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // types are represented in memory the same way
+                // 2. A C struct are represented the same way in memory as tuple with the same
+                // number of the struct fields of the same type of the struct fields
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                // It's safe to get the data at the `self.offset` because we checked it's in the
+                // bounds
+                let ptr = self.kv as *mut (Janet, Janet);
+
+                if !(*ptr).0.is_nil() {
+                    // Add for the next before returning
+                    self.kv = self.kv.add(1);
+                    return Some(((*ptr).0, (*ptr).1));
+                }
+                self.kv = self.kv.add(1);
+            }
         }
+
+        None
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = (self.end - self.offset) as usize;
+        let exact = self.end as usize - self.kv as usize;
         (exact, Some(exact))
     }
 }
@@ -1828,6 +1845,7 @@ mod tests {
             Some((&Janet::integer(11), &Janet::from("onze")))
         );
         assert_eq!(iter.next(), None);
+        assert_eq!(iter.next(), None);
     }
 
     #[test]
@@ -1847,6 +1865,7 @@ mod tests {
             Some((&Janet::integer(11), &mut Janet::from("onze")))
         );
         assert_eq!(iter.next(), None);
+        assert_eq!(iter.next(), None);
     }
 
     #[test]
@@ -1859,6 +1878,7 @@ mod tests {
 
         assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
         assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
+        assert_eq!(iter.next(), None);
         assert_eq!(iter.next(), None);
     }
 }
