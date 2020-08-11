@@ -186,6 +186,72 @@ macro_rules! table {
     }};
 }
 
+/// A macro to make life easier creating modules for Janet from Rust.
+///
+/// ## The syntax:
+/// `janet_mod!(<Janet Module Name (string literal)>; <{<Janet Function Name ((string
+/// literal))>, <function pointer>, <Janet documentation string (string literal)>},
+/// ...>);` ¹ Itens inside `<>` means mandatory
+/// ² `...` means one or more
+///
+/// # Examples
+/// ```
+/// use janetrs::{janet_mod, lowlevel, types::*};
+///
+/// #[no_mangle]
+/// unsafe extern "C" fn rust_hello(argc: i32, _argv: *mut lowlevel::Janet) -> lowlevel::Janet {
+///     lowlevel::janet_fixarity(argc, 0);
+///     println!("Hello from Rust!");
+///
+///     Janet::nil().into()
+/// }
+///
+/// #[no_mangle]
+/// unsafe extern "C" fn hi(argc: i32, _argv: *mut lowlevel::Janet) -> lowlevel::Janet {
+///     lowlevel::janet_fixarity(argc, 0);
+///
+///     Janet::from("Hi! My name is GrayJack!").into()
+/// }
+///
+/// janet_mod!("rust";
+///     {"hello", rust_hello, "(rust/hello)\n\nRust say hello"},
+///     {"hi", hi, "(rust/hi)\n\nHi! My name is..."}
+/// );
+/// ```
+#[macro_export]
+macro_rules! janet_mod {
+    ($mod_name: literal; $({$fn_name: literal, $fn: expr, $fn_doc: literal}),+ $(,)?) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn _janet_mod_config() -> $crate::lowlevel::JanetBuildConfig {
+            $crate::lowlevel::JanetBuildConfig {
+                major: $crate::lowlevel::JANET_VERSION_MAJOR,
+                minor: $crate::lowlevel::JANET_VERSION_MINOR,
+                patch: $crate::lowlevel::JANET_VERSION_PATCH,
+                bits:  $crate::lowlevel::JANET_CURRENT_CONFIG_BITS,
+            }
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn _janet_init(env: *mut $crate::lowlevel::JanetTable) {
+            $crate::lowlevel::janet_cfuns(env, concat!($mod_name, "\0").as_ptr() as *const i8, [
+                $(
+                    $crate::lowlevel::JanetReg {
+                        name: concat!($fn_name, "\0").as_ptr() as *const i8,
+                        cfun: Some($fn),
+                        documentation: concat!($fn_doc, "\0").as_ptr() as *const i8,
+                    },
+                )+
+
+                $crate::lowlevel::JanetReg {
+                    name: std::ptr::null(),
+                    cfun: None,
+                    documentation: std::ptr::null(),
+                },
+            ].as_ptr())
+        }
+    };
+}
+
 #[cfg(all(test, any(feature = "amalgation", feature = "system")))]
 mod tests {
     // use super::*;
