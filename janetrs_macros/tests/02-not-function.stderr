@@ -1,0 +1,5 @@
+error: expected fn item
+ --> $DIR/02-not-function:4:1
+  |
+4 | struct A(i32);
+  | ^^^^^^^^^^^^^^

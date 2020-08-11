@@ -1,0 +1,11 @@
+#![allow(unused_imports)]
+
+use janetrs_macros::*;
+use janetrs::types::{self, Janet};
+
+#[janet_fn]
+pub fn function(_args: &mut Janet) -> Janet {
+    Janet::nil()
+}
+
+fn main() {}

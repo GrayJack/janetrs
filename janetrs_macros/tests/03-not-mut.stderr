@@ -1,0 +1,5 @@
+error: expected argument to be a mutable reference and found a immutable reference
+ --> $DIR/03-not-mut:7:24
+  |
+7 | pub fn function(_args: &[Janet]) -> Janet {
+  |                        ^^^^^^^^

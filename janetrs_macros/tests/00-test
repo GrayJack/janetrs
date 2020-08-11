@@ -1,0 +1,24 @@
+use janetrs_macros::*;
+use janetrs::types::{self, Janet};
+
+#[janet_fn]
+pub fn function(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn]
+pub fn function2(_args: &mut [types::Janet]) -> types::Janet {
+    Janet::nil()
+}
+
+#[janet_fn]
+pub fn function3(_args: &mut [janetrs::types::Janet]) -> janetrs::types::Janet {
+    Janet::nil()
+}
+
+#[janet_fn]
+pub fn function4(_args: &mut [::janetrs::types::Janet]) -> ::janetrs::types::Janet {
+    Janet::nil()
+}
+
+fn main() {}

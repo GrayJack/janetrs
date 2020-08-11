@@ -1,0 +1,5 @@
+error: expected to be a slice of `janetrs::types::Janet`
+ --> $DIR/06-not-slice:7:29
+  |
+7 | pub fn function(_args: &mut Janet) -> Janet {
+  |                             ^^^^^

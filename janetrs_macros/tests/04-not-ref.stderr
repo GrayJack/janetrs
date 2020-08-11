@@ -1,0 +1,5 @@
+error: expected argument to be a mutable reference and found something that is not a reference at all
+ --> $DIR/04-not-ref:7:24
+  |
+7 | pub fn function(_args: Janet) -> Janet {
+  |                        ^^^^^

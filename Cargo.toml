@@ -43,6 +43,9 @@ system = ["evil-janet/system"]
 # Use to link to system libjanet (not recommended generally)
 link-system = ["evil-janet/link-system"]
 
+[workspace]
+members = ["janetrs_macros"]
+
 [[example]]
 name = "hello_world"
 required-features = ["amalgation"]

@@ -1,0 +1,22 @@
+#![allow(unused_imports)]
+
+use janetrs::{janet_mod, lowlevel, types::*};
+use janetrs_macros::janet_fn;
+
+#[janet_fn]
+pub fn rust_hello(args: &mut [Janet]) -> Janet {
+    println!("Hello from Rust!");
+    Janet::nil()
+}
+
+#[janet_fn]
+pub fn string(args: &mut [Janet]) -> Janet {
+    Janet::from("I'm a returned string! =)")
+}
+
+janet_mod!("rust";
+    {"hello", rust_hello, "(rust/hello)\n\nRust say hello"},
+    {"string", string, "(rust/string\n\nReturn a string"},
+);
+
+fn main() {}

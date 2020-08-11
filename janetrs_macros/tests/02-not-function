@@ -1,0 +1,6 @@
+use janetrs_macros::*;
+
+#[janet_fn]
+struct A(i32);
+
+fn main() {}
