@@ -436,6 +436,22 @@ impl From<&str> for Janet {
     }
 }
 
+impl From<char> for Janet {
+    #[inline]
+    fn from(val: char) -> Self {
+        let s = JanetString::from(val);
+        Self::string(s)
+    }
+}
+
+impl From<&char> for Janet {
+    #[inline]
+    fn from(val: &char) -> Self {
+        let s = JanetString::from(val);
+        Self::string(s)
+    }
+}
+
 impl From<JanetTable<'_>> for Janet {
     #[inline]
     fn from(val: JanetTable<'_>) -> Self {

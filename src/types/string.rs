@@ -1427,6 +1427,20 @@ impl Clone for JanetString<'_> {
     }
 }
 
+impl From<char> for JanetString<'_> {
+    #[inline]
+    fn from(ch: char) -> Self {
+        Self::builder(1).put_char(ch).finalize()
+    }
+}
+
+impl From<&char> for JanetString<'_> {
+    #[inline]
+    fn from(ch: &char) -> Self {
+        Self::builder(1).put_char(*ch).finalize()
+    }
+}
+
 impl<'data> From<JanetBuffer<'data>> for JanetString<'data> {
     #[inline]
     fn from(buff: JanetBuffer<'data>) -> Self {

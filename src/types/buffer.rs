@@ -1638,6 +1638,15 @@ impl From<char> for JanetBuffer<'_> {
     }
 }
 
+impl From<&char> for JanetBuffer<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from(ch: &char) -> Self {
+        let mut buff = JanetBuffer::with_capacity(4);
+        buff.push(*ch);
+        buff
+    }
+}
+
 impl From<JanetString<'_>> for JanetBuffer<'_> {
     #[inline]
     fn from(s: JanetString<'_>) -> Self {
