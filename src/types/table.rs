@@ -1584,7 +1584,7 @@ impl ExactSizeIterator for IntoIter<'_> {}
 
 impl FusedIterator for IntoIter<'_> {}
 
-#[cfg(all(test, any(feature = "amalgation", feature = "system")))]
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     #[cfg(not(feature = "std"))]
     use serial_test::serial;

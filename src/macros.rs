@@ -252,7 +252,7 @@ macro_rules! janet_mod {
     };
 }
 
-#[cfg(all(test, any(feature = "amalgation", feature = "system")))]
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     // use super::*;
     use crate::types::Janet;

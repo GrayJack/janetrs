@@ -1868,7 +1868,7 @@ impl JanetExtend<&CStr> for JanetBuffer<'_> {
     }
 }
 
-#[cfg(all(test, any(feature = "amalgation", feature = "system")))]
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
     use crate::{client::JanetClient, types::JanetString};

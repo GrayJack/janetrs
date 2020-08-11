@@ -22,7 +22,7 @@ features = ["amalgation"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-evil-janet = "1.11.4"
+evil-janet = "1.11.5"
 bstr = { version = "0.2.13", default-features = false}
 
 [dev-dependencies]
@@ -32,14 +32,16 @@ serial_test = "~0.4.0"
 default = ["std", "unicode"]
 # To use Error trait and alocations
 std = ["bstr/std"]
-# Use to have Janet client
+# Use to statically link to janet runtime and have Janet client
 amalgation = ["evil-janet/link-amalg"]
 # Inline more functions
 inline-more = []
 # Unicode conveniences
 unicode = ["bstr/unicode"]
-# Use system libjanet (not recommended generally)
+# Use system janet.h
 system = ["evil-janet/system"]
+# Use to link to system libjanet (not recommended generally)
+link-system = ["evil-janet/link-system"]
 
 [[example]]
 name = "hello_world"

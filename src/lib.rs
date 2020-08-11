@@ -82,6 +82,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 // Cause compilation error when both almagation and system is set
+#[cfg(all(feature = "amalgation", feature = "link-system"))]
+compile_error!(r#"You can only use either "amalgation" or "link-system" feature, not both."#);
 #[cfg(all(feature = "amalgation", feature = "system"))]
 compile_error!(r#"You can only use either "amalgation" or "system" feature, not both."#);
 
@@ -90,7 +92,7 @@ extern crate alloc;
 
 pub use evil_janet as lowlevel;
 
-#[cfg(any(feature = "amalgation", feature = "system"))]
+#[cfg(any(feature = "amalgation", feature = "link-system"))]
 pub mod client;
 mod macros;
 pub mod types;
