@@ -124,6 +124,13 @@ impl Clone for JanetSymbol<'_> {
     }
 }
 
+impl<'data> From<super::JanetString<'data>> for JanetSymbol<'data> {
+    #[inline]
+    fn from(string: super::JanetString<'data>) -> Self {
+        unsafe { JanetSymbol::from_raw(string.raw) }
+    }
+}
+
 /// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
 /// the language, it is a normal string that cen be defined by the user.
 #[derive(Debug)]
@@ -224,5 +231,12 @@ impl Clone for JanetKeyword<'_> {
             raw:     unsafe { janet_symbol(self.raw, self.len()) },
             phantom: PhantomData,
         }
+    }
+}
+
+impl<'data> From<super::JanetString<'data>> for JanetKeyword<'data> {
+    #[inline]
+    fn from(string: super::JanetString<'data>) -> Self {
+        unsafe { JanetKeyword::from_raw(string.raw) }
     }
 }

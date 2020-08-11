@@ -1427,11 +1427,25 @@ impl Clone for JanetString<'_> {
     }
 }
 
-impl From<JanetBuffer<'_>> for JanetString<'_> {
+impl<'data> From<JanetBuffer<'data>> for JanetString<'data> {
     #[inline]
-    fn from(buff: JanetBuffer<'_>) -> Self {
+    fn from(buff: JanetBuffer<'data>) -> Self {
         let slice = buff.as_bytes();
         JanetString::new(slice)
+    }
+}
+
+impl<'data> From<super::JanetSymbol<'data>> for JanetString<'data> {
+    #[inline]
+    fn from(sym: super::JanetSymbol<'data>) -> Self {
+        unsafe { JanetString::from_raw(sym.raw) }
+    }
+}
+
+impl<'data> From<super::JanetKeyword<'data>> for JanetString<'data> {
+    #[inline]
+    fn from(key: super::JanetKeyword<'data>) -> Self {
+        unsafe { JanetString::from_raw(key.raw) }
     }
 }
 

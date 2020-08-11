@@ -48,7 +48,7 @@
 //! Example:
 //! ```rust,ignore
 //! #[janet_fn]
-//! pub extern "C" fn fn_name(args: &mut [Janet]) -> Janet {
+//! pub fn fn_name(args: &mut [Janet]) -> Janet {
 //!     // Function logic
 //! }
 //! ```
