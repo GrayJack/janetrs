@@ -249,6 +249,14 @@ pub fn check_range_arity(args: &[Janet], min: i32, max: Option<i32>) {
     unsafe { evil_janet::janet_arity(args.len() as i32, min, max) }
 }
 
+/// Just a wrapper for the janet panic function
+#[doc(hidden)]
+pub fn panic(msg: Janet) -> ! {
+    unsafe { evil_janet::janet_panicv(msg.inner) }
+    #[allow(clippy::empty_loop)]
+    loop {}
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
