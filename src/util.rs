@@ -232,6 +232,23 @@ impl Ord for JanetVersion {
     }
 }
 
+use crate::types::Janet;
+
+/// Checks if the given `args` have the same amount of expected arguments, if the check
+/// fails it panics from the Janet side.
+pub fn check_fix_arity(args: &[Janet], fix_arity: i32) {
+    unsafe { evil_janet::janet_fixarity(args.len() as i32, fix_arity) };
+}
+
+/// Check if the given `args` have the expected arguments in the inclusive range, if the
+/// check fails it panics from the Janet side.
+///
+/// If `max` is `None`, it will disable the maximum check, allowing variadic arguments.
+pub fn check_range_arity(args: &[Janet], min: i32, max: Option<i32>) {
+    let max = max.unwrap_or(-1);
+    unsafe { evil_janet::janet_arity(args.len() as i32, min, max) }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -280,8 +280,6 @@ impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
         let iter = iter.into_iter().collect::<super::JanetArray>().into_iter();
         let (lower, upper) = iter.size_hint();
 
-        dbg!(&lower, &upper);
-
         let mut new = if let Some(upper) = upper {
             Self::builder(upper as i32)
         } else if lower > 0 {
