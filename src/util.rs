@@ -85,8 +85,7 @@ impl JanetVersion {
 
     /// Create a custom [`JanetVersion`] given the version number.
     ///
-    /// Mostly used to check if current version match a requirement for your code and
-    /// tests in this crate.
+    /// Mostly used to check if current version match a requirement for your code.
     #[inline]
     pub const fn custom(major: u32, minor: u32, patch: u32) -> Self {
         Self {

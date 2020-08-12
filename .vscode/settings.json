@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.checkOnSave.features": [
+        "amalgation"
+    ],
+    "rust-analyzer.cargo.features": [
+        "amalgation"
+    ],
+}

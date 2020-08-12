@@ -277,13 +277,17 @@ impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
 impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
-        let iter = iter.into_iter();
+        let iter = iter.into_iter().collect::<super::JanetArray>().into_iter();
         let (lower, upper) = iter.size_hint();
+
+        dbg!(&lower, &upper);
 
         let mut new = if let Some(upper) = upper {
             Self::builder(upper as i32)
-        } else {
+        } else if lower > 0 {
             Self::builder(lower as i32)
+        } else {
+            Self::builder(20)
         };
 
         for i in iter {
@@ -414,7 +418,7 @@ impl FusedIterator for IntoIter<'_> {}
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, tuple, types::Janet};
+    use crate::{client::JanetClient, tuple, types::*};
 
     #[cfg(not(feature = "std"))]
     use serial_test::serial;
@@ -473,6 +477,30 @@ mod tests {
         assert_eq!(tuple.get(1), clone.get(1));
         assert_eq!(tuple.get(2), clone.get(2));
         assert_eq!(tuple.get(3), clone.get(3));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn collect() {
+        let _client = JanetClient::init().unwrap();
+        let vec = vec![Janet::nil(); 100];
+
+        let jtup: JanetTuple<'_> = vec.into_iter().collect();
+        assert_eq!(jtup.len(), 100);
+        assert!(jtup.iter().all(|j| j == Janet::nil()));
+
+        let vec = crate::array![101.0, "string", true];
+
+        let jtup: JanetTuple<'_> = vec.into_iter().collect();
+        assert_eq!(jtup.len(), 3);
+        let mut iter = jtup.iter();
+        assert_eq!(Some(&Janet::number(101.0)), iter.next());
+        assert_eq!(
+            Some(&Janet::string(JanetString::new("string"))),
+            iter.next()
+        );
+        assert_eq!(Some(&Janet::boolean(true)), iter.next());
+        assert_eq!(None, iter.next());
     }
 
     #[test]
@@ -537,15 +565,5 @@ mod tests {
         assert_eq!(Some(Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
-    }
-
-    #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
-    fn collect() {
-        let _client = JanetClient::init().unwrap();
-        let vec = vec![Janet::nil(); 100];
-
-        let jarr: JanetTuple<'_> = vec.into_iter().collect();
-        assert_eq!(jarr.len(), 100);
     }
 }

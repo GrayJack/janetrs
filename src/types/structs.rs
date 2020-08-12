@@ -462,7 +462,7 @@ where
 {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = (U, J)>>(iter: T) -> Self {
-        let iter = iter.into_iter();
+        let iter = iter.into_iter().collect::<JanetTable>().into_iter();
         let (lower, upper) = iter.size_hint();
 
         let mut new = if let Some(upper) = upper {
