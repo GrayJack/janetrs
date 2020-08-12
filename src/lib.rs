@@ -29,9 +29,9 @@
 //!
 //! ### TODO: Types: Lacking or Incomplete
 //!  - [ ] JanetAbstract
-//!  - [I] JanetCFunction
+//!  - [ ] JanetCFunction
 //!  - [I] JanetFiber
-//!  - [ ] JanetFunction
+//!  - [I] JanetFunction
 //!  - [ ] JanetPointer
 //!  - [ ] Janet Typed Array
 //!  - [ ] GC functions

@@ -6,6 +6,8 @@ use evil_janet::{
     JANET_CURRENT_CONFIG_BITS, JANET_VERSION_MAJOR, JANET_VERSION_MINOR, JANET_VERSION_PATCH,
 };
 
+use crate::types::Janet;
+
 /// Janet configuration in the build.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct JanetBuildConfig {
@@ -231,8 +233,6 @@ impl Ord for JanetVersion {
         }
     }
 }
-
-use crate::types::Janet;
 
 /// Checks if the given `args` have the same amount of expected arguments, if the check
 /// fails it panics from the Janet side.

@@ -11,6 +11,8 @@ use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
 
 use super::{Janet, JanetFiber, JanetSignal};
 
+pub type JanetCFunction = evil_janet::JanetCFunction;
+
 #[derive(Debug)]
 pub enum CallError<'data> {
     Arity,
