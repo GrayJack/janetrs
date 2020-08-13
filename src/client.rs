@@ -10,7 +10,7 @@ use std::{error::Error as StdError, thread_local};
 
 use evil_janet::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
 
-use crate::types::{Janet, JanetTable};
+use crate::types::{Janet, JanetCFunction, JanetTable};
 
 // There are platforms where AtomicBool doesn't exist
 // At some point it would be awesome to find what targets doesn't have support for atomics
@@ -124,14 +124,163 @@ impl JanetClient {
         self
     }
 
-    /// Run given Janet `code` bytes.
+    /// Add a Janet immutable variable to the client environment if it has one, otherwise
+    /// creates it.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{client::JanetClient, types::Janet};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut client = JanetClient::init()?;
+    /// assert!(client.env().is_none());
+    ///
+    /// client.add_def("const", 10, None);
+    /// assert!(client.env().is_some());
+    ///
+    /// let c = client.run("const")?;
+    /// assert!(!c.is_nil());
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn add_def(&mut self, name: &str, value: impl Into<Janet>, doc: Option<&str>) {
+        if self.env().is_none() {
+            self.env_table = Some(JanetTable::with_capacity(10));
+        }
+
+        if let Some(env) = self.env_mut() {
+            crate::util::def(env, name, value, doc)
+        }
+    }
+
+    /// Add a Janet mutable variable to the client environment if it has one, otherwise
+    /// creates it.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{client::JanetClient, types::Janet};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut client = JanetClient::init()?;
+    /// assert!(client.env().is_none());
+    ///
+    /// client.add_var("variable", 10, None);
+    /// assert!(client.env().is_some());
+    ///
+    /// let c = client.run("variable")?;
+    /// assert!(!c.is_nil());
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn add_var(&mut self, name: &str, value: impl Into<Janet>, doc: Option<&str>) {
+        if self.env().is_none() {
+            self.env_table = Some(JanetTable::with_capacity(10));
+        }
+
+        if let Some(env) = self.env_mut() {
+            crate::util::var(env, name, value, doc)
+        }
+    }
+
+    /// Add a Janet C function to the client environment if it has one and register that
+    /// function in the Janet VM, otherwise creates it.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{
+    ///     client::JanetClient,
+    ///     lowlevel,
+    ///     types::{Janet, JanetType},
+    /// };
+    ///
+    /// unsafe extern "C" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
+    ///     Janet::nil().into()
+    /// };
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut client = JanetClient::init()?;
+    /// assert!(client.env().is_none());
+    ///
+    /// client.add_c_fn("test", Some(test), None);
+    /// assert!(client.env().is_some());
+    ///
+    /// let c = client.run("test")?;
+    /// assert_eq!(c.kind(), JanetType::CFunction);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn add_c_fn(&mut self, name: &str, f: JanetCFunction, doc: Option<&str>) {
+        if self.env().is_none() {
+            self.env_table = Some(JanetTable::with_capacity(10));
+        }
+
+        if let Some(env) = self.env_mut() {
+            crate::util::c_func(env, None, name, f, doc)
+        }
+    }
+
+    /// Add a Janet C function under a given `namespace` to the client environment if it
+    /// has one and register that function in the Janet VM, otherwise creates it.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{
+    ///     client::JanetClient,
+    ///     lowlevel,
+    ///     types::{Janet, JanetType},
+    /// };
+    ///
+    /// unsafe extern "C" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
+    ///     Janet::nil().into()
+    /// };
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut client = JanetClient::init()?;
+    /// assert!(client.env().is_none());
+    ///
+    /// client.add_c_fn_with_namespace("p", "test", Some(test), None);
+    /// assert!(client.env().is_some());
+    ///
+    /// let c = client.run("p/test")?;
+    /// assert_eq!(c.kind(), JanetType::CFunction);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn add_c_fn_with_namespace(
+        &mut self, namespace: &str, name: &str, f: JanetCFunction, doc: Option<&str>,
+    ) {
+        if self.env().is_none() {
+            self.env_table = Some(JanetTable::with_capacity(10));
+        }
+
+        if let Some(env) = self.env_mut() {
+            crate::util::c_func(env, Some(namespace), name, f, doc)
+        }
+    }
+
+    /// Run given Janet `code` bytes and if no errors occurs, returns the output of the
+    /// given `code`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{client::JanetClient, types::Janet};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = JanetClient::init()?.with_default_env();
+    ///
+    /// let out = client.run_bytes(b"(def x 10) (+ x x)")?;
+    ///
+    /// assert_eq!(Janet::number(20.0), out);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
     ///
     /// ## TODO:
-    /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
-    /// respectively.
-    /// Change that the Client struct holds another struct that configure those two.
-    /// For now, I'm not 100% certain that the return value will not be a bitwise
-    /// OR'd combination of multiple errors.
+    /// Right now the sourcePath value are hardcoded to `b"main\0"`.
+    /// Change that the Client struct holds sourcePath.
     #[inline]
     pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<Janet, Error> {
         let code = code.as_ref();
@@ -160,12 +309,27 @@ impl JanetClient {
         }
     }
 
-    /// Run given Janet `code` string.
+    /// Run given Janet `code` string and if no errors occurs, returns the output of the
+    /// given `code`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{client::JanetClient, types::Janet};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = JanetClient::init()?.with_default_env();
+    ///
+    /// let out = client.run("(def x 10) (+ x x)")?;
+    ///
+    /// assert_eq!(Janet::number(20.0), out);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     ///
     /// ## TODO:
-    /// Right now the sourcePath and out values are hardcoded to `b"main\0"` and `NULL`,
+    /// Right now the sourcePath value are hardcoded to `b"main\0"`,
     /// respectively.
-    /// Change that the Client struct holds a nother struct that configure those two.
+    /// Change that the Client struct hold sourcePath.
     #[inline]
     pub fn run(&self, code: impl AsRef<str>) -> Result<Janet, Error> {
         let code = code.as_ref();
