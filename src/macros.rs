@@ -258,6 +258,8 @@ macro_rules! janet_mod {
 ///
 /// # Examples
 /// ```
+/// use janetrs::jpanic;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
 /// jpanic!();
 /// jpanic!("this is a terrible mistake!");
 /// jpanic!(4); // In simple cases you can use any type that Janet implements From trait
@@ -266,13 +268,13 @@ macro_rules! janet_mod {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::panic(Janet::from("explicity panic"));
+        $crate::util::panic($crate::types::Janet::from("explicity panic"));
     };
     ($msg: expr $(,)?) => {
-        $crate::util::panic(Janet::from($msg));
+        $crate::util::panic($crate::types::Janet::from($msg));
     };
     ($msg: expr, $($arg:tt)+) => {
-        $crate::util::panic(Janet::from(format!($msg, $($arg)+).as_str()));
+        $crate::util::panic($crate::types::Janet::from(format!($msg, $($arg)+).as_str()));
     };
 }
 
