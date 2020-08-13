@@ -298,11 +298,15 @@ impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
 impl Index<i32> for JanetTuple<'_> {
     type Output = Janet;
 
+    /// Get a reference of the [`Janet`] hold by [`JanetTuple`] at `index`.
+    ///
+    /// # Janet Panics
+    /// This function may Janet panic if try to access `index` out of the bounds
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
         match self.get(index) {
             Some(out) => out,
-            None => panic!(
+            None => crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
                 self.len(),
                 index

@@ -319,10 +319,9 @@ pub fn panic(msg: Janet) -> ! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{array, table};
     use core::cmp::Ordering;
 
-    unsafe extern "C" fn test(argc: i32, argv: *mut evil_janet::Janet) -> evil_janet::Janet {
+    unsafe extern "C" fn test(_argc: i32, _argv: *mut evil_janet::Janet) -> evil_janet::Janet {
         Janet::nil().into()
     }
 

@@ -401,8 +401,8 @@ impl<'data> JanetArray<'data> {
     /// Inserts an element at position `index` within the array, shifting all elements
     /// after it to the right.
     ///
-    /// # Panics
-    /// Panics if `index < 0` or `index > len`.
+    /// # Janet Panics
+    /// Janet panics if `index < 0` or `index > len`.
     ///
     /// # Examples
     /// ```
@@ -415,7 +415,7 @@ impl<'data> JanetArray<'data> {
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn insert(&mut self, index: i32, element: impl Into<Janet>) {
         if index < 0 || index > self.len() + 1 {
-            panic!(
+            crate::jpanic!(
                 "insertion index (is {}) should be >= 0 and <= {})",
                 index,
                 self.len()
@@ -753,11 +753,15 @@ impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {
 impl Index<i32> for JanetArray<'_> {
     type Output = Janet;
 
+    /// Get a immutable reference of the [`Janet`] hold by [`JanetArray`] at `index`.
+    ///
+    /// # Janet Panics
+    /// Janet panic if try to access `index` out of the bounds.
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
         match self.get(index) {
             Some(item) => item,
-            None => panic!(
+            None => crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
                 self.len(),
                 index
@@ -767,15 +771,20 @@ impl Index<i32> for JanetArray<'_> {
 }
 
 impl IndexMut<i32> for JanetArray<'_> {
+    /// Get a exclusive reference of the [`Janet`] hold by [`JanetArray`] at `index`.
+    ///
+    /// # Janet Panics
+    /// Janet panic if try to access `index` out of the bounds.
     #[inline]
     fn index_mut(&mut self, index: i32) -> &mut Self::Output {
         let len = self.len();
 
         match self.get_mut(index) {
             Some(item) => item,
-            None => panic!(
+            None => crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
-                len, index
+                len,
+                index
             ),
         }
     }
