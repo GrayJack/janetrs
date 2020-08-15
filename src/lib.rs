@@ -29,7 +29,7 @@
 //!
 //! ### TODO: Types: Lacking or Incomplete
 //!  - [ ] JanetAbstract
-//!  - [ ] JanetCFunction
+//!  - [I] JanetCFunction
 //!  - [I] JanetFiber
 //!  - [I] JanetFunction
 //!  - [ ] JanetPointer
