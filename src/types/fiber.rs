@@ -27,9 +27,16 @@ impl<'data> JanetFiber<'data> {
     /// Create a new [`JanetFiber`] from a [`JanetFunction`] and it's arguments.
     ///
     /// In case any passed argument is invalid, returns `None`.
-    pub fn new(f: &mut JanetFunction, args: impl AsRef<[Janet]>) -> Option<Self> {
+    pub fn new(capacity: i32, f: &mut JanetFunction, args: impl AsRef<[Janet]>) -> Option<Self> {
         let args = args.as_ref();
-        let raw = unsafe { janet_fiber(f.raw, 64, args.len() as i32, args.as_ptr() as *const _) };
+        let raw = unsafe {
+            janet_fiber(
+                f.raw,
+                capacity,
+                args.len() as i32,
+                args.as_ptr() as *const _,
+            )
+        };
         if raw.is_null() {
             None
         } else {
@@ -111,7 +118,7 @@ impl<'data> JanetFiber<'data> {
     /// )?;
     /// let mut f_concrete: JanetFunction = f.unwrap()?;
     ///
-    /// let mut fiber = JanetFiber::new(&mut f_concrete, &[]).unwrap();
+    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[]).unwrap();
     /// fiber.exec().for_each(|j| println!("{}", j));
     /// # Ok(()) }
     /// ```
@@ -147,7 +154,7 @@ impl<'data> JanetFiber<'data> {
     /// )?;
     /// let mut f_concrete: JanetFunction = f.unwrap()?;
     ///
-    /// let mut fiber = JanetFiber::new(&mut f_concrete, &[10.into()]).unwrap();
+    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10.into()]).unwrap();
     /// fiber
     ///     .exec_input(Janet::integer(12))
     ///     .for_each(|j| println!("{}", j));
@@ -185,7 +192,7 @@ impl<'data> JanetFiber<'data> {
     /// )?;
     /// let mut f_concrete: JanetFunction = f.unwrap()?;
     ///
-    /// let mut fiber = JanetFiber::new(&mut f_concrete, &[10.into()]).unwrap();
+    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10.into()]).unwrap();
     /// fiber
     ///     .exec_with(|| Janet::integer(3))
     ///     .for_each(|j| println!("{}", j));
@@ -343,7 +350,7 @@ mod tests {
             )
             .unwrap();
         let mut fun = JanetFunction::try_from(fun).unwrap();
-        let mut fiber = JanetFiber::new(&mut fun, &[Janet::number(10.0)]).unwrap();
+        let mut fiber = JanetFiber::new(64, &mut fun, &[Janet::number(10.0)]).unwrap();
         let mut iter = fiber.exec();
         assert_eq!(Some(Janet::number(10.0)), iter.next());
         assert_eq!(Some(Janet::number(11.0)), iter.next());
