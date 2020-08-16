@@ -14,35 +14,89 @@ use super::{Janet, JanetFiber, JanetSignal};
 pub type JanetCFunction = evil_janet::JanetCFunction;
 
 #[derive(Debug)]
-pub enum CallError<'data> {
-    Arity,
-    Yield,
-    Run {
-        fiber: JanetFiber<'data>,
-        error: Janet,
-    },
+pub struct CallError<'data> {
+    kind:   CallErrorKind,
+    value:  Janet,
+    signal: JanetSignal,
+    fiber:  Option<JanetFiber<'data>>,
 }
 
-impl CallError<'_> {
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[non_exhaustive]
+pub enum CallErrorKind {
+    Arity,
+    Run,
+    Yield,
+}
+
+impl<'data> CallError<'data> {
+    #[inline]
+    fn new(
+        kind: CallErrorKind, value: Janet, signal: JanetSignal, fiber: Option<JanetFiber<'data>>,
+    ) -> Self {
+        Self {
+            kind,
+            value,
+            signal,
+            fiber,
+        }
+    }
+
+    #[inline]
+    pub fn kind(&self) -> CallErrorKind {
+        self.kind
+    }
+
+    #[inline]
+    pub fn value(&self) -> Janet {
+        self.value
+    }
+
+    #[inline]
+    pub fn signal(&self) -> JanetSignal {
+        self.signal
+    }
+
+    #[inline]
+    pub fn fiber(&self) -> Option<&JanetFiber> {
+        self.fiber.as_ref()
+    }
+
+    #[inline]
+    pub fn fiber_mut(&mut self) -> Option<&mut JanetFiber<'data>> {
+        self.fiber.as_mut()
+    }
+
+    #[inline]
+    pub fn take_fiber(self) -> Option<JanetFiber<'data>> {
+        self.fiber
+    }
+
     /// Display the stacktrace in the Stderr
     #[inline]
     pub fn stacktrace(&mut self) {
-        if let Self::Run { fiber, error } = self {
-            fiber.display_stacktrace(*error)
+        if let CallErrorKind::Run = self.kind {
+            if let Some(ref mut fiber) = self.fiber {
+                fiber.display_stacktrace(self.value);
+            } else {
+                eprintln!("There is no stacktrace.")
+            }
+        } else {
+            eprintln!("There is no stacktrace.")
         }
     }
 }
 
 impl Display for CallError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Arity => write!(f, "Wrong number of arguments"),
-            Self::Yield => write!(
+        match self.kind {
+            CallErrorKind::Arity => write!(f, "{}: Wrong number of arguments", self.value),
+            CallErrorKind::Yield => write!(
                 f,
                 "This function can yield more than one result. In those cases it's recommended to \
                  create a JanetFiber to execute all its steps"
             ),
-            Self::Run { .. } => write!(f, "Failed to execute the Janet function."),
+            CallErrorKind::Run { .. } => write!(f, "Failed to execute the Janet function."),
         }
     }
 }
@@ -56,7 +110,7 @@ pub struct JanetFunction<'data> {
     phantom: PhantomData<&'data ()>,
 }
 
-impl JanetFunction<'_> {
+impl<'data> JanetFunction<'data> {
     /// Create a new [`JanetFunction`] with a `raw` pointer.
     ///
     /// # Safety
@@ -75,7 +129,7 @@ impl JanetFunction<'_> {
     /// If the executions was successful returns a tuple with the output and the signal of
     /// the execution, otherwise return the [`JanetSignal`] returned by the call.
     #[inline]
-    pub fn call<'fiber>(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError<'fiber>> {
+    pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError<'data>> {
         let args = args.as_ref();
         let mut out = Janet::nil();
         let fiber = ptr::null_mut();
@@ -89,21 +143,24 @@ impl JanetFunction<'_> {
             )
         };
 
-        let sig = JanetSignal::from(raw_sig);
+        let sig = raw_sig.into();
 
         match sig {
             JanetSignal::Ok | JanetSignal::User9 => Ok(out),
-            JanetSignal::Yield => Err(CallError::Yield),
+            JanetSignal::Yield => Err(CallError::new(CallErrorKind::Yield, out, sig, None)),
+            JanetSignal::Error if out == Janet::from("arity mismatch") => {
+                Err(CallError::new(CallErrorKind::Arity, out, sig, None))
+            },
             _ => {
                 // SAFETY: We checked if the pointer are null
                 let fiber = unsafe {
                     if fiber.is_null() || (*fiber).is_null() {
-                        return Err(CallError::Arity);
+                        None
                     } else {
-                        JanetFiber::from_raw(*fiber)
+                        Some(JanetFiber::from_raw(*fiber))
                     }
                 };
-                Err(CallError::Run { fiber, error: out })
+                Err(CallError::new(CallErrorKind::Run, out, sig, fiber))
             },
         }
     }
@@ -128,18 +185,21 @@ impl JanetFunction<'_> {
             )
         };
 
-        let sig = JanetSignal::from(raw_sig);
+        let sig = raw_sig.into();
 
         match sig {
             JanetSignal::Ok | JanetSignal::User9 => Ok(out),
-            JanetSignal::Yield => Err(CallError::Yield),
+            JanetSignal::Yield => Err(CallError::new(CallErrorKind::Yield, out, sig, None)),
+            JanetSignal::Error if out == Janet::from("arity mismatch") => {
+                Err(CallError::new(CallErrorKind::Arity, out, sig, None))
+            },
             _ => {
                 let fiber = if fiber.raw.is_null() {
-                    return Err(CallError::Arity);
+                    None
                 } else {
-                    unsafe { JanetFiber::from_raw(fiber.raw) }
+                    Some(unsafe { JanetFiber::from_raw(fiber.raw) })
                 };
-                Err(CallError::Run { fiber, error: out })
+                Err(CallError::new(CallErrorKind::Run, out, sig, fiber))
             },
         }
     }
