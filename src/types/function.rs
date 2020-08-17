@@ -11,8 +11,10 @@ use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
 
 use super::{Janet, JanetFiber, JanetSignal};
 
+/// C function pointer that is accepted by Janet as a type.
 pub type JanetCFunction = evil_janet::JanetCFunction;
 
+/// Error type that happens when calling a [`JanetFunction`] on the Rust side.
 #[derive(Debug)]
 pub struct CallError<'data> {
     kind:   CallErrorKind,
@@ -21,6 +23,7 @@ pub struct CallError<'data> {
     fiber:  Option<JanetFiber<'data>>,
 }
 
+/// Kinds of errors of [`CallError`].
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[non_exhaustive]
 pub enum CallErrorKind {
@@ -42,31 +45,37 @@ impl<'data> CallError<'data> {
         }
     }
 
+    /// Returns the kind of the error.
     #[inline]
     pub fn kind(&self) -> CallErrorKind {
         self.kind
     }
 
+    /// Returns the error value.
     #[inline]
     pub fn value(&self) -> Janet {
         self.value
     }
 
+    /// Returns the [`JanetSignal`] that caused the error.
     #[inline]
     pub fn signal(&self) -> JanetSignal {
         self.signal
     }
 
+    /// Get a reference to the fiber that the error happened if it exists.
     #[inline]
     pub fn fiber(&self) -> Option<&JanetFiber> {
         self.fiber.as_ref()
     }
 
+    /// Get a exclusive reference to the fiber that the error happened if it exists.
     #[inline]
     pub fn fiber_mut(&mut self) -> Option<&mut JanetFiber<'data>> {
         self.fiber.as_mut()
     }
 
+    /// Consume the error and return the fiber that the error happened if it exists.
     #[inline]
     pub fn take_fiber(self) -> Option<JanetFiber<'data>> {
         self.fiber
@@ -88,6 +97,7 @@ impl<'data> CallError<'data> {
 }
 
 impl Display for CallError<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             CallErrorKind::Arity => write!(f, "{}: Wrong number of arguments", self.value),

@@ -48,7 +48,6 @@ pub fn janet_fn(
             }
 
             // check output type
-
             let output_span = match f.sig.output.clone() {
                 syn::ReturnType::Default => f_clone.sig.span(),
                 syn::ReturnType::Type(_, ty) => ty.span(),
