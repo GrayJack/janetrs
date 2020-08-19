@@ -1429,6 +1429,13 @@ impl Clone for JanetString<'_> {
     }
 }
 
+impl Default for JanetString<'_> {
+    #[inline]
+    fn default() -> Self {
+        Self::from("")
+    }
+}
+
 impl From<char> for JanetString<'_> {
     #[inline]
     fn from(ch: char) -> Self {
