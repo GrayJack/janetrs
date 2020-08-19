@@ -46,10 +46,10 @@ macro_rules! count {
 macro_rules! tuple {
     ($elem: expr; $n: expr) => {$crate::types::JanetTuple::with_default_elem($crate::types::Janet::from($elem), $n)};
 
-    ($($val: expr),+ $(,)?) => {{
+    ($($val: expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
         let tuple = $crate::types::JanetTuple::builder(LEN)
-            $(.put($crate::types::Janet::from($val)))+;
+            $(.put($crate::types::Janet::from($val)))*;
 
         tuple.finalize()
     }};
@@ -102,10 +102,10 @@ macro_rules! array {
         arr
     }};
 
-    ($($val: expr),+ $(,)?) => {{
+    ($($val: expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
         let mut arr = $crate::types::JanetArray::with_capacity(LEN);
-        $(arr.push($crate::types::Janet::from($val));)+
+        $(arr.push($crate::types::Janet::from($val));)*
         arr
     }};
 }
@@ -141,7 +141,7 @@ macro_rules! structs {
     ($($key: expr => $value: expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
         let st = $crate::types::JanetStruct::builder(LEN)
-            $(.put($crate::types::Janet::from($key), $crate::types::Janet::from($value)))+;
+            $(.put($crate::types::Janet::from($key), $crate::types::Janet::from($value)))*;
 
         st.finalize()
     }};
@@ -177,10 +177,10 @@ macro_rules! structs {
 macro_rules! table {
     () => ($crate::types::JanetTable::new());
 
-    ($($key: expr => $value: expr),+ $(,)?) => {{
+    ($($key: expr => $value: expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
         let mut table = $crate::types::JanetTable::with_capacity(LEN);
-        $(let _ = table.insert($crate::types::Janet::from($key), $crate::types::Janet::from($value));)+
+        $(let _ = table.insert($crate::types::Janet::from($key), $crate::types::Janet::from($value));)*
 
         table
     }};
@@ -220,7 +220,7 @@ macro_rules! table {
 /// ```
 #[macro_export]
 macro_rules! janet_mod {
-    ($mod_name: literal; $({$fn_name: literal, $fn: expr, $fn_doc: literal}),+ $(,)?) => {
+    ($mod_name: literal; $({$fn_name: literal, $fn: expr, $fn_doc: literal}),* $(,)?) => {
         #[no_mangle]
         pub unsafe extern "C" fn _janet_mod_config() -> $crate::lowlevel::JanetBuildConfig {
             $crate::lowlevel::JanetBuildConfig {
@@ -240,7 +240,7 @@ macro_rules! janet_mod {
                         cfun: Some($fn),
                         documentation: concat!($fn_doc, "\0").as_ptr() as *const i8,
                     },
-                )+
+                )*
 
                 $crate::lowlevel::JanetReg {
                     name: std::ptr::null(),
@@ -385,5 +385,21 @@ mod tests {
         assert_eq!(table.len(), 2);
         assert_eq!(table.get(1), Some(&Janet::from("one")));
         assert_eq!(table.get(true), Some(&Janet::integer(1)));
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn empty() {
+        let _client = crate::client::JanetClient::init().unwrap();
+
+        let arr = array![];
+        let tup = tuple![];
+        let stru = structs! {};
+        let tab = table! {};
+
+        assert!(arr.is_empty());
+        assert!(tup.is_empty());
+        assert!(stru.is_empty());
+        assert!(tab.is_empty());
     }
 }
