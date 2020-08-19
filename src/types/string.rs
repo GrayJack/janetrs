@@ -1,8 +1,10 @@
 //! Janet String
 use core::{
+    convert::Infallible,
     fmt::{self, Debug, Display},
     iter::FromIterator,
     marker::PhantomData,
+    str::FromStr,
 };
 
 use alloc::string::String;
@@ -1474,6 +1476,15 @@ impl AsRef<BStr> for JanetString<'_> {
     #[inline]
     fn as_ref(&self) -> &BStr {
         self.as_bytes().as_ref()
+    }
+}
+
+impl FromStr for JanetString<'_> {
+    type Err = Infallible;
+
+    #[inline]
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from(s))
     }
 }
 
