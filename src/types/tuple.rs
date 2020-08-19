@@ -228,6 +228,13 @@ impl Clone for JanetTuple<'_> {
     }
 }
 
+impl Default for JanetTuple<'_> {
+    #[inline]
+    fn default() -> Self {
+        crate::tuple![]
+    }
+}
+
 impl AsRef<[Janet]> for JanetTuple<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
