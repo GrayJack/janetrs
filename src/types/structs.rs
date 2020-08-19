@@ -412,6 +412,13 @@ impl Clone for JanetStruct<'_> {
     }
 }
 
+impl Default for JanetStruct<'_> {
+    #[inline]
+    fn default() -> Self {
+        crate::structs! {}
+    }
+}
+
 impl From<JanetTable<'_>> for JanetStruct<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from(table: JanetTable<'_>) -> Self {
