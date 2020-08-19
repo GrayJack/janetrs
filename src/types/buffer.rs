@@ -1,6 +1,6 @@
 //! Janet dynamic buffer (string)
 use core::{
-    fmt::{self, Debug, Display},
+    fmt::{self, Debug, Display, Write},
     iter::FromIterator,
     marker::PhantomData,
 };
@@ -1838,6 +1838,20 @@ impl Extend<String> for JanetBuffer<'_> {
         let iter = iter.into_iter();
         self.reserve(iter.size_hint().0 as i32);
         iter.for_each(|s| self.push_str(&s));
+    }
+}
+
+impl Write for JanetBuffer<'_> {
+    #[inline]
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.push_str(s);
+        Ok(())
+    }
+
+    #[inline]
+    fn write_char(&mut self, ch: char) -> fmt::Result {
+        self.push(ch);
+        Ok(())
     }
 }
 
