@@ -1,4 +1,4 @@
-//! Tuples
+//! Janet tuple type.
 use core::{
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},

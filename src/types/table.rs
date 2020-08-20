@@ -1,4 +1,4 @@
-//! Janet table structure.
+//! Janet table (mutable HashMap) type.
 use core::{
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},

@@ -1,4 +1,4 @@
-//! Janet String
+//! Janet String type.
 use core::{
     convert::Infallible,
     fmt::{self, Debug, Display},

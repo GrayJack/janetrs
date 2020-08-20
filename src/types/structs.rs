@@ -1,4 +1,4 @@
-//! Janet Struct
+//! Janet Struct (immutable HashMap) type.
 use core::{
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},

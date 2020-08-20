@@ -1,8 +1,4 @@
-//! Module for Janet fibers (soft threads)
-//!
-//! TODO:
-//!  * Add JanetFiberStatus and the respective From implementations
-//!  * Add methods for JanetFiber using the Janet C API
+//! Janet fibers (soft threads) type.
 use core::{iter::FusedIterator, marker::PhantomData};
 
 use evil_janet::{

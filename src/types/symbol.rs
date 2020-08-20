@@ -1,4 +1,4 @@
-//! Module dealing with symbols and keywords
+//! Janet symbols and keywords types.
 use core::marker::PhantomData;
 
 use evil_janet::{janet_string_head, janet_symbol, janet_symbol_gen};

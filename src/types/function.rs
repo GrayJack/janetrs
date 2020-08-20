@@ -1,3 +1,4 @@
+//! Janet function types.
 use core::{
     fmt::{self, Display},
     marker::PhantomData,

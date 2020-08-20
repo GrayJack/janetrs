@@ -1,4 +1,4 @@
-//! Janet dynamic array
+//! Janet array (vector) type.
 use core::{
     convert::{TryFrom, TryInto},
     fmt::{self, Debug},

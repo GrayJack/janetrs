@@ -1,4 +1,4 @@
-//! Janet dynamic buffer (string)
+//! Janet buffer (string) type.
 use core::{
     convert::Infallible,
     fmt::{self, Debug, Display, Write},
