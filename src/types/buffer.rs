@@ -1701,6 +1701,7 @@ impl Index<i32> for JanetBuffer<'_> {
     /// Panics if the index is out of bounds.
     ///
     /// [`bytes`]: #method.bytes.html
+    #[inline]
     fn index(&self, index: i32) -> &Self::Output {
         if index < 0 {
             crate::jpanic!(
@@ -1729,6 +1730,7 @@ impl IndexMut<i32> for JanetBuffer<'_> {
     /// Panics if the index is out of bounds.
     ///
     /// [`bytes_mut`]: #method.bytes_mut.html
+    #[inline]
     fn index_mut(&mut self, index: i32) -> &mut Self::Output {
         let len = self.len();
         if index < 0 {
@@ -2049,5 +2051,32 @@ mod tests {
 
         assert!(buffer.is_empty());
         assert_eq!(buffer.capacity(), 6);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn index_indexmut() {
+        let _client = JanetClient::init().unwrap();
+
+        let buffer = JanetBuffer::from("test\u{1F3B7}");
+        let expected = "test\u{1F3B7}".as_bytes();
+
+        assert_eq!(expected[0], buffer[0]);
+        assert_eq!(expected[1], buffer[1]);
+        assert_eq!(expected[2], buffer[2]);
+        assert_eq!(expected[3], buffer[3]);
+        assert_eq!(expected[4], buffer[4]);
+        assert_eq!(expected[5], buffer[5]);
+
+        let mut buffer = JanetBuffer::from("test");
+        buffer[0] = b"a"[0];
+        buffer[1] = b"b"[0];
+        buffer[2] = b"c"[0];
+        buffer[3] = b"d"[0];
+
+        assert_eq!(buffer[0], b"a"[0]);
+        assert_eq!(buffer[1], b"b"[0]);
+        assert_eq!(buffer[2], b"c"[0]);
+        assert_eq!(buffer[3], b"d"[0]);
     }
 }

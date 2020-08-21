@@ -1507,6 +1507,7 @@ impl Index<i32> for JanetString<'_> {
     /// Panics if the index is out of bounds.
     ///
     /// [`bytes`]: #method.bytes.html
+    #[inline]
     fn index(&self, index: i32) -> &Self::Output {
         if index < 0 {
             crate::jpanic!(
@@ -1709,5 +1710,19 @@ mod tests {
 
         assert!(str2 < str3);
         assert!(str3 > str2);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn index() {
+        let _client = JanetClient::init().unwrap();
+
+        let expected = "test".as_bytes();
+        let str1 = JanetString::new("test");
+
+        assert_eq!(expected[0], str1[0]);
+        assert_eq!(expected[1], str1[1]);
+        assert_eq!(expected[2], str1[2]);
+        assert_eq!(expected[3], str1[3]);
     }
 }
