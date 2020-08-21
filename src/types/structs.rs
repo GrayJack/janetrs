@@ -3,6 +3,7 @@ use core::{
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
+    ops::Index,
 };
 
 use evil_janet::{
@@ -432,6 +433,24 @@ impl From<JanetTable<'_>> for JanetStruct<'_> {
     }
 }
 
+impl<T: Into<Janet>> Index<T> for JanetStruct<'_> {
+    type Output = Janet;
+
+    /// Get a reference to the value of a given `key`.
+    ///
+    /// It is recommended to use [`get`] method.
+    ///
+    /// # Janet Panics
+    /// Panics if the struct does not have the `key`.
+    ///
+    /// [`get`]: #method.get.html
+    #[inline]
+    fn index(&self, key: T) -> &Self::Output {
+        self.get(key)
+            .unwrap_or_else(|| crate::jpanic!("no entry found for key"))
+    }
+}
+
 impl<'data> IntoIterator for JanetStruct<'data> {
     type IntoIter = IntoIter<'data>;
     type Item = (Janet, Janet);
@@ -777,5 +796,16 @@ mod tests {
         assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
         assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn index() {
+        let _client = JanetClient::init().unwrap();
+        let st = crate::structs! {1 => 1, 2 => true, 3 => "help"};
+
+        assert_eq!(&Janet::from(1), st[1]);
+        assert_eq!(&Janet::from(true), st[2]);
+        assert_eq!(&Janet::from("help"), st[3]);
     }
 }
