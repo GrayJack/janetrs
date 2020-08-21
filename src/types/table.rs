@@ -823,9 +823,19 @@ impl From<JanetStruct<'_>> for JanetTable<'_> {
 impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
     type Output = Janet;
 
+    /// Get a reference to the value of a given `key`.
+    ///
+    /// It is recommended to use [`get`] method or the [`entry`] API.
+    ///
+    /// # Janet Panics
+    /// Panics if the table does not have the `key`.
+    ///
+    /// [`get`]: #method.get.html
+    /// [`entry`]: #method.entry.html
     #[inline]
     fn index(&self, key: T) -> &Self::Output {
-        self.get(key).expect("no entry found for key")
+        self.get(key)
+            .unwrap_or_else(|| crate::jpanic!("no entry found for key"))
     }
 }
 
