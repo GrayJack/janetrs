@@ -4,6 +4,7 @@ use core::{
     fmt::{self, Debug, Display, Write},
     iter::FromIterator,
     marker::PhantomData,
+    ops::{Index, IndexMut},
     str::FromStr,
 };
 
@@ -1686,6 +1687,67 @@ impl FromStr for JanetBuffer<'_> {
     #[inline]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(s))
+    }
+}
+
+impl Index<i32> for JanetBuffer<'_> {
+    type Output = u8;
+
+    /// Get a reference to the byte of the buffer at the `index`.
+    ///
+    /// It is more idiomatic to use [`bytes`] method.
+    ///
+    /// # Janet Panics
+    /// Panics if the index is out of bounds.
+    ///
+    /// [`bytes`]: #method.bytes.html
+    fn index(&self, index: i32) -> &Self::Output {
+        if index < 0 {
+            crate::jpanic!(
+                "index out of bounds: the len is {} but the index is {}",
+                self.len(),
+                index
+            )
+        }
+
+        self.as_bytes().get(index as usize).unwrap_or_else(|| {
+            crate::jpanic!(
+                "index out of bounds: the len is {} but the index is {}",
+                self.len(),
+                index
+            )
+        })
+    }
+}
+
+impl IndexMut<i32> for JanetBuffer<'_> {
+    /// Get a exclusive reference to the byte of the string at the `index`.
+    ///
+    /// It is more idiomatic to use [`bytes_mut`] method.
+    ///
+    /// # Janet Panics
+    /// Panics if the index is out of bounds.
+    ///
+    /// [`bytes_mut`]: #method.bytes_mut.html
+    fn index_mut(&mut self, index: i32) -> &mut Self::Output {
+        let len = self.len();
+        if index < 0 {
+            crate::jpanic!(
+                "index out of bounds: the len is {} but the index is {}",
+                len,
+                index
+            )
+        }
+
+        if let Some(byte) = self.as_bytes_mut().get_mut(index as usize) {
+            byte
+        } else {
+            crate::jpanic!(
+                "index out of bounds: the len is {} but the index is {}",
+                len,
+                index
+            )
+        }
     }
 }
 
