@@ -1735,8 +1735,7 @@ impl IndexMut<i32> for JanetBuffer<'_> {
         let len = self.len();
         if index < 0 {
             crate::jpanic!(
-                "index out of bounds: the len is {} but the index is {}",
-                len,
+                "index out of bounds: the index ({}) is negative and must be positive",
                 index
             )
         }

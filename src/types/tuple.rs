@@ -311,6 +311,13 @@ impl Index<i32> for JanetTuple<'_> {
     /// This function may Janet panic if try to access `index` out of the bounds
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
+        if index < 0 {
+            crate::jpanic!(
+                "index out of bounds: the index ({}) is negative and must be positive",
+                index
+            )
+        }
+
         match self.get(index) {
             Some(out) => out,
             None => crate::jpanic!(

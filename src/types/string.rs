@@ -1511,8 +1511,7 @@ impl Index<i32> for JanetString<'_> {
     fn index(&self, index: i32) -> &Self::Output {
         if index < 0 {
             crate::jpanic!(
-                "index out of bounds: the len is {} but the index is {}",
-                self.len(),
+                "index out of bounds: the index ({}) is negative and must be positive",
                 index
             )
         }
@@ -1717,7 +1716,7 @@ mod tests {
     fn index() {
         let _client = JanetClient::init().unwrap();
 
-        let expected = "test".as_bytes();
+        let expected = b"test";
         let str1 = JanetString::new("test");
 
         assert_eq!(expected[0], str1[0]);
