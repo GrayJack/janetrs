@@ -234,6 +234,8 @@ impl JanetFiber<'_> {
     }
 }
 /// An iterator that executes the function related to the fiber untill it completes.
+///
+/// **Executing this iterator may trigger a GC collection**
 #[derive(Debug)]
 pub struct Exec<'a, 'data> {
     fiber: &'a mut JanetFiber<'data>,

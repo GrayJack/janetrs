@@ -263,6 +263,8 @@ impl JanetClient {
     /// Run given Janet `code` bytes and if no errors occurs, returns the output of the
     /// given `code`.
     ///
+    /// **This function may trigger a GC collection**
+    ///
     /// # Examples
     /// ```
     /// use janetrs::{client::JanetClient, types::Janet};
@@ -311,6 +313,8 @@ impl JanetClient {
 
     /// Run given Janet `code` string and if no errors occurs, returns the output of the
     /// given `code`.
+    ///
+    /// **This function may trigger a GC collection**
     ///
     /// # Examples
     /// ```

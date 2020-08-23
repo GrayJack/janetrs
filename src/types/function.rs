@@ -137,6 +137,8 @@ impl<'data> JanetFunction<'data> {
 
     /// Execute the [`JanetFunction`] with the given arguments.
     ///
+    /// **This function may trigger a GC collection**
+    ///
     /// If the executions was successful returns a tuple with the output and the signal of
     /// the execution, otherwise return the [`JanetSignal`] returned by the call.
     #[inline]
@@ -177,6 +179,8 @@ impl<'data> JanetFunction<'data> {
     }
 
     /// Execute the [`JanetFunction`] with the given arguments wising the given `fiber`.
+    ///
+    /// **This function may trigger the a GC collection**
     ///
     /// If the executions was successful returns a tuple with the output and the signal of
     /// the execution, otherwise return the [`JanetSignal`] returned by the call.
