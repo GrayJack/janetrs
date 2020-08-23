@@ -137,10 +137,10 @@ impl<'data> JanetFunction<'data> {
 
     /// Execute the [`JanetFunction`] with the given arguments.
     ///
-    /// **This function may trigger a GC collection**
+    /// **This function may trigger a GC collection.**
     ///
-    /// If the executions was successful returns a tuple with the output and the signal of
-    /// the execution, otherwise return the [`JanetSignal`] returned by the call.
+    /// If the executions was successful returns the output, otherwise return the
+    /// [`CallError`] with information returned by the call.
     #[inline]
     pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError<'data>> {
         let args = args.as_ref();
@@ -180,10 +180,10 @@ impl<'data> JanetFunction<'data> {
 
     /// Execute the [`JanetFunction`] with the given arguments wising the given `fiber`.
     ///
-    /// **This function may trigger the a GC collection**
+    /// **This function may trigger the a GC collection.**
     ///
-    /// If the executions was successful returns a tuple with the output and the signal of
-    /// the execution, otherwise return the [`JanetSignal`] returned by the call.
+    /// If the executions was successful returns the output, otherwise return the
+    /// [`CallError`] with information returned by the call.
     #[inline]
     pub fn call_with_fiber<'fiber>(
         &mut self, mut fiber: JanetFiber<'fiber>, args: impl AsRef<[Janet]>,
@@ -217,6 +217,20 @@ impl<'data> JanetFunction<'data> {
                 Err(CallError::new(CallErrorKind::Run, out, sig, fiber))
             },
         }
+    }
+
+    /// Execute the [`JanetFunction`] with the given arguments.
+    ///
+    /// **This function can not trigger GC collection.**
+    ///
+    /// # Janet Panics
+    /// Panics if anything goes wrong trying to call the function.
+    #[inline]
+    pub fn call_or_panic(&mut self, args: impl AsRef<[Janet]>) -> Janet {
+        let args = args.as_ref();
+
+        unsafe { evil_janet::janet_call(self.raw, args.len() as i32, args.as_ptr() as *const _) }
+            .into()
     }
 
     /// Return a raw pointer to the function raw structure.
