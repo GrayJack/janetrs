@@ -12,6 +12,7 @@ use core::{
     cmp::Ordering,
     convert::TryFrom,
     fmt::{self, Display},
+    hash::{self, Hash},
 };
 
 #[cfg(feature = "std")]
@@ -310,6 +311,14 @@ impl fmt::Display for Janet {
         };
 
         write!(f, "{}", s)
+    }
+}
+
+// TODO: Derive it in the next release of evil_janet
+#[allow(clippy::derive_hash_xor_eq)]
+impl Hash for Janet {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        state.write_i32(unsafe { evil_janet::janet_hash(self.inner) })
     }
 }
 
@@ -846,3 +855,34 @@ impl_string_like!(JanetString<'_> JanetKeyword<'_> JanetSymbol<'_>);
 impl_part!(JanetString<'_>, JanetKeyword<'_>);
 impl_part!(JanetString<'_>, JanetSymbol<'_>);
 impl_part!(JanetKeyword<'_>, JanetSymbol<'_>);
+
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
+mod tests {
+    use super::*;
+    use core::hash::Hasher;
+
+    #[cfg_attr(feature = "std", test)]
+    fn janet_eq_hash() {
+        let _client = crate::client::JanetClient::init().unwrap();
+
+        let mut hasher1 = std::collections::hash_map::DefaultHasher::new();
+        let mut hasher2 = std::collections::hash_map::DefaultHasher::new();
+
+        let (j1, j2) = (Janet::from(10), Janet::from(10));
+        j1.hash(&mut hasher1);
+        j2.hash(&mut hasher2);
+        assert_eq!(j1, j2);
+        assert_eq!(hasher1.finish(), hasher2.finish());
+        assert_eq!(j1 == j2, hasher1.finish() == hasher2.finish());
+
+        let mut hasher1 = std::collections::hash_map::DefaultHasher::new();
+        let mut hasher2 = std::collections::hash_map::DefaultHasher::new();
+
+        let (j1, j2) = (Janet::from(10), Janet::from("hey"));
+        j1.hash(&mut hasher1);
+        j2.hash(&mut hasher2);
+        assert_ne!(j1, j2);
+        assert_ne!(hasher1.finish(), hasher2.finish());
+        assert_eq!(j1 == j2, hasher1.finish() == hasher2.finish());
+    }
+}
