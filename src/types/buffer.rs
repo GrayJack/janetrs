@@ -1681,6 +1681,20 @@ impl AsRef<BStr> for JanetBuffer<'_> {
     }
 }
 
+impl AsMut<[u8]> for JanetBuffer<'_> {
+    #[inline]
+    fn as_mut(&mut self) -> &mut [u8] {
+        self.as_bytes_mut()
+    }
+}
+
+impl AsMut<BStr> for JanetBuffer<'_> {
+    #[inline]
+    fn as_mut(&mut self) -> &mut BStr {
+        self.as_bytes_mut().as_bstr_mut()
+    }
+}
+
 impl FromStr for JanetBuffer<'_> {
     type Err = Infallible;
 
