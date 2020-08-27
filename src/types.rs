@@ -296,21 +296,23 @@ impl fmt::Display for Janet {
         // There some overhead for doing this dance, but the only way to get the Janet value from
         // C API and transform into &str to display it.
         let fmt = if matches!(self.kind(), JanetType::String | JanetType::Buffer) {
-            "%V\0"
+            "%p\0"
         } else {
             "%q\0"
         };
 
-        let s = unsafe {
-            let jstr = JanetString::from_raw(evil_janet::janet_formatc(
+        // SAFETY: `janet_formatc` always returns a non-null valid sequence of `u8` in the form of
+        // `*const u8`
+        let jstr = unsafe {
+            JanetString::from_raw(evil_janet::janet_formatc(
                 fmt.as_ptr() as *const i8,
                 self.inner,
-            ));
-            let slice = core::slice::from_raw_parts(jstr.as_raw(), jstr.len() as usize);
-            core::str::from_utf8(slice).map_err(|_| fmt::Error)?
+            ))
         };
 
-        write!(f, "{}", s)
+        let s = jstr.to_str().map_err(|_| fmt::Error)?;
+
+        fmt::Display::fmt(s, f)
     }
 }
 
