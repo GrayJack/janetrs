@@ -4,10 +4,6 @@
 //! There is some commom naming patterns when looking at the type definitions
 //!
 //!  - `'data` is the lifetime of data that is owned by the Janet GC.
-//!
-//! TODO: After all Janet types implement [`Clone`], change all functions parameters that
-//! recieves `impl Into<Janet>` to `&impl Into<Janet> + Clone`
-
 use core::{
     cmp::Ordering,
     convert::TryFrom,
@@ -66,9 +62,50 @@ impl Display for JanetConversionError {
     }
 }
 
-/// Central structure for Janet.
+/// `Janet` is the central structure of the Janet Language.
 ///
-/// All possible Janet types is represented at some point as this structure.
+/// All possible Janet types is represented at some point as this structure, either to
+/// receive as argumenst ou return something to Janet VM.
+///
+/// ## Creating new values
+/// With exception to `Janet` `nil` value the best way to create a `Janet` value is to use
+/// the [`Janet::wrap`] function, it can receive anything that can be turned [`Into`]
+/// `Janet`. For the `nil` value, there is a nice function for that, the [`Janet::nil`]
+/// function.
+///
+/// It is also possible to use the [`From`] trait to convert as well.
+///
+/// ### Examples
+/// ```
+/// use janetrs::types::Janet;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
+/// let j_nil = Janet::nil();
+/// let jnt = Janet::wrap(10); // A Number Janet
+/// let jnt_str = Janet::wrap("Hello"); // A JanetString Janet
+/// let from_jnt = Janet::from(true); // A boolean Janet
+/// ```
+///
+/// ## Extracting/Unwraping Janet values
+/// To extract/unwrap the `Janet` value you can use the [`Janet::unwrap`] method, that
+/// will return a [`Result`] either with the resulted type of and conversion error.
+///
+/// It is possible to use the [`TryFrom`] trait, but that requires to include the trait in
+/// the context.
+///
+/// ### Example
+/// ```
+/// use janetrs::types::{Janet, JanetString};
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
+/// let jnt = Janet::wrap(10); // A Number Janet
+///
+/// let res_num: Result<f64, _> = jnt.unwrap();
+/// assert!(res_num.is_ok());
+///
+/// let res_string = jnt.unwrap::<JanetString>();
+/// assert!(res_string.is_err());
+/// ```
 // allow this lint here because it is complaining about manually implementing PartialOrd between
 // Janet and &Janet
 #[allow(clippy::derive_ord_xor_partial_ord)]
