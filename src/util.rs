@@ -237,8 +237,10 @@ impl Ord for JanetVersion {
 /// Checks if the given `args` have the same amount of expected arguments, if the check
 /// fails it panics from the Janet side.
 #[inline]
-pub fn check_fix_arity(args: &[Janet], fix_arity: i32) {
-    unsafe { evil_janet::janet_fixarity(args.len() as i32, fix_arity) };
+pub fn check_fix_arity(args: &[Janet], fix_arity: usize) {
+    if args.len() != fix_arity {
+        crate::jpanic!("arity mismatch, expected {}, got {}", fix_arity, args.len());
+    }
 }
 
 /// Check if the given `args` have the expected arguments in the inclusive range, if the
@@ -246,9 +248,18 @@ pub fn check_fix_arity(args: &[Janet], fix_arity: i32) {
 ///
 /// If `max` is `None`, it will disable the maximum check, allowing variadic arguments.
 #[inline]
-pub fn check_range_arity(args: &[Janet], min: i32, max: Option<i32>) {
-    let max = max.unwrap_or(-1);
-    unsafe { evil_janet::janet_arity(args.len() as i32, min, max) }
+pub fn check_range_arity(args: &[Janet], min: usize, max: Option<usize>) {
+    let arity = args.len();
+
+    if arity < min {
+        crate::jpanic!("arity mismatch, expected at least {}, got {}", min, arity);
+    }
+
+    if let Some(max) = max {
+        if arity > max {
+            crate::jpanic!("arity mismatch, expected at most {}, got {}", max, arity);
+        }
+    }
 }
 
 /// Add a Janet immutable variable in the given environment.
