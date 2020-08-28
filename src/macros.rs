@@ -278,6 +278,34 @@ macro_rules! jpanic {
     };
 }
 
+/// Macro that tries to run a expression, and if it panics in Rust side, it tries to
+/// recover from that and pass the Rust panic string to a Janet Panic.
+///
+/// This uses the [`catch_unwind`] function, and therefore have the same guarantees as it.
+///
+/// # Examples
+/// ```
+/// use janetrs::jtry;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+///
+/// let arr = [10; 5];
+/// let val_index_2 = jtry!(arr[2]); // Not going to panic
+/// let val_index_20 = jtry!(arr[20]); // Index out bounds
+/// ```
+#[cfg(feature = "std")]
+#[macro_export]
+macro_rules! jtry {
+    ($e:expr) => {{
+        ::std::panic::catch_unwind(|| $e).unwrap_or_else(|err| {
+            if let Some(err) = err.downcast_ref::<String>() {
+                $crate::jpanic!("{}", err);
+            } else {
+                $crate::jpanic!();
+            }
+        })
+    }};
+}
+
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     // use super::*;
