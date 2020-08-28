@@ -285,6 +285,7 @@ macro_rules! jpanic {
 ///
 /// # Examples
 /// ```
+/// # #![allow(unconditional_panic)]
 /// use janetrs::jtry;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
