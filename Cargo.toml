@@ -23,7 +23,8 @@ features = ["amalgation"]
 
 [dependencies]
 evil-janet = "1.11.5"
-bstr = { version = "0.2.13", default-features = false}
+bstr = { version = "0.2.13", default-features = false }
+janetrs_macros = { version = "0.1.0", optional = true }
 
 [dev-dependencies]
 serial_test = "~0.4.0"
@@ -42,6 +43,7 @@ unicode = ["bstr/unicode"]
 system = ["evil-janet/system"]
 # Use to link to system libjanet (not recommended generally)
 link-system = ["evil-janet/link-system"]
+attr-macros = ["janetrs_macros"]
 
 [workspace]
 members = ["janetrs_macros"]

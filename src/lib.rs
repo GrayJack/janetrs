@@ -65,3 +65,6 @@ pub mod client;
 mod macros;
 pub mod types;
 pub mod util;
+
+#[cfg(feature = "attr-macros")]
+pub use janetrs_macros::janet_fn;

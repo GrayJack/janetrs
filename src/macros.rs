@@ -292,6 +292,8 @@ macro_rules! jpanic {
 /// let val_index_2 = jtry!(arr[2]); // Not going to panic
 /// let val_index_20 = jtry!(arr[20]); // Index out bounds
 /// ```
+///
+/// [`catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
 #[cfg(feature = "std")]
 #[macro_export]
 macro_rules! jtry {
