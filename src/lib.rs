@@ -23,6 +23,7 @@
 //! - `system`: Use system header to get Janet functions
 //! - `link-system`: Link the Janet runtime to the package from the system, enabling to
 //!   use the client module
+//! - `attr-macros`: Include attribute macros in the crate.
 //!
 //! ## Licensing
 //! This software is licensed under the terms of the [MIT Public License](./LICENSE).
