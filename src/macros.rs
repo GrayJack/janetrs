@@ -257,7 +257,7 @@ macro_rules! janet_mod {
 /// passed message where the Janet runtime takes care to properly exit.
 ///
 /// # Examples
-/// ```
+/// ```ignore
 /// use janetrs::jpanic;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 /// jpanic!();
@@ -284,7 +284,7 @@ macro_rules! jpanic {
 /// This uses the [`catch_unwind`] function, and therefore have the same guarantees as it.
 ///
 /// # Examples
-/// ```
+/// ```ignore
 /// # #![allow(unconditional_panic)]
 /// use janetrs::jtry;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
