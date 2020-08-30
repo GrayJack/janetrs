@@ -2,6 +2,7 @@
 //! janet modules.
 use core::{cmp::Ordering, fmt};
 
+use const_fn::const_fn;
 use evil_janet::{
     JANET_CURRENT_CONFIG_BITS, JANET_VERSION_MAJOR, JANET_VERSION_MINOR, JANET_VERSION_PATCH,
 };
@@ -44,21 +45,23 @@ impl JanetBuildConfig {
 
     /// Return `true` if Janet single threaded bit is set.
     #[inline]
-    pub fn is_single_threaded(&self) -> bool {
+    #[const_fn("1.46")]
+    pub const fn is_single_threaded(&self) -> bool {
         match self.bits {
             0 | 1 => false,
             2 | 3 => true,
-            _ => unreachable!(),
+            _ => false,
         }
     }
 
     /// Return `true` is Janet nanbox bit is set.
     #[inline]
-    pub fn is_nanbox(&self) -> bool {
+    #[const_fn("1.46")]
+    pub const fn is_nanbox(&self) -> bool {
         match self.bits {
             0 | 2 => false,
             1 | 3 => true,
-            _ => unreachable!(),
+            _ => false,
         }
     }
 }
