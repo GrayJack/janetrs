@@ -391,7 +391,7 @@ impl<'data> JanetStruct<'data> {
 }
 
 impl Debug for JanetStruct<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_map().entries(self.iter()).finish()
     }
@@ -513,6 +513,7 @@ pub struct Iter<'a, 'data> {
 }
 
 impl Debug for Iter<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.st.iter()).finish()
     }
@@ -565,6 +566,7 @@ pub struct Keys<'a, 'data> {
 }
 
 impl Debug for Keys<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.st.keys()).finish()
     }
@@ -595,6 +597,7 @@ pub struct Values<'a, 'data> {
 }
 
 impl Debug for Values<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.st.values()).finish()
     }
@@ -627,6 +630,7 @@ pub struct IntoIter<'data> {
 }
 
 impl Debug for IntoIter<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.st.iter()).finish()
     }

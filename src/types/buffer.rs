@@ -1717,6 +1717,7 @@ impl Index<i32> for JanetBuffer<'_> {
     /// [`bytes`]: #method.bytes.html
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
+        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
@@ -1747,6 +1748,7 @@ impl IndexMut<i32> for JanetBuffer<'_> {
     #[inline]
     fn index_mut(&mut self, index: i32) -> &mut Self::Output {
         let len = self.len();
+        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",
@@ -1754,15 +1756,15 @@ impl IndexMut<i32> for JanetBuffer<'_> {
             )
         }
 
-        if let Some(byte) = self.as_bytes_mut().get_mut(index as usize) {
-            byte
-        } else {
-            crate::jpanic!(
-                "index out of bounds: the len is {} but the index is {}",
-                len,
-                index
-            )
-        }
+        self.as_bytes_mut()
+            .get_mut(index as usize)
+            .unwrap_or_else(|| {
+                crate::jpanic!(
+                    "index out of bounds: the len is {} but the index is {}",
+                    len,
+                    index
+                )
+            })
     }
 }
 

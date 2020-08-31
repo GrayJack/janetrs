@@ -208,7 +208,7 @@ impl<'data> JanetTuple<'data> {
 }
 
 impl Debug for JanetTuple<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
@@ -311,6 +311,7 @@ impl Index<i32> for JanetTuple<'_> {
     /// This function may Janet panic if try to access `index` out of the bounds
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
+        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",
@@ -318,14 +319,13 @@ impl Index<i32> for JanetTuple<'_> {
             )
         }
 
-        match self.get(index) {
-            Some(out) => out,
-            None => crate::jpanic!(
+        self.get(index).unwrap_or_else(|| {
+            crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
                 self.len(),
                 index
-            ),
-        }
+            )
+        })
     }
 }
 
@@ -338,6 +338,7 @@ pub struct Iter<'a, 'data> {
 }
 
 impl Debug for Iter<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.tup.as_ref()).finish()
     }
@@ -389,6 +390,7 @@ pub struct IntoIter<'data> {
 }
 
 impl Debug for IntoIter<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.tup.as_ref()).finish()
     }

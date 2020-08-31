@@ -1405,6 +1405,7 @@ impl<'data> JanetString<'data> {
 }
 
 impl Debug for JanetString<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
 
@@ -1413,6 +1414,7 @@ impl Debug for JanetString<'_> {
 }
 
 impl Display for JanetString<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
 
@@ -1509,6 +1511,7 @@ impl Index<i32> for JanetString<'_> {
     /// [`bytes`]: #method.bytes.html
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
+        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",

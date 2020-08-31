@@ -759,6 +759,7 @@ impl Index<i32> for JanetArray<'_> {
     /// Janet panic if try to access `index` out of the bounds.
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
+        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",
@@ -766,14 +767,13 @@ impl Index<i32> for JanetArray<'_> {
             )
         }
 
-        match self.get(index) {
-            Some(item) => item,
-            None => crate::jpanic!(
+        self.get(index).unwrap_or_else(|| {
+            crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
                 self.len(),
                 index
-            ),
-        }
+            )
+        })
     }
 }
 
@@ -786,14 +786,21 @@ impl IndexMut<i32> for JanetArray<'_> {
     fn index_mut(&mut self, index: i32) -> &mut Self::Output {
         let len = self.len();
 
-        match self.get_mut(index) {
-            Some(item) => item,
-            None => crate::jpanic!(
+        #[cold]
+        if index < 0 {
+            crate::jpanic!(
+                "index out of bounds: the index ({}) is negative and must be positive",
+                index
+            )
+        }
+
+        self.get_mut(index).unwrap_or_else(|| {
+            crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
                 len,
                 index
-            ),
-        }
+            )
+        })
     }
 }
 
@@ -806,6 +813,7 @@ pub struct Iter<'a, 'data> {
 }
 
 impl Debug for Iter<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.arr.as_ref()).finish()
     }
@@ -877,6 +885,7 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
 }
 
 impl Debug for IterMut<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.arr.as_ref()).finish()
     }
@@ -907,6 +916,7 @@ pub struct IntoIter<'data> {
 }
 
 impl Debug for IntoIter<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.arr.as_ref()).finish()
     }

@@ -1353,6 +1353,7 @@ pub struct Iter<'a, 'data> {
 }
 
 impl Debug for Iter<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
     }
@@ -1405,6 +1406,7 @@ pub struct Keys<'a, 'data> {
 }
 
 impl Debug for Keys<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.table.keys()).finish()
     }
@@ -1449,6 +1451,7 @@ impl<'a> Iterator for Values<'a, '_> {
 }
 
 impl Debug for Values<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.table.values()).finish()
     }
@@ -1466,6 +1469,7 @@ pub struct IterMut<'a, 'data> {
 }
 
 impl Debug for IterMut<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
     }
@@ -1517,6 +1521,7 @@ pub struct ValuesMut<'a, 'data> {
 }
 
 impl Debug for ValuesMut<'_, '_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.table.clone()).finish()
     }
@@ -1549,6 +1554,7 @@ pub struct IntoIter<'data> {
 }
 
 impl Debug for IntoIter<'_> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
     }
