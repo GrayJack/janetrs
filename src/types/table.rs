@@ -618,6 +618,7 @@ impl<'data> JanetTable<'data> {
     ///     println!("Key: {}", key);
     /// }
     /// ```
+    #[inline]
     pub fn keys(&self) -> Keys<'_, '_> {
         Keys { inner: self.iter() }
     }
@@ -635,6 +636,7 @@ impl<'data> JanetTable<'data> {
     ///     println!("Value: {}", val);
     /// }
     /// ```
+    #[inline]
     pub fn values(&self) -> Values<'_, '_> {
         Values { inner: self.iter() }
     }
@@ -654,6 +656,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// assert!(table.values().all(|v| *v == Janet::number(100.0)));
     /// ```
+    #[inline]
     pub fn values_mut(&mut self) -> ValuesMut<'_, '_> {
         ValuesMut {
             inner: self.iter_mut(),

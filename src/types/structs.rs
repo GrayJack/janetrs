@@ -335,6 +335,7 @@ impl<'data> JanetStruct<'data> {
     ///     println!("Key: {}", key);
     /// }
     /// ```
+    #[inline]
     pub fn keys(&self) -> Keys<'_, '_> {
         Keys { inner: self.iter() }
     }
@@ -352,6 +353,7 @@ impl<'data> JanetStruct<'data> {
     ///     println!("Value: {}", val);
     /// }
     /// ```
+    #[inline]
     pub fn values(&self) -> Values<'_, '_> {
         Values { inner: self.iter() }
     }
