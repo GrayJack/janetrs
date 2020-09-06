@@ -730,6 +730,30 @@ impl From<CJanetType> for JanetType {
     }
 }
 
+impl Display for JanetType {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Abstract => Display::fmt("abstract", f),
+            Self::Array => Display::fmt("array", f),
+            Self::Boolean => Display::fmt("boolean", f),
+            Self::Buffer => Display::fmt("buffer", f),
+            Self::CFunction => Display::fmt("cfunction", f),
+            Self::Fiber => Display::fmt("fiber", f),
+            Self::Function => Display::fmt("function", f),
+            Self::Keyword => Display::fmt("keyword", f),
+            Self::Nil => Display::fmt("nil", f),
+            Self::Number => Display::fmt("number", f),
+            Self::Pointer => Display::fmt("pointer", f),
+            Self::String => Display::fmt("string", f),
+            Self::Struct => Display::fmt("struct", f),
+            Self::Symbol => Display::fmt("symbol", f),
+            Self::Table => Display::fmt("table", f),
+            Self::Tuple => Display::fmt("tuple", f),
+        }
+    }
+}
+
 impl From<JanetType> for CJanetType {
     #[inline]
     fn from(val: JanetType) -> Self {
