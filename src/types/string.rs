@@ -1731,4 +1731,15 @@ mod tests {
         assert_eq!(expected[2], str1[2]);
         assert_eq!(expected[3], str1[3]);
     }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn from_char() {
+        let _client = JanetClient::init().unwrap();
+
+        let expected = JanetString::new("α");
+        let test = JanetString::from('α');
+
+        assert_eq!(test, expected);
+    }
 }
