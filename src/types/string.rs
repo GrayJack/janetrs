@@ -1442,14 +1442,18 @@ impl Default for JanetString<'_> {
 impl From<char> for JanetString<'_> {
     #[inline]
     fn from(ch: char) -> Self {
-        Self::builder(1).put_char(ch).finalize()
+        let mut buff = [0; 4];
+        let s = ch.encode_utf8(&mut buff);
+        Self::new(s)
     }
 }
 
 impl From<&char> for JanetString<'_> {
     #[inline]
     fn from(ch: &char) -> Self {
-        Self::builder(1).put_char(*ch).finalize()
+        let mut buff = [0; 4];
+        let s = ch.encode_utf8(&mut buff);
+        Self::new(s)
     }
 }
 
