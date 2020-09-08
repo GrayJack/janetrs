@@ -9,6 +9,7 @@ use syn::{parse_macro_input, spanned::Spanned};
 /// to the thing the Janet C API is expection (`fn(i32, *mut janetrs::lowlevel::Janet) ->
 /// janetrs::lowlevel::Janet`)
 ///
+///
 /// The optional arg `check_mut_ref` adds a check to see if the function received more
 /// than one reference to the same `*mut` pointer. This check is not the default because
 /// Janet Types act like types with interior mutability and the check is expensive, but if
