@@ -8,4 +8,6 @@ fn tests() {
     t.compile_fail("tests/04-not-ref");
     t.compile_fail("tests/05-wrong-args");
     t.compile_fail("tests/06-not-slice");
+    t.pass("tests/07-mod");
+    t.compile_fail("tests/08-wrong-args");
 }

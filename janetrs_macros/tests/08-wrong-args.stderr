@@ -1,0 +1,5 @@
+error: Invalid argument. Valid arguments: `check_mut_ref`.
+ --> $DIR/08-wrong-args:4:12
+  |
+4 | #[janet_fn(a)]
+  |            ^

@@ -1,0 +1,10 @@
+
+use janetrs_macros::janet_fn;
+
+#[janet_fn(a)]
+pub fn rust_hello(_args: &mut [Janet]) -> Janet {
+    println!("Hello from Rust!");
+    Janet::nil()
+}
+
+fn main() {}

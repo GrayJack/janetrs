@@ -16,7 +16,7 @@ pub fn function3(_args: &mut [janetrs::types::Janet]) -> janetrs::types::Janet {
     Janet::nil()
 }
 
-#[janet_fn]
+#[janet_fn(check_mut_ref)]
 pub fn function4(_args: &mut [::janetrs::types::Janet]) -> ::janetrs::types::Janet {
     Janet::nil()
 }
