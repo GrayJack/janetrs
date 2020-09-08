@@ -8,19 +8,18 @@ use syn::{parse_macro_input, spanned::Spanned};
 /// Macro that tranforms a high-level Janet function (`fn(&mut [Janet]) -> Janet`)
 /// to the thing the Janet C API is expection (`fn(i32, *mut janetrs::lowlevel::Janet) ->
 /// janetrs::lowlevel::Janet`)
-
+///
 /// The optional arg `check_mut_ref` adds a check to see if the function received more
-/// than one reference to the same thing. This check is not the default because Janet
-/// Types act like types with interior mutability and the check is expensive, but if you
-/// want to make sure that your function never receives the same thing more than once you
-/// can use this.
+/// than one reference to the same `*mut` pointer. This check is not the default because
+/// Janet Types act like types with interior mutability and the check is expensive, but if
+/// you want to make sure that your function never receives the same pointer more than
+/// once you can use this.
 #[proc_macro_attribute]
 pub fn janet_fn(
     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let func = parse_macro_input!(input as syn::Item);
 
-    // dbg!(&args);
     let args = parse_macro_input!(args as syn::AttributeArgs);
 
     if args.len() > 1 {
@@ -141,6 +140,7 @@ pub fn janet_fn(
                     let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::types::Janet])};
 
                     #check
+
                     #name(args).into()
                 }
             }
