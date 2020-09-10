@@ -17,18 +17,20 @@ use std::error;
 use evil_janet::{
     janet_length, janet_truthy, janet_type, janet_unwrap_array, janet_unwrap_boolean,
     janet_unwrap_buffer, janet_unwrap_cfunction, janet_unwrap_fiber, janet_unwrap_function,
-    janet_unwrap_integer, janet_unwrap_keyword, janet_unwrap_number, janet_unwrap_string,
-    janet_unwrap_struct, janet_unwrap_symbol, janet_unwrap_table, janet_unwrap_tuple,
-    janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer, janet_wrap_cfunction,
-    janet_wrap_fiber, janet_wrap_function, janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil,
-    janet_wrap_number, janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table,
-    janet_wrap_tuple, Janet as CJanet, JanetType as CJanetType,
+    janet_unwrap_integer, janet_unwrap_keyword, janet_unwrap_number, janet_unwrap_pointer,
+    janet_unwrap_string, janet_unwrap_struct, janet_unwrap_symbol, janet_unwrap_table,
+    janet_unwrap_tuple, janet_wrap_array, janet_wrap_boolean, janet_wrap_buffer,
+    janet_wrap_cfunction, janet_wrap_fiber, janet_wrap_function, janet_wrap_integer,
+    janet_wrap_keyword, janet_wrap_nil, janet_wrap_number, janet_wrap_pointer, janet_wrap_string,
+    janet_wrap_struct, janet_wrap_symbol, janet_wrap_table, janet_wrap_tuple, Janet as CJanet,
+    JanetType as CJanetType,
 };
 
 pub mod array;
 pub mod buffer;
 pub mod fiber;
 pub mod function;
+pub mod pointer;
 pub mod string;
 pub mod structs;
 pub mod symbol;
@@ -39,6 +41,7 @@ pub use array::JanetArray;
 pub use buffer::JanetBuffer;
 pub use fiber::JanetFiber;
 pub use function::{JanetCFunction, JanetFunction};
+pub use pointer::JanetPointer;
 pub use string::JanetString;
 pub use structs::JanetStruct;
 pub use symbol::{JanetKeyword, JanetSymbol};
@@ -233,6 +236,14 @@ impl Janet {
     pub fn c_function(value: JanetCFunction) -> Self {
         Self {
             inner: unsafe { janet_wrap_cfunction(value) },
+        }
+    }
+
+    /// Create a pointer [`Janet`] with `value`.
+    #[inline]
+    pub fn pointer(value: JanetPointer) -> Self {
+        Self {
+            inner: unsafe { janet_wrap_pointer(value.as_ptr()) },
         }
     }
 
@@ -638,7 +649,25 @@ macro_rules! try_from_janet {
             }
         }
     };
+
+    ($ty:ty, $kind:path, $unwrap_fn_name:ident, $fn_name:ident) => {
+        impl TryFrom<Janet> for $ty {
+            type Error = JanetConversionError;
+
+            #[inline]
+            fn try_from(value: Janet) -> Result<Self, Self::Error> {
+                if matches!(value.kind(), $kind) {
+                    Ok(unsafe { Self::$fn_name($unwrap_fn_name(value.inner)) })
+                } else {
+                    Err(JanetConversionError)
 }
+            }
+        }
+    };
+}
+
+from_for_janet!(JanetPointer, pointer);
+try_from_janet!(JanetPointer, JanetType::Pointer, janet_unwrap_pointer, new);
 
 from_for_janet!(JanetTable<'_>, table);
 from_for_janet!(clone &JanetTable<'_>, table);

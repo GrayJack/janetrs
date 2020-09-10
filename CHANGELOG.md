@@ -4,6 +4,9 @@ All notable changes to the library should be put here
 
 ## Unreleased ~ 0.2.0
 
+-   Implement `JanetPointer` type
+-   `janet_fn` now can accept a parameter `check_mut_ref` that checks if the function received more than one `*mut` pointer as parameter (not the default because Janet types are like interior mutability types)
+
 ## 0.1.2
 
 ### Changes
