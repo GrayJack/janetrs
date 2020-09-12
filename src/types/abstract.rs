@@ -1,7 +1,7 @@
 //! FIXME: Work In Progress
 //!
 //! This module may change drastically in the near future
-use core::{cell::Cell, ffi::c_void, marker::PhantomData};
+use core::{cell::Cell, ffi::c_void, fmt, marker::PhantomData};
 
 use evil_janet::{janet_abstract, janet_abstract_head};
 
@@ -66,6 +66,14 @@ impl JanetAbstract {
     #[inline]
     pub fn type_info(&self) -> JanetAbstractType {
         unsafe { *(*janet_abstract_head(self.raw)).type_ }
+    }
+}
+
+impl fmt::Debug for JanetAbstract {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("JanetAbstract")
+            .field("mem_size", &self.size())
+            .finish()
     }
 }
 
