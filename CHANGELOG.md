@@ -4,6 +4,10 @@ All notable changes to the library should be put here
 
 ## Unreleased ~ 0.2.0
 
+-   **BREAKING:** Add `Janet::unwrap` that return `TaggedJanet`
+-   **BREAKING:** Rename `Janet::unwrap` to `Janet::try_unwrap`
+-   Implement `TaggetJanet` type
+-   Implement `JanetAbstract` type
 -   Implement `JanetPointer` type
 -   `janet_fn` now can accept a parameter `check_mut_ref` that checks if the function received more than one `*mut` pointer as parameter (not the default because Janet types are like interior mutability types)
 
