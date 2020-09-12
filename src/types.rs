@@ -105,10 +105,10 @@ impl Display for JanetConversionError {
 ///
 /// let jnt = Janet::wrap(10); // A Number Janet
 ///
-/// let res_num: Result<f64, _> = jnt.unwrap();
+/// let res_num: Result<f64, _> = jnt.try_unwrap();
 /// assert!(res_num.is_ok());
 ///
-/// let res_string = jnt.unwrap::<JanetString>();
+/// let res_string = jnt.try_unwrap::<JanetString>();
 /// assert!(res_string.is_err());
 /// ```
 // allow this lint here because it is complaining about manually implementing PartialOrd between

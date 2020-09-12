@@ -112,12 +112,13 @@ impl<'data> JanetFiber<'data> {
     ///         (yield 4)
     ///         5)",
     /// )?;
-    /// let mut f_concrete: JanetFunction = f.unwrap()?;
+    /// let mut f_concrete: JanetFunction = f.try_unwrap()?;
     ///
     /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[]).unwrap();
     /// fiber.exec().for_each(|j| println!("{}", j));
     /// # Ok(()) }
     /// ```
+    // TODO: Change the example to use TaggedJanet
     #[inline]
     pub fn exec<'a>(&'a mut self) -> Exec<'a, 'data> {
         Exec {
@@ -148,7 +149,7 @@ impl<'data> JanetFiber<'data> {
     ///         (yield (* x 3))
     ///         x)",
     /// )?;
-    /// let mut f_concrete: JanetFunction = f.unwrap()?;
+    /// let mut f_concrete: JanetFunction = f.try_unwrap()?;
     ///
     /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10.into()]).unwrap();
     /// fiber
@@ -158,6 +159,7 @@ impl<'data> JanetFiber<'data> {
     /// ```
     ///
     /// [`exec`]: #method.exec
+    // TODO: Change the example to use TaggedJanet
     #[inline]
     pub fn exec_input<'a>(&'a mut self, input: Janet) -> Exec<'a, 'data> {
         Exec { fiber: self, input }
@@ -186,7 +188,7 @@ impl<'data> JanetFiber<'data> {
     ///         (yield (* x 3))
     ///         x)",
     /// )?;
-    /// let mut f_concrete: JanetFunction = f.unwrap()?;
+    /// let mut f_concrete: JanetFunction = f.try_unwrap()?;
     ///
     /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10.into()]).unwrap();
     /// fiber
@@ -195,6 +197,7 @@ impl<'data> JanetFiber<'data> {
     /// # Ok(()) }
     /// ```
     /// [`exec`]: #method.exec
+    // TODO: Change the example to use TaggedJanet
     #[inline]
     pub fn exec_with<'a, F>(&'a mut self, f: F) -> Exec<'a, 'data>
     where F: FnOnce() -> Janet {
