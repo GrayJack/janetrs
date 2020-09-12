@@ -830,6 +830,30 @@ impl From<Janet> for TaggedJanet<'_> {
     }
 }
 
+impl TaggedJanet<'_> {
+    #[inline]
+    pub fn kind(&self) -> JanetType {
+        match self {
+            TaggedJanet::Abstract(_) => JanetType::Abstract,
+            TaggedJanet::Array(_) => JanetType::Array,
+            TaggedJanet::Boolean(_) => JanetType::Boolean,
+            TaggedJanet::Buffer(_) => JanetType::Buffer,
+            TaggedJanet::CFunction(_) => JanetType::CFunction,
+            TaggedJanet::Fiber(_) => JanetType::Fiber,
+            TaggedJanet::Function(_) => JanetType::Function,
+            TaggedJanet::Keyword(_) => JanetType::Keyword,
+            TaggedJanet::Nil => JanetType::Nil,
+            TaggedJanet::Number(_) => JanetType::Number,
+            TaggedJanet::Pointer(_) => JanetType::Pointer,
+            TaggedJanet::String(_) => JanetType::String,
+            TaggedJanet::Struct(_) => JanetType::Struct,
+            TaggedJanet::Symbol(_) => JanetType::Symbol,
+            TaggedJanet::Table(_) => JanetType::Table,
+            TaggedJanet::Tuple(_) => JanetType::Tuple,
+        }
+    }
+}
+
 impl From<TaggedJanet<'_>> for Janet {
     #[inline]
     fn from(val: TaggedJanet) -> Self {
