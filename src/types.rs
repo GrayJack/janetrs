@@ -8,7 +8,6 @@ use core::{
     cmp::Ordering,
     convert::TryFrom,
     fmt::{self, Display},
-    hash::{self, Hash},
 };
 
 #[cfg(feature = "std")]
@@ -115,7 +114,8 @@ impl Display for JanetConversionError {
 // allow this lint here because it is complaining about manually implementing PartialOrd between
 // Janet and &Janet
 #[allow(clippy::derive_ord_xor_partial_ord)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[allow(clippy::derive_hash_xor_eq)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct Janet {
     pub(crate) inner: CJanet,
@@ -378,14 +378,6 @@ impl fmt::Display for Janet {
         let s = jstr.to_str().map_err(|_| fmt::Error)?;
 
         fmt::Display::fmt(s, f)
-    }
-}
-
-// TODO: Derive it in the next release of evil_janet
-#[allow(clippy::derive_hash_xor_eq)]
-impl Hash for Janet {
-    fn hash<H: hash::Hasher>(&self, state: &mut H) {
-        state.write_i32(unsafe { evil_janet::janet_hash(self.inner) })
     }
 }
 
@@ -1102,7 +1094,7 @@ impl_part!(JanetKeyword<'_>, JanetSymbol<'_>);
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use core::hash::Hasher;
+    use core::hash::{Hash, Hasher};
 
     #[cfg_attr(feature = "std", test)]
     fn janet_eq_hash() {
