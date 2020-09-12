@@ -264,10 +264,16 @@ impl Janet {
         value.into()
     }
 
+    /// Unwrap the [`Janet`] value into a enum that holds the type value
+    #[inline]
+    pub fn unwrap<'data>(self) -> TaggedJanet<'data> {
+        self.into()
+    }
+
     /// Tries to unwrap the [`Janet`] into a concrete type that implements
     /// [`TryFrom`]<[`Janet`]>.
     #[inline]
-    pub fn unwrap<T: TryFrom<Self>>(self) -> Result<T, T::Error> {
+    pub fn try_unwrap<T: TryFrom<Self>>(self) -> Result<T, T::Error> {
         T::try_from(self)
     }
 
@@ -671,7 +677,7 @@ macro_rules! try_from_janet {
                     Ok(unsafe { Self::$fn_name($unwrap_fn_name(value.inner)) })
                 } else {
                     Err(JanetConversionError)
-}
+                }
             }
         }
     };
@@ -724,6 +730,137 @@ try_from_janet!(
 
 from_for_janet!(JanetFiber<'_>, fiber);
 try_from_janet!(JanetFiber<'_>, JanetType::Fiber, janet_unwrap_fiber);
+
+macro_rules! janet_unwrap_unchecked {
+    (abstracts $janet: expr) => {
+        unsafe { JanetAbstract::from_raw(janet_unwrap_abstract($janet.into())) }
+    };
+
+    (array $janet: expr) => {
+        unsafe { JanetArray::from_raw(janet_unwrap_array($janet.into())) }
+    };
+
+    (boolean $janet: expr) => {
+        unsafe { janet_unwrap_boolean($janet.inner) } != 0
+    };
+
+    (buffer $janet: expr) => {
+        unsafe { JanetBuffer::from_raw(janet_unwrap_buffer($janet.into())) }
+    };
+
+    (cfunc $janet: expr) => {
+        unsafe { janet_unwrap_cfunction($janet.into()) }
+    };
+
+    (fiber $janet: expr) => {
+        unsafe { JanetFiber::from_raw(janet_unwrap_fiber($janet.into())) }
+    };
+
+    (function $janet: expr) => {
+        unsafe { JanetFunction::from_raw(janet_unwrap_function($janet.into())) }
+    };
+
+    (keyword $janet: expr) => {
+        unsafe { JanetKeyword::from_raw(janet_unwrap_keyword($janet.into())) }
+    };
+
+    (number $janet: expr) => {
+        unsafe { janet_unwrap_number($janet.into()) }
+    };
+
+    (pointer $janet: expr) => {
+        unsafe { JanetPointer::new(janet_unwrap_pointer($janet.into())) }
+    };
+
+    (string $janet: expr) => {
+        unsafe { JanetString::from_raw(janet_unwrap_string($janet.into())) }
+    };
+
+    (structs $janet: expr) => {
+        unsafe { JanetStruct::from_raw(janet_unwrap_struct($janet.into())) }
+    };
+
+    (symbol $janet: expr) => {
+        unsafe { JanetSymbol::from_raw(janet_unwrap_symbol($janet.into())) }
+    };
+
+    (table $janet: expr) => {
+        unsafe { JanetTable::from_raw(janet_unwrap_table($janet.into())) }
+    };
+
+    (tuple $janet: expr) => {
+        unsafe { JanetTuple::from_raw(janet_unwrap_tuple($janet.into())) }
+    };
+}
+
+/// Janet type in the form of a Tagged Union
+#[derive(Debug)]
+pub enum TaggedJanet<'data> {
+    Abstract(JanetAbstract),
+    Array(JanetArray<'data>),
+    Boolean(bool),
+    Buffer(JanetBuffer<'data>),
+    CFunction(JanetCFunction),
+    Fiber(JanetFiber<'data>),
+    Function(JanetFunction<'data>),
+    Keyword(JanetKeyword<'data>),
+    Nil,
+    Number(f64),
+    Pointer(JanetPointer),
+    String(JanetString<'data>),
+    Struct(JanetStruct<'data>),
+    Symbol(JanetSymbol<'data>),
+    Table(JanetTable<'data>),
+    Tuple(JanetTuple<'data>),
+}
+
+impl From<Janet> for TaggedJanet<'_> {
+    #[inline]
+    fn from(val: Janet) -> Self {
+        match val.kind() {
+            JanetType::Abstract => Self::Abstract(janet_unwrap_unchecked!(abstracts val)),
+            JanetType::Array => Self::Array(janet_unwrap_unchecked!(array val)),
+            JanetType::Boolean => Self::Boolean(janet_unwrap_unchecked!(boolean val)),
+            JanetType::Buffer => Self::Buffer(janet_unwrap_unchecked!(buffer val)),
+            JanetType::CFunction => Self::CFunction(janet_unwrap_unchecked!(cfunc val)),
+            JanetType::Fiber => Self::Fiber(janet_unwrap_unchecked!(fiber val)),
+            JanetType::Function => Self::Function(janet_unwrap_unchecked!(function val)),
+            JanetType::Keyword => Self::Keyword(janet_unwrap_unchecked!(keyword val)),
+            JanetType::Nil => Self::Nil,
+            JanetType::Number => Self::Number(janet_unwrap_unchecked!(number val)),
+            JanetType::Pointer => Self::Pointer(janet_unwrap_unchecked!(pointer val)),
+            JanetType::String => Self::String(janet_unwrap_unchecked!(string val)),
+            JanetType::Struct => Self::Struct(janet_unwrap_unchecked!(structs val)),
+            JanetType::Symbol => Self::Symbol(janet_unwrap_unchecked!(symbol val)),
+            JanetType::Table => Self::Table(janet_unwrap_unchecked!(table val)),
+            JanetType::Tuple => Self::Tuple(janet_unwrap_unchecked!(tuple val)),
+        }
+    }
+}
+
+impl From<TaggedJanet<'_>> for Janet {
+    #[inline]
+    fn from(val: TaggedJanet) -> Self {
+        match val {
+            TaggedJanet::Abstract(inner) => inner.into(),
+            TaggedJanet::Array(inner) => inner.into(),
+            TaggedJanet::Boolean(inner) => inner.into(),
+            TaggedJanet::Buffer(inner) => inner.into(),
+            TaggedJanet::CFunction(inner) => inner.into(),
+            TaggedJanet::Fiber(inner) => inner.into(),
+            TaggedJanet::Function(inner) => inner.into(),
+            TaggedJanet::Keyword(inner) => inner.into(),
+            TaggedJanet::Nil => Janet::nil(),
+            TaggedJanet::Number(inner) => inner.into(),
+            TaggedJanet::Pointer(inner) => inner.into(),
+            TaggedJanet::String(inner) => inner.into(),
+            TaggedJanet::Struct(inner) => inner.into(),
+            TaggedJanet::Symbol(inner) => inner.into(),
+            TaggedJanet::Table(inner) => inner.into(),
+            TaggedJanet::Tuple(inner) => inner.into(),
+        }
+    }
+}
 
 /// Representation of all Janet types.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
