@@ -759,7 +759,6 @@ impl Index<i32> for JanetArray<'_> {
     /// Janet panic if try to access `index` out of the bounds.
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
-        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",
@@ -786,7 +785,6 @@ impl IndexMut<i32> for JanetArray<'_> {
     fn index_mut(&mut self, index: i32) -> &mut Self::Output {
         let len = self.len();
 
-        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",

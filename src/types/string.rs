@@ -1515,7 +1515,6 @@ impl Index<i32> for JanetString<'_> {
     /// [`bytes`]: #method.bytes.html
     #[inline]
     fn index(&self, index: i32) -> &Self::Output {
-        #[cold]
         if index < 0 {
             crate::jpanic!(
                 "index out of bounds: the index ({}) is negative and must be positive",
