@@ -2,6 +2,7 @@
 use core::{
     fmt::{self, Display},
     marker::PhantomData,
+    mem::MaybeUninit,
     ptr,
 };
 
@@ -256,5 +257,51 @@ impl fmt::Debug for JanetFunction<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.pad("JanetFunction")
+    }
+}
+
+/// A structure that holds the old and new states of the Janet VM.
+///
+/// This can be used to execute a [`JanetCFunction`] and capture its Janet panics.
+pub struct JanetTryState {
+    inner: evil_janet::JanetTryState,
+}
+
+impl JanetTryState {
+    /// Initializes the state.
+    #[inline]
+    pub fn init() -> Self {
+        let state = {
+            let mut state = MaybeUninit::uninit();
+            unsafe {
+                // SAFETY: C-FFI
+                evil_janet::janet_try_init(state.as_mut_ptr());
+
+                // SAFETY: The above function initializes the state, therefore it is initialized now
+                state.assume_init()
+            }
+        };
+
+        JanetTryState { inner: state }
+    }
+
+    /// Get the [`JanetSignal`] of the state.
+    #[inline]
+    pub fn signal(&mut self) -> JanetSignal {
+        let signal = unsafe { evil_janet::_setjmp(self.inner.buf.as_mut_ptr()) };
+
+        JanetSignal::from(signal as u32)
+    }
+
+    /// Get the output of the execution.
+    #[inline]
+    pub fn payload(&self) -> Janet {
+        self.inner.payload.into()
+    }
+}
+
+impl Drop for JanetTryState {
+    fn drop(&mut self) {
+        unsafe { evil_janet::janet_restore(&mut self.inner) };
     }
 }
