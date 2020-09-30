@@ -6,7 +6,7 @@ use evil_janet::{
     janet_stacktrace, JanetFiber as CJanetFiber,
 };
 
-use super::{Janet, JanetFunction, JanetSignal};
+use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 
 /// A lightweight green thread in Janet. It does not correspond to operating system
 /// threads.
@@ -41,6 +41,20 @@ impl<'data> JanetFiber<'data> {
                 phantom: PhantomData,
             })
         }
+    }
+
+    /// Create a new [`JanetFiber`] from a [`JanetFunction`] and it's arguments with a
+    /// given environments.
+    ///
+    /// In case any passed argument is invalid, returns `None`.
+    #[inline]
+    pub fn with_env(
+        env: JanetTable, capacity: i32, f: &mut JanetFunction, args: impl AsRef<[Janet]>,
+    ) -> Option<Self> {
+        Self::new(capacity, f, args).map(|mut f| {
+            unsafe { (*f.raw).env = env.raw };
+            f
+        })
     }
 
     /// Return the current [`JanetFiber`] if it exists.
