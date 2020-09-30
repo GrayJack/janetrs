@@ -295,8 +295,9 @@ macro_rules! jpanic {
 ///     dbg!(res);
 ///     Janet::nil()
 /// }
-/// # }
 /// ```
+///
+/// [`JanetCFunction`]: ./types/struct.JanetCFunction.html
 #[macro_export]
 macro_rules! jcatch {
     ($e:expr) => {{

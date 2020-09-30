@@ -788,7 +788,7 @@ macro_rules! janet_unwrap_unchecked {
     };
 }
 
-/// Janet type in the form of a Tagged Union
+/// Janet type in the form of a Tagged Union.
 #[derive(Debug)]
 pub enum TaggedJanet<'data> {
     Abstract(JanetAbstract),
