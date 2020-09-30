@@ -41,7 +41,7 @@ pub mod tuple;
 pub use array::JanetArray;
 pub use buffer::JanetBuffer;
 pub use fiber::JanetFiber;
-pub use function::{JanetCFunction, JanetFunction, JanetTryState};
+pub use function::{JanetCFunction, JanetFunction};
 pub use janet_abstract::{IsJanetAbstract, JanetAbstract};
 pub use pointer::JanetPointer;
 pub use string::JanetString;
