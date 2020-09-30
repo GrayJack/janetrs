@@ -381,6 +381,9 @@ impl fmt::Display for Janet {
     }
 }
 
+#[cfg(feature = "std")]
+impl error::Error for Janet {}
+
 impl PartialEq<&Janet> for Janet {
     #[inline]
     fn eq(&self, other: &&Janet) -> bool {
@@ -957,8 +960,11 @@ impl From<JanetType> for CJanetType {
     }
 }
 
-/// Fiber signals
-// TODO: better docs
+/// Signals that can be produced by a [`JanetFunction`] and [`JanetCFunction`]
+/// representing that those worked correctly or not.
+///
+/// `Ok`, `Yield` and `User9` usually represents when it worked, the others usually
+/// represents that something went wrong.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[repr(u32)]
 pub enum JanetSignal {
