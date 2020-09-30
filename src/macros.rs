@@ -278,6 +278,47 @@ macro_rules! jpanic {
     };
 }
 
+/// Execute a [`JanetCFunction`] and catch any janet panic that may happen as a
+/// [`Result`].
+///
+/// # Examples
+/// ```ignore
+/// use janetrs::{jcatch, jpanic, types::Janet};
+///
+/// fn panic_fn() {
+///     jpanic!("Help!");
+/// }
+///
+/// #[janet_fn]
+/// fn test(args: &mut [Janet]) -> Janet {
+///     let res = jcatch!(panic_fn());
+///     dbg!(res);
+///     Janet::nil()
+/// }
+/// # }
+/// ```
+#[macro_export]
+macro_rules! jcatch {
+    ($e:expr) => {{
+        let mut state = $crate::types::function::JanetTryState::init();
+
+        if let Some(signal) = state.signal() {
+            if matches!(
+                signal,
+                $crate::types::JanetSignal::Ok
+                    | $crate::types::JanetSignal::Yield
+                    | $crate::types::JanetSignal::User9
+            ) {
+                Ok($e)
+            } else {
+                Err(state.payload())
+            }
+        } else {
+            Err($crate::types::Janet::from("No fiber to run."))
+        }
+    }};
+}
+
 /// Macro that tries to run a expression, and if it panics in Rust side, it tries to
 /// recover from that and pass the Rust panic string to a Janet Panic.
 ///
