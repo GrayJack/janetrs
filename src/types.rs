@@ -258,6 +258,20 @@ impl Janet {
         }
     }
 
+    /// Resolve a `symbol` in the core environment.
+    #[inline]
+    pub fn from_core<'a>(symbol: impl Into<JanetSymbol<'a>>) -> Option<Self> {
+        let symbol = symbol.into();
+        let mut out = Janet::nil();
+
+        unsafe {
+            let env = evil_janet::janet_core_env(core::ptr::null_mut());
+            evil_janet::janet_resolve(env, symbol.raw, &mut out.inner);
+        }
+
+        if out.is_nil() { None } else { Some(out) }
+    }
+
     /// Wraps a value into a [`Janet`].
     #[inline]
     pub fn wrap(value: impl Into<Janet>) -> Self {
