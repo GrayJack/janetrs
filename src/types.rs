@@ -258,6 +258,19 @@ impl Janet {
         }
     }
 
+    /// Get a dynamic binding from the environment.
+    #[inline]
+    pub fn dynamic(key: impl AsRef<[u8]>) -> Option<Self> {
+        let mut key: JanetBuffer = key.as_ref().into();
+        key.push('\0');
+        // let mut key = String::from(key.to_str().ok()?);
+        // key.push('\0');
+
+        let janet = Janet::from(unsafe { evil_janet::janet_dyn(key.as_ptr() as *const _) });
+
+        if janet.is_nil() { None } else { Some(janet) }
+    }
+
     /// Resolve a `symbol` in the core environment.
     #[inline]
     pub fn from_core<'a>(symbol: impl Into<JanetSymbol<'a>>) -> Option<Self> {
@@ -1163,5 +1176,14 @@ mod tests {
         assert_ne!(j1, j2);
         assert_ne!(hasher1.finish(), hasher2.finish());
         assert_eq!(j1 == j2, hasher1.finish() == hasher2.finish());
+    }
+
+    #[test]
+    fn dynamic() {
+        let _client = crate::client::JanetClient::init().unwrap();
+
+        unsafe { evil_janet::janet_setdyn("test\0".as_ptr() as *const _, Janet::from(10).into())};
+
+        assert_eq!(Some(Janet::number(10.0)), Janet::dynamic("test"));
     }
 }
