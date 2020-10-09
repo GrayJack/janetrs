@@ -1,7 +1,11 @@
 //! Janet symbols and keywords types.
-use core::marker::PhantomData;
+use core::{convert::Infallible, marker::PhantomData, str::FromStr};
 
+
+use bstr::BStr;
 use evil_janet::{janet_string_head, janet_symbol, janet_symbol_gen};
+
+use super::{JanetBuffer, JanetString};
 
 /// Janet symbol type. Usually used to name things in Janet.
 #[derive(Debug)]
@@ -104,6 +108,22 @@ impl JanetSymbol<'_> {
         self.len() == 0
     }
 
+    /// Returns a byte slice of the [`JanetString`] contents.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetSymbol;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetSymbol::new("hello");
+    ///
+    /// assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
+    /// ```
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+    }
+
     /// Return a raw pointer to the symbol raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -124,10 +144,41 @@ impl Clone for JanetSymbol<'_> {
     }
 }
 
-impl<'data> From<super::JanetString<'data>> for JanetSymbol<'data> {
+impl<'data> From<JanetString<'data>> for JanetSymbol<'data> {
     #[inline]
-    fn from(string: super::JanetString<'data>) -> Self {
+    fn from(string: JanetString<'data>) -> Self {
         unsafe { JanetSymbol::from_raw(string.raw) }
+    }
+}
+
+impl<'data> From<JanetBuffer<'data>> for JanetSymbol<'data> {
+    #[inline]
+    fn from(buff: JanetBuffer<'data>) -> Self {
+        let slice = buff.as_bytes();
+        JanetSymbol::new(slice)
+    }
+}
+
+impl AsRef<[u8]> for JanetSymbol<'_> {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsRef<BStr> for JanetSymbol<'_> {
+    #[inline]
+    fn as_ref(&self) -> &BStr {
+        self.as_bytes().as_ref()
+    }
+}
+
+impl FromStr for JanetSymbol<'_> {
+    type Err = Infallible;
+
+    #[inline]
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from(s))
     }
 }
 
@@ -214,6 +265,22 @@ impl JanetKeyword<'_> {
         self.len() == 0
     }
 
+    /// Returns a byte slice of the [`JanetString`] contents.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::JanetKeyword;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetKeyword::new("hello");
+    ///
+    /// assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
+    /// ```
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+    }
+
     /// Return a raw pointer to the keyword raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -234,9 +301,40 @@ impl Clone for JanetKeyword<'_> {
     }
 }
 
-impl<'data> From<super::JanetString<'data>> for JanetKeyword<'data> {
+impl<'data> From<JanetString<'data>> for JanetKeyword<'data> {
     #[inline]
-    fn from(string: super::JanetString<'data>) -> Self {
+    fn from(string: JanetString<'data>) -> Self {
         unsafe { JanetKeyword::from_raw(string.raw) }
+    }
+}
+
+impl<'data> From<JanetBuffer<'data>> for JanetKeyword<'data> {
+    #[inline]
+    fn from(buff: JanetBuffer<'data>) -> Self {
+        let slice = buff.as_bytes();
+        JanetKeyword::new(slice)
+    }
+}
+
+impl AsRef<[u8]> for JanetKeyword<'_> {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsRef<BStr> for JanetKeyword<'_> {
+    #[inline]
+    fn as_ref(&self) -> &BStr {
+        self.as_bytes().as_ref()
+    }
+}
+
+impl FromStr for JanetKeyword<'_> {
+    type Err = Infallible;
+
+    #[inline]
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from(s))
     }
 }

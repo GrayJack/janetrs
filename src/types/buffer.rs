@@ -37,7 +37,7 @@ use bstr::{
     WordsWithBreakIndices, WordsWithBreaks,
 };
 
-use super::{JanetExtend, JanetString};
+use super::{JanetExtend, JanetKeyword, JanetString, JanetSymbol};
 
 /// Janet [buffers](https://janet-lang.org/docs/data_structures/buffers.html) are the mutable
 /// version of [`JanetStrings`]. Since Janet strings can hold any sequence of bytes,
@@ -1653,6 +1653,26 @@ impl From<&char> for JanetBuffer<'_> {
 impl From<JanetString<'_>> for JanetBuffer<'_> {
     #[inline]
     fn from(s: JanetString<'_>) -> Self {
+        let slice = s.as_bytes();
+        let mut buff = Self::with_capacity(s.len());
+        buff.push_bytes(slice);
+        buff
+    }
+}
+
+impl From<JanetSymbol<'_>> for JanetBuffer<'_> {
+    #[inline]
+    fn from(s: JanetSymbol<'_>) -> Self {
+        let slice = s.as_bytes();
+        let mut buff = Self::with_capacity(s.len());
+        buff.push_bytes(slice);
+        buff
+    }
+}
+
+impl From<JanetKeyword<'_>> for JanetBuffer<'_> {
+    #[inline]
+    fn from(s: JanetKeyword<'_>) -> Self {
         let slice = s.as_bytes();
         let mut buff = Self::with_capacity(s.len());
         buff.push_bytes(slice);
