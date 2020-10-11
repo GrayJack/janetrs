@@ -1,0 +1,49 @@
+error: the argument must be a string literal
+ --> $DIR/09-version-wrong:3:17
+  |
+3 | #[janet_version(wrong)]
+  |                 ^^^^^
+
+error: invalid string literal: invalid digit found in string
+ --> $DIR/09-version-wrong:8:17
+  |
+8 | #[janet_version("1,12,10")]
+  |                 ^^^^^^^^^
+
+error: invalid string literal: invalid digit found in string
+  --> $DIR/09-version-wrong:13:17
+   |
+13 | #[janet_version("aaaaaa")]
+   |                 ^^^^^^^^
+
+error: expected at least one argument to the janet_version proc-macro
+   --> $DIR/09-version-wrong:18:1
+    |
+18  |   #[janet_version()]
+    |   ^^^^^^^^^^^^^^^^^^ in this macro invocation
+    |
+   ::: $WORKSPACE/janetrs_macros/src/lib.rs
+    |
+    | / pub fn janet_version(
+    | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
+    | | ) -> proc_macro::TokenStream {
+    | |____________________________- in this expansion of `#[janet_version]`
+
+error: invalid string literal: invalid digit found in string
+  --> $DIR/09-version-wrong:23:22
+   |
+23 | #[janet_version("1", "aaa")]
+   |                      ^^^^^
+
+error: expected at max two argument to the janet_version proc-macro
+   --> $DIR/09-version-wrong:28:1
+    |
+28  |   #[janet_version("1", "2", "3")]
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ in this macro invocation
+    |
+   ::: $WORKSPACE/janetrs_macros/src/lib.rs
+    |
+    | / pub fn janet_version(
+    | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
+    | | ) -> proc_macro::TokenStream {
+    | |____________________________- in this expansion of `#[janet_version]`

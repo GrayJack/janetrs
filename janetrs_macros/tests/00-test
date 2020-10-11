@@ -21,4 +21,24 @@ pub fn function4(_args: &mut [::janetrs::types::Janet]) -> ::janetrs::types::Jan
     Janet::nil()
 }
 
+#[janet_version("1")]
+pub fn function5() {
+    todo!()
+}
+
+#[janet_version("1.8")]
+pub fn function6() {
+    todo!()
+}
+
+#[janet_version("1.11.2")]
+pub fn function7() {
+    todo!()
+}
+
+#[janet_version("1.11.2", "2")]
+pub fn function8() {
+    todo!()
+}
+
 fn main() {}

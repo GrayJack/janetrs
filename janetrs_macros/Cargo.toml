@@ -20,7 +20,15 @@ proc-macro = true
 [dependencies]
 syn = {version = "1", features = ["extra-traits", "full"]}
 quote = "1"
+evil-janet = "1"
+# janetrs = { version = "0.1.2" }
 
+[features]
+default = []
+system = ["evil-janet/system"]
+# embed = ["janetrs/amalgation"]
+# system = ["janetrs/link-system"]
+# _test = ["embed"]
 
 [[test]]
 name = "tests"
@@ -28,4 +36,4 @@ path = "tests/progress.rs"
 
 [dev-dependencies]
 trybuild = { version = "1.0", features = ["diff"] }
-janetrs = { path = ".." }
+janetrs = "0.1.2"

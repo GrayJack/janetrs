@@ -1,0 +1,33 @@
+use janetrs_macros::janet_version;
+
+#[janet_version(wrong)]
+pub fn func1() {
+    todo!()
+}
+
+#[janet_version("1,12,10")]
+pub fn func2() {
+    todo!()
+}
+
+#[janet_version("aaaaaa")]
+pub fn func3() {
+    todo!()
+}
+
+#[janet_version()]
+pub fn func4() {
+    todo!()
+}
+
+#[janet_version("1", "aaa")]
+pub fn func5() {
+    todo!()
+}
+
+#[janet_version("1", "2", "3")]
+pub fn func6() {
+    todo!()
+}
+
+fn main() {}
