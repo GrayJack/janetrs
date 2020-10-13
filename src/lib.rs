@@ -23,7 +23,6 @@
 //! - `system`: Use system header to get Janet functions
 //! - `link-system`: Link the Janet runtime to the package from the system, enabling to
 //!   use the client module
-//! - `attr-macros`: Include attribute macros in the crate.
 //!
 //! ## Licensing
 //! This software is licensed under the terms of the [MIT Public License](./LICENSE).
@@ -67,5 +66,4 @@ mod macros;
 pub mod types;
 pub mod util;
 
-#[cfg(feature = "attr-macros")]
-pub use janetrs_macros::janet_fn;
+pub use janetrs_macros::{cjvg, janet_fn, janet_version};

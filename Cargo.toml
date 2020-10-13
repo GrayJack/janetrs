@@ -25,7 +25,7 @@ features = ["amalgation", "attr-macros"]
 evil-janet = "1.12.4"
 const_fn = "0.4"
 bstr = { version = "0.2.13", default-features = false }
-janetrs_macros = { version = "0.1.1", optional = true }
+janetrs_macros = "0.2.0"
 
 [dev-dependencies]
 serial_test = "~0.4.0"
@@ -41,10 +41,9 @@ inline-more = []
 # Unicode conveniences
 unicode = ["bstr/unicode"]
 # Use system janet.h
-system = ["evil-janet/system"]
+system = ["evil-janet/system", "janetrs_macros/system"]
 # Use to link to system libjanet (not recommended generally)
-link-system = ["evil-janet/link-system"]
-attr-macros = ["janetrs_macros"]
+link-system = ["evil-janet/link-system", "janetrs_macros/system"]
 
 [workspace]
 members = ["janetrs_macros"]
