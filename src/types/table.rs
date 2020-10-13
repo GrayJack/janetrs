@@ -15,6 +15,7 @@ use evil_janet::{
 // janet_table_remove
 
 use super::{Janet, JanetExtend, JanetStruct};
+use crate::cjvg;
 
 /// Janet [table]s are mutable data structures that map keys to values. Values are put
 /// into a Janet table with a key, and can be looked up later with the same key. Tables
@@ -162,6 +163,7 @@ impl<'data> JanetTable<'data> {
     /// table.clear();
     /// assert!(table.is_empty());
     /// ```
+    #[cjvg("1.10.1")]
     #[inline]
     pub fn clear(&mut self) {
         unsafe { janet_table_clear(self.raw) }
@@ -516,6 +518,7 @@ impl<'data> JanetTable<'data> {
     /// assert_eq!(table.remove(10), Some(Janet::from("ten")));
     /// assert_eq!(table.remove(10), None);
     /// ```
+    #[cjvg("1.11.0")]
     #[inline]
     pub fn remove(&mut self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
@@ -526,6 +529,58 @@ impl<'data> JanetTable<'data> {
             let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into() };
 
             if value.is_nil() { None } else { Some(value) }
+        }
+    }
+
+    /// Removes `key` from the table, returning the value of the `key`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::types::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = JanetTable::with_capacity(20);
+    /// table.insert(10, "ten");
+    ///
+    /// assert_eq!(table.remove(10), Some(Janet::from("ten")));
+    /// assert_eq!(table.remove(10), None);
+    /// ```
+    #[cjvg("1.0.0", "1.11.0")]
+    #[inline]
+    pub fn remove(&mut self, key: impl Into<Janet>) -> Option<Janet> {
+        let key = key.into();
+
+        if key.is_nil() {
+            None
+        } else {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+            let kv: *mut (Janet, Janet) =
+                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+
+            if kv.is_null() {
+                None
+            } else {
+                unsafe {
+                    let ret = (*kv).1;
+                    if ret.is_nil() {
+                        None
+                    } else {
+                        (*self.raw).count -= 1;
+                        (*self.raw).deleted += 1;
+
+                        (*kv).0 = Janet::nil();
+                        (*kv).1 = Janet::boolean(false);
+
+                        Some(ret)
+                    }
+                }
+            }
         }
     }
 

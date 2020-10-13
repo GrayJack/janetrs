@@ -1,4 +1,4 @@
 {
-    "rust-analyzer.checkOnSave.features": ["amalgation", "attr-macros"],
-    "rust-analyzer.cargo.features": ["amalgation", "attr-macros"]
+    "rust-analyzer.checkOnSave.features": ["amalgation"],
+    "rust-analyzer.cargo.features": ["amalgation"]
 }

@@ -2,7 +2,6 @@
 use core::{
     fmt::{self, Display},
     marker::PhantomData,
-    mem::MaybeUninit,
     ptr,
 };
 
@@ -11,7 +10,13 @@ use std::error;
 
 use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
 
-use super::{Janet, JanetFiber, JanetSignal};
+use crate::{
+    cjvg,
+    types::{Janet, JanetFiber, JanetSignal},
+};
+
+#[cjvg("1.12.2")]
+pub use trystate::JanetTryState;
 
 /// C function pointer that is accepted by Janet as a type.
 pub type JanetCFunction = evil_janet::JanetCFunction;
@@ -260,72 +265,82 @@ impl fmt::Debug for JanetFunction<'_> {
     }
 }
 
-/// A structure that holds the old and new states of the Janet VM.
-///
-/// This can be used to execute a [`JanetCFunction`] and capture its Janet panics.
-pub struct JanetTryState {
-    inner: evil_janet::JanetTryState,
-}
+#[cjvg("1.12.2")]
+mod trystate {
+    use core::mem::MaybeUninit;
 
-impl JanetTryState {
-    /// Initializes the state.
-    #[inline]
-    pub fn init() -> Self {
-        let mut state = {
-            let mut state = MaybeUninit::uninit();
-            unsafe {
-                // SAFETY: C-FFI
-                evil_janet::janet_try_init(state.as_mut_ptr());
+    use crate::types::{Janet, JanetSignal};
 
-                // SAFETY: The above function initializes the state, therefore it is initialized now
-                state.assume_init()
-            }
-        };
-
-        state.payload = Janet::nil().into();
-
-        JanetTryState { inner: state }
-    }
-
-    /// Check if the VM have a valid JanetFiber.
-    #[inline]
-    pub fn is_valid_to_run(&self) -> bool {
-        !self.inner.vm_fiber.is_null()
-    }
-
-    /// Get the [`JanetSignal`] of the state without checking if the environment is set to
-    /// catch Janet Panics.
+    /// A structure that holds the old and new states of the Janet VM.
     ///
-    /// # Safety
-    /// If this is called with the invalid environment to chatch Janet Panics it will
-    /// cause undefined behaviour.
-    #[inline]
-    pub unsafe fn signal_unchecked(&mut self) -> JanetSignal {
-        let signal = evil_janet::_setjmp(self.inner.buf.as_mut_ptr());
-
-        JanetSignal::from(signal as u32)
+    /// This can be used to execute a [`JanetCFunction`] and capture its Janet panics.
+    ///
+    /// [`JanetCFunction`]: ./types/struct.JanetCFunction.html
+    pub struct JanetTryState {
+        inner: evil_janet::JanetTryState,
     }
 
-    /// Get the [`JanetSignal`] of the state if the environment is set to catch Janet
-    /// Panics.
-    #[inline]
-    pub fn signal(&mut self) -> Option<JanetSignal> {
-        if self.is_valid_to_run() {
-            Some(unsafe { self.signal_unchecked() })
-        } else {
-            None
+    impl JanetTryState {
+        /// Initializes the state.
+        #[inline]
+        pub fn init() -> Self {
+            let mut state = {
+                let mut state = MaybeUninit::uninit();
+                unsafe {
+                    // SAFETY: C-FFI
+                    evil_janet::janet_try_init(state.as_mut_ptr());
+
+                    // SAFETY: The above function initializes the state, therefore it is initialized
+                    // now
+                    state.assume_init()
+                }
+            };
+
+            state.payload = Janet::nil().into();
+
+            JanetTryState { inner: state }
+        }
+
+        /// Check if the VM have a valid JanetFiber.
+        #[inline]
+        pub fn is_valid_to_run(&self) -> bool {
+            !self.inner.vm_fiber.is_null()
+        }
+
+        /// Get the [`JanetSignal`] of the state without checking if the environment is
+        /// set to catch Janet Panics.
+        ///
+        /// # Safety
+        /// If this is called with the invalid environment to chatch Janet Panics it will
+        /// cause undefined behaviour.
+        #[inline]
+        pub unsafe fn signal_unchecked(&mut self) -> JanetSignal {
+            let signal = evil_janet::_setjmp(self.inner.buf.as_mut_ptr());
+
+            JanetSignal::from(signal as u32)
+        }
+
+        /// Get the [`JanetSignal`] of the state if the environment is set to catch Janet
+        /// Panics.
+        #[inline]
+        pub fn signal(&mut self) -> Option<JanetSignal> {
+            if self.is_valid_to_run() {
+                Some(unsafe { self.signal_unchecked() })
+            } else {
+                None
+            }
+        }
+
+        /// Get the output of the execution.
+        #[inline]
+        pub fn payload(&self) -> Janet {
+            self.inner.payload.into()
         }
     }
 
-    /// Get the output of the execution.
-    #[inline]
-    pub fn payload(&self) -> Janet {
-        self.inner.payload.into()
-    }
-}
-
-impl Drop for JanetTryState {
-    fn drop(&mut self) {
-        unsafe { evil_janet::janet_restore(&mut self.inner) };
+    impl Drop for JanetTryState {
+        fn drop(&mut self) {
+            unsafe { evil_janet::janet_restore(&mut self.inner) };
+        }
     }
 }
