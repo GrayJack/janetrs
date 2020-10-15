@@ -17,7 +17,7 @@ use evil_janet::{janet_string, janet_string_begin, janet_string_end, janet_strin
 
 use bstr::{
     BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
-    LinesWithTerminator, Utf8Chunks, Utf8Error,
+    LinesWithTerminator, Split, SplitN, SplitNReverse, SplitReverse, Utf8Chunks, Utf8Error,
 };
 
 #[cfg(feature = "unicode")]
@@ -1206,6 +1206,382 @@ impl<'data> JanetString<'data> {
     #[inline]
     pub fn sentences(&self) -> Sentences {
         self.as_bytes().sentences()
+    }
+
+    /// Creates an iterator over substrings of this string, separated
+    /// by the given string. Each element yielded is guaranteed not to
+    /// include the splitter substring.
+    ///
+    /// The splitter may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("Mary had a little lamb");
+    /// let x: Vec<&[u8]> = s.split(" ").collect();
+    /// assert_eq!(x, vec![
+    ///     &b"Mary"[..],
+    ///     &b"had"[..],
+    ///     &b"a"[..],
+    ///     &b"little"[..],
+    ///     &b"lamb"[..],
+    /// ]);
+    ///
+    /// let s = JanetString::from("");
+    /// let x: Vec<&[u8]> = s.split("X").collect();
+    /// assert_eq!(x, vec![&b""[..]]);
+    ///
+    /// let s = JanetString::from("lionXXtigerXleopard");
+    /// let x: Vec<&[u8]> = s.split("X").collect();
+    /// assert_eq!(x, vec![
+    ///     &b"lion"[..],
+    ///     &b""[..],
+    ///     &b"tiger"[..],
+    ///     &b"leopard"[..]
+    /// ]);
+    ///
+    /// let s = JanetString::from("lion::tiger::leopard");
+    /// let x: Vec<&[u8]> = s.split("::").collect();
+    /// assert_eq!(x, vec![&b"lion"[..], &b"tiger"[..], &b"leopard"[..]]);
+    /// ```
+    ///
+    /// If a string contains multiple contiguous separators, you will end up
+    /// with empty strings yielded by the iterator:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("||||a||b|c");
+    /// let x: Vec<&[u8]> = s.split("|").collect();
+    /// assert_eq!(x, vec![
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b"a"[..],
+    ///     &b""[..],
+    ///     &b"b"[..],
+    ///     &b"c"[..],
+    /// ]);
+    ///
+    /// let s = JanetString::from("(///)");
+    /// let x: Vec<&[u8]> = s.split("/").collect();
+    /// assert_eq!(x, vec![&b"("[..], &b""[..], &b""[..], &b")"[..]]);
+    /// ```
+    ///
+    /// Separators at the start or end of a string are neighbored by empty
+    /// strings.
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("010");
+    /// let x: Vec<&[u8]> = s.split("0").collect();
+    /// assert_eq!(x, vec![&b""[..], &b"1"[..], &b""[..]]);
+    /// ```
+    ///
+    /// When the empty string is used as a separator, it splits every **byte**
+    /// in the string, along with the beginning and end of the string.
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("rust");
+    /// let x: Vec<&[u8]> = s.split("").collect();
+    /// assert_eq!(x, vec![
+    ///     &b""[..],
+    ///     &b"r"[..],
+    ///     &b"u"[..],
+    ///     &b"s"[..],
+    ///     &b"t"[..],
+    ///     &b""[..]
+    /// ]);
+    ///
+    /// // Splitting by an empty string is not UTF-8 aware. Elements yielded
+    /// // may not be valid UTF-8!
+    /// let s = JanetString::from("☃");
+    /// let x: Vec<&[u8]> = s.split("").collect();
+    /// assert_eq!(x, vec![
+    ///     &b""[..],
+    ///     &b"\xE2"[..],
+    ///     &b"\x98"[..],
+    ///     &b"\x83"[..],
+    ///     &b""[..]
+    /// ]);
+    /// ```
+    ///
+    /// Contiguous separators, especially whitespace, can lead to possibly
+    /// surprising behavior. For example, this code is correct:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("    a  b c");
+    /// let x: Vec<&[u8]> = s.split(" ").collect();
+    /// assert_eq!(x, vec![
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b"a"[..],
+    ///     &b""[..],
+    ///     &b"b"[..],
+    ///     &b"c"[..]
+    /// ]);
+    /// ```
+    ///
+    /// It does *not* give you `["a", "b", "c"]`. For that behavior, use
+    /// [`fields`](#method.fields) instead.
+    #[inline]
+    pub fn split<'a, S>(&'a self, splitter: &'a S) -> Split<'a>
+    where S: ?Sized + AsRef<[u8]> {
+        self.as_bytes().split_str(splitter)
+    }
+
+    /// Creates an iterator over substrings of this string, separated
+    /// by the given string. Each element yielded is guaranteed not to
+    /// include the splitter substring.
+    ///
+    /// The splitter may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("Mary had a little lamb");
+    /// let x: Vec<&[u8]> = s.rsplit(" ").collect();
+    /// assert_eq!(x, vec![
+    ///     &b"lamb"[..],
+    ///     &b"little"[..],
+    ///     &b"a"[..],
+    ///     &b"had"[..],
+    ///     &b"Mary"[..],
+    /// ]);
+    ///
+    /// let s = JanetString::from("");
+    /// let x: Vec<&[u8]> = s.rsplit("X").collect();
+    /// assert_eq!(x, vec![&b""[..]]);
+    ///
+    /// let s = JanetString::from("lionXXtigerXleopard");
+    /// let x: Vec<&[u8]> = s.rsplit("X").collect();
+    /// assert_eq!(x, vec![
+    ///     &b"leopard"[..],
+    ///     &b"tiger"[..],
+    ///     &b""[..],
+    ///     &b"lion"[..],
+    /// ]);
+    /// let s = JanetString::from("lion::tiger::leopard");
+    /// let x: Vec<&[u8]> = s.rsplit("::").collect();
+    /// assert_eq!(x, vec![&b"leopard"[..], &b"tiger"[..], &b"lion"[..]]);
+    /// ```
+    ///
+    /// If a string contains multiple contiguous separators, you will end up
+    /// with empty strings yielded by the iterator:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("||||a||b|c");
+    /// let x: Vec<&[u8]> = s.rsplit("|").collect();
+    /// assert_eq!(x, vec![
+    ///     &b"c"[..],
+    ///     &b"b"[..],
+    ///     &b""[..],
+    ///     &b"a"[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    /// ]);
+    ///
+    /// let s = JanetString::from("(///)");
+    /// let x: Vec<&[u8]> = s.rsplit("/").collect();
+    /// assert_eq!(x, vec![&b")"[..], &b""[..], &b""[..], &b"("[..]]);
+    /// ```
+    ///
+    /// Separators at the start or end of a string are neighbored by empty
+    /// strings.
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("010");
+    /// let x: Vec<&[u8]> = s.rsplit("0").collect();
+    /// assert_eq!(x, vec![&b""[..], &b"1"[..], &b""[..]]);
+    /// ```
+    ///
+    /// When the empty string is used as a separator, it splits every **byte**
+    /// in the string, along with the beginning and end of the string.
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("rust");
+    /// let x: Vec<&[u8]> = s.rsplit("").collect();
+    /// assert_eq!(x, vec![
+    ///     &b""[..],
+    ///     &b"t"[..],
+    ///     &b"s"[..],
+    ///     &b"u"[..],
+    ///     &b"r"[..],
+    ///     &b""[..]
+    /// ]);
+    ///
+    /// // Splitting by an empty string is not UTF-8 aware. Elements yielded
+    /// // may not be valid UTF-8!
+    /// let s = JanetString::from("☃");
+    /// let x: Vec<&[u8]> = s.rsplit("").collect();
+    /// assert_eq!(x, vec![
+    ///     &b""[..],
+    ///     &b"\x83"[..],
+    ///     &b"\x98"[..],
+    ///     &b"\xE2"[..],
+    ///     &b""[..]
+    /// ]);
+    /// ```
+    ///
+    /// Contiguous separators, especially whitespace, can lead to possibly
+    /// surprising behavior. For example, this code is correct:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("    a  b c");
+    /// let x: Vec<&[u8]> = s.rsplit(" ").collect();
+    /// assert_eq!(x, vec![
+    ///     &b"c"[..],
+    ///     &b"b"[..],
+    ///     &b""[..],
+    ///     &b"a"[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    ///     &b""[..],
+    /// ]);
+    /// ```
+    ///
+    /// It does *not* give you `["a", "b", "c"]`.
+    #[inline]
+    pub fn rsplit<'a, S>(&'a self, splitter: &'a S) -> SplitReverse<'a>
+    where S: ?Sized + AsRef<[u8]> {
+        self.as_bytes().rsplit_str(splitter)
+    }
+
+    /// Creates an iterator of at most `limit` substrings of this string,
+    /// separated by the given string. If `limit` substrings are yielded,
+    /// then the last substring will contain the remainder of this string.
+    ///
+    /// The needle may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("Mary had a little lamb");
+    /// let x: Vec<_> = s.splitn(3, " ").collect();
+    /// assert_eq!(x, vec![&b"Mary"[..], &b"had"[..], &b"a little lamb"[..]]);
+    ///
+    /// let s = JanetString::from("");
+    /// let x: Vec<_> = s.splitn(3, "X").collect();
+    /// assert_eq!(x, vec![b""]);
+    ///
+    /// let s = JanetString::from("lionXXtigerXleopard");
+    /// let x: Vec<_> = s.splitn(3, "X").collect();
+    /// assert_eq!(x, vec![&b"lion"[..], &b""[..], &b"tigerXleopard"[..]]);
+    ///
+    /// let s = JanetString::from("lion::tiger::leopard");
+    /// let x: Vec<_> = s.splitn(2, "::").collect();
+    /// assert_eq!(x, vec![&b"lion"[..], &b"tiger::leopard"[..]]);
+    ///
+    /// let s = JanetString::from("abcXdef");
+    /// let x: Vec<_> = s.splitn(1, "X").collect();
+    /// assert_eq!(x, vec![&b"abcXdef"[..]]);
+    ///
+    /// let s = JanetString::from("abcdef");
+    /// let x: Vec<_> = s.splitn(2, "X").collect();
+    /// assert_eq!(x, vec![&b"abcdef"[..]]);
+    ///
+    /// let s = JanetString::from("abcXdef");
+    /// let x: Vec<_> = s.splitn(0, "X").collect();
+    /// assert!(x.is_empty());
+    /// ```
+    #[inline]
+    pub fn splitn<'a, S>(&'a self, limit: usize, splitter: &'a S) -> SplitN<'a>
+    where S: ?Sized + AsRef<[u8]> {
+        self.as_bytes().splitn_str(limit, splitter)
+    }
+
+    /// Creates an iterator of at most `limit` substrings of this string,
+    /// separated by the given string. If `limit` substrings are yielded,
+    /// then the last substring will contain the remainder of this string.
+    ///
+    /// The needle may be any type that can be cheaply converted into a
+    /// `&[u8]`. This includes, but is not limited to, `&str` and `&[u8]`.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::from("Mary had a little lamb");
+    /// let x: Vec<_> = s.rsplitn(3, " ").collect();
+    /// assert_eq!(x, vec![&b"lamb"[..], &b"little"[..], &b"Mary had a"[..]]);
+    ///
+    /// let s = JanetString::from("");
+    /// let x: Vec<_> = s.rsplitn(3, "X").collect();
+    /// assert_eq!(x, vec![b""]);
+    ///
+    /// let s = JanetString::from("lionXXtigerXleopard");
+    /// let x: Vec<_> = s.rsplitn(3, "X").collect();
+    /// assert_eq!(x, vec![&b"leopard"[..], &b"tiger"[..], &b"lionX"[..]]);
+    ///
+    /// let s = JanetString::from("lion::tiger::leopard");
+    /// let x: Vec<_> = s.rsplitn(2, "::").collect();
+    /// assert_eq!(x, vec![&b"leopard"[..], &b"lion::tiger"[..]]);
+    ///
+    /// let s = JanetString::from("abcXdef");
+    /// let x: Vec<_> = s.rsplitn(1, "X").collect();
+    /// assert_eq!(x, vec![&b"abcXdef"[..]]);
+    ///
+    /// let s = JanetString::from("abcdef");
+    /// let x: Vec<_> = s.rsplitn(2, "X").collect();
+    /// assert_eq!(x, vec![&b"abcdef"[..]]);
+    ///
+    /// let s = JanetString::from("abcXdef");
+    /// let x: Vec<_> = s.rsplitn(0, "X").collect();
+    /// assert!(x.is_empty());
+    /// ```
+    #[inline]
+    pub fn rsplitn<'a, S>(&'a self, limit: usize, splitter: &'a S) -> SplitNReverse<'a>
+    where S: ?Sized + AsRef<[u8]> {
+        self.as_bytes().rsplitn_str(limit, splitter)
     }
 
     /// Creates an iterator over chunks of valid UTF-8.
