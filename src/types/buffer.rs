@@ -282,6 +282,14 @@ impl JanetBuffer<'_> {
         unsafe { janet_buffer_push_bytes(self.raw, bytes.as_ptr(), len) }
     }
 
+    /// Appends the given char to the end of this buffer.
+    #[inline]
+    pub fn push_char(&mut self, ch: char) {
+        let mut buff = [0; 4];
+        let s = ch.encode_utf8(&mut buff);
+        self.push_str(s);
+    }
+
     /// Append the given string slice onto the end of the buffer.
     #[inline]
     pub fn push_str(&mut self, string: &str) {
