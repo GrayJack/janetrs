@@ -323,6 +323,344 @@ impl<'data> JanetString<'data> {
         self.as_bytes().is_utf8()
     }
 
+    /// Returns a new `JanetString` containing the lowercase equivalent of this
+    /// string.
+    ///
+    /// In this case, lowercase is defined according to the `Lowercase` Unicode
+    /// property.
+    ///
+    /// If invalid UTF-8 is seen, or if a character has no lowercase variant,
+    /// then it is written to the given buffer unchanged.
+    ///
+    /// Note that some characters in this string may expand into multiple
+    /// characters when changing the case, so the number of bytes written to
+    /// the given string may not be equivalent to the number of bytes in
+    /// this string.
+    ///
+    /// If you'd like to reuse an allocation for performance reasons, then use
+    /// [`to_lowercase_into`](#method.to_lowercase_into) instead.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("HELLO Β");
+    /// assert_eq!("hello β".as_bytes(), s.to_lowercase().as_bytes());
+    /// ```
+    ///
+    /// Scripts without case are not changed:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("农历新年");
+    /// assert_eq!("农历新年".as_bytes(), s.to_lowercase().as_bytes());
+    /// ```
+    ///
+    /// Invalid UTF-8 remains as is:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
+    /// assert_eq!(
+    ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]),
+    ///     s.to_lowercase()
+    /// );
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn to_lowercase(&self) -> Self {
+        self.as_bytes().to_lowercase().into()
+    }
+
+    /// Writes the lowercase equivalent of this string into the given
+    /// buffer. The buffer is not cleared before written to.
+    ///
+    /// In this case, lowercase is defined according to the `Lowercase`
+    /// Unicode property.
+    ///
+    /// If invalid UTF-8 is seen, or if a character has no lowercase variant,
+    /// then it is written to the given buffer unchanged.
+    ///
+    /// Note that some characters in this string may expand into multiple
+    /// characters when changing the case, so the number of bytes written to
+    /// the given buffer may not be equivalent to the number of bytes in
+    /// this string.
+    ///
+    /// If you don't need to amortize allocation and instead prefer
+    /// convenience, then use [`to_lowercase`](#method.to_lowercase) instead.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("HELLO Β");
+    ///
+    /// let mut buf = JanetBuffer::new();
+    /// s.to_lowercase_into(&mut buf);
+    /// assert_eq!("hello β".as_bytes(), buf.as_bytes());
+    /// ```
+    ///
+    /// Scripts without case are not changed:
+    ///
+    /// ```
+    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("农历新年");
+    ///
+    /// let mut buf = JanetBuffer::new();
+    /// s.to_lowercase_into(&mut buf);
+    /// assert_eq!("农历新年".as_bytes(), buf.as_bytes());
+    /// ```
+    ///
+    /// Invalid UTF-8 remains as is:
+    ///
+    /// ```
+    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
+    ///
+    /// let mut buf = JanetBuffer::new();
+    /// s.to_lowercase_into(&mut buf);
+    /// assert_eq!(
+    ///     JanetBuffer::from(&b"foo\xFFbar\xE2\x98baz"[..]).as_bytes(),
+    ///     buf.as_bytes()
+    /// );
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn to_lowercase_into(&self, buf: &mut JanetBuffer) {
+        buf.reserve(self.len());
+
+        for (s, e, ch) in self.char_indices() {
+            if ch == '\u{FFFD}' {
+                buf.push_bytes(&self.as_bytes()[s..e]);
+            } else if ch.is_ascii() {
+                buf.push_char(ch.to_ascii_lowercase());
+            } else {
+                for upper in ch.to_lowercase() {
+                    buf.push_char(upper);
+                }
+            }
+        }
+    }
+
+    /// Returns a new `JanetBuffer` containing the ASCII lowercase equivalent of
+    /// this buffer.
+    ///
+    /// In this case, lowercase is only defined in ASCII letters. Namely, the
+    /// letters `A-Z` are converted to `a-z`. All other bytes remain unchanged.
+    /// In particular, the length of the buffer returned is always
+    /// equivalent to the length of this buffer.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("HELLO Β");
+    /// assert_eq!("hello Β".as_bytes(), s.to_ascii_lowercase().as_bytes());
+    /// ```
+    ///
+    /// Invalid UTF-8 remains as is:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
+    /// assert_eq!(
+    ///     s.to_ascii_lowercase(),
+    ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..])
+    /// );
+    /// ```
+    pub fn to_ascii_lowercase(&self) -> Self {
+        Self::new(self.as_bytes().to_ascii_lowercase())
+    }
+
+    /// Returns a new `JanetString` containing the uppercase equivalent of this
+    /// string.
+    ///
+    /// In this case, uppercase is defined according to the `Uppercase`
+    /// Unicode property.
+    ///
+    /// If invalid UTF-8 is seen, or if a character has no uppercase variant,
+    /// then it is written to the given buffer unchanged.
+    ///
+    /// Note that some characters in this string may expand into multiple
+    /// characters when changing the case, so the number of bytes written to
+    /// the given buffer may not be equivalent to the number of bytes in
+    /// this string.
+    ///
+    /// If you'd like to reuse an allocation for performance reasons, then use
+    /// [`to_uppercase_into`](#method.to_uppercase_into) instead.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("hello β");
+    /// assert_eq!(s.to_uppercase().as_bytes(), "HELLO Β".as_bytes());
+    /// ```
+    ///
+    /// Scripts without case are not changed:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("农历新年");
+    /// assert_eq!(s.to_uppercase().as_bytes(), "农历新年".as_bytes());
+    /// ```
+    ///
+    /// Invalid UTF-8 remains as is:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
+    /// assert_eq!(s.to_uppercase().as_bytes(), &b"FOO\xFFBAR\xE2\x98BAZ"[..]);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn to_uppercase(&self) -> Self {
+        self.as_bytes().to_uppercase().into()
+    }
+
+    /// Writes the uppercase equivalent of this string into the given
+    /// buffer. The buffer is not cleared before written to.
+    ///
+    /// In this case, uppercase is defined according to the `Uppercase`
+    /// Unicode property.
+    ///
+    /// If invalid UTF-8 is seen, or if a character has no uppercase variant,
+    /// then it is written to the given buffer unchanged.
+    ///
+    /// Note that some characters in this buffer may expand into multiple
+    /// characters when changing the case, so the number of bytes written to
+    /// the given buffer may not be equivalent to the number of bytes in
+    /// this buffer.
+    ///
+    /// If you don't need to amortize allocation and instead prefer
+    /// convenience, then use [`to_uppercase`](#method.to_uppercase) instead.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("hello β");
+    ///
+    /// let mut buf = JanetBuffer::new();
+    /// s.to_uppercase_into(&mut buf);
+    /// assert_eq!(buf.as_bytes(), "HELLO Β".as_bytes());
+    /// ```
+    ///
+    /// Scripts without case are not changed:
+    ///
+    /// ```
+    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("农历新年");
+    ///
+    /// let mut buf = JanetBuffer::new();
+    /// s.to_uppercase_into(&mut buf);
+    /// assert_eq!(buf.as_bytes(), "农历新年".as_bytes());
+    /// ```
+    ///
+    /// Invalid UTF-8 remains as is:
+    ///
+    /// ```
+    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
+    ///
+    /// let mut buf = JanetBuffer::new();
+    /// s.to_uppercase_into(&mut buf);
+    /// assert_eq!(buf.as_bytes(), &b"FOO\xFFBAR\xE2\x98BAZ"[..]);
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn to_uppercase_into(&self, buf: &mut JanetBuffer) {
+        // based on bstr version of the same function
+        buf.reserve(self.len());
+
+        for (s, e, ch) in self.char_indices() {
+            if ch == '\u{FFFD}' {
+                buf.push_bytes(&self.as_bytes()[s..e]);
+            } else if ch.is_ascii() {
+                buf.push_char(ch.to_ascii_uppercase());
+            } else {
+                for upper in ch.to_uppercase() {
+                    buf.push_char(upper);
+                }
+            }
+        }
+    }
+
+    /// Returns a new `JanetString` containing the ASCII uppercase equivalent of
+    /// this string.
+    ///
+    /// In this case, uppercase is only defined in ASCII letters. Namely, the
+    /// letters `a-z` are converted to `A-Z`. All other bytes remain unchanged.
+    /// In particular, the length of the string returned is always
+    /// equivalent to the length of this string.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("hello β");
+    /// assert_eq!(s.to_ascii_uppercase().as_bytes(), "HELLO β".as_bytes());
+    /// ```
+    ///
+    /// Invalid UTF-8 remains as is:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
+    /// assert_eq!(
+    ///     s.to_ascii_uppercase().as_bytes(),
+    ///     &b"FOO\xFFBAR\xE2\x98BAZ"[..]
+    /// );
+    /// ```
+    #[inline]
+    pub fn to_ascii_uppercase(&self) -> Self {
+        self.as_bytes().to_ascii_uppercase().into()
+    }
+
     /// Safely convert this string into a `&str` if it's valid UTF-8.
     ///
     /// If this string is not valid UTF-8, then an error is returned. The
