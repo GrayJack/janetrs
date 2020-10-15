@@ -8,7 +8,7 @@ use core::{
     str::FromStr,
 };
 
-use alloc::string::String;
+use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "std")]
 use std::{
@@ -1981,7 +1981,7 @@ impl Clone for JanetBuffer<'_> {
 }
 
 impl From<&[u8]> for JanetBuffer<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn from(bytes: &[u8]) -> Self {
         let len = if bytes.len() >= i32::MAX as usize {
             i32::MAX
@@ -1995,7 +1995,7 @@ impl From<&[u8]> for JanetBuffer<'_> {
 }
 
 impl From<&str> for JanetBuffer<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn from(string: &str) -> Self {
         let cap = if string.len() >= i32::MAX as usize {
             i32::MAX
@@ -2009,7 +2009,7 @@ impl From<&str> for JanetBuffer<'_> {
 }
 
 impl From<char> for JanetBuffer<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn from(ch: char) -> Self {
         let mut buff = JanetBuffer::with_capacity(4);
         buff.push(ch);
@@ -2018,11 +2018,25 @@ impl From<char> for JanetBuffer<'_> {
 }
 
 impl From<&char> for JanetBuffer<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn from(ch: &char) -> Self {
         let mut buff = JanetBuffer::with_capacity(4);
         buff.push(*ch);
         buff
+    }
+}
+
+impl From<Vec<u8>> for JanetBuffer<'_> {
+    #[inline]
+    fn from(bytes: Vec<u8>) -> Self {
+        From::<&[u8]>::from(bytes.as_ref())
+    }
+}
+
+impl From<String> for JanetBuffer<'_> {
+    #[inline]
+    fn from(string: String) -> Self {
+        From::<&str>::from(string.as_ref())
     }
 }
 

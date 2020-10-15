@@ -1053,9 +1053,23 @@ macro_rules! impl_string_like {
                 fn from(bytes: &[u8]) -> Self { Self::new(bytes) }
             }
 
+            impl From<alloc::vec::Vec<u8>> for $ty {
+                #[inline]
+                fn from(vec: Vec<u8>) -> Self {
+                    Self::new(vec)
+                }
+            }
+
             impl From<&str> for $ty {
                 #[inline]
                 fn from(rust_str: &str) -> Self { Self::new(rust_str) }
+            }
+
+            impl From<alloc::string::String> for $ty {
+                #[inline]
+                fn from(s: String) -> Self {
+                    Self::new(s)
+                }
             }
 
             impl PartialEq for $ty {
