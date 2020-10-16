@@ -504,9 +504,210 @@ impl<'data> JanetArray<'data> {
     /// ```
     ///
     /// [`clear`]: #method.clear
+    #[inline]
     pub fn truncate(&mut self, len: i32) {
         if len <= self.len() && len >= 0 {
             self.set_len(len);
+        }
+    }
+
+    /// Returns a reference to the first element of the array, or `None` if it is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = array![10, 40, 30];
+    /// assert_eq!(Some(&Janet::from(10)), v.first());
+    ///
+    /// let w = array![];
+    /// assert_eq!(None, w.first());
+    /// ```
+    #[inline]
+    pub fn first(&self) -> Option<&Janet> {
+        if let [first, ..] = self.as_ref() {
+            Some(first)
+        } else {
+            None
+        }
+    }
+
+    /// Returns a mutable reference to the first element of the array, or `None` if it is
+    /// empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut x = array![0, 1, 2];
+    ///
+    /// if let Some(first) = x.first_mut() {
+    ///     *first = Janet::from(5);
+    /// }
+    /// assert_eq!(x.as_ref(), array![5, 1, 2].as_ref());
+    /// ```
+    #[inline]
+    pub fn first_mut(&mut self) -> Option<&mut Janet> {
+        if let [first, ..] = self.as_mut() {
+            Some(first)
+        } else {
+            None
+        }
+    }
+
+    /// Returns a reference of the first and a reference to all the rest of the elements
+    /// of the array, or `None` if it is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let x = array![0, 1, 2];
+    ///
+    /// if let Some((first, elements)) = x.split_first() {
+    ///     assert_eq!(first, &Janet::from(0));
+    ///     assert_eq!(elements, &[Janet::from(1), Janet::from(2)]);
+    /// }
+    /// ```
+    #[inline]
+    pub fn split_first(&self) -> Option<(&Janet, &[Janet])> {
+        if let [first, tail @ ..] = self.as_ref() {
+            Some((first, tail))
+        } else {
+            None
+        }
+    }
+
+    /// Returns a mutable reference of the first and a mutable reference to all the rest
+    /// of the elements of the array, or `None` if it is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut x = array![0, 1, 2];
+    ///
+    /// if let Some((first, elements)) = x.split_first_mut() {
+    ///     *first = Janet::from(3);
+    ///     elements[0] = Janet::from(4);
+    ///     elements[1] = Janet::from(5);
+    /// }
+    /// assert_eq!(x.as_ref(), array![3, 4, 5].as_ref());
+    /// ```
+    #[inline]
+    pub fn split_first_mut(&mut self) -> Option<(&mut Janet, &mut [Janet])> {
+        if let [first, tail @ ..] = self.as_mut() {
+            Some((first, tail))
+        } else {
+            None
+        }
+    }
+
+    /// Returns a reference to the last element of the array, or `None` if it is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = array![10, 40, 30];
+    /// assert_eq!(Some(&Janet::from(30)), v.last());
+    ///
+    /// let w = array![];
+    /// assert_eq!(None, w.last());
+    /// ```
+    #[inline]
+    pub fn last(&self) -> Option<&Janet> {
+        if let [.., last] = self.as_ref() {
+            Some(last)
+        } else {
+            None
+        }
+    }
+
+    /// Returns a mutable reference to the last element of the array, or `None` if it is
+    /// empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut x = array![0, 1, 2];
+    ///
+    /// if let Some(last) = x.last_mut() {
+    ///     *last = Janet::from(10);
+    /// }
+    /// assert_eq!(x.as_ref(), array![0, 1, 10].as_ref());
+    /// ```
+    #[inline]
+    pub fn last_mut(&mut self) -> Option<&mut Janet> {
+        if let [.., last] = self.as_mut() {
+            Some(last)
+        } else {
+            None
+        }
+    }
+
+    /// Returns a reference of the last and all the rest of the elements of the array, or
+    /// `None` if it is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let x = array![0, 1, 2];
+    ///
+    /// if let Some((last, elements)) = x.split_last() {
+    ///     assert_eq!(last, &Janet::from(2));
+    ///     assert_eq!(elements, &[Janet::from(0), Janet::from(1)]);
+    /// }
+    /// ```
+    #[inline]
+    pub fn split_last(&self) -> Option<(&Janet, &[Janet])> {
+        if let [init @ .., last] = self.as_ref() {
+            Some((last, init))
+        } else {
+            None
+        }
+    }
+
+    /// Returns a mutable to the last and all the rest of the elements of the slice, or
+    /// `None` if it is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut x = array![0, 1, 2];
+    ///
+    /// if let Some((last, elements)) = x.split_last_mut() {
+    ///     *last = Janet::from(3);
+    ///     elements[0] = Janet::from(4);
+    ///     elements[1] = Janet::from(5);
+    /// }
+    /// assert_eq!(x.as_ref(), array![4, 5, 3].as_ref());
+    /// ```
+    #[inline]
+    pub fn split_last_mut(&mut self) -> Option<(&mut Janet, &mut [Janet])> {
+        if let [init @ .., last] = self.as_mut() {
+            Some((last, init))
+        } else {
+            None
         }
     }
 
