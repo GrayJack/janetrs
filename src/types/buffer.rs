@@ -890,6 +890,147 @@ impl JanetBuffer<'_> {
         self.as_bytes_mut().make_ascii_uppercase()
     }
 
+    /// Return a buffer with leading and trailing whitespace removed.
+    ///
+    /// Whitespace is defined according to the terms of the `White_Space`
+    /// Unicode property.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from(" foo\tbar\t\u{2003}\n");
+    /// assert_eq!(
+    ///     s.trim().as_bytes(),
+    ///     JanetBuffer::from("foo\tbar").as_bytes()
+    /// );
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn trim(&self) -> Self {
+        self.as_bytes().trim().into()
+    }
+
+    /// Return a buffer with leading whitespace removed.
+    ///
+    /// Whitespace is defined according to the terms of the `White_Space`
+    /// Unicode property.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from(" foo\tbar\t\u{2003}\n");
+    /// assert_eq!(
+    ///     s.trim_start().as_bytes(),
+    ///     JanetBuffer::from("foo\tbar\t\u{2003}\n").as_bytes()
+    /// );
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn trim_start(&self) -> Self {
+        self.as_bytes().trim_start().into()
+    }
+
+    /// Return a buffer with trailing whitespace removed.
+    ///
+    /// Whitespace is defined according to the terms of the `White_Space`
+    /// Unicode property.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from(" foo\tbar\t\u{2003}\n");
+    /// assert_eq!(
+    ///     s.trim_end().as_bytes(),
+    ///     JanetBuffer::from(" foo\tbar").as_bytes()
+    /// );
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn trim_end(&self) -> Self {
+        self.as_bytes().trim_end().into()
+    }
+
+    /// Return a buffer with leading and trailing characters
+    /// satisfying the given predicate removed.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from("123foo5bar789");
+    /// assert_eq!(
+    ///     s.trim_with(|c| c.is_numeric()).as_bytes(),
+    ///     JanetBuffer::from("foo5bar").as_bytes(),
+    /// );
+    /// ```
+    #[inline]
+    pub fn trim_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
+        self.as_bytes().trim_with(trim).into()
+    }
+
+    /// Return a buffer with leading characters satisfying the given
+    /// predicate removed.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from("123foo5bar789");
+    /// assert_eq!(
+    ///     s.trim_start_with(|c| c.is_numeric()).as_bytes(),
+    ///     JanetBuffer::from("foo5bar789").as_bytes()
+    /// );
+    /// ```
+    #[inline]
+    pub fn trim_start_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
+        self.as_bytes().trim_start_with(trim).into()
+    }
+
+    /// Return a buffer with trailing characters satisfying the
+    /// given predicate removed.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetBuffer;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetBuffer::from("123foo5bar");
+    /// assert_eq!(
+    ///     s.trim_end_with(|c| c.is_numeric()).as_bytes(),
+    ///     JanetBuffer::from("123foo5bar").as_bytes()
+    /// );
+    /// ```
+    #[inline]
+    pub fn trim_end_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
+        self.as_bytes().trim_end_with(trim).into()
+    }
+
     /// Safely convert this buffer into a `&str` if it's valid UTF-8.
     ///
     /// If this buffer is not valid UTF-8, then an error is returned. The

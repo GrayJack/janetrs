@@ -349,7 +349,7 @@ impl<'data> JanetString<'data> {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("HELLO Β");
-    /// assert_eq!("hello β".as_bytes(), s.to_lowercase().as_bytes());
+    /// assert_eq!(s.to_lowercase(), JanetString::new("hello β"));
     /// ```
     ///
     /// Scripts without case are not changed:
@@ -359,7 +359,7 @@ impl<'data> JanetString<'data> {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("农历新年");
-    /// assert_eq!("农历新年".as_bytes(), s.to_lowercase().as_bytes());
+    /// assert_eq!(s.to_lowercase(), JanetString::new("农历新年"));
     /// ```
     ///
     /// Invalid UTF-8 remains as is:
@@ -370,8 +370,8 @@ impl<'data> JanetString<'data> {
     ///
     /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
     /// assert_eq!(
-    ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]),
-    ///     s.to_lowercase()
+    ///     s.to_lowercase(),
+    ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..])
     /// );
     /// ```
     #[cfg(feature = "unicode")]
@@ -475,7 +475,7 @@ impl<'data> JanetString<'data> {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("HELLO Β");
-    /// assert_eq!("hello Β".as_bytes(), s.to_ascii_lowercase().as_bytes());
+    /// assert_eq!(s.to_ascii_lowercase(), JanetString::new("hello Β"));
     /// ```
     ///
     /// Invalid UTF-8 remains as is:
@@ -520,7 +520,7 @@ impl<'data> JanetString<'data> {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("hello β");
-    /// assert_eq!(s.to_uppercase().as_bytes(), "HELLO Β".as_bytes());
+    /// assert_eq!(s.to_uppercase(), JanetString::new("HELLO Β"));
     /// ```
     ///
     /// Scripts without case are not changed:
@@ -530,7 +530,7 @@ impl<'data> JanetString<'data> {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("农历新年");
-    /// assert_eq!(s.to_uppercase().as_bytes(), "农历新年".as_bytes());
+    /// assert_eq!(s.to_uppercase(), JanetString::new("农历新年"));
     /// ```
     ///
     /// Invalid UTF-8 remains as is:
@@ -540,7 +540,10 @@ impl<'data> JanetString<'data> {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
-    /// assert_eq!(s.to_uppercase().as_bytes(), &b"FOO\xFFBAR\xE2\x98BAZ"[..]);
+    /// assert_eq!(
+    ///     s.to_uppercase(),
+    ///     JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..])
+    /// );
     /// ```
     #[cfg(feature = "unicode")]
     #[inline]
@@ -659,6 +662,135 @@ impl<'data> JanetString<'data> {
     #[inline]
     pub fn to_ascii_uppercase(&self) -> Self {
         self.as_bytes().to_ascii_uppercase().into()
+    }
+
+    /// Return a string with leading and trailing whitespace removed.
+    ///
+    /// Whitespace is defined according to the terms of the `White_Space`
+    /// Unicode property.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(" foo\tbar\t\u{2003}\n");
+    /// assert_eq!(s.trim(), JanetString::new("foo\tbar"));
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn trim(&self) -> Self {
+        self.as_bytes().trim().into()
+    }
+
+    /// Return a string with leading whitespace removed.
+    ///
+    /// Whitespace is defined according to the terms of the `White_Space`
+    /// Unicode property.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(" foo\tbar\t\u{2003}\n");
+    /// assert_eq!(s.trim_start(), JanetString::new("foo\tbar\t\u{2003}\n"));
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn trim_start(&self) -> Self {
+        self.as_bytes().trim_start().into()
+    }
+
+    /// Return a string with trailing whitespace removed.
+    ///
+    /// Whitespace is defined according to the terms of the `White_Space`
+    /// Unicode property.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new(" foo\tbar\t\u{2003}\n");
+    /// assert_eq!(s.trim_end(), JanetString::new(" foo\tbar"));
+    /// ```
+    #[cfg(feature = "unicode")]
+    #[inline]
+    pub fn trim_end(&self) -> Self {
+        self.as_bytes().trim_end().into()
+    }
+
+    /// Return a string with leading and trailing characters
+    /// satisfying the given predicate removed.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("123foo5bar789");
+    /// assert_eq!(s.trim_with(|c| c.is_numeric()), JanetString::new("foo5bar"),);
+    /// ```
+    #[inline]
+    pub fn trim_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
+        self.as_bytes().trim_with(trim).into()
+    }
+
+    /// Return a string with leading characters satisfying the given
+    /// predicate removed.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("123foo5bar789");
+    /// assert_eq!(
+    ///     s.trim_start_with(|c| c.is_numeric()),
+    ///     JanetString::new("foo5bar789")
+    /// );
+    /// ```
+    #[inline]
+    pub fn trim_start_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
+        self.as_bytes().trim_start_with(trim).into()
+    }
+
+    /// Return a string with trailing characters satisfying the
+    /// given predicate removed.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::types::JanetString;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = JanetString::new("123foo5bar");
+    /// assert_eq!(
+    ///     s.trim_end_with(|c| c.is_numeric()),
+    ///     JanetString::new("123foo5bar")
+    /// );
+    /// ```
+    #[inline]
+    pub fn trim_end_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
+        self.as_bytes().trim_end_with(trim).into()
     }
 
     /// Safely convert this string into a `&str` if it's valid UTF-8.
