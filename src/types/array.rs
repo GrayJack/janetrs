@@ -711,6 +711,42 @@ impl<'data> JanetArray<'data> {
         }
     }
 
+    /// Swaps two elements in the array.
+    ///
+    /// # Arguments
+    ///
+    /// * a - The index of the first element
+    /// * b - The index of the second element
+    ///
+    /// # Panics
+    ///
+    /// Panics if `a` or `b` are out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array!["a", "b", "c", "d"];
+    /// v.swap(1, 3);
+    /// assert!(v.as_ref() == array!["a", "d", "c", "b"].as_ref());
+    /// ```
+    #[inline]
+    pub fn swap(&mut self, a: i32, b: i32) {
+        // Can't take two mutable loans from one vector, so instead just cast
+        // them to their raw pointers to do the swap.
+        let pa: *mut Janet = &mut self[a];
+        let pb: *mut Janet = &mut self[b];
+        // SAFETY: `pa` and `pb` have been created from safe mutable references and refer
+        // to elements in the slice and therefore are guaranteed to be valid and aligned.
+        // Note that accessing the elements behind `a` and `b` is checked and will
+        // panic when out of bounds.
+        unsafe {
+            core::ptr::swap(pa, pb);
+        }
+    }
+
     /// Creates a iterator over the reference of the array itens.
     ///
     /// # Examples
