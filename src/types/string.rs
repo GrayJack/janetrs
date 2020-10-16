@@ -647,7 +647,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::types::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
