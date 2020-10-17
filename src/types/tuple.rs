@@ -4,6 +4,7 @@ use core::{
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::Index,
+    slice::{Chunks, ChunksExact, RChunks, RChunksExact, Windows},
 };
 
 use evil_janet::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
@@ -291,6 +292,192 @@ impl<'data> JanetTuple<'data> {
             index_head: 0,
             index_tail: self.len(),
         }
+    }
+
+    /// Creates an iterator over all contiguous windows of length
+    /// `size`. The windows overlap. If the tuple is shorter than
+    /// `size`, the iterator returns no values.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `size` is 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple!['r', 'u', 's', 't'];
+    /// let mut iter = arr.windows(2);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('r'), Janet::from('u')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('u'), Janet::from('s')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('s'), Janet::from('t')]);
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// If the tuple is shorter than `size`:
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple!['f', 'o', 'o'];
+    /// let mut iter = arr.windows(4);
+    /// assert!(iter.next().is_none());
+    /// ```
+    #[inline]
+    pub fn windows(&self, size: usize) -> Windows<'_, Janet> {
+        self.as_ref().windows(size)
+    }
+
+    /// Creates an iterator over `chunk_size` elements of the tuple at a time, starting at
+    /// the beginning of the tuple.
+    ///
+    /// The chunks are slices and do not overlap. If `chunk_size` does not divide the
+    /// length of the tuple, then the last chunk will not have length `chunk_size`.
+    ///
+    /// See [`chunks_exact`] for a variant of this iterator that returns chunks of always
+    /// exactly `chunk_size` elements, and [`rchunks`] for the same iterator but
+    /// starting at the end of the tuple.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `chunk_size` is 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
+    /// let mut iter = arr.chunks(2);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('l'), Janet::from('o')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('r'), Janet::from('e')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('m')]);
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// [`chunks_exact`]: #method.chunks_exact
+    /// [`rchunks`]: #method.rchunks
+    #[inline]
+    pub fn chunks(&self, chunk_size: usize) -> Chunks<'_, Janet> {
+        self.as_ref().chunks(chunk_size)
+    }
+
+    /// Creates an iterator over `chunk_size` elements of the tuple at a time, starting at
+    /// the beginning of the tuple.
+    ///
+    /// The chunks are slices and do not overlap. If `chunk_size` does not divide the
+    /// length of the tuple, then the last up to `chunk_size-1` elements will be
+    /// omitted and can be retrieved from the `remainder` function of the iterator.
+    ///
+    /// Due to each chunk having exactly `chunk_size` elements, the compiler can often
+    /// optimize the resulting code better than in the case of [`chunks`].
+    ///
+    /// See [`chunks`] for a variant of this iterator that also returns the remainder as a
+    /// smaller chunk, and [`rchunks_exact`] for the same iterator but starting at the
+    /// end of the tuple.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `chunk_size` is 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
+    /// let mut iter = arr.chunks_exact(2);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('l'), Janet::from('o')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('r'), Janet::from('e')]);
+    /// assert!(iter.next().is_none());
+    /// assert_eq!(iter.remainder(), &[Janet::from('m')]);
+    /// ```
+    ///
+    /// [`chunks`]: #method.chunks
+    /// [`rchunks_exact`]: #method.rchunks_exact
+    #[inline]
+    pub fn chunks_exact(&self, chunk_size: usize) -> ChunksExact<'_, Janet> {
+        self.as_ref().chunks_exact(chunk_size)
+    }
+
+    /// Create an iterator over `chunk_size` elements of the tuple at a time, starting at
+    /// the end of the tuple.
+    ///
+    /// The chunks are slices and do not overlap. If `chunk_size` does not divide the
+    /// length of the tuple, then the last chunk will not have length `chunk_size`.
+    ///
+    /// See [`rchunks_exact`] for a variant of this iterator that returns chunks of always
+    /// exactly `chunk_size` elements, and [`chunks`] for the same iterator but
+    /// starting at the beginning of the tuple.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `chunk_size` is 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
+    /// let mut iter = arr.rchunks(2);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('e'), Janet::from('m')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('o'), Janet::from('r')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('l')]);
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// [`rchunks_exact`]: #method.rchunks_exact
+    /// [`chunks`]: #method.chunks
+    #[inline]
+    pub fn rchunks(&self, chunk_size: usize) -> RChunks<'_, Janet> {
+        self.as_ref().rchunks(chunk_size)
+    }
+
+    /// Returns an iterator over `chunk_size` elements of the tuple at a time, starting at
+    /// the end of the tuple.
+    ///
+    /// The chunks are slices and do not overlap. If `chunk_size` does not divide the
+    /// length of the tuple, then the last up to `chunk_size-1` elements will be
+    /// omitted and can be retrieved from the `remainder` function of the iterator.
+    ///
+    /// Due to each chunk having exactly `chunk_size` elements, the compiler can often
+    /// optimize the resulting code better than in the case of [`chunks`].
+    ///
+    /// See [`rchunks`] for a variant of this iterator that also returns the remainder as
+    /// a smaller chunk, and [`chunks_exact`] for the same iterator but starting at
+    /// the beginning of the tuple.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `chunk_size` is 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
+    /// let mut iter = arr.rchunks_exact(2);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('e'), Janet::from('m')]);
+    /// assert_eq!(iter.next().unwrap(), &[Janet::from('o'), Janet::from('r')]);
+    /// assert!(iter.next().is_none());
+    /// assert_eq!(iter.remainder(), &[Janet::from('l')]);
+    /// ```
+    ///
+    /// [`chunks`]: #method.chunks
+    /// [`rchunks`]: #method.rchunks
+    /// [`chunks_exact`]: #method.chunks_exact
+    #[inline]
+    pub fn rchunks_exact(&self, chunk_size: usize) -> RChunksExact<'_, Janet> {
+        self.as_ref().rchunks_exact(chunk_size)
     }
 
     /// Return a raw pointer to the tuple raw structure.
