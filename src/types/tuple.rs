@@ -284,6 +284,39 @@ impl<'data> JanetTuple<'data> {
         }
     }
 
+    /// Creates a tuple by repeating a tuple `n` times.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the capacity would overflow.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     tuple![1, 2].repeat(3).as_ref(),
+    ///     tuple![1, 2, 1, 2, 1, 2].as_ref()
+    /// );
+    /// ```
+    ///
+    /// A panic upon overflow:
+    ///
+    /// ```should_panic
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// // this will panic at runtime
+    /// b"0123456789abcdef".repeat(usize::MAX);
+    /// ```
+    pub fn repeat(&self, n: usize) -> JanetArray {
+        self.as_ref().repeat(n).into_iter().collect()
+    }
+
     /// Creates a iterator over the reference of the array itens.
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {

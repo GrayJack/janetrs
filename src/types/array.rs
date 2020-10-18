@@ -734,7 +734,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// let mut v = array!["a", "b", "c", "d"];
     /// v.swap(1, 3);
-    /// assert!(v.as_ref() == array!["a", "d", "c", "b"].as_ref());
+    /// assert_eq!(v.as_ref(), array!["a", "d", "c", "b"].as_ref());
     /// ```
     #[inline]
     pub fn swap(&mut self, a: i32, b: i32) {
@@ -749,6 +749,56 @@ impl<'data> JanetArray<'data> {
         unsafe {
             core::ptr::swap(pa, pb);
         }
+    }
+
+    /// Reverses the order of elements in the array, in place.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![1, 2, 3];
+    /// v.reverse();
+    /// assert_eq!(v.as_ref(), array![3, 2, 1].as_ref());
+    /// ```
+    #[inline]
+    pub fn reverse(&mut self) {
+        self.as_mut().reverse()
+    }
+
+    /// Creates a array by repeating a array `n` times.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the capacity would overflow.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// assert_eq!(
+    ///     array![1, 2].repeat(3).as_ref(),
+    ///     array![1, 2, 1, 2, 1, 2].as_ref()
+    /// );
+    /// ```
+    ///
+    /// A panic upon overflow:
+    ///
+    /// ```should_panic
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// // this will panic at runtime
+    /// b"0123456789abcdef".repeat(usize::MAX);
+    /// ```
+    pub fn repeat(&self, n: usize) -> Self {
+        self.as_ref().repeat(n).into_iter().collect()
     }
 
     /// Creates a iterator over the reference of the array itens.
