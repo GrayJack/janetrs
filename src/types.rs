@@ -385,26 +385,24 @@ impl fmt::Debug for Janet {
 impl fmt::Display for Janet {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // There some overhead for doing this dance, but the only way to get the Janet value from
-        // C API and transform into &str to display it.
-        let fmt = if matches!(self.kind(), JanetType::String | JanetType::Buffer) {
-            "%p\0"
-        } else {
-            "%q\0"
-        };
-
-        // SAFETY: `janet_formatc` always returns a non-null valid sequence of `u8` in the form of
-        // `*const u8`
+        match self.unwrap() {
+            TaggedJanet::Boolean(b) => fmt::Display::fmt(&b, f),
+            TaggedJanet::Buffer(s) => fmt::Display::fmt(&s, f),
+            TaggedJanet::Number(n) => fmt::Display::fmt(&n, f),
+            TaggedJanet::String(s) => fmt::Display::fmt(&s, f),
+            _ => {
+                // SAFETY: `janet_formatc` always returns a non-null valid sequence of `u8` in the
+                // form of `*const u8`
         let jstr = unsafe {
             JanetString::from_raw(evil_janet::janet_formatc(
-                fmt.as_ptr() as *const i8,
+                        "%q\0".as_ptr() as *const i8,
                 self.inner,
             ))
         };
 
-        let s = jstr.to_str().map_err(|_| fmt::Error)?;
-
-        fmt::Display::fmt(s, f)
+                fmt::Display::fmt(&jstr, f)
+            },
+        }
     }
 }
 

@@ -24,7 +24,7 @@ features = ["amalgation"]
 [dependencies]
 evil-janet = "1.12.4"
 const_fn = "0.4"
-bstr = { version = "0.2.13", default-features = false }
+bstr = { version = "0.2.14", default-features = false }
 janetrs_macros = "0.2.0"
 
 [dev-dependencies]
