@@ -318,6 +318,66 @@ impl<'data> JanetTuple<'data> {
         self.as_ref().repeat(n).into_iter().collect()
     }
 
+    /// Returns `true` if `needle` is a prefix of the tuple.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![10, 40, 30];
+    /// assert!(v.starts_with(&[Janet::from(10)]));
+    /// assert!(v.starts_with(&[Janet::from(10), Janet::from(40)]));
+    /// assert!(!v.starts_with(&[Janet::from(50)]));
+    /// assert!(!v.starts_with(&[Janet::from(10), Janet::from(50)]));
+    /// ```
+    ///
+    /// Always returns `true` if `needle` is an empty slice:
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![10, 40, 30];
+    /// assert!(v.starts_with(&[]));
+    /// let v = tuple![];
+    /// assert!(v.starts_with(&[]));
+    /// ```
+    pub fn starts_with(&self, needle: &[Janet]) -> bool {
+        self.as_ref().starts_with(needle)
+    }
+
+    /// Returns `true` if `needle` is a suffix of the tuple.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![10, 40, 30];
+    /// assert!(v.ends_with(&[Janet::from(30)]));
+    /// assert!(v.ends_with(&[Janet::from(40), Janet::from(30)]));
+    /// assert!(!v.ends_with(&[Janet::from(50)]));
+    /// assert!(!v.ends_with(&[Janet::from(50), Janet::from(30)]));
+    /// ```
+    ///
+    /// Always returns `true` if `needle` is an empty slice:
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![10, 40, 30];
+    /// assert!(v.ends_with(&[]));
+    /// let v = tuple![];
+    /// assert!(v.ends_with(&[]));
+    /// ```
+    pub fn ends_with(&self, needle: &[Janet]) -> bool {
+        self.as_ref().ends_with(needle)
+    }
+
     /// Binary searches this tuple for a given element.
     ///
     /// If the value is found then [`Result::Ok`] is returned, containing the
