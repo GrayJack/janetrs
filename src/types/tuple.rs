@@ -1,5 +1,6 @@
 //! Janet tuple type.
 use core::{
+    cmp::Ordering,
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
@@ -315,6 +316,130 @@ impl<'data> JanetTuple<'data> {
     /// ```
     pub fn repeat(&self, n: usize) -> JanetArray {
         self.as_ref().repeat(n).into_iter().collect()
+    }
+
+    /// Binary searches this tuple for a given element.
+    ///
+    /// If the value is found then [`Result::Ok`] is returned, containing the
+    /// index of the matching element. If there are multiple matches, then any
+    /// one of the matches could be returned. If the value is not found then
+    /// [`Result::Err`] is returned, containing the index where a matching
+    /// element could be inserted while maintaining sorted order.
+    ///
+    /// # Examples
+    ///
+    /// Looks up a series of four elements. The first is found, with a
+    /// uniquely determined position; the second and third are not
+    /// found; the fourth could match any position in `[1, 4]`.
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+    ///
+    /// assert_eq!(s.binary_search(&Janet::from(13)), Ok(9));
+    /// assert_eq!(s.binary_search(&Janet::from(4)), Err(7));
+    /// assert_eq!(s.binary_search(&Janet::from(100)), Err(13));
+    /// let r = s.binary_search(&Janet::from(1));
+    /// assert!(match r {
+    ///     Ok(1..=4) => true,
+    ///     _ => false,
+    /// });
+    /// ```
+    ///
+    /// If you want to insert an item to a sorted vector, while maintaining
+    /// sort order:
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::{Janet, JanetArray}};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+    /// let num = Janet::from(42);
+    /// let idx = s.binary_search(&num).unwrap_or_else(|x| x);
+    /// let mut s = JanetArray::from(s);
+    /// s.insert(idx as i32, num);
+    /// assert_eq!(
+    ///     s.as_ref(),
+    ///     tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55].as_ref()
+    /// );
+    /// ```
+    pub fn binary_search(&self, x: &Janet) -> Result<usize, usize> {
+        self.binary_search_by(|p| p.cmp(x))
+    }
+
+    /// Binary searches this sorted tuple with a comparator function.
+    ///
+    /// The comparator function should implement an order consistent
+    /// with the sort order of the underlying slice, returning an
+    /// order code that indicates whether its argument is `Less`,
+    /// `Equal` or `Greater` the desired target.
+    ///
+    /// If the value is found then [`Result::Ok`] is returned, containing the
+    /// index of the matching element. If there are multiple matches, then any
+    /// one of the matches could be returned. If the value is not found then
+    /// [`Result::Err`] is returned, containing the index where a matching
+    /// element could be inserted while maintaining sorted order.
+    ///
+    /// # Examples
+    ///
+    /// Looks up a series of four elements. The first is found, with a
+    /// uniquely determined position; the second and third are not
+    /// found; the fourth could match any position in `[1, 4]`.
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+    ///
+    /// let seek = Janet::from(13);
+    /// assert_eq!(s.binary_search_by(|probe| probe.cmp(&seek)), Ok(9));
+    /// let seek = Janet::from(4);
+    /// assert_eq!(s.binary_search_by(|probe| probe.cmp(&seek)), Err(7));
+    /// let seek = Janet::from(100);
+    /// assert_eq!(s.binary_search_by(|probe| probe.cmp(&seek)), Err(13));
+    /// let seek = Janet::from(1);
+    /// let r = s.binary_search_by(|probe| probe.cmp(&seek));
+    /// assert!(match r {
+    ///     Ok(1..=4) => true,
+    ///     _ => false,
+    /// });
+    /// ```
+    #[inline]
+    pub fn binary_search_by<'a, F>(&'a self, f: F) -> Result<usize, usize>
+    where F: FnMut(&'a Janet) -> Ordering {
+        self.as_ref().binary_search_by(f)
+    }
+
+    /// Binary searches this tuple with a key extraction function.
+    ///
+    /// Assumes that the tuple is sorted by the key, for instance with
+    /// [`sort_by_key`] using the same key extraction function.
+    ///
+    /// If the value is found then [`Result::Ok`] is returned, containing the
+    /// index of the matching element. If there are multiple matches, then any
+    /// one of the matches could be returned. If the value is not found then
+    /// [`Result::Err`] is returned, containing the index where a matching
+    /// element could be inserted while maintaining sorted order.
+    ///
+    /// [`sort_by_key`]: #method.sort_by_key
+    ///
+    /// # Examples
+    /// TODO: Find a good example
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    /// ```
+    #[inline]
+    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
+    where
+        F: FnMut(&'a Janet) -> B,
+        B: Ord,
+    {
+        self.binary_search_by(|k| f(k).cmp(b))
     }
 
     /// Creates a iterator over the reference of the array itens.
