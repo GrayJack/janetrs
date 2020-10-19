@@ -352,7 +352,10 @@ impl<'data> JanetTuple<'data> {
     /// sort order:
     ///
     /// ```
-    /// use janetrs::{tuple, types::{Janet, JanetArray}};
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, JanetArray},
+    /// };
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];

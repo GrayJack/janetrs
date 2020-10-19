@@ -925,6 +925,266 @@ impl<'data> JanetArray<'data> {
         self.binary_search_by(|k| f(k).cmp(b))
     }
 
+    /// Sorts the array.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and `O(n * log(n))`
+    /// worst-case.
+    ///
+    /// When applicable, unstable sorting is preferred because it is generally faster than
+    /// stable sorting and it doesn't allocate auxiliary memory.
+    /// See [`sort_unstable`](#method.sort_unstable).
+    ///
+    /// # Current implementation
+    ///
+    /// The current algorithm is an adaptive, iterative merge sort inspired by
+    /// [timsort](https://en.wikipedia.org/wiki/Timsort).
+    /// It is designed to be very fast in cases where the slice is nearly sorted, or
+    /// consists of two or more sorted sequences concatenated one after another.
+    ///
+    /// Also, it allocates temporary storage half the size of `self`, but for short slices
+    /// a non-allocating insertion sort is used instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![-5, 4, 1, -3, 2];
+    ///
+    /// v.sort();
+    /// assert_eq!(v.as_ref(), array![-5, -3, 1, 2, 4].as_ref());
+    /// ```
+    #[inline]
+    pub fn sort(&mut self) {
+        self.as_mut().sort()
+    }
+
+    /// Sorts the array with a comparator function.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and `O(n * log(n))`
+    /// worst-case.
+    ///
+    /// The comparator function must define a total ordering for the elements in the
+    /// slice. If the ordering is not total, the order of the elements is unspecified.
+    /// An order is a total order if it is (for all `a`, `b` and `c`):
+    ///
+    /// * total and antisymmetric: exactly one of `a < b`, `a == b` or `a > b` is true,
+    ///   and
+    /// * transitive, `a < b` and `b < c` implies `a < c`. The same must hold for both
+    ///   `==` and `>`.
+    ///
+    /// When applicable, unstable sorting is preferred because it is generally faster than
+    /// stable sorting and it doesn't allocate auxiliary memory.
+    /// See [`sort_unstable_by`](#method.sort_unstable_by).
+    ///
+    /// # Current implementation
+    ///
+    /// The current algorithm is an adaptive, iterative merge sort inspired by
+    /// [timsort](https://en.wikipedia.org/wiki/Timsort).
+    /// It is designed to be very fast in cases where the slice is nearly sorted, or
+    /// consists of two or more sorted sequences concatenated one after another.
+    ///
+    /// Also, it allocates temporary storage half the size of `self`, but for short slices
+    /// a non-allocating insertion sort is used instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![5, 4, 1, 3, 2];
+    /// v.sort_by(|a, b| a.cmp(b));
+    /// assert_eq!(v.as_ref(), array![1, 2, 3, 4, 5].as_ref());
+    ///
+    /// // reverse sorting
+    /// v.sort_by(|a, b| b.cmp(a));
+    /// assert_eq!(v.as_ref(), array![5, 4, 3, 2, 1].as_ref());
+    /// ```
+    #[inline]
+    pub fn sort_by<F>(&mut self, compare: F)
+    where F: FnMut(&Janet, &Janet) -> Ordering {
+        self.as_mut().sort_by(compare)
+    }
+
+    /// Sorts the array with a key extraction function.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and `O(m * n *
+    /// log(n))` worst-case, where the key function is `O(m)`.
+    ///
+    /// For expensive key functions (e.g. functions that are not simple property accesses
+    /// or basic operations), [`sort_by_cached_key`](#method.sort_by_cached_key) is
+    /// likely to be significantly faster, as it does not recompute element keys.
+    ///
+    /// When applicable, unstable sorting is preferred because it is generally faster than
+    /// stable sorting and it doesn't allocate auxiliary memory.
+    /// See [`sort_unstable_by_key`](#method.sort_unstable_by_key).
+    ///
+    /// # Current implementation
+    ///
+    /// The current algorithm is an adaptive, iterative merge sort inspired by
+    /// [timsort](https://en.wikipedia.org/wiki/Timsort).
+    /// It is designed to be very fast in cases where the slice is nearly sorted, or
+    /// consists of two or more sorted sequences concatenated one after another.
+    ///
+    /// Also, it allocates temporary storage half the size of `self`, but for short slices
+    /// a non-allocating insertion sort is used instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![-5i32, 4, 1, -3, 2];
+    ///
+    /// v.sort_by_key(|k| match k.unwrap() {
+    ///     TaggedJanet::Number(n) => n.abs() as i128,
+    ///     _ => 0,
+    /// });
+    /// assert_eq!(v.as_ref(), array![1, 2, -3, 4, -5].as_ref());
+    /// ```
+    #[inline]
+    pub fn sort_by_key<K, F>(&mut self, f: F)
+    where
+        F: FnMut(&Janet) -> K,
+        K: Ord,
+    {
+        self.as_mut().sort_by_key(f)
+    }
+
+    /// Sorts the array, but may not preserve the order of equal elements.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place
+    /// (i.e., does not allocate), and *O*(*n* \* log(*n*)) worst-case.
+    ///
+    /// # Current implementation
+    ///
+    /// The current algorithm is based on [pattern-defeating quicksort][pdqsort] by Orson
+    /// Peters, which combines the fast average case of randomized quicksort with the
+    /// fast worst case of heapsort, while achieving linear time on slices with
+    /// certain patterns. It uses some randomization to avoid degenerate cases, but
+    /// with a fixed seed to always provide deterministic behavior.
+    ///
+    /// It is typically faster than stable sorting, except in a few special cases, e.g.,
+    /// when the slice consists of several concatenated sorted sequences.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![-5, 4, 1, -3, 2];
+    ///
+    /// v.sort_unstable();
+    /// assert_eq!(v.as_ref(), array![-5, -3, 1, 2, 4].as_ref());
+    /// ```
+    ///
+    /// [pdqsort]: https://github.com/orlp/pdqsort
+    #[inline]
+    pub fn sort_unstable(&mut self) {
+        self.as_mut().sort_unstable()
+    }
+
+    /// Sorts the array with a comparator function, but may not preserve the order of
+    /// equal elements.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place
+    /// (i.e., does not allocate), and *O*(*n* \* log(*n*)) worst-case.
+    ///
+    /// The comparator function must define a total ordering for the elements in the
+    /// array. If the ordering is not total, the order of the elements is unspecified.
+    /// An order is a total order if it is (for all a, b and c):
+    ///
+    /// * total and antisymmetric: exactly one of a < b, a == b or a > b is true; and
+    /// * transitive, a < b and b < c implies a < c. The same must hold for both == and >.
+    ///
+    /// # Current implementation
+    ///
+    /// The current algorithm is based on [pattern-defeating quicksort][pdqsort] by Orson
+    /// Peters, which combines the fast average case of randomized quicksort with the
+    /// fast worst case of heapsort, while achieving linear time on slices with
+    /// certain patterns. It uses some randomization to avoid degenerate cases, but
+    /// with a fixed seed to always provide deterministic behavior.
+    ///
+    /// It is typically faster than stable sorting, except in a few special cases, e.g.,
+    /// when the slice consists of several concatenated sorted sequences.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{array, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![5, 4, 1, 3, 2];
+    /// v.sort_unstable_by(|a, b| a.cmp(b));
+    /// assert_eq!(v.as_ref(), array![1, 2, 3, 4, 5].as_ref());
+    ///
+    /// // reverse sorting
+    /// v.sort_unstable_by(|a, b| b.cmp(a));
+    /// assert_eq!(v.as_ref(), array![5, 4, 3, 2, 1].as_ref());
+    /// ```
+    ///
+    /// [pdqsort]: https://github.com/orlp/pdqsort
+    #[inline]
+    pub fn sort_unstable_by<F>(&mut self, compare: F)
+    where F: FnMut(&Janet, &Janet) -> Ordering {
+        self.as_mut().sort_unstable_by(compare)
+    }
+
+    /// Sorts the array with a key extraction function, but may not preserve the order of
+    /// equal elements.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place
+    /// (i.e., does not allocate), and *O*(m \* *n* \* log(*n*)) worst-case, where the key
+    /// function is *O*(*m*).
+    ///
+    /// # Current implementation
+    ///
+    /// The current algorithm is based on [pattern-defeating quicksort][pdqsort] by Orson
+    /// Peters, which combines the fast average case of randomized quicksort with the
+    /// fast worst case of heapsort, while achieving linear time on slices with
+    /// certain patterns. It uses some randomization to avoid degenerate cases, but
+    /// with a fixed seed to always provide deterministic behavior.
+    ///
+    /// Due to its key calling strategy,
+    /// [`sort_unstable_by_key`](#method.sort_unstable_by_key) is likely to be slower
+    /// than [`sort_by_cached_key`](#method.sort_by_cached_key) in cases where the key
+    /// function is expensive.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![-5i32, 4, 1, -3, 2];
+    ///
+    /// v.sort_unstable_by_key(|k| match k.unwrap() {
+    ///     TaggedJanet::Number(n) => n.abs() as i128,
+    ///     _ => 0,
+    /// });
+    /// assert_eq!(v.as_ref(), array![1, 2, -3, 4, -5].as_ref());
+    /// ```
+    ///
+    /// [pdqsort]: https://github.com/orlp/pdqsort
+    #[inline]
+    pub fn sort_unstable_by_key<K, F>(&mut self, f: F)
+    where
+        F: FnMut(&Janet) -> K,
+        K: Ord,
+    {
+        self.as_mut().sort_unstable_by_key(f)
+    }
+
     /// Creates a iterator over the reference of the array itens.
     ///
     /// # Examples
