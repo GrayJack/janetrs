@@ -13,6 +13,9 @@ use evil_janet::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as 
 use super::{Janet, JanetArray};
 
 pub type Split<'a, P> = core::slice::Split<'a, Janet, P>;
+pub type RSplit<'a, P> = core::slice::RSplit<'a, Janet, P>;
+pub type SplitN<'a, P> = core::slice::SplitN<'a, Janet, P>;
+pub type RSplitN<'a, P> = core::slice::RSplitN<'a, Janet, P>;
 
 /// Builder for [`JanetTuple`]s.
 #[derive(Debug)]
@@ -821,6 +824,126 @@ impl<'data> JanetTuple<'data> {
     pub fn split<F>(&self, pred: F) -> Split<'_, F>
     where F: FnMut(&Janet) -> bool {
         self.as_ref().split(pred)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`, starting at the end of the slice and working backwards.
+    /// The matched element is not contained in the subslices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple![11, 22, 33, 0, 44, 55];
+    /// let mut iter = arr.rsplit(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), tuple![44, 55].as_ref());
+    /// assert_eq!(iter.next().unwrap(), tuple![11, 22, 33].as_ref());
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    ///
+    /// As with `split()`, if the first or last element is matched, an empty
+    /// slice will be the first (or last) item returned by the iterator.
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![0, 1, 1, 2, 3, 5, 8];
+    /// let mut it = v.rsplit(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(n) => n as i64 % 2 == 0,
+    ///     _ => false,
+    /// });
+    /// assert_eq!(it.next().unwrap(), tuple![].as_ref());
+    /// assert_eq!(it.next().unwrap(), tuple![3, 5].as_ref());
+    /// assert_eq!(it.next().unwrap(), tuple![1, 1].as_ref());
+    /// assert_eq!(it.next().unwrap(), tuple![].as_ref());
+    /// assert_eq!(it.next(), None);
+    /// ```
+    #[inline]
+    pub fn rsplit<F>(&self, pred: F) -> RSplit<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().rsplit(pred)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`, limited to returning at most `n` items. The matched element is
+    /// not contained in the subslices.
+    ///
+    /// The last element returned, if any, will contain the remainder of the
+    /// tuple.
+    ///
+    /// # Examples
+    ///
+    /// Print the tuple split once by numbers divisible by 3 (i.e., `[10, 40]`,
+    /// `[20, 60, 50]`):
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in v.splitn(2, |j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 % 3 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     println!("{:?}", group);
+    /// }
+    /// ```
+    #[inline]
+    pub fn splitn<F>(&self, n: usize, pred: F) -> SplitN<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().splitn(n, pred)
+    }
+
+    /// Returns an iterator over subslices separated by elements that match
+    /// `pred` limited to returning at most `n` items. This starts at the end of
+    /// the tuple and works backwards. The matched element is not contained in
+    /// the subslices.
+    ///
+    /// The last element returned, if any, will contain the remainder of the
+    /// tuple.
+    ///
+    /// # Examples
+    ///
+    /// Print the tuple split once, starting from the end, by numbers divisible
+    /// by 3 (i.e., `[50]`, `[10, 40, 30, 20]`):
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in v.rsplitn(2, |j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 % 3 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     println!("{:?}", group);
+    /// }
+    /// ```
+    #[inline]
+    pub fn rsplitn<F>(&self, n: usize, pred: F) -> RSplitN<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().rsplitn(n, pred)
     }
 
     /// Return a raw pointer to the tuple raw structure.

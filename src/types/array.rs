@@ -21,6 +21,13 @@ use super::{Janet, JanetExtend, JanetTuple};
 
 pub type Split<'a, P> = core::slice::Split<'a, Janet, P>;
 pub type SplitMut<'a, P> = core::slice::SplitMut<'a, Janet, P>;
+pub type RSplit<'a, P> = core::slice::RSplit<'a, Janet, P>;
+pub type RSplitMut<'a, P> = core::slice::RSplitMut<'a, Janet, P>;
+pub type SplitN<'a, P> = core::slice::SplitN<'a, Janet, P>;
+pub type SplitNMut<'a, P> = core::slice::SplitNMut<'a, Janet, P>;
+pub type RSplitN<'a, P> = core::slice::RSplitN<'a, Janet, P>;
+pub type RSplitNMut<'a, P> = core::slice::RSplitNMut<'a, Janet, P>;
+
 
 /// Janet [arrays](https://janet-lang.org/docs/data_structures/arrays.html) are a fundamental
 /// datatype in Janet. Janet Arrays are values that contain a sequence of other values.
@@ -1834,6 +1841,222 @@ impl<'data> JanetArray<'data> {
         self.as_mut().split_mut(pred)
     }
 
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`, starting at the end of the slice and working backwards.
+    /// The matched element is not contained in the subslices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![11, 22, 33, 0, 44, 55];
+    /// let mut iter = arr.rsplit(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), array![44, 55].as_ref());
+    /// assert_eq!(iter.next().unwrap(), array![11, 22, 33].as_ref());
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    ///
+    /// As with `split()`, if the first or last element is matched, an empty
+    /// slice will be the first (or last) item returned by the iterator.
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = array![0, 1, 1, 2, 3, 5, 8];
+    /// let mut it = v.rsplit(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(n) => n as i64 % 2 == 0,
+    ///     _ => false,
+    /// });
+    /// assert_eq!(it.next().unwrap(), array![].as_ref());
+    /// assert_eq!(it.next().unwrap(), array![3, 5].as_ref());
+    /// assert_eq!(it.next().unwrap(), array![1, 1].as_ref());
+    /// assert_eq!(it.next().unwrap(), array![].as_ref());
+    /// assert_eq!(it.next(), None);
+    /// ```
+    #[inline]
+    pub fn rsplit<F>(&self, pred: F) -> RSplit<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().rsplit(pred)
+    }
+
+    /// Creates an iterator over mutable subslices separated by elements that
+    /// match `pred`, starting at the end of the slice and working
+    /// backwards. The matched element is not contained in the subslices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![100, 400, 300, 200, 600, 500];
+    ///
+    /// let mut count = 0;
+    /// for group in v.rsplit_mut(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as i128 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     count += 1;
+    ///     group[0] = Janet::from(count);
+    /// }
+    /// assert_eq!(v.as_ref(), array![3, 400, 300, 2, 600, 1].as_ref());
+    /// ```
+    #[inline]
+    pub fn rsplit_mut<F>(&mut self, pred: F) -> RSplitMut<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_mut().rsplit_mut(pred)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`, limited to returning at most `n` items. The matched element is
+    /// not contained in the subslices.
+    ///
+    /// The last element returned, if any, will contain the remainder of the
+    /// array.
+    ///
+    /// # Examples
+    ///
+    /// Print the array split once by numbers divisible by 3 (i.e., `[10, 40]`,
+    /// `[20, 60, 50]`):
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = array![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in v.splitn(2, |j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 % 3 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     println!("{:?}", group);
+    /// }
+    /// ```
+    #[inline]
+    pub fn splitn<F>(&self, n: usize, pred: F) -> SplitN<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().splitn(n, pred)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`, limited to returning at most `n` items. The matched element is
+    /// not contained in the subslices.
+    ///
+    /// The last element returned, if any, will contain the remainder of the
+    /// array.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in v.splitn_mut(2, |j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 % 3 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     group[0] = Janet::from(1);
+    /// }
+    /// assert_eq!(v.as_ref(), array![1, 40, 30, 1, 60, 50].as_ref());
+    /// ```
+    #[inline]
+    pub fn splitn_mut<F>(&mut self, n: usize, pred: F) -> SplitNMut<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_mut().splitn_mut(n, pred)
+    }
+
+    /// Returns an iterator over subslices separated by elements that match
+    /// `pred` limited to returning at most `n` items. This starts at the end of
+    /// the array and works backwards. The matched element is not contained in
+    /// the subslices.
+    ///
+    /// The last element returned, if any, will contain the remainder of the
+    /// array.
+    ///
+    /// # Examples
+    ///
+    /// Print the array split once, starting from the end, by numbers divisible
+    /// by 3 (i.e., `[50]`, `[10, 40, 30, 20]`):
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = array![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in v.rsplitn(2, |j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 % 3 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     println!("{:?}", group);
+    /// }
+    /// ```
+    #[inline]
+    pub fn rsplitn<F>(&self, n: usize, pred: F) -> RSplitN<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().rsplitn(n, pred)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred` limited to returning at most `n` items. This starts at the end of
+    /// the array and works backwards. The matched element is not contained in
+    /// the subslices.
+    ///
+    /// The last element returned, if any, will contain the remainder of the
+    /// array.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut s = array![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in s.rsplitn_mut(2, |j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => num as i64 % 3 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     group[0] = Janet::from(1);
+    /// }
+    /// assert_eq!(s.as_ref(), array![1, 40, 30, 20, 60, 1].as_ref());
+    /// ```
+    #[inline]
+    pub fn rsplitn_mut<F>(&mut self, n: usize, pred: F) -> RSplitNMut<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_mut().rsplitn_mut(n, pred)
+    }
+
     /// Return a raw pointer to the buffer raw structure.
     ///
     /// The caller must ensure that the buffer outlives the pointer this function returns,
@@ -1852,7 +2075,7 @@ impl<'data> JanetArray<'data> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_mut_raw(&mut self) -> *mut CJanetArray {
+    pub fn as_raw_mut(&mut self) -> *mut CJanetArray {
         self.raw
     }
 }
