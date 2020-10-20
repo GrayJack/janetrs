@@ -285,6 +285,53 @@ impl<'data> JanetTuple<'data> {
         }
     }
 
+    /// Divides one tuple into two at an index.
+    ///
+    /// The first will contain all indices from `[0, mid)` (excluding
+    /// the index `mid` itself) and the second will contain all
+    /// indices from `[mid, len)` (excluding the index `len` itself).
+    ///
+    /// # Panics
+    ///
+    /// Panics if `mid > len` or `mid < 0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{tuple, types::Janet};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let v = tuple![1, 2, 3, 4, 5, 6];
+    ///
+    /// {
+    ///     let (left, right) = v.split_at(0);
+    ///     assert!(left.is_empty());
+    ///     assert_eq!(right, tuple![1, 2, 3, 4, 5, 6].as_ref());
+    /// }
+    ///
+    /// {
+    ///     let (left, right) = v.split_at(2);
+    ///     assert_eq!(left, tuple![1, 2].as_ref());
+    ///     assert_eq!(right, tuple![3, 4, 5, 6].as_ref());
+    /// }
+    ///
+    /// {
+    ///     let (left, right) = v.split_at(6);
+    ///     assert_eq!(left, tuple![1, 2, 3, 4, 5, 6].as_ref());
+    ///     assert!(right.is_empty());
+    /// }
+    /// ```
+    #[inline]
+    pub fn split_at(&self, mid: i32) -> (&[Janet], &[Janet]) {
+        if mid < 0 {
+            crate::jpanic!(
+                "index out of bounds: the index ({}) is negative and must be positive",
+                mid
+            )
+        }
+        self.as_ref().split_at(mid as usize)
+    }
+
     /// Creates a tuple by repeating a tuple `n` times.
     ///
     /// # Panics
