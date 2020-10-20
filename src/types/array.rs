@@ -19,6 +19,9 @@ use evil_janet::{
 
 use super::{Janet, JanetExtend, JanetTuple};
 
+pub type Split<'a, P> = core::slice::Split<'a, Janet, P>;
+pub type SplitMut<'a, P> = core::slice::SplitMut<'a, Janet, P>;
+
 /// Janet [arrays](https://janet-lang.org/docs/data_structures/arrays.html) are a fundamental
 /// datatype in Janet. Janet Arrays are values that contain a sequence of other values.
 ///
@@ -1728,6 +1731,107 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub fn rchunks_exact_mut(&mut self, chunk_size: usize) -> RChunksExactMut<'_, Janet> {
         self.as_mut().rchunks_exact_mut(chunk_size)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`. The matched element is not contained in the subslices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![10, 40, 33, 20];
+    /// let mut iter = arr.split(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as u128 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), array![10, 40].as_ref());
+    /// assert_eq!(iter.next().unwrap(), array![20].as_ref());
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// If the first element is matched, an empty slice will be the first item
+    /// returned by the iterator. Similarly, if the last element in the slice
+    /// is matched, an empty slice will be the last item returned by the
+    /// iterator:
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![10, 40, 33];
+    /// let mut iter = arr.split(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as u128 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), array![10, 40].as_ref());
+    /// assert_eq!(iter.next().unwrap(), array![].as_ref());
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// If two matched elements are directly adjacent, an empty slice will be
+    /// present between them:
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![10, 6, 33, 20];
+    /// let mut iter = arr.split(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as u128 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), array![10].as_ref());
+    /// assert_eq!(iter.next().unwrap(), array![].as_ref());
+    /// assert_eq!(iter.next().unwrap(), array![20].as_ref());
+    /// assert!(iter.next().is_none());
+    /// ```
+    #[inline]
+    pub fn split<F>(&self, pred: F) -> Split<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().split(pred)
+    }
+
+    /// Creates an iterator over mutable subslices separated by elements that
+    /// match `pred`. The matched element is not contained in the subslices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut v = array![10, 40, 30, 20, 60, 50];
+    ///
+    /// for group in v.split_mut(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as i128 == 0,
+    ///     _ => false,
+    /// }) {
+    ///     group[0] = Janet::from(1);
+    /// }
+    /// assert_eq!(v.as_ref(), array![1, 40, 30, 1, 60, 1].as_ref());
+    /// ```
+    #[inline]
+    pub fn split_mut<F>(&mut self, pred: F) -> SplitMut<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_mut().split_mut(pred)
     }
 
     /// Return a raw pointer to the buffer raw structure.

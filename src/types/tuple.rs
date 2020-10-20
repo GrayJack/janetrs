@@ -12,6 +12,8 @@ use evil_janet::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as 
 
 use super::{Janet, JanetArray};
 
+pub type Split<'a, P> = core::slice::Split<'a, Janet, P>;
+
 /// Builder for [`JanetTuple`]s.
 #[derive(Debug)]
 pub struct JanetTupleBuilder<'data> {
@@ -746,6 +748,79 @@ impl<'data> JanetTuple<'data> {
     #[inline]
     pub fn rchunks_exact(&self, chunk_size: usize) -> RChunksExact<'_, Janet> {
         self.as_ref().rchunks_exact(chunk_size)
+    }
+
+    /// Creates an iterator over subslices separated by elements that match
+    /// `pred`. The matched element is not contained in the subslices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple![10, 40, 33, 20];
+    /// let mut iter = arr.split(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as u128 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), tuple![10, 40].as_ref());
+    /// assert_eq!(iter.next().unwrap(), tuple![20].as_ref());
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// If the first element is matched, an empty slice will be the first item
+    /// returned by the iterator. Similarly, if the last element in the slice
+    /// is matched, an empty slice will be the last item returned by the
+    /// iterator:
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple![10, 40, 33];
+    /// let mut iter = arr.split(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as u128 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), tuple![10, 40].as_ref());
+    /// assert_eq!(iter.next().unwrap(), tuple![].as_ref());
+    /// assert!(iter.next().is_none());
+    /// ```
+    ///
+    /// If two matched elements are directly adjacent, an empty slice will be
+    /// present between them:
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     tuple,
+    ///     types::{Janet, TaggedJanet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = tuple![10, 6, 33, 20];
+    /// let mut iter = arr.split(|j| match j.unwrap() {
+    ///     TaggedJanet::Number(num) => (num % 3.0) as u128 == 0,
+    ///     _ => false,
+    /// });
+    ///
+    /// assert_eq!(iter.next().unwrap(), tuple![10].as_ref());
+    /// assert_eq!(iter.next().unwrap(), tuple![].as_ref());
+    /// assert_eq!(iter.next().unwrap(), tuple![20].as_ref());
+    /// assert!(iter.next().is_none());
+    /// ```
+    #[inline]
+    pub fn split<F>(&self, pred: F) -> Split<'_, F>
+    where F: FnMut(&Janet) -> bool {
+        self.as_ref().split(pred)
     }
 
     /// Return a raw pointer to the tuple raw structure.
