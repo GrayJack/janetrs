@@ -96,13 +96,13 @@ macro_rules! tuple {
 macro_rules! array {
     () => { $crate::types::JanetArray::new() };
 
-    ($elem: expr; $n: expr) => {{
+    ($elem:expr; $n:expr) => {{
         let mut arr = $crate::types::JanetArray::with_capacity($n);
         (0..$n).for_each(|_| arr.push($crate::types::Janet::from($elem)));
         arr
     }};
 
-    ($($val: expr),* $(,)?) => {{
+    ($($val:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
         let mut arr = $crate::types::JanetArray::with_capacity(LEN);
         $(arr.push($crate::types::Janet::from($val));)*
@@ -138,7 +138,7 @@ macro_rules! array {
 /// [`JanetStruct`]: ./types/tuple/struct.JanetStruct.html
 #[macro_export]
 macro_rules! structs {
-    ($($key: expr => $value: expr),* $(,)?) => {{
+    ($($key:expr => $value:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
         let st = $crate::types::JanetStruct::builder(LEN)
             $(.put($crate::types::Janet::from($key), $crate::types::Janet::from($value)))*;
@@ -177,7 +177,7 @@ macro_rules! structs {
 macro_rules! table {
     () => ($crate::types::JanetTable::new());
 
-    ($($key: expr => $value: expr),* $(,)?) => {{
+    ($($key:expr => $value:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
         let mut table = $crate::types::JanetTable::with_capacity(LEN);
         $(let _ = table.insert($crate::types::Janet::from($key), $crate::types::Janet::from($value));)*
@@ -220,7 +220,7 @@ macro_rules! table {
 /// ```
 #[macro_export]
 macro_rules! janet_mod {
-    ($mod_name: literal; $({$fn_name: literal, $fn: expr, $fn_doc: literal}),* $(,)?) => {
+    ($mod_name:literal; $({$fn_name:literal, $fn:expr, $fn_doc:literal}),* $(,)?) => {
         #[no_mangle]
         pub unsafe extern "C" fn _janet_mod_config() -> $crate::lowlevel::JanetBuildConfig {
             $crate::lowlevel::JanetBuildConfig {
@@ -270,10 +270,10 @@ macro_rules! jpanic {
     () => {
         $crate::util::panic($crate::types::Janet::from("explicity panic"));
     };
-    ($msg: expr $(,)?) => {
+    ($msg:expr $(,)?) => {
         $crate::util::panic($crate::types::Janet::from($msg));
     };
-    ($msg: expr, $($arg:tt)+) => {
+    ($msg:expr, $($arg:tt)+) => {
         $crate::util::panic($crate::types::Janet::from(format!($msg, $($arg)+).as_str()));
     };
 }

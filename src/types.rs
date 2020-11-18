@@ -392,12 +392,12 @@ impl fmt::Display for Janet {
             _ => {
                 // SAFETY: `janet_formatc` always returns a non-null valid sequence of `u8` in the
                 // form of `*const u8`
-        let jstr = unsafe {
-            JanetString::from_raw(evil_janet::janet_formatc(
+                let jstr = unsafe {
+                    JanetString::from_raw(evil_janet::janet_formatc(
                         "%q\0".as_ptr() as *const i8,
-                self.inner,
-            ))
-        };
+                        self.inner,
+                    ))
+                };
 
                 fmt::Display::fmt(&jstr, f)
             },
@@ -751,63 +751,63 @@ from_for_janet!(JanetFiber<'_>, fiber);
 try_from_janet!(JanetFiber<'_>, JanetType::Fiber, janet_unwrap_fiber);
 
 macro_rules! janet_unwrap_unchecked {
-    (abstracts $janet: expr) => {
+    (abstracts $janet:expr) => {
         unsafe { JanetAbstract::from_raw(janet_unwrap_abstract($janet.into())) }
     };
 
-    (array $janet: expr) => {
+    (array $janet:expr) => {
         unsafe { JanetArray::from_raw(janet_unwrap_array($janet.into())) }
     };
 
-    (boolean $janet: expr) => {
+    (boolean $janet:expr) => {
         unsafe { janet_unwrap_boolean($janet.inner) } != 0
     };
 
-    (buffer $janet: expr) => {
+    (buffer $janet:expr) => {
         unsafe { JanetBuffer::from_raw(janet_unwrap_buffer($janet.into())) }
     };
 
-    (cfunc $janet: expr) => {
+    (cfunc $janet:expr) => {
         unsafe { janet_unwrap_cfunction($janet.into()) }
     };
 
-    (fiber $janet: expr) => {
+    (fiber $janet:expr) => {
         unsafe { JanetFiber::from_raw(janet_unwrap_fiber($janet.into())) }
     };
 
-    (function $janet: expr) => {
+    (function $janet:expr) => {
         unsafe { JanetFunction::from_raw(janet_unwrap_function($janet.into())) }
     };
 
-    (keyword $janet: expr) => {
+    (keyword $janet:expr) => {
         unsafe { JanetKeyword::from_raw(janet_unwrap_keyword($janet.into())) }
     };
 
-    (number $janet: expr) => {
+    (number $janet:expr) => {
         unsafe { janet_unwrap_number($janet.into()) }
     };
 
-    (pointer $janet: expr) => {
+    (pointer $janet:expr) => {
         unsafe { JanetPointer::new(janet_unwrap_pointer($janet.into())) }
     };
 
-    (string $janet: expr) => {
+    (string $janet:expr) => {
         unsafe { JanetString::from_raw(janet_unwrap_string($janet.into())) }
     };
 
-    (structs $janet: expr) => {
+    (structs $janet:expr) => {
         unsafe { JanetStruct::from_raw(janet_unwrap_struct($janet.into())) }
     };
 
-    (symbol $janet: expr) => {
+    (symbol $janet:expr) => {
         unsafe { JanetSymbol::from_raw(janet_unwrap_symbol($janet.into())) }
     };
 
-    (table $janet: expr) => {
+    (table $janet:expr) => {
         unsafe { JanetTable::from_raw(janet_unwrap_table($janet.into())) }
     };
 
-    (tuple $janet: expr) => {
+    (tuple $janet:expr) => {
         unsafe { JanetTuple::from_raw(janet_unwrap_tuple($janet.into())) }
     };
 }
