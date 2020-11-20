@@ -62,6 +62,7 @@ pub use evil_janet as lowlevel;
 
 #[cfg(any(feature = "amalgation", feature = "link-system"))]
 pub mod client;
+pub mod env;
 mod macros;
 pub mod types;
 pub mod util;
