@@ -13,17 +13,7 @@ use core::{
 #[cfg(feature = "std")]
 use std::error;
 
-use evil_janet::{
-    janet_length, janet_truthy, janet_type, janet_unwrap_abstract, janet_unwrap_array,
-    janet_unwrap_boolean, janet_unwrap_buffer, janet_unwrap_cfunction, janet_unwrap_fiber,
-    janet_unwrap_function, janet_unwrap_integer, janet_unwrap_keyword, janet_unwrap_number,
-    janet_unwrap_pointer, janet_unwrap_string, janet_unwrap_struct, janet_unwrap_symbol,
-    janet_unwrap_table, janet_unwrap_tuple, janet_wrap_array, janet_wrap_boolean,
-    janet_wrap_buffer, janet_wrap_cfunction, janet_wrap_fiber, janet_wrap_function,
-    janet_wrap_integer, janet_wrap_keyword, janet_wrap_nil, janet_wrap_number, janet_wrap_pointer,
-    janet_wrap_string, janet_wrap_struct, janet_wrap_symbol, janet_wrap_table, janet_wrap_tuple,
-    Janet as CJanet, JanetType as CJanetType,
-};
+use evil_janet::{Janet as CJanet, JanetType as CJanetType};
 
 pub mod array;
 pub mod buffer;
@@ -126,7 +116,7 @@ impl Janet {
     #[inline]
     pub fn nil() -> Self {
         Self {
-            inner: unsafe { janet_wrap_nil() },
+            inner: unsafe { evil_janet::janet_wrap_nil() },
         }
     }
 
@@ -134,7 +124,7 @@ impl Janet {
     #[inline]
     pub fn boolean(value: bool) -> Self {
         Self {
-            inner: unsafe { janet_wrap_boolean(value.into()) },
+            inner: unsafe { evil_janet::janet_wrap_boolean(value.into()) },
         }
     }
 
@@ -142,7 +132,7 @@ impl Janet {
     #[inline]
     pub fn number(value: f64) -> Self {
         Self {
-            inner: unsafe { janet_wrap_number(value) },
+            inner: unsafe { evil_janet::janet_wrap_number(value) },
         }
     }
 
@@ -150,7 +140,7 @@ impl Janet {
     #[inline]
     pub fn integer(value: i32) -> Self {
         Self {
-            inner: unsafe { janet_wrap_integer(value) },
+            inner: unsafe { evil_janet::janet_wrap_integer(value) },
         }
     }
 
@@ -158,7 +148,7 @@ impl Janet {
     #[inline]
     pub fn array(value: JanetArray<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_array(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_array(value.raw) },
         }
     }
 
@@ -166,7 +156,7 @@ impl Janet {
     #[inline]
     pub fn buffer(value: JanetBuffer<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_buffer(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_buffer(value.raw) },
         }
     }
 
@@ -174,7 +164,7 @@ impl Janet {
     #[inline]
     pub fn table(value: JanetTable<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_table(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_table(value.raw) },
         }
     }
 
@@ -182,7 +172,7 @@ impl Janet {
     #[inline]
     pub fn tuple(value: JanetTuple<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_tuple(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_tuple(value.raw) },
         }
     }
 
@@ -190,7 +180,7 @@ impl Janet {
     #[inline]
     pub fn string(value: JanetString<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_string(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_string(value.raw) },
         }
     }
 
@@ -198,7 +188,7 @@ impl Janet {
     #[inline]
     pub fn structs(value: JanetStruct<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_struct(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_struct(value.raw) },
         }
     }
 
@@ -206,7 +196,7 @@ impl Janet {
     #[inline]
     pub fn symbol(value: JanetSymbol<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_symbol(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_symbol(value.raw) },
         }
     }
 
@@ -214,7 +204,7 @@ impl Janet {
     #[inline]
     pub fn keyword(value: JanetKeyword<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_keyword(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_keyword(value.raw) },
         }
     }
 
@@ -222,7 +212,7 @@ impl Janet {
     #[inline]
     pub fn fiber(value: JanetFiber<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_fiber(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_fiber(value.raw) },
         }
     }
 
@@ -230,7 +220,7 @@ impl Janet {
     #[inline]
     pub fn function(value: JanetFunction<'_>) -> Self {
         Self {
-            inner: unsafe { janet_wrap_function(value.raw) },
+            inner: unsafe { evil_janet::janet_wrap_function(value.raw) },
         }
     }
 
@@ -238,7 +228,7 @@ impl Janet {
     #[inline]
     pub fn c_function(value: JanetCFunction) -> Self {
         Self {
-            inner: unsafe { janet_wrap_cfunction(value) },
+            inner: unsafe { evil_janet::janet_wrap_cfunction(value) },
         }
     }
 
@@ -246,7 +236,7 @@ impl Janet {
     #[inline]
     pub fn pointer(value: JanetPointer) -> Self {
         Self {
-            inner: unsafe { janet_wrap_pointer(value.as_ptr()) },
+            inner: unsafe { evil_janet::janet_wrap_pointer(value.as_ptr()) },
         }
     }
 
@@ -328,7 +318,7 @@ impl Janet {
                 | Jt::Buffer
                 | Jt::Abstract
         ) {
-            Some(unsafe { janet_length(self.inner) })
+            Some(unsafe { evil_janet::janet_length(self.inner) })
         } else {
             None
         }
@@ -344,13 +334,13 @@ impl Janet {
     /// Returns `true` if the `Janet` value are truthy.
     #[inline]
     pub fn is_truthy(&self) -> bool {
-        unsafe { janet_truthy(self.inner) == 0 }
+        unsafe { evil_janet::janet_truthy(self.inner) == 0 }
     }
 
     /// Returns the type of [`Janet`] object.
     #[inline]
     pub fn kind(&self) -> JanetType {
-        unsafe { janet_type(self.inner) }.into()
+        unsafe { evil_janet::janet_type(self.inner) }.into()
     }
 
     /// Returns the raw data of the data
@@ -478,7 +468,7 @@ impl TryFrom<Janet> for bool {
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
         if matches!(value.kind(), JanetType::Boolean) {
-            Ok(unsafe { janet_unwrap_boolean(value.inner) } != 0)
+            Ok(unsafe { evil_janet::janet_unwrap_boolean(value.inner) } != 0)
         } else {
             Err(JanetConversionError)
         }
@@ -505,7 +495,7 @@ impl TryFrom<Janet> for i32 {
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
         if matches!(value.kind(), JanetType::Number) {
-            Ok(unsafe { janet_unwrap_integer(value.inner) })
+            Ok(unsafe { evil_janet::janet_unwrap_integer(value.inner) })
         } else {
             Err(JanetConversionError)
         }
@@ -532,7 +522,7 @@ impl TryFrom<Janet> for f64 {
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
         if matches!(value.kind(), JanetType::Number) {
-            Ok(unsafe { janet_unwrap_number(value.inner) })
+            Ok(unsafe { evil_janet::janet_unwrap_number(value.inner) })
         } else {
             Err(JanetConversionError)
         }
@@ -574,7 +564,7 @@ impl TryFrom<Janet> for JanetCFunction {
 
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
         if matches!(value.kind(), JanetType::CFunction) {
-            Ok(unsafe { janet_unwrap_cfunction(value.inner) })
+            Ok(unsafe { evil_janet::janet_unwrap_cfunction(value.inner) })
         } else {
             Err(JanetConversionError)
         }
@@ -679,7 +669,7 @@ macro_rules! try_from_janet {
             #[inline]
             fn try_from(value: Janet) -> Result<Self, Self::Error> {
                 if matches!(value.kind(), $kind) {
-                    Ok(unsafe { Self::from_raw($unwrap_fn_name(value.inner)) })
+                    Ok(unsafe { Self::from_raw(evil_janet::$unwrap_fn_name(value.inner)) })
                 } else {
                     Err(JanetConversionError)
                 }
@@ -694,7 +684,7 @@ macro_rules! try_from_janet {
             #[inline]
             fn try_from(value: Janet) -> Result<Self, Self::Error> {
                 if matches!(value.kind(), $kind) {
-                    Ok(unsafe { Self::$fn_name($unwrap_fn_name(value.inner)) })
+                    Ok(unsafe { Self::$fn_name(evil_janet::$unwrap_fn_name(value.inner)) })
                 } else {
                     Err(JanetConversionError)
                 }
@@ -753,63 +743,63 @@ try_from_janet!(JanetFiber<'_>, JanetType::Fiber, janet_unwrap_fiber);
 
 macro_rules! janet_unwrap_unchecked {
     (abstracts $janet:expr) => {
-        unsafe { JanetAbstract::from_raw(janet_unwrap_abstract($janet.into())) }
+        unsafe { JanetAbstract::from_raw(evil_janet::janet_unwrap_abstract($janet.into())) }
     };
 
     (array $janet:expr) => {
-        unsafe { JanetArray::from_raw(janet_unwrap_array($janet.into())) }
+        unsafe { JanetArray::from_raw(evil_janet::janet_unwrap_array($janet.into())) }
     };
 
     (boolean $janet:expr) => {
-        unsafe { janet_unwrap_boolean($janet.inner) } != 0
+        unsafe { evil_janet::janet_unwrap_boolean($janet.inner) } != 0
     };
 
     (buffer $janet:expr) => {
-        unsafe { JanetBuffer::from_raw(janet_unwrap_buffer($janet.into())) }
+        unsafe { JanetBuffer::from_raw(evil_janet::janet_unwrap_buffer($janet.into())) }
     };
 
     (cfunc $janet:expr) => {
-        unsafe { janet_unwrap_cfunction($janet.into()) }
+        unsafe { evil_janet::janet_unwrap_cfunction($janet.into()) }
     };
 
     (fiber $janet:expr) => {
-        unsafe { JanetFiber::from_raw(janet_unwrap_fiber($janet.into())) }
+        unsafe { JanetFiber::from_raw(evil_janet::janet_unwrap_fiber($janet.into())) }
     };
 
     (function $janet:expr) => {
-        unsafe { JanetFunction::from_raw(janet_unwrap_function($janet.into())) }
+        unsafe { JanetFunction::from_raw(evil_janet::janet_unwrap_function($janet.into())) }
     };
 
     (keyword $janet:expr) => {
-        unsafe { JanetKeyword::from_raw(janet_unwrap_keyword($janet.into())) }
+        unsafe { JanetKeyword::from_raw(evil_janet::janet_unwrap_keyword($janet.into())) }
     };
 
     (number $janet:expr) => {
-        unsafe { janet_unwrap_number($janet.into()) }
+        unsafe { evil_janet::janet_unwrap_number($janet.into()) }
     };
 
     (pointer $janet:expr) => {
-        unsafe { JanetPointer::new(janet_unwrap_pointer($janet.into())) }
+        unsafe { JanetPointer::new(evil_janet::janet_unwrap_pointer($janet.into())) }
     };
 
     (string $janet:expr) => {
-        unsafe { JanetString::from_raw(janet_unwrap_string($janet.into())) }
+        unsafe { JanetString::from_raw(evil_janet::janet_unwrap_string($janet.into())) }
     };
 
     (structs $janet:expr) => {
-        unsafe { JanetStruct::from_raw(janet_unwrap_struct($janet.into())) }
+        unsafe { JanetStruct::from_raw(evil_janet::janet_unwrap_struct($janet.into())) }
     };
 
     (symbol $janet:expr) => {
-        unsafe { JanetSymbol::from_raw(janet_unwrap_symbol($janet.into())) }
+        unsafe { JanetSymbol::from_raw(evil_janet::janet_unwrap_symbol($janet.into())) }
     };
 
     (table $janet:expr) => {
-        unsafe { JanetTable::from_raw(janet_unwrap_table($janet.into())) }
+        unsafe { JanetTable::from_raw(evil_janet::janet_unwrap_table($janet.into())) }
     };
 
     (tuple $janet:expr) => {
-        unsafe { JanetTuple::from_raw(janet_unwrap_tuple($janet.into())) }
+        unsafe { JanetTuple::from_raw(evil_janet::janet_unwrap_tuple($janet.into())) }
     };
 }
 
