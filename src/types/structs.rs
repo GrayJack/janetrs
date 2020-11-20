@@ -26,7 +26,7 @@ impl<'data> JanetStructBuilder<'data> {
     /// length specified at the start of the building process, in the [`builder`]
     /// function, is ignored.
     ///
-    /// [`builder`]: ./struct.JanetStruct.html#method.builder
+    /// [`builder`]: #method.builder
     #[inline]
     pub fn put(self, key: impl Into<Janet>, value: impl Into<Janet>) -> Self {
         let (key, value) = (key.into(), value.into());

@@ -2499,7 +2499,7 @@ impl JanetBuffer<'_> {
     ///
     /// If you need to mutate the contents of the slice, use [`as_mut_ptr`].
     ///
-    /// [`as_mut_ptr`]: ./struct.JanetBuffer.html#method.as_mut_raw
+    /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
     pub fn as_raw(&self) -> *const CJanetBuffer {
         self.raw

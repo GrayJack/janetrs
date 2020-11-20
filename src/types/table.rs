@@ -12,7 +12,6 @@ use evil_janet::{
     janet_table_get, janet_table_merge_table, janet_table_put, janet_table_rawget,
     janet_table_remove, JanetKV, JanetTable as CJanetTable,
 };
-// janet_table_remove
 
 use super::{Janet, JanetExtend, JanetStruct};
 use crate::cjvg;

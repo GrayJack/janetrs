@@ -72,7 +72,7 @@ impl<'data> JanetTupleBuilder<'data> {
 ///     .put(Janet::boolean(true));
 /// ```
 ///
-/// [Janet arrays]: ./../array/struct.JanetArray.html
+/// [Janet arrays]: crate::types::JanetArray
 #[repr(transparent)]
 pub struct JanetTuple<'data> {
     pub(crate) raw: *const CJanet,
