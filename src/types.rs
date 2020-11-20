@@ -40,6 +40,8 @@ pub use symbol::{JanetKeyword, JanetSymbol};
 pub use table::JanetTable;
 pub use tuple::JanetTuple;
 
+use crate::env::JanetEnvironment;
+
 
 /// The error when converting [`Janet`]s to C Janet types.
 ///
@@ -265,15 +267,8 @@ impl Janet {
     /// Resolve a `symbol` in the core environment.
     #[inline]
     pub fn from_core<'a>(symbol: impl Into<JanetSymbol<'a>>) -> Option<Self> {
-        let symbol = symbol.into();
-        let mut out = Janet::nil();
-
-        unsafe {
-            let env = evil_janet::janet_core_env(core::ptr::null_mut());
-            evil_janet::janet_resolve(env, symbol.raw, &mut out.inner);
-        }
-
-        if out.is_nil() { None } else { Some(out) }
+        let env = JanetEnvironment::default();
+        env.resolve(symbol)
     }
 
     /// Wraps a value into a [`Janet`].
