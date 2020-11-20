@@ -2,7 +2,7 @@ use core::ptr;
 
 use crate::types::{Janet, JanetCFunction, JanetSymbol, JanetTable};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 #[repr(transparent)]
 pub struct JanetEnvironment(JanetTable<'static>);
 
@@ -82,5 +82,11 @@ impl JanetEnvironment {
     #[inline]
     pub fn table(&self) -> &JanetTable {
         &self.0
+    }
+}
+
+impl Default for JanetEnvironment {
+    fn default() -> Self {
+        Self::new()
     }
 }
