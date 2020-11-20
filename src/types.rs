@@ -258,7 +258,8 @@ impl Janet {
         }
     }
 
-    /// Get a dynamic binding from the environment.
+    /// Get a dynamic [keywrord](self::JanetKeyword) binding from the environment if it
+    /// exists.
     #[inline]
     pub fn dynamic(key: impl AsRef<[u8]>) -> Option<Self> {
         let mut key: JanetBuffer = key.as_ref().into();
