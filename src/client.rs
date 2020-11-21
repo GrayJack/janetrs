@@ -1,16 +1,16 @@
 //! This module implements anything required to run a Janet client.
 use core::{
     fmt::{self, Display},
-    ptr,
     sync::atomic::{AtomicBool, Ordering},
 };
 
 #[cfg(feature = "std")]
 use std::{error::Error as StdError, thread_local};
 
-use evil_janet::{janet_core_env, janet_deinit, janet_dobytes, janet_init};
-
-use crate::types::{Janet, JanetCFunction, JanetTable};
+use crate::{
+    env::JanetEnvironment,
+    types::{Janet, JanetCFunction, JanetTable},
+};
 
 // There are platforms where AtomicBool doesn't exist
 // At some point it would be awesome to find what targets doesn't have support for atomics
@@ -65,7 +65,7 @@ impl StdError for Error {}
 /// [`init_unchecked`]: ./struct.JanetClient.html#method.init_unchecked.html
 #[derive(Debug)]
 pub struct JanetClient {
-    env_table: Option<JanetTable<'static>>,
+    env_table: Option<JanetEnvironment>,
 }
 
 impl JanetClient {
@@ -88,7 +88,7 @@ impl JanetClient {
 
         // SAFETY: We use a static AtomicBool to make sure that it is started only once (per
         // thread if "std" feature activated)
-        unsafe { janet_init() };
+        unsafe { evil_janet::janet_init() };
         Ok(Self { env_table: None })
     }
 
@@ -103,7 +103,7 @@ impl JanetClient {
     /// segmentation fault.
     #[inline]
     pub unsafe fn init_unchecked() -> Self {
-        janet_init();
+        evil_janet::janet_init();
         Self { env_table: None }
     }
 
@@ -113,19 +113,22 @@ impl JanetClient {
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     #[inline]
     pub fn with_default_env(mut self) -> Self {
-        self.env_table = Some(unsafe { JanetTable::from_raw(janet_core_env(ptr::null_mut())) });
+        self.env_table = Some(JanetEnvironment::default());
         self
     }
 
-    /// Load the environment of `env_table`.
+    /// Load the deafult environment of Janet with the givern `replacements` table.
+    ///
+    /// If an item in the `replacements` table has the same name as a item in the default
+    /// environment table, the item is replaced by the newer.
     #[inline]
-    pub fn with_env(mut self, env_table: JanetTable<'static>) -> Self {
-        self.env_table = Some(env_table);
+    pub fn with_replacements(mut self, replacements: JanetTable<'static>) -> Self {
+        self.env_table = Some(JanetEnvironment::with_replacements(replacements));
         self
     }
 
     /// Add a Janet immutable variable to the client environment if it has one, otherwise
-    /// creates it.
+    /// creates it with the default one.
     ///
     /// # Examples
     /// ```
@@ -134,7 +137,7 @@ impl JanetClient {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
     ///
-    /// client.add_def("const", 10, None);
+    /// client.add_def("const", 10);
     /// assert!(client.env().is_some());
     ///
     /// let c = client.run("const")?;
@@ -143,18 +146,18 @@ impl JanetClient {
     /// # }
     /// ```
     #[inline]
-    pub fn add_def(&mut self, name: &str, value: impl Into<Janet>, doc: Option<&str>) {
+    pub fn add_def(&mut self, name: &str, value: impl Into<Janet>) {
         if self.env().is_none() {
-            self.env_table = Some(JanetTable::with_capacity(10));
+            self.env_table = Some(JanetEnvironment::default());
         }
 
-        if let Some(env) = self.env_mut() {
-            crate::util::def(env, name, value, doc)
+        if let Some(ref mut env) = self.env_table {
+            env.add_def(name, value)
         }
     }
 
-    /// Add a Janet mutable variable to the client environment if it has one, otherwise
-    /// creates it.
+    /// Add a Janet immutable variable with the given doc to the client environment if it
+    /// has one, otherwise creates it with the default one.
     ///
     /// # Examples
     /// ```
@@ -163,7 +166,36 @@ impl JanetClient {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
     ///
-    /// client.add_var("variable", 10, None);
+    /// client.add_def_with_doc("const", 10, "my const");
+    /// assert!(client.env().is_some());
+    ///
+    /// let c = client.run("const")?;
+    /// assert!(!c.is_nil());
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn add_def_with_doc(&mut self, name: &str, value: impl Into<Janet>, doc: &str) {
+        if self.env().is_none() {
+            self.env_table = Some(JanetEnvironment::default());
+        }
+
+        if let Some(ref mut env) = self.env_table {
+            env.add_def_with_doc(name, value, doc)
+        }
+    }
+
+    /// Add a Janet mutable variable to the client environment if it has one, otherwise
+    /// creates it with the default one.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{client::JanetClient, types::Janet};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut client = JanetClient::init()?;
+    /// assert!(client.env().is_none());
+    ///
+    /// client.add_var("variable", 10);
     /// assert!(client.env().is_some());
     ///
     /// let c = client.run("variable")?;
@@ -172,18 +204,47 @@ impl JanetClient {
     /// # }
     /// ```
     #[inline]
-    pub fn add_var(&mut self, name: &str, value: impl Into<Janet>, doc: Option<&str>) {
+    pub fn add_var(&mut self, name: &str, value: impl Into<Janet>) {
         if self.env().is_none() {
-            self.env_table = Some(JanetTable::with_capacity(10));
+            self.env_table = Some(JanetEnvironment::default());
         }
 
-        if let Some(env) = self.env_mut() {
-            crate::util::var(env, name, value, doc)
+        if let Some(ref mut env) = self.env_table {
+            env.add_var(name, value)
+        }
+    }
+
+    /// Add a Janet mutable variable with the given doc to the client environment if it
+    /// has one, otherwise creates it with the default one.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{client::JanetClient, types::Janet};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut client = JanetClient::init()?;
+    /// assert!(client.env().is_none());
+    ///
+    /// client.add_var_with_doc("variable", 10, "my_var");
+    /// assert!(client.env().is_some());
+    ///
+    /// let c = client.run("variable")?;
+    /// assert!(!c.is_nil());
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn add_var_with_doc(&mut self, name: &str, value: impl Into<Janet>, doc: &str) {
+        if self.env().is_none() {
+            self.env_table = Some(JanetEnvironment::default());
+        }
+
+        if let Some(ref mut env) = self.env_table {
+            env.add_var_with_doc(name, value, doc)
         }
     }
 
     /// Add a Janet C function to the client environment if it has one and register that
-    /// function in the Janet VM, otherwise creates it.
+    /// function in the Janet VM, otherwise creates it with default one.
     ///
     /// # Examples
     /// ```
@@ -201,7 +262,7 @@ impl JanetClient {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
     ///
-    /// client.add_c_fn("test", Some(test), None);
+    /// client.add_c_fn(None, "test", Some(test));
     /// assert!(client.env().is_some());
     ///
     /// let c = client.run("test")?;
@@ -210,18 +271,18 @@ impl JanetClient {
     /// # }
     /// ```
     #[inline]
-    pub fn add_c_fn(&mut self, name: &str, f: JanetCFunction, doc: Option<&str>) {
+    pub fn add_c_fn(&mut self, namespace: Option<&str>, name: &str, f: JanetCFunction) {
         if self.env().is_none() {
-            self.env_table = Some(JanetTable::with_capacity(10));
+            self.env_table = Some(JanetEnvironment::default());
         }
 
-        if let Some(env) = self.env_mut() {
-            crate::util::c_func(env, None, name, f, doc)
+        if let Some(ref mut env) = self.env_table {
+            env.add_c_func(namespace, name, f)
         }
     }
 
-    /// Add a Janet C function under a given `namespace` to the client environment if it
-    /// has one and register that function in the Janet VM, otherwise creates it.
+    /// Add a Janet C function to the client environment if it has one and register that
+    /// function in the Janet VM, otherwise creates it with default one.
     ///
     /// # Examples
     /// ```
@@ -239,24 +300,24 @@ impl JanetClient {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
     ///
-    /// client.add_c_fn_with_namespace("p", "test", Some(test), None);
+    /// client.add_c_fn_with_doc(None, "test", Some(test), "test function");
     /// assert!(client.env().is_some());
     ///
-    /// let c = client.run("p/test")?;
+    /// let c = client.run("test")?;
     /// assert_eq!(c.kind(), JanetType::CFunction);
     /// # Ok(())
     /// # }
     /// ```
     #[inline]
-    pub fn add_c_fn_with_namespace(
-        &mut self, namespace: &str, name: &str, f: JanetCFunction, doc: Option<&str>,
+    pub fn add_c_fn_with_doc(
+        &mut self, namespace: Option<&str>, name: &str, f: JanetCFunction, doc: &str,
     ) {
         if self.env().is_none() {
-            self.env_table = Some(JanetTable::with_capacity(10));
+            self.env_table = Some(JanetEnvironment::default());
         }
 
-        if let Some(env) = self.env_mut() {
-            crate::util::c_func(env, Some(namespace), name, f, doc)
+        if let Some(ref mut env) = self.env_table {
+            env.add_c_func_with_doc(namespace, name, f, doc)
         }
     }
 
@@ -287,14 +348,14 @@ impl JanetClient {
     pub fn run_bytes(&self, code: impl AsRef<[u8]>) -> Result<Janet, Error> {
         let code = code.as_ref();
         let env = match self.env_table.as_ref() {
-            Some(e) => e,
+            Some(e) => e.table(),
             None => return Err(Error::EnvNotInit),
         };
 
         let mut out = Janet::nil();
 
         let res = unsafe {
-            janet_dobytes(
+            evil_janet::janet_dobytes(
                 env.raw,
                 code.as_ptr(),
                 code.len() as i32,
@@ -341,13 +402,8 @@ impl JanetClient {
     }
 
     /// Return a reference of the environment table of the runtime if it exist.
-    pub fn env(&self) -> Option<&JanetTable<'static>> {
+    pub fn env(&self) -> Option<&JanetEnvironment> {
         self.env_table.as_ref()
-    }
-
-    /// Return a mutable reference of the environment table of the runtime if it exist.
-    pub fn env_mut(&mut self) -> Option<&mut JanetTable<'static>> {
-        self.env_table.as_mut()
     }
 }
 
@@ -361,7 +417,7 @@ impl Drop for JanetClient {
         #[cfg(not(feature = "std"))]
         INIT.swap(false, Ordering::SeqCst);
 
-        unsafe { janet_deinit() }
+        unsafe { evil_janet::janet_deinit() }
     }
 }
 
