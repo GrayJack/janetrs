@@ -28,11 +28,11 @@
 //! This software is licensed under the terms of the [MIT Public License](./LICENSE).
 //!
 //! ### TODO: Types: Lacking or Incomplete
-//!  - [ ] JanetAbstract
-//!  - [I] JanetCFunction
+//!  - [I] JanetAbstract
+//!  - [X] JanetCFunction
 //!  - [I] JanetFiber
 //!  - [I] JanetFunction
-//!  - [ ] JanetPointer
+//!  - [X] JanetPointer
 //!  - [ ] Janet Typed Array
 //!  - [ ] GC functions
 //!
