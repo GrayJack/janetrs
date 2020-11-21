@@ -1,10 +1,7 @@
 //! Janet fibers (soft threads) type.
 use core::{iter::FusedIterator, marker::PhantomData};
 
-use evil_janet::{
-    janet_continue, janet_current_fiber, janet_fiber, janet_fiber_status, janet_root_fiber,
-    janet_stacktrace, JanetFiber as CJanetFiber,
-};
+use evil_janet::JanetFiber as CJanetFiber;
 
 use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 
@@ -26,7 +23,7 @@ impl<'data> JanetFiber<'data> {
     pub fn new(capacity: i32, f: &mut JanetFunction, args: impl AsRef<[Janet]>) -> Option<Self> {
         let args = args.as_ref();
         let raw = unsafe {
-            janet_fiber(
+            evil_janet::janet_fiber(
                 f.raw,
                 capacity,
                 args.len() as i32,
@@ -60,7 +57,7 @@ impl<'data> JanetFiber<'data> {
     /// Return the current [`JanetFiber`] if it exists.
     #[inline]
     pub fn current() -> Option<Self> {
-        let f = unsafe { janet_current_fiber() };
+        let f = unsafe { evil_janet::janet_current_fiber() };
         if f.is_null() {
             None
         } else {
@@ -76,7 +73,7 @@ impl<'data> JanetFiber<'data> {
     /// The root fiber is the oldest ancestor that does not have a parent.
     #[inline]
     pub fn root() -> Option<Self> {
-        let f = unsafe { janet_root_fiber() };
+        let f = unsafe { evil_janet::janet_root_fiber() };
         if f.is_null() {
             None
         } else {
@@ -103,7 +100,7 @@ impl<'data> JanetFiber<'data> {
     /// Returns the fiber status.
     #[inline]
     pub fn status(&self) -> FiberStatus {
-        let raw_status = unsafe { janet_fiber_status(self.raw) };
+        let raw_status = unsafe { evil_janet::janet_fiber_status(self.raw) };
         FiberStatus::from(raw_status)
     }
 
@@ -247,7 +244,7 @@ impl<'data> JanetFiber<'data> {
 impl JanetFiber<'_> {
     #[inline]
     pub(crate) fn display_stacktrace(&mut self, err: Janet) {
-        unsafe { janet_stacktrace(self.raw, err.inner) }
+        unsafe { evil_janet::janet_stacktrace(self.raw, err.inner) }
     }
 }
 /// An iterator that executes the function related to the fiber untill it completes.
@@ -265,7 +262,8 @@ impl<'a, 'data> Iterator for Exec<'a, 'data> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let mut out = Janet::nil();
-        let sig = unsafe { janet_continue(self.fiber.raw, self.input.inner, &mut out.inner) };
+        let sig =
+            unsafe { evil_janet::janet_continue(self.fiber.raw, self.input.inner, &mut out.inner) };
         let sig = JanetSignal::from(sig);
         if matches!(
             sig,

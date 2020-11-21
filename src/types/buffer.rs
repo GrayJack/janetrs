@@ -17,14 +17,7 @@ use std::{
     path::Path,
 };
 
-use evil_janet::{
-    janet_buffer, janet_buffer_ensure, janet_buffer_extra, janet_buffer_push_bytes,
-    janet_buffer_push_u16, janet_buffer_push_u32, janet_buffer_push_u64, janet_buffer_push_u8,
-    janet_buffer_setcount, JanetBuffer as CJanetBuffer,
-};
-
-#[cfg(feature = "std")]
-use evil_janet::janet_buffer_push_cstring;
+use evil_janet::JanetBuffer as CJanetBuffer;
 
 use bstr::{
     BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
@@ -112,7 +105,7 @@ impl JanetBuffer<'_> {
     #[inline]
     pub fn new() -> Self {
         Self {
-            raw:     unsafe { janet_buffer(0) },
+            raw:     unsafe { evil_janet::janet_buffer(0) },
             phantom: PhantomData,
         }
     }
@@ -132,7 +125,7 @@ impl JanetBuffer<'_> {
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
-            raw:     unsafe { janet_buffer(capacity) },
+            raw:     unsafe { evil_janet::janet_buffer(capacity) },
             phantom: PhantomData,
         }
     }
@@ -204,7 +197,7 @@ impl JanetBuffer<'_> {
     /// Note that this method has no effect on the allocated capacity of the buffer.
     #[inline]
     pub fn set_len(&mut self, new_len: i32) {
-        unsafe { janet_buffer_setcount(self.raw, new_len) };
+        unsafe { evil_janet::janet_buffer_setcount(self.raw, new_len) };
     }
 
     /// Ensure that a buffer has enough space for `check_capacity` elements. If not,
@@ -212,7 +205,7 @@ impl JanetBuffer<'_> {
     /// should be `1` or `2`.
     #[inline]
     pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
-        unsafe { janet_buffer_ensure(self.raw, check_capacity, growth) };
+        unsafe { evil_janet::janet_buffer_ensure(self.raw, check_capacity, growth) };
     }
 
     /// Ensures that this `JanetBuffer`'s capacity is at least `additional` bytes
@@ -231,7 +224,7 @@ impl JanetBuffer<'_> {
     /// [`reserve_exact`]: #method.reserve_exact
     #[inline]
     pub fn reserve(&mut self, additional: i32) {
-        unsafe { janet_buffer_extra(self.raw, additional) };
+        unsafe { evil_janet::janet_buffer_extra(self.raw, additional) };
     }
 
     /// Ensures that this `JanetBuffer`'s capacity is `additional` bytes
@@ -279,7 +272,7 @@ impl JanetBuffer<'_> {
             bytes.len() as i32
         };
 
-        unsafe { janet_buffer_push_bytes(self.raw, bytes.as_ptr(), len) }
+        unsafe { evil_janet::janet_buffer_push_bytes(self.raw, bytes.as_ptr(), len) }
     }
 
     /// Appends the given char to the end of this buffer.
@@ -314,32 +307,32 @@ impl JanetBuffer<'_> {
     /// Append the given [`u8`] onto the end of the buffer.
     #[inline]
     pub fn push_u8(&mut self, elem: u8) {
-        unsafe { janet_buffer_push_u8(self.raw, elem) }
+        unsafe { evil_janet::janet_buffer_push_u8(self.raw, elem) }
     }
 
     /// Append the given [`u16`] onto the end of the buffer.
     #[inline]
     pub fn push_u16(&mut self, elem: u16) {
-        unsafe { janet_buffer_push_u16(self.raw, elem) }
+        unsafe { evil_janet::janet_buffer_push_u16(self.raw, elem) }
     }
 
     /// Append the given [`u32`] onto the end of the buffer.
     #[inline]
     pub fn push_u32(&mut self, elem: u32) {
-        unsafe { janet_buffer_push_u32(self.raw, elem) }
+        unsafe { evil_janet::janet_buffer_push_u32(self.raw, elem) }
     }
 
     /// Append the given [`u64`] onto the end of the buffer.
     #[inline]
     pub fn push_u64(&mut self, elem: u64) {
-        unsafe { janet_buffer_push_u64(self.raw, elem) }
+        unsafe { evil_janet::janet_buffer_push_u64(self.raw, elem) }
     }
 
     /// Append the given c-string slice onto the end of the buffer.
     #[cfg(feature = "std")]
     #[inline]
     pub fn push_cstr(&mut self, cstr: &CStr) {
-        unsafe { janet_buffer_push_cstring(self.raw, cstr.as_ptr()) }
+        unsafe { evil_janet::janet_buffer_push_cstring(self.raw, cstr.as_ptr()) }
     }
 
     /// Returns a byte slice of the [`JanetBuffer`] contents.

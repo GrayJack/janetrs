@@ -12,10 +12,7 @@ use core::{
     },
 };
 
-use evil_janet::{
-    janet_array, janet_array_ensure, janet_array_n, janet_array_peek, janet_array_pop,
-    janet_array_push, janet_array_setcount, Janet as CJanet, JanetArray as CJanetArray,
-};
+use evil_janet::{Janet as CJanet, JanetArray as CJanetArray};
 
 use super::{Janet, JanetExtend, JanetTuple};
 
@@ -67,7 +64,7 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub fn new() -> Self {
         Self {
-            raw:     unsafe { janet_array(0) },
+            raw:     unsafe { evil_janet::janet_array(0) },
             phantom: PhantomData,
         }
     }
@@ -87,7 +84,7 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
-            raw:     unsafe { janet_array(capacity) },
+            raw:     unsafe { evil_janet::janet_array(capacity) },
             phantom: PhantomData,
         }
     }
@@ -167,7 +164,7 @@ impl<'data> JanetArray<'data> {
     /// This functions does nothing if `new_len` is lesser than zero.
     #[inline]
     pub fn set_len(&mut self, new_len: i32) {
-        unsafe { janet_array_setcount(self.raw, new_len) };
+        unsafe { evil_janet::janet_array_setcount(self.raw, new_len) };
     }
 
     /// Ensure that an array has enough space for `check_capacity` elements. If not,
@@ -187,7 +184,7 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
-        unsafe { janet_array_ensure(self.raw, check_capacity, growth) };
+        unsafe { evil_janet::janet_array_ensure(self.raw, check_capacity, growth) };
     }
 
     /// Reserves capacity for at least `additional` more elements to be inserted
@@ -271,7 +268,7 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub fn push(&mut self, value: impl Into<Janet>) {
         let value = value.into();
-        unsafe { janet_array_push(self.raw, value.inner) };
+        unsafe { evil_janet::janet_array_push(self.raw, value.inner) };
     }
 
     /// Removes the last element from a array and returns it, or None if it is
@@ -294,7 +291,7 @@ impl<'data> JanetArray<'data> {
         if self.is_empty() {
             None
         } else {
-            Some(unsafe { janet_array_pop(self.raw).into() })
+            Some(unsafe { evil_janet::janet_array_pop(self.raw).into() })
         }
     }
 
@@ -314,7 +311,7 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     pub fn peek(&mut self) -> Janet {
-        unsafe { janet_array_peek(self.raw).into() }
+        unsafe { evil_janet::janet_array_peek(self.raw).into() }
     }
 
     /// Returns a reference to an element in the array at the`index`.
@@ -732,7 +729,7 @@ impl<'data> JanetArray<'data> {
     /// the index `mid` itself) and the second will contain all
     /// indices from `[mid, len)` (excluding the index `len` itself).
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `mid > len` or `mid < 0`.
     ///
@@ -779,7 +776,7 @@ impl<'data> JanetArray<'data> {
     /// the index `mid` itself) and the second will contain all
     /// indices from `[mid, len)` (excluding the index `len` itself).
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `mid > len` or `mid < 0`.
     ///
@@ -818,7 +815,7 @@ impl<'data> JanetArray<'data> {
     /// * a - The index of the first element
     /// * b - The index of the second element
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `a` or `b` are out of bounds.
     ///
@@ -866,7 +863,7 @@ impl<'data> JanetArray<'data> {
 
     /// Creates a array by repeating a array `n` times.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// This function will panic if the capacity would overflow.
     ///
@@ -1389,7 +1386,7 @@ impl<'data> JanetArray<'data> {
     /// `size`. The windows overlap. If the array is shorter than
     /// `size`, the iterator returns no values.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `size` is 0.
     ///
@@ -1432,7 +1429,7 @@ impl<'data> JanetArray<'data> {
     /// exactly `chunk_size` elements, and [`rchunks`] for the same iterator but
     /// starting at the end of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1468,7 +1465,7 @@ impl<'data> JanetArray<'data> {
     /// always exactly `chunk_size` elements, and [`rchunks_mut`] for the same
     /// iterator but starting at the end of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1511,7 +1508,7 @@ impl<'data> JanetArray<'data> {
     /// smaller chunk, and [`rchunks_exact`] for the same iterator but starting at the
     /// end of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1551,7 +1548,7 @@ impl<'data> JanetArray<'data> {
     /// as a smaller chunk, and [`rchunks_exact_mut`] for the same iterator but
     /// starting at the end of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1590,7 +1587,7 @@ impl<'data> JanetArray<'data> {
     /// exactly `chunk_size` elements, and [`chunks`] for the same iterator but
     /// starting at the beginning of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1626,7 +1623,7 @@ impl<'data> JanetArray<'data> {
     /// always exactly `chunk_size` elements, and [`chunks_mut`] for the same iterator
     /// but starting at the beginning of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1669,7 +1666,7 @@ impl<'data> JanetArray<'data> {
     /// a smaller chunk, and [`chunks_exact`] for the same iterator but starting at
     /// the beginning of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -1710,7 +1707,7 @@ impl<'data> JanetArray<'data> {
     /// as a smaller chunk, and [`chunks_exact_mut`] for the same iterator but
     /// starting at the beginning of the array.
     ///
-    /// # Panics
+    /// # Janet Panics
     ///
     /// Panics if `chunk_size` is 0.
     ///
@@ -2214,7 +2211,7 @@ impl TryFrom<&[CJanet]> for JanetArray<'_> {
         let len = slice.len().try_into()?;
 
         Ok(Self {
-            raw:     unsafe { janet_array_n(slice.as_ptr(), len) },
+            raw:     unsafe { evil_janet::janet_array_n(slice.as_ptr(), len) },
             phantom: PhantomData,
         })
     }

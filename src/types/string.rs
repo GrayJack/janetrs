@@ -13,8 +13,6 @@ use alloc::string::String;
 #[cfg(feature = "std")]
 use std::{borrow::Cow, ffi::OsStr, path::Path};
 
-use evil_janet::{janet_string, janet_string_begin, janet_string_end, janet_string_head};
-
 use bstr::{
     BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
     LinesWithTerminator, Split, SplitN, SplitNReverse, SplitReverse, Utf8Chunks, Utf8Error,
@@ -85,7 +83,7 @@ impl<'data> JanetStringBuilder<'data> {
     #[inline]
     pub fn finalize(self) -> JanetString<'data> {
         JanetString {
-            raw:     unsafe { janet_string_end(self.raw) },
+            raw:     unsafe { evil_janet::janet_string_end(self.raw) },
             phantom: PhantomData,
         }
     }
@@ -146,7 +144,7 @@ impl<'data> JanetString<'data> {
         };
 
         Self {
-            raw:     unsafe { janet_string(buffer.as_ptr(), len) },
+            raw:     unsafe { evil_janet::janet_string(buffer.as_ptr(), len) },
             phantom: PhantomData,
         }
     }
@@ -172,7 +170,7 @@ impl<'data> JanetString<'data> {
         let len = if len < 0 { 0 } else { len };
 
         JanetStringBuilder {
-            raw: unsafe { janet_string_begin(len) },
+            raw: unsafe { evil_janet::janet_string_begin(len) },
             len,
             added: 0,
             phantom: PhantomData,
@@ -192,7 +190,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        unsafe { (*janet_string_head(self.raw)).length }
+        unsafe { (*evil_janet::janet_string_head(self.raw)).length }
     }
 
     /// Returns `true` if this [`JanetString`] has a length of zero, and `false`
@@ -2272,7 +2270,7 @@ impl Clone for JanetString<'_> {
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            raw:     unsafe { janet_string(self.raw, self.len()) },
+            raw:     unsafe { evil_janet::janet_string(self.raw, self.len()) },
             phantom: PhantomData,
         }
     }

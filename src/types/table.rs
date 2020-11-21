@@ -7,11 +7,7 @@ use core::{
     ptr::NonNull,
 };
 
-use evil_janet::{
-    janet_struct_to_table, janet_table, janet_table_clear, janet_table_clone, janet_table_find,
-    janet_table_get, janet_table_merge_table, janet_table_put, janet_table_rawget,
-    janet_table_remove, JanetKV, JanetTable as CJanetTable,
-};
+use evil_janet::{JanetKV, JanetTable as CJanetTable};
 
 use super::{Janet, JanetExtend, JanetStruct};
 use crate::cjvg;
@@ -60,7 +56,7 @@ impl<'data> JanetTable<'data> {
     #[inline]
     pub fn new() -> Self {
         Self {
-            raw:    unsafe { janet_table(0) },
+            raw:    unsafe { evil_janet::janet_table(0) },
             phatom: PhantomData,
         }
     }
@@ -92,7 +88,7 @@ impl<'data> JanetTable<'data> {
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
-            raw:    unsafe { janet_table(capacity) },
+            raw:    unsafe { evil_janet::janet_table(capacity) },
             phatom: PhantomData,
         }
     }
@@ -165,7 +161,7 @@ impl<'data> JanetTable<'data> {
     #[cjvg("1.10.1")]
     #[inline]
     pub fn clear(&mut self) {
-        unsafe { janet_table_clear(self.raw) }
+        unsafe { evil_janet::janet_table_clear(self.raw) }
     }
 
     /// Returns the number of elements of the table, also refered to as its 'length'.
@@ -253,7 +249,7 @@ impl<'data> JanetTable<'data> {
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let kv: *mut (Janet, Janet) =
-                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+                unsafe { evil_janet::janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
@@ -332,7 +328,7 @@ impl<'data> JanetTable<'data> {
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let kv: *mut (Janet, Janet) =
-                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+                unsafe { evil_janet::janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
@@ -370,7 +366,7 @@ impl<'data> JanetTable<'data> {
     ) -> (&Janet, &'data mut Janet) {
         let key = key.into();
 
-        let kv: *mut (Janet, Janet) = janet_table_find(self.raw, key.inner) as *mut _;
+        let kv: *mut (Janet, Janet) = evil_janet::janet_table_find(self.raw, key.inner) as *mut _;
 
         (&(*kv).0, &mut (*kv).1)
     }
@@ -396,7 +392,7 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
-            let val: Janet = unsafe { janet_table_get(self.raw, key.inner).into() };
+            let val: Janet = unsafe { evil_janet::janet_table_get(self.raw, key.inner).into() };
             if val.is_nil() { None } else { Some(val) }
         }
     }
@@ -445,7 +441,7 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
-            let val: Janet = unsafe { janet_table_rawget(self.raw, key.inner).into() };
+            let val: Janet = unsafe { evil_janet::janet_table_rawget(self.raw, key.inner).into() };
             if val.is_nil() { None } else { Some(val) }
         }
     }
@@ -496,7 +492,7 @@ impl<'data> JanetTable<'data> {
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
             let kv: *mut (Janet, Janet) =
-                unsafe { janet_table_find(self.raw, key.inner) as *mut _ };
+                unsafe { evil_janet::janet_table_find(self.raw, key.inner) as *mut _ };
 
             if kv.is_null() {
                 None
@@ -528,7 +524,8 @@ impl<'data> JanetTable<'data> {
         if key.is_nil() {
             None
         } else {
-            let value: Janet = unsafe { janet_table_remove(self.raw, key.inner).into() };
+            let value: Janet =
+                unsafe { evil_janet::janet_table_remove(self.raw, key.inner).into() };
 
             if value.is_nil() { None } else { Some(value) }
         }
@@ -620,7 +617,7 @@ impl<'data> JanetTable<'data> {
 
         let old_value = self.get_owned(key);
 
-        unsafe { janet_table_put(self.raw, key.inner, value.inner) };
+        unsafe { evil_janet::janet_table_put(self.raw, key.inner, value.inner) };
 
         old_value
     }
@@ -809,8 +806,9 @@ impl<'data> JanetTable<'data> {
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-            let elem =
-                unsafe { NonNull::new_unchecked(janet_table_find(self.raw, key.inner) as *mut _) };
+            let elem = unsafe {
+                NonNull::new_unchecked(evil_janet::janet_table_find(self.raw, key.inner) as *mut _)
+            };
 
             Entry::Occupied(OccupiedEntry {
                 key: Some(key),
@@ -834,7 +832,7 @@ impl Clone for JanetTable<'_> {
     #[inline]
     fn clone(&self) -> Self {
         JanetTable {
-            raw:    unsafe { janet_table_clone(self.raw) },
+            raw:    unsafe { evil_janet::janet_table_clone(self.raw) },
             phatom: PhantomData,
         }
     }
@@ -862,7 +860,7 @@ impl JanetExtend<JanetTable<'_>> for JanetTable<'_> {
     /// Extend the table with all key-value pairs of the `other` table.
     #[inline]
     fn extend(&mut self, other: JanetTable<'_>) {
-        unsafe { janet_table_merge_table(self.raw, other.raw) }
+        unsafe { evil_janet::janet_table_merge_table(self.raw, other.raw) }
     }
 }
 
@@ -876,7 +874,7 @@ impl Default for JanetTable<'_> {
 impl From<JanetStruct<'_>> for JanetTable<'_> {
     #[inline]
     fn from(val: JanetStruct<'_>) -> Self {
-        unsafe { Self::from_raw(janet_struct_to_table(val.raw)) }
+        unsafe { Self::from_raw(evil_janet::janet_struct_to_table(val.raw)) }
     }
 }
 
@@ -1363,7 +1361,9 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
         //
         // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
         let elem = unsafe {
-            NonNull::new_unchecked(janet_table_find(self.table.raw, self.key.inner) as *mut _)
+            NonNull::new_unchecked(
+                evil_janet::janet_table_find(self.table.raw, self.key.inner) as *mut _
+            )
         };
 
         OccupiedEntry {

@@ -3,8 +3,6 @@
 //! This module may change drastically in the near future
 use core::{cell::Cell, ffi::c_void, fmt, marker::PhantomData};
 
-use evil_janet::{janet_abstract, janet_abstract_head};
-
 pub use evil_janet::JanetAbstractType;
 
 
@@ -24,7 +22,7 @@ impl JanetAbstract {
     #[inline]
     pub fn new<A: IsJanetAbstract>() -> Self {
         Self {
-            raw:     unsafe { janet_abstract(&A::TYPE, A::SIZE as _) },
+            raw:     unsafe { evil_janet::janet_abstract(&A::TYPE, A::SIZE as _) },
             phantom: PhantomData,
         }
     }
@@ -58,14 +56,14 @@ impl JanetAbstract {
     /// Return the size of the type it holds
     #[inline]
     pub fn size(&self) -> usize {
-        unsafe { (*janet_abstract_head(self.raw)).size as usize }
+        unsafe { (*evil_janet::janet_abstract_head(self.raw)).size as usize }
     }
 
     /// Return the struct that holds the type name and all possible polimorfic function
     /// pointer that a Abstract type can have in Janet.
     #[inline]
     pub fn type_info(&self) -> JanetAbstractType {
-        unsafe { *(*janet_abstract_head(self.raw)).type_ }
+        unsafe { *(*evil_janet::janet_abstract_head(self.raw)).type_ }
     }
 }
 

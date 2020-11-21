@@ -3,7 +3,6 @@ use core::{convert::Infallible, marker::PhantomData, str::FromStr};
 
 
 use bstr::BStr;
-use evil_janet::{janet_string_head, janet_symbol, janet_symbol_gen};
 
 use super::{JanetBuffer, JanetString};
 
@@ -39,7 +38,7 @@ impl JanetSymbol<'_> {
         };
 
         Self {
-            raw:     unsafe { janet_symbol(val.as_ptr(), len) },
+            raw:     unsafe { evil_janet::janet_symbol(val.as_ptr(), len) },
             phantom: PhantomData,
         }
     }
@@ -58,7 +57,7 @@ impl JanetSymbol<'_> {
     #[inline]
     pub fn unique() -> Self {
         Self {
-            raw:     unsafe { janet_symbol_gen() },
+            raw:     unsafe { evil_janet::janet_symbol_gen() },
             phantom: PhantomData,
         }
     }
@@ -89,7 +88,7 @@ impl JanetSymbol<'_> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        unsafe { (*janet_string_head(self.raw)).length }
+        unsafe { (*evil_janet::janet_string_head(self.raw)).length }
     }
 
     /// Returns `true` if this [`JanetSymbol`] has a length of zero, and `false`
@@ -138,7 +137,7 @@ impl Clone for JanetSymbol<'_> {
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            raw:     unsafe { janet_symbol(self.raw, self.len()) },
+            raw:     unsafe { evil_janet::janet_symbol(self.raw, self.len()) },
             phantom: PhantomData,
         }
     }
@@ -215,7 +214,7 @@ impl JanetKeyword<'_> {
         };
 
         Self {
-            raw:     unsafe { janet_symbol(val.as_ptr(), len) },
+            raw:     unsafe { evil_janet::janet_symbol(val.as_ptr(), len) },
             phantom: PhantomData,
         }
     }
@@ -246,7 +245,7 @@ impl JanetKeyword<'_> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        unsafe { (*janet_string_head(self.raw)).length }
+        unsafe { (*evil_janet::janet_string_head(self.raw)).length }
     }
 
     /// Returns `true` if this [`JanetKeyword`] has a length of zero, and `false`
@@ -295,7 +294,7 @@ impl Clone for JanetKeyword<'_> {
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            raw:     unsafe { janet_symbol(self.raw, self.len()) },
+            raw:     unsafe { evil_janet::janet_symbol(self.raw, self.len()) },
             phantom: PhantomData,
         }
     }

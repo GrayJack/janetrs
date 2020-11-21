@@ -6,10 +6,7 @@ use core::{
     ops::Index,
 };
 
-use evil_janet::{
-    janet_struct_begin, janet_struct_end, janet_struct_find, janet_struct_get, janet_struct_head,
-    janet_struct_put, JanetKV,
-};
+use evil_janet::JanetKV;
 
 use super::{Janet, JanetTable};
 
@@ -30,7 +27,7 @@ impl<'data> JanetStructBuilder<'data> {
     #[inline]
     pub fn put(self, key: impl Into<Janet>, value: impl Into<Janet>) -> Self {
         let (key, value) = (key.into(), value.into());
-        unsafe { janet_struct_put(self.raw, key.into(), value.into()) }
+        unsafe { evil_janet::janet_struct_put(self.raw, key.into(), value.into()) }
 
         self
     }
@@ -39,7 +36,7 @@ impl<'data> JanetStructBuilder<'data> {
     #[inline]
     pub fn finalize(self) -> JanetStruct<'data> {
         JanetStruct {
-            raw:     unsafe { janet_struct_end(self.raw) },
+            raw:     unsafe { evil_janet::janet_struct_end(self.raw) },
             phantom: PhantomData,
         }
     }
@@ -77,7 +74,7 @@ impl<'data> JanetStruct<'data> {
         let len = if len < 0 { 0 } else { len };
 
         JanetStructBuilder {
-            raw:     unsafe { janet_struct_begin(len) },
+            raw:     unsafe { evil_janet::janet_struct_begin(len) },
             phantom: PhantomData,
         }
     }
@@ -98,7 +95,7 @@ impl<'data> JanetStruct<'data> {
     /// Returns the number of elements the struct can hold.
     #[inline]
     pub fn capacity(&self) -> i32 {
-        unsafe { (*janet_struct_head(self.raw)).capacity }
+        unsafe { (*evil_janet::janet_struct_head(self.raw)).capacity }
     }
 
     /// Returns the number of elements in the struct, also referred to as its 'length'.
@@ -116,7 +113,7 @@ impl<'data> JanetStruct<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        unsafe { (*janet_struct_head(self.raw)).length }
+        unsafe { (*evil_janet::janet_struct_head(self.raw)).length }
     }
 
     /// Returns `true` if the struct contains no elements.
@@ -181,7 +178,7 @@ impl<'data> JanetStruct<'data> {
         if key.is_nil() {
             None
         } else {
-            let kv = unsafe { janet_struct_find(self.raw, key.into()) };
+            let kv = unsafe { evil_janet::janet_struct_find(self.raw, key.into()) };
 
             if kv.is_null() {
                 None
@@ -228,7 +225,7 @@ impl<'data> JanetStruct<'data> {
         if key.is_nil() {
             None
         } else {
-            let val: Janet = unsafe { janet_struct_get(self.raw, key.inner).into() };
+            let val: Janet = unsafe { evil_janet::janet_struct_get(self.raw, key.inner).into() };
 
             if val.is_nil() { None } else { Some(val) }
         }
@@ -260,7 +257,7 @@ impl<'data> JanetStruct<'data> {
         if key.is_nil() {
             None
         } else {
-            let kv = unsafe { janet_struct_find(self.raw, key.into()) };
+            let kv = unsafe { evil_janet::janet_struct_find(self.raw, key.into()) };
 
             if kv.is_null() {
                 None

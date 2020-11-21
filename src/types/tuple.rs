@@ -8,7 +8,7 @@ use core::{
     slice::{Chunks, ChunksExact, RChunks, RChunksExact, Windows},
 };
 
-use evil_janet::{janet_tuple_begin, janet_tuple_end, janet_tuple_head, Janet as CJanet};
+use evil_janet::Janet as CJanet;
 
 use super::{Janet, JanetArray};
 
@@ -53,7 +53,7 @@ impl<'data> JanetTupleBuilder<'data> {
     #[inline]
     pub fn finalize(self) -> JanetTuple<'data> {
         JanetTuple {
-            raw:     unsafe { janet_tuple_end(self.raw) },
+            raw:     unsafe { evil_janet::janet_tuple_end(self.raw) },
             phantom: PhantomData,
         }
     }
@@ -88,7 +88,7 @@ impl<'data> JanetTuple<'data> {
         let len = if len < 0 { 0 } else { len };
 
         JanetTupleBuilder {
-            raw: unsafe { janet_tuple_begin(len) },
+            raw: unsafe { evil_janet::janet_tuple_begin(len) },
             len,
             added: 0,
             phantom: PhantomData,
@@ -158,7 +158,7 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        unsafe { (*janet_tuple_head(self.raw)).length }
+        unsafe { (*evil_janet::janet_tuple_head(self.raw)).length }
     }
 
     /// Returns `true` if the tuple contains no elements.
