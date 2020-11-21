@@ -478,6 +478,9 @@ impl<'data> JanetTable<'data> {
     ///
     /// Notice that if there is no key-value pair in the table, this function will return
     /// a tuple of mutable references to Janet `nil`.
+    // TODO: @GrayJack: Fow now lets allow dead code, if we get to 1.0.0 without it we can remove
+    // the function entire function.
+    #[allow(dead_code)]
     #[cfg_attr(feature = "inline-more", inline)]
     pub(crate) fn find(&mut self, key: impl Into<Janet>) -> Option<(&mut Janet, &mut Janet)> {
         let key = key.into();
