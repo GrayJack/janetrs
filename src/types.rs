@@ -89,28 +89,28 @@ impl Display for JanetConversionError {
 ///
 /// ### Example
 /// ```
-/// use janetrs::types::{Janet, TaggetJanet};
+/// use janetrs::types::{Janet, TaggedJanet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let jnt = Janet::wrap(10); // A Number Janet
 ///
 /// match jnt.unwrap() {
-///     TaggedJanet::Abstract(abstract) => {}
-///     TaggedJanet::Array(array) => {}
-///     TaggedJanet::Boolean(boolean) => {}
-///     TaggedJanet::Buffer(buffer) => {}
-///     TaggedJanet::CFunction(c_fun) => {}
-///     TaggedJanet::Fiber(fiber) => {}
-///     TaggedJanet::Function(func) => {}
-///     TaggedJanet::Keyword(keyword) => {}
-///     TaggedJanet::Nil => {}
-///     TaggedJanet::Number(num) => {}
-///     TaggedJanet::Pointer(ptr) => {}
-///     TaggedJanet::String(string) => {}
-///     TaggedJanet::Struct(st) => {}
-///     TaggedJanet::Symbol(symbol) => {}
-///     TaggedJanet::Table(table) => {}
-///     TaggedJanet::Tuple(tuple) => {}
+///     TaggedJanet::Abstract(jabstract) => {},
+///     TaggedJanet::Array(array) => {},
+///     TaggedJanet::Boolean(boolean) => {},
+///     TaggedJanet::Buffer(buffer) => {},
+///     TaggedJanet::CFunction(c_fun) => {},
+///     TaggedJanet::Fiber(fiber) => {},
+///     TaggedJanet::Function(func) => {},
+///     TaggedJanet::Keyword(keyword) => {},
+///     TaggedJanet::Nil => {},
+///     TaggedJanet::Number(num) => {},
+///     TaggedJanet::Pointer(ptr) => {},
+///     TaggedJanet::String(string) => {},
+///     TaggedJanet::Struct(st) => {},
+///     TaggedJanet::Symbol(symbol) => {},
+///     TaggedJanet::Table(table) => {},
+///     TaggedJanet::Tuple(tuple) => {},
 /// };
 /// ```
 ///
