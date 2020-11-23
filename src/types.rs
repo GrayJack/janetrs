@@ -84,7 +84,7 @@ impl Display for JanetConversionError {
 /// ```
 ///
 /// ## Extracting/Unwraping Janet values
-/// To extract/unwrap the `Janet` value you can use the [`Janet::unwrap`] method, that
+/// To extract/unwrap the `Janet` value you can use the [`Janet::try_unwrap`] method, that
 /// will return a [`Result`] either with the resulted type of and conversion error.
 ///
 /// It is possible to use the [`TryFrom`] trait, but that requires to include the trait in
