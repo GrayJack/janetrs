@@ -22,9 +22,9 @@ features = ["amalgation"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-evil-janet = "1.14.1"
+evil-janet = "1.15.2"
 const_fn = "0.4"
-bstr = { version = "0.2.14", default-features = false }
+bstr = { version = "0.2.15", default-features = false }
 janetrs_macros = "0.2.0"
 
 [dev-dependencies]
