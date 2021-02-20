@@ -297,8 +297,7 @@ pub fn var(env: &mut JanetTable, name: &str, value: impl Into<Janet>, doc: Optio
 pub fn c_func(
     env: &mut JanetTable, namespace: Option<&str>, fn_name: &str, f: JanetCFunction,
     doc: Option<&str>,
-)
-{
+) {
     if let Some(prefix) = namespace {
         let full_name = format!("{}/{}", prefix.trim(), fn_name.trim());
         let mut cfun = JanetTable::with_capacity(2);
