@@ -1,4 +1,41 @@
 {
     "rust-analyzer.checkOnSave.features": ["amalgation"],
-    "rust-analyzer.cargo.features": ["amalgation"]
+    "rust-analyzer.cargo.features": [
+        "amalgation"
+    ],
+    "cSpell.ignoreWords": [
+        "abcdefg",
+        "barfoz",
+        "bstr",
+        "cstr",
+        "cstring",
+        "ebar",
+        "f",
+        "fbar",
+        "ffbar",
+        "indexmut",
+        "janetrs",
+        "jpanic",
+        "lion",
+        "nbaz",
+        "nquux",
+        "orld",
+        "pushs",
+        "quux",
+        "rabz",
+        "rfind",
+        "rsplit",
+        "rsplitn",
+        "setcount",
+        "splitn",
+        "tbaz",
+        "x",
+        "xleopard",
+        "xtiger",
+        "αβγγδ"
+    ],
+    "cSpell.words": [
+        "amalgation",
+        "repr"
+    ]
 }

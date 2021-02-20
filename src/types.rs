@@ -42,6 +42,15 @@ pub use tuple::JanetTuple;
 
 use crate::env::JanetEnvironment;
 
+/// A trait to express a deep equality.
+///
+/// A deep equality is to check equality of the collections by value. That is needed
+/// because the [`PartialEq`] for Janet mutable data structures are simply check is the
+/// inner pointer are the same.
+pub trait DeepEq<Rhs = Self> {
+    fn deep_eq(&self, other: &Rhs) -> bool;
+}
+
 
 /// The error when converting [`Janet`]s to C Janet types.
 ///

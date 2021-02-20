@@ -1,6 +1,5 @@
 //! Janet String type.
 use core::{
-    cmp::Ordering,
     convert::Infallible,
     fmt::{self, Debug, Display},
     iter::FromIterator,
@@ -2276,53 +2275,6 @@ impl Clone for JanetString<'_> {
         }
     }
 }
-
-impl PartialOrd for JanetString<'_> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.len().cmp(&other.len()) {
-            x @ Ordering::Less => Some(x),
-            x @ Ordering::Greater => Some(x),
-            Ordering::Equal => {
-                while let Some((s, o)) = self.bytes().zip(other.bytes()).next() {
-                    match s.cmp(o) {
-                        x @ Ordering::Less => return Some(x),
-                        x @ Ordering::Greater => return Some(x),
-                        Ordering::Equal => continue,
-                    }
-                }
-                Some(Ordering::Equal)
-            },
-        }
-    }
-}
-
-impl Ord for JanetString<'_> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        match self.len().cmp(&other.len()) {
-            x @ Ordering::Less => x,
-            x @ Ordering::Greater => x,
-            Ordering::Equal => {
-                while let Some((s, o)) = self.bytes().zip(other.bytes()).next() {
-                    match s.cmp(o) {
-                        x @ Ordering::Less => return x,
-                        x @ Ordering::Greater => return x,
-                        Ordering::Equal => continue,
-                    }
-                }
-                Ordering::Equal
-            },
-        }
-    }
-}
-
-impl PartialEq for JanetString<'_> {
-    #[inline]
-    fn eq(&self, other: &Self) -> bool {
-        unsafe { evil_janet::janet_string_equal(self.raw, other.raw) != 0 }
-    }
-}
-
-impl Eq for JanetString<'_> {}
 
 impl Default for JanetString<'_> {
     #[inline]
