@@ -1,5 +1,6 @@
 //! Janet buffer (string) type.
 use core::{
+    cmp::Ordering,
     convert::Infallible,
     fmt::{self, Debug, Display, Write},
     iter::FromIterator,
@@ -1060,7 +1061,7 @@ impl JanetBuffer<'_> {
     /// UTF-8 bytes with the Unicode replacement codepoint (`U+FFFD`).
     ///
     /// If the buffer is already valid UTF-8, then no copying or
-    /// allocation is performed and a borrrowed string slice is returned. If
+    /// allocation is performed and a borrowed string slice is returned. If
     /// the buffer is not valid UTF-8, then an owned string buffer is
     /// returned with invalid bytes replaced by the replacement codepoint.
     ///
@@ -1723,7 +1724,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(vec![(0, 5, "à̖"), (5, 13, "🇺🇸")], graphemes);
     /// ```
     ///
-    /// This example shows what happens when invalid UTF-8 is enountered. Note
+    /// This example shows what happens when invalid UTF-8 is encountered. Note
     /// that the offsets are valid indices into the original string, and do
     /// not necessarily correspond to the length of the `&str` returned!
     ///
@@ -2555,6 +2556,29 @@ impl Clone for JanetBuffer<'_> {
         clone
     }
 }
+
+impl PartialOrd for JanetBuffer<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.raw.partial_cmp(&other.raw)
+    }
+}
+
+impl Ord for JanetBuffer<'_> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.raw.cmp(&other.raw)
+    }
+}
+
+impl PartialEq for JanetBuffer<'_> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.raw.eq(&other.raw)
+    }
+}
+
+impl Eq for JanetBuffer<'_> {}
 
 impl From<&[u8]> for JanetBuffer<'_> {
     #[inline]

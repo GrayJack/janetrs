@@ -2095,6 +2095,29 @@ impl Clone for JanetArray<'_> {
     }
 }
 
+impl PartialOrd for JanetArray<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.raw.partial_cmp(&other.raw)
+    }
+}
+
+impl Ord for JanetArray<'_> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.raw.cmp(&other.raw)
+    }
+}
+
+impl PartialEq for JanetArray<'_> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.raw.eq(&other.raw)
+    }
+}
+
+impl Eq for JanetArray<'_> {}
+
 impl AsRef<[Janet]> for JanetArray<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {

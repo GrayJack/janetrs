@@ -977,6 +977,63 @@ impl Clone for JanetTuple<'_> {
     }
 }
 
+impl PartialOrd for JanetTuple<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.len().cmp(&other.len()) {
+            x @ Ordering::Less => Some(x),
+            x @ Ordering::Greater => Some(x),
+            Ordering::Equal => {
+                while let Some((s, o)) = self.iter().zip(other.iter()).next() {
+                    match s.partial_cmp(o) {
+                        x @ Some(Ordering::Less) => return x,
+                        x @ Some(Ordering::Greater) => return x,
+                        Some(Ordering::Equal) => continue,
+                        None => return None,
+                    }
+                }
+                Some(Ordering::Equal)
+            },
+        }
+    }
+}
+
+impl Ord for JanetTuple<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.len().cmp(&other.len()) {
+            x @ Ordering::Less => x,
+            x @ Ordering::Greater => x,
+            Ordering::Equal => {
+                while let Some((s, o)) = self.iter().zip(other.iter()).next() {
+                    match s.cmp(o) {
+                        x @ Ordering::Less => return x,
+                        x @ Ordering::Greater => return x,
+                        Ordering::Equal => continue,
+                    }
+                }
+                Ordering::Equal
+            },
+        }
+    }
+}
+
+impl PartialEq for JanetTuple<'_> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // if the pointer is the same, one are equal to the other
+        if self.raw.eq(&other.raw) {
+            return true;
+        }
+        // if they have the same length, check value by value
+        if self.len().eq(&other.len()) {
+            return self.iter().zip(other.iter()).all(|(s, o)| s.eq(o));
+        }
+        // otherwise it's false
+        false
+    }
+}
+
+impl Eq for JanetTuple<'_> {}
+
 impl Default for JanetTuple<'_> {
     #[inline]
     fn default() -> Self {

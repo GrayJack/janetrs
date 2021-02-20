@@ -1,5 +1,6 @@
 //! Janet table (mutable HashMap) type.
 use core::{
+    cmp::Ordering,
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
@@ -837,6 +838,29 @@ impl Clone for JanetTable<'_> {
         }
     }
 }
+
+impl PartialOrd for JanetTable<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.raw.partial_cmp(&other.raw)
+    }
+}
+
+impl Ord for JanetTable<'_> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.raw.cmp(&other.raw)
+    }
+}
+
+impl PartialEq for JanetTable<'_> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.raw.eq(&other.raw)
+    }
+}
+
+impl Eq for JanetTable<'_> {}
 
 impl Extend<(Janet, Janet)> for JanetTable<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
