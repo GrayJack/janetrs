@@ -93,7 +93,7 @@ pub struct JanetBuffer<'data> {
 impl JanetBuffer<'_> {
     /// Creates a empty [`JanetBuffer`].
     ///
-    /// It is initially created with capacity 0, so it will not allocate until it is
+    /// It is initially created with capacity 4, so it will not allocate until it is
     /// first pushed into.
     ///
     /// # Examples
@@ -106,15 +106,15 @@ impl JanetBuffer<'_> {
     #[inline]
     pub fn new() -> Self {
         Self {
-            raw:     unsafe { evil_janet::janet_buffer(0) },
+            raw:     unsafe { evil_janet::janet_buffer(4) },
             phantom: PhantomData,
         }
     }
 
     /// Create a empty [`JanetBuffer`] given to Janet the specified `capacity`.
     ///
-    /// When `capacity` is lesser than zero, it's the same as calling with `capacity`
-    /// equals to zero.
+    /// When `capacity` is lesser than four, it's the same as calling with `capacity`
+    /// equals to four.
     ///
     /// # Examples
     /// ```
@@ -125,6 +125,7 @@ impl JanetBuffer<'_> {
     /// ```
     #[inline]
     pub fn with_capacity(capacity: i32) -> Self {
+        let capacity = if capacity < 4 { 4 } else { capacity };
         Self {
             raw:     unsafe { evil_janet::janet_buffer(capacity) },
             phantom: PhantomData,
@@ -3004,7 +3005,7 @@ mod tests {
 
         let test = JanetBuffer::new();
         assert!(test.is_empty());
-        assert_eq!(0, test.capacity());
+        assert_eq!(4, test.capacity());
 
         let test = JanetBuffer::with_capacity(100);
         assert!(test.is_empty());
