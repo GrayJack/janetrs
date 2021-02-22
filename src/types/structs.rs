@@ -1,12 +1,13 @@
 //! Janet Struct (immutable HashMap) type.
 use core::{
+    cmp::Ordering,
     fmt::{self, Debug},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::Index,
 };
 
-use evil_janet::JanetKV;
+use evil_janet::{JanetKV, JanetStructHead};
 
 use super::{Janet, JanetTable};
 
@@ -92,10 +93,17 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
+    // Get the [`JanetStructHead`] from the `JanetStruct` pointer.
+    #[inline]
+    fn head(&self) -> &JanetStructHead {
+        // Safety: Janet struct must always be a valid ponter
+        unsafe { &*evil_janet::janet_struct_head(self.raw) }
+    }
+
     /// Returns the number of elements the struct can hold.
     #[inline]
     pub fn capacity(&self) -> i32 {
-        unsafe { (*evil_janet::janet_struct_head(self.raw)).capacity }
+        self.head().capacity
     }
 
     /// Returns the number of elements in the struct, also referred to as its 'length'.
@@ -113,7 +121,7 @@ impl<'data> JanetStruct<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        unsafe { (*evil_janet::janet_struct_head(self.raw)).length }
+        self.head().length
     }
 
     /// Returns `true` if the struct contains no elements.
@@ -416,6 +424,83 @@ impl Default for JanetStruct<'_> {
     #[inline]
     fn default() -> Self {
         crate::structs! {}
+    }
+}
+
+impl PartialEq for JanetStruct<'_> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // if the pointer is the same, one are equal to the other
+        if self.raw.eq(&other.raw) {
+            return true;
+        }
+
+        // If the hash is the same
+        if self.head().hash.eq(&other.head().hash) {
+            return true;
+        }
+
+        // if they have the same length, check value by value
+        if self.len().eq(&other.len()) {
+            return self.iter().zip(other.iter()).all(|(s, o)| s.eq(&o));
+        }
+        // otherwise it's false
+        false
+    }
+}
+
+impl Eq for JanetStruct<'_> {}
+
+impl PartialOrd for JanetStruct<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        use core::cmp::Ordering::*;
+
+        match self.len().cmp(&other.len()) {
+            x @ Less => Some(x),
+            x @ Greater => Some(x),
+            Equal => match self.head().hash.cmp(&other.head().hash) {
+                x @ Less => Some(x),
+                x @ Greater => Some(x),
+                Equal => {
+                    while let Some((s, ref o)) = self.iter().zip(other.iter()).next() {
+                        match s.partial_cmp(o) {
+                            x @ Some(Less) => return x,
+                            x @ Some(Greater) => return x,
+                            Some(Equal) => continue,
+                            None => return None,
+                        }
+                    }
+                    Some(Equal)
+                },
+            },
+        }
+    }
+}
+
+impl Ord for JanetStruct<'_> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        use core::cmp::Ordering::*;
+
+        match self.len().cmp(&other.len()) {
+            x @ Less => x,
+            x @ Greater => x,
+            Equal => match self.head().hash.cmp(&other.head().hash) {
+                x @ Less => x,
+                x @ Greater => x,
+                Equal => {
+                    while let Some((s, ref o)) = self.iter().zip(other.iter()).next() {
+                        match s.cmp(o) {
+                            x @ Less => return x,
+                            x @ Greater => return x,
+                            Equal => continue,
+                        }
+                    }
+                    Equal
+                },
+            },
+        }
     }
 }
 
