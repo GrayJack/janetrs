@@ -1,6 +1,6 @@
 [package]
 name = "janetrs"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Eric Shimizu Karbstein <gr41.j4ck@gmail.com>"]
 description = "High level binding for Janet programming language"
 repository = "https://github.com/GrayJack/janetrs"
@@ -9,7 +9,7 @@ documentation = "https://docs.rs/janetrs"
 license-file = "LICENSE"
 readme = "README.md"
 edition = "2018"
-keywords = ["janet", "embedding"]
+keywords = ["janet", "embedding", "ffi"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu", "x86_64-unknown-freebsd",
