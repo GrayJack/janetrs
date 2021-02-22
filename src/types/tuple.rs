@@ -1037,7 +1037,7 @@ impl PartialEq for JanetTuple<'_> {
 
         // If the hash is the same
         // Safety: Janet tuple must always be a valid ponter
-        if self.head().hash.eq(self.head().hash) {
+        if self.head().hash.eq(&self.head().hash) {
             return true;
         }
 
