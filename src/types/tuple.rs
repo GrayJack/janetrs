@@ -8,7 +8,7 @@ use core::{
     slice::{Chunks, ChunksExact, RChunks, RChunksExact, Windows},
 };
 
-use evil_janet::Janet as CJanet;
+use evil_janet::{janet_tuple_head, Janet as CJanet};
 
 use super::{Janet, JanetArray};
 
@@ -158,6 +158,7 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
+        // Safety: Janet tuple must always be a valid ponter
         unsafe { (*evil_janet::janet_tuple_head(self.raw)).length }
     }
 
@@ -1023,6 +1024,19 @@ impl PartialEq for JanetTuple<'_> {
         if self.raw.eq(&other.raw) {
             return true;
         }
+
+        // If the hash is the same
+        // Safety: Janet tuple must always be a valid ponter
+        let (self_hash, ref other_hash) = unsafe {
+            let self_head = janet_tuple_head(self.raw);
+            let other_head = janet_tuple_head(other.raw);
+
+            ((*self_head).hash, (*other_head).hash)
+        };
+        if self_hash.eq(other_hash) {
+            return true;
+        }
+
         // if they have the same length, check value by value
         if self.len().eq(&other.len()) {
             return self.iter().zip(other.iter()).all(|(s, o)| s.eq(o));
