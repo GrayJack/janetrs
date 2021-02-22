@@ -164,7 +164,7 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        self.head().length }
+        self.head().length
     }
 
     /// Returns `true` if the tuple contains no elements.
