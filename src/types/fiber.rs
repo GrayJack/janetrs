@@ -9,7 +9,7 @@ use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 /// threads.
 ///
 /// TODO: A proper docs
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct JanetFiber<'data> {
     pub(crate) raw: *mut CJanetFiber,
