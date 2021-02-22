@@ -96,7 +96,7 @@ impl<'data> JanetStruct<'data> {
     // Get the [`JanetStructHead`] from the `JanetStruct` pointer.
     #[inline]
     fn head(&self) -> &JanetStructHead {
-        // Safety: Janet struct must always be a valid ponter
+        // Safety: Janet struct are always be a valid pointer
         unsafe { &*evil_janet::janet_struct_head(self.raw) }
     }
 

@@ -8,7 +8,7 @@ use core::{
     slice::{Chunks, ChunksExact, RChunks, RChunksExact, Windows},
 };
 
-use evil_janet::{janet_tuple_head, Janet as CJanet};
+use evil_janet::{janet_tuple_head, Janet as CJanet, JanetTupleHead};
 
 use super::{Janet, JanetArray};
 
@@ -122,6 +122,12 @@ impl<'data> JanetTuple<'data> {
         }
     }
 
+    // Get the [`JanetTupleHead`] from the `JanetStruct` pointer.
+    fn head(&self) -> &JanetTupleHead {
+        // Safety: Janet tuple are always be a valid pointer
+        unsafe { &*janet_tuple_head(self.raw) }
+    }
+
     /// Returns a reference to an element in the tuple.
     ///
     /// # Examples
@@ -158,8 +164,7 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     pub fn len(&self) -> i32 {
-        // Safety: Janet tuple must always be a valid ponter
-        unsafe { (*evil_janet::janet_tuple_head(self.raw)).length }
+        self.head().length }
     }
 
     /// Returns `true` if the tuple contains no elements.
@@ -980,19 +985,21 @@ impl Clone for JanetTuple<'_> {
 
 impl PartialOrd for JanetTuple<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        use core::cmp::Ordering::*;
+
         match self.len().cmp(&other.len()) {
-            x @ Ordering::Less => Some(x),
-            x @ Ordering::Greater => Some(x),
-            Ordering::Equal => {
+            x @ Less => Some(x),
+            x @ Greater => Some(x),
+            Equal => {
                 for (s, o) in self.iter().zip(other.iter()) {
                     match s.partial_cmp(o) {
-                        x @ Some(Ordering::Less) => return x,
-                        x @ Some(Ordering::Greater) => return x,
-                        Some(Ordering::Equal) => continue,
+                        x @ Some(Less) => return x,
+                        x @ Some(Greater) => return x,
+                        Some(Equal) => continue,
                         None => return None,
                     }
                 }
-                Some(Ordering::Equal)
+                Some(Equal)
             },
         }
     }
@@ -1000,19 +1007,21 @@ impl PartialOrd for JanetTuple<'_> {
 
 impl Ord for JanetTuple<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
+        use core::cmp::Ordering::*;
+
         match self.len().cmp(&other.len()) {
-            x @ Ordering::Less => x,
-            x @ Ordering::Greater => x,
-            Ordering::Equal => {
+            x @ Less => x,
+            x @ Greater => x,
+            Equal => {
                 for (s, o) in self.iter().zip(other.iter()) {
                     dbg!(s, o);
                     match s.cmp(o) {
-                        x @ Ordering::Less => return x,
-                        x @ Ordering::Greater => return x,
-                        Ordering::Equal => continue,
+                        x @ Less => return x,
+                        x @ Greater => return x,
+                        Equal => continue,
                     }
                 }
-                Ordering::Equal
+                Equal
             },
         }
     }
@@ -1028,13 +1037,7 @@ impl PartialEq for JanetTuple<'_> {
 
         // If the hash is the same
         // Safety: Janet tuple must always be a valid ponter
-        let (self_hash, ref other_hash) = unsafe {
-            let self_head = janet_tuple_head(self.raw);
-            let other_head = janet_tuple_head(other.raw);
-
-            ((*self_head).hash, (*other_head).hash)
-        };
-        if self_hash.eq(other_hash) {
+        if self.head().hash.eq(self.head().hash) {
             return true;
         }
 
