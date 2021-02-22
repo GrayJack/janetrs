@@ -984,7 +984,7 @@ impl PartialOrd for JanetTuple<'_> {
             x @ Ordering::Less => Some(x),
             x @ Ordering::Greater => Some(x),
             Ordering::Equal => {
-                while let Some((s, o)) = self.iter().zip(other.iter()).next() {
+                for (s, o) in self.iter().zip(other.iter()) {
                     match s.partial_cmp(o) {
                         x @ Some(Ordering::Less) => return x,
                         x @ Some(Ordering::Greater) => return x,
@@ -1004,7 +1004,8 @@ impl Ord for JanetTuple<'_> {
             x @ Ordering::Less => x,
             x @ Ordering::Greater => x,
             Ordering::Equal => {
-                while let Some((s, o)) = self.iter().zip(other.iter()).next() {
+                for (s, o) in self.iter().zip(other.iter()) {
+                    dbg!(s, o);
                     match s.cmp(o) {
                         x @ Ordering::Less => return x,
                         x @ Ordering::Greater => return x,
@@ -1402,5 +1403,20 @@ mod tests {
         assert_eq!(Some(Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
+    }
+
+    #[test]
+    #[cfg_attr(not(feature = "std"), serial)]
+    fn compare() {
+        use core::cmp::Ordering::*;
+        let _client = JanetClient::init().unwrap();
+
+        let test = tuple![1, 2, 3, 4, 5, 6];
+        let clone = test.clone();
+
+        assert_eq!(test.cmp(&clone), Equal);
+
+        let test2 = tuple![1, 2];
+        assert_eq!(test.cmp(&test2), Greater);
     }
 }

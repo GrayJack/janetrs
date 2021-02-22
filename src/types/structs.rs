@@ -463,7 +463,7 @@ impl PartialOrd for JanetStruct<'_> {
                 x @ Less => Some(x),
                 x @ Greater => Some(x),
                 Equal => {
-                    while let Some((s, ref o)) = self.iter().zip(other.iter()).next() {
+                    for (s, ref o) in self.iter().zip(other.iter()) {
                         match s.partial_cmp(o) {
                             x @ Some(Less) => return x,
                             x @ Some(Greater) => return x,
@@ -490,7 +490,7 @@ impl Ord for JanetStruct<'_> {
                 x @ Less => x,
                 x @ Greater => x,
                 Equal => {
-                    while let Some((s, ref o)) = self.iter().zip(other.iter()).next() {
+                    for (s, ref o) in self.iter().zip(other.iter()) {
                         match s.cmp(o) {
                             x @ Less => return x,
                             x @ Greater => return x,
