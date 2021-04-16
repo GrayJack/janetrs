@@ -1,12 +1,73 @@
-/// TODO: Cratefy this module since it's just copy-paste of janetrs
 use core::{cmp::Ordering, fmt};
+
+use const_fn::const_fn;
+use evil_janet::{
+    JANET_CURRENT_CONFIG_BITS, JANET_VERSION_MAJOR, JANET_VERSION_MINOR, JANET_VERSION_PATCH,
+};
+
+/// Janet configuration in the build.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct JanetBuildConfig {
+    version: JanetVersion,
+    bits:    u32,
+}
+
+impl JanetBuildConfig {
+    /// Get the current Janet build version.
+    #[inline]
+    pub const fn current() -> Self {
+        Self {
+            version: JanetVersion::current(),
+            bits:    JANET_CURRENT_CONFIG_BITS,
+        }
+    }
+
+    /// Create a custom [`JanetBuildConfig`].
+    ///
+    /// Mostly used to check if current version match a requirement for your code.
+    #[inline]
+    pub const fn custom(major: u32, minor: u32, patch: u32, bits: u32) -> Self {
+        Self {
+            version: JanetVersion::custom(major, minor, patch),
+            bits,
+        }
+    }
+
+    /// Return the version of the Janet.
+    #[inline]
+    pub const fn version(&self) -> JanetVersion {
+        self.version
+    }
+
+    /// Return `true` if Janet single threaded bit is set.
+    #[inline]
+    #[const_fn("1.46")]
+    pub const fn is_single_threaded(&self) -> bool {
+        match self.bits {
+            0 | 1 => false,
+            2 | 3 => true,
+            _ => false,
+        }
+    }
+
+    /// Return `true` is Janet nanbox bit is set.
+    #[inline]
+    #[const_fn("1.46")]
+    pub const fn is_nanbox(&self) -> bool {
+        match self.bits {
+            0 | 2 => false,
+            1 | 3 => true,
+            _ => false,
+        }
+    }
+}
 
 /// Janet version representation.
 ///
 /// It has convenient comparison operators implementations with triples `(u32, u32, u32)`,
 /// arrays `[u32; 3]` and [`str`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) struct JanetVersion {
+pub struct JanetVersion {
     major: u32,
     minor: u32,
     patch: u32,
@@ -15,11 +76,11 @@ pub(crate) struct JanetVersion {
 impl JanetVersion {
     /// Get the current Janet version.
     #[inline]
-    pub(crate) const fn current() -> Self {
+    pub const fn current() -> Self {
         Self {
-            major: evil_janet::JANET_VERSION_MAJOR,
-            minor: evil_janet::JANET_VERSION_MINOR,
-            patch: evil_janet::JANET_VERSION_PATCH,
+            major: JANET_VERSION_MAJOR,
+            minor: JANET_VERSION_MINOR,
+            patch: JANET_VERSION_PATCH,
         }
     }
 
@@ -27,12 +88,30 @@ impl JanetVersion {
     ///
     /// Mostly used to check if current version match a requirement for your code.
     #[inline]
-    pub(crate) const fn custom(major: u32, minor: u32, patch: u32) -> Self {
+    pub const fn custom(major: u32, minor: u32, patch: u32) -> Self {
         Self {
             major,
             minor,
             patch,
         }
+    }
+
+    /// Return the Janet major version.
+    #[inline]
+    pub const fn major(&self) -> u32 {
+        self.major
+    }
+
+    /// Return the Janet minor version.
+    #[inline]
+    pub const fn minor(&self) -> u32 {
+        self.minor
+    }
+
+    /// Return the Janet patch version.
+    #[inline]
+    pub const fn patch(&self) -> u32 {
+        self.patch
     }
 }
 
@@ -289,5 +368,25 @@ mod tests {
             JanetVersion::custom(1, 1, 2).partial_cmp(&"version go brr")
         );
         assert_eq!(None, JanetVersion::custom(1, 1, 2).partial_cmp(&"1.1.1.1"));
+    }
+
+    #[test]
+    fn config_bits() {
+        let test0 = JanetBuildConfig::custom(0, 0, 0, 0);
+        let test1 = JanetBuildConfig::custom(0, 0, 0, 1);
+        let test2 = JanetBuildConfig::custom(0, 0, 0, 2);
+        let test3 = JanetBuildConfig::custom(0, 0, 0, 3);
+
+        assert!(!test0.is_nanbox());
+        assert!(!test0.is_single_threaded());
+
+        assert!(test1.is_nanbox());
+        assert!(!test1.is_single_threaded());
+
+        assert!(!test2.is_nanbox());
+        assert!(test2.is_single_threaded());
+
+        assert!(test3.is_nanbox());
+        assert!(test3.is_single_threaded());
     }
 }

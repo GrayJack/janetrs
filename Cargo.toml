@@ -45,7 +45,7 @@ system = ["evil-janet/system", "janetrs_macros/system"]
 link-system = ["evil-janet/link-system", "janetrs_macros/system"]
 
 [workspace]
-members = ["janetrs_macros"]
+members = ["janetrs_macros", "janetrs_version"]
 
 [[example]]
 name = "hello_world"
