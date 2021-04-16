@@ -329,7 +329,7 @@ pub fn panic(msg: Janet) -> ! {
     loop {}
 }
 
-#[cfg(test)]
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
     use core::cmp::Ordering;

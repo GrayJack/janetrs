@@ -2995,11 +2995,7 @@ mod tests {
     use super::*;
     use crate::{client::JanetClient, types::JanetString};
 
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn creation() {
         let _client = JanetClient::init().unwrap();
 
@@ -3013,7 +3009,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn pushs_and_length() {
         let _client = JanetClient::init().unwrap();
 
@@ -3031,7 +3026,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn set_length() {
         let _client = JanetClient::init().unwrap();
         let mut buffer = JanetBuffer::new();
@@ -3050,7 +3044,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn clone() {
         let _client = JanetClient::init().unwrap();
         let mut buffer = JanetBuffer::new();
@@ -3063,7 +3056,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn clear() {
         let _client = JanetClient::init().unwrap();
         let mut buffer = JanetBuffer::from("Hello!");
@@ -3078,7 +3070,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn index_indexmut() {
         let _client = JanetClient::init().unwrap();
 

@@ -769,7 +769,6 @@ mod tests {
     use serial_test::serial;
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn creation_and_get() {
         let _client = JanetClient::init().unwrap();
 
@@ -791,7 +790,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get_owned() {
         let _client = JanetClient::init().unwrap();
 
@@ -810,7 +808,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn find() {
         let _client = JanetClient::init().unwrap();
 
@@ -832,7 +829,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn clone() {
         let _client = JanetClient::init().unwrap();
 
@@ -855,7 +851,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn iter() {
         let _client = JanetClient::init().unwrap();
 
@@ -874,7 +869,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter() {
         let _client = JanetClient::init().unwrap();
 
@@ -887,7 +881,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn index() {
         let _client = JanetClient::init().unwrap();
         let st = crate::structs! {1 => 1, 2 => true, 3 => "help"};

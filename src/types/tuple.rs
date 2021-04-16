@@ -1261,11 +1261,7 @@ mod tests {
     use super::*;
     use crate::{client::JanetClient, tuple, types::*};
 
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn builder() {
         let _client = JanetClient::init().unwrap();
 
@@ -1282,7 +1278,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get() {
         let _client = JanetClient::init().unwrap();
 
@@ -1300,7 +1295,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn clone() {
         let _client = JanetClient::init().unwrap();
 
@@ -1321,7 +1315,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn collect() {
         let _client = JanetClient::init().unwrap();
         let vec = vec![Janet::nil(); 100];
@@ -1345,7 +1338,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn iter_iterator() {
         let _client = JanetClient::init().unwrap();
         let array = tuple![1, "hey", true];
@@ -1359,7 +1351,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn iter_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let numbers = tuple![1, 2, 3, 4, 5, 6];
@@ -1377,7 +1368,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter_iterator() {
         let _client = JanetClient::init().unwrap();
         let array = tuple![1, "hey", true];
@@ -1391,7 +1381,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let numbers = tuple![1, 2, 3, 4, 5, 6];
@@ -1409,7 +1398,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn compare() {
         use core::cmp::Ordering::*;
         let _client = JanetClient::init().unwrap();

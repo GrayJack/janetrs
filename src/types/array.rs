@@ -2481,14 +2481,10 @@ impl FusedIterator for IntoIter<'_> {}
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     use super::*;
     use crate::{array, client::JanetClient};
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn creation() {
         let _client = JanetClient::init().unwrap();
         let array = JanetArray::new();
@@ -2500,7 +2496,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn insert_and_length() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -2515,7 +2510,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn pop_and_peek() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -2533,7 +2527,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn set_length() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -2553,7 +2546,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -2565,7 +2557,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get_mut() {
         let _client = JanetClient::init().unwrap();
         let mut array = JanetArray::new();
@@ -2580,7 +2571,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn iter_iterator() {
         let _client = JanetClient::init().unwrap();
         let array = array![1, "hey", true];
@@ -2594,7 +2584,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn iter_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let numbers = array![1, 2, 3, 4, 5, 6];
@@ -2612,7 +2601,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn itermut_iterator() {
         let _client = JanetClient::init().unwrap();
         let mut array = array![1, "hey", true];
@@ -2626,7 +2614,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn itermut_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let mut numbers = array![1, 2, 3, 4, 5, 6];
@@ -2644,7 +2631,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter_iterator() {
         let _client = JanetClient::init().unwrap();
         let array = array![1, "hey", true];
@@ -2658,7 +2644,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter_double_ended_iterator() {
         let _client = JanetClient::init().unwrap();
         let numbers = array![1, 2, 3, 4, 5, 6];
@@ -2676,7 +2661,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn collect() {
         let _client = JanetClient::init().unwrap();
         let vec = vec![Janet::nil(); 100];
@@ -2693,7 +2677,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn size_hint() {
         let _client = JanetClient::init().unwrap();
         let mut iter = array![Janet::nil(); 100].into_iter();
@@ -2707,7 +2690,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn insert() {
         let _client = JanetClient::init().unwrap();
         let mut array = array![1, 2, 3, 4];
@@ -2725,7 +2707,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn remove() {
         let _client = JanetClient::init().unwrap();
         let mut array = array![1, 2, 3, 4];
@@ -2737,7 +2718,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn clear() {
         let _client = JanetClient::init().unwrap();
         let mut array = array![1, 2, 3, 4, "5", 6.0];

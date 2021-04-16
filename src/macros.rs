@@ -356,11 +356,7 @@ mod tests {
     // use super::*;
     use crate::types::Janet;
 
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn tuple0() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -376,7 +372,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn tuple1() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -389,7 +384,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn array0() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -398,7 +392,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn array1() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -413,7 +406,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn array2() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -428,7 +420,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn structs() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -443,7 +434,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn table() {
         let _client = crate::client::JanetClient::init().unwrap();
 
@@ -461,7 +451,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn empty() {
         let _client = crate::client::JanetClient::init().unwrap();
 

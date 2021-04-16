@@ -1693,7 +1693,6 @@ mod tests {
     use crate::{client::JanetClient, table, types::JanetString};
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn index() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::new();
@@ -1703,7 +1702,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn creation() {
         let _client = JanetClient::init().unwrap();
         let table = JanetTable::new();
@@ -1714,7 +1712,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn insert() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::new();
@@ -1725,7 +1722,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn length() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::new();
@@ -1736,7 +1732,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1748,7 +1743,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get_mut() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1769,7 +1763,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn get_owned() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1781,7 +1774,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn raw_get_owned() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1793,7 +1785,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn find() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1808,7 +1799,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn remove() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1835,7 +1825,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn entry_api_vacant_or_insert() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1850,7 +1839,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn entry_api_occupied_or_insert() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1863,7 +1851,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn entry_api_and_modify() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1892,7 +1879,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn entry_api_key() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1912,7 +1898,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn entry_api_insert() {
         let _client = JanetClient::init().unwrap();
         let mut table = JanetTable::with_capacity(2);
@@ -1929,7 +1914,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn iter() {
         let _client = JanetClient::init().unwrap();
 
@@ -1949,7 +1933,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn itermut() {
         let _client = JanetClient::init().unwrap();
 
@@ -1969,7 +1952,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn intoiter() {
         let _client = JanetClient::init().unwrap();
 

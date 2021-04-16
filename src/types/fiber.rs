@@ -344,11 +344,7 @@ mod tests {
 
     use core::convert::TryFrom;
 
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn exec_iterator() {
         let client = JanetClient::init().unwrap().with_default_env();
 

@@ -2485,7 +2485,6 @@ mod tests {
     use serial_test::serial;
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn creation_new() {
         let _client = JanetClient::init().unwrap();
 
@@ -2497,7 +2496,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn creation_builder() {
         let _client = JanetClient::init().unwrap();
 
@@ -2515,7 +2513,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn builder_no_panic() {
         let _client = JanetClient::init().unwrap();
 
@@ -2535,7 +2532,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn equal() {
         let _client = JanetClient::init().unwrap();
 
@@ -2546,7 +2542,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn ord() {
         let _client = JanetClient::init().unwrap();
 
@@ -2562,7 +2557,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn index() {
         let _client = JanetClient::init().unwrap();
 
@@ -2576,7 +2570,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(not(feature = "std"), serial)]
     fn from_char() {
         let _client = JanetClient::init().unwrap();
 
