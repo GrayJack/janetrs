@@ -20,12 +20,12 @@ proc-macro = true
 [dependencies]
 syn = {version = "1", features = ["extra-traits", "full"]}
 quote = "1"
-evil-janet = "1"
+janetrs_version = "0.1"
 # janetrs = { version = "0.1.2" }
 
 [features]
 default = []
-system = ["evil-janet/system"]
+system = ["janetrs_version/system"]
 # embed = ["janetrs/amalgation"]
 # system = ["janetrs/link-system"]
 # _test = ["embed"]

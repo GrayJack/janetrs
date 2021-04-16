@@ -26,6 +26,7 @@ evil-janet = "1.15.4"
 const_fn = "0.4"
 bstr = { version = "0.2.15", default-features = false }
 janetrs_macros = "0.2.0"
+janetrs_version = "0.1.0"
 
 [dev-dependencies]
 
@@ -40,7 +41,7 @@ inline-more = []
 # Unicode conveniences
 unicode = ["bstr/unicode"]
 # Use system janet.h
-system = ["evil-janet/system", "janetrs_macros/system"]
+system = ["evil-janet/system", "janetrs_macros/system", "janetrs_version/system"]
 # Use to link to system libjanet (not recommended generally)
 link-system = ["evil-janet/link-system", "janetrs_macros/system"]
 
