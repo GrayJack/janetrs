@@ -53,7 +53,7 @@ impl JanetAbstract {
         self.raw as *mut U
     }
 
-    /// Return the size of the type it holds
+    /// Return the size of the type it holds.
     #[inline]
     pub fn size(&self) -> usize {
         unsafe { (*evil_janet::janet_abstract_head(self.raw)).size as usize }
@@ -68,6 +68,7 @@ impl JanetAbstract {
 }
 
 impl fmt::Debug for JanetAbstract {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("JanetAbstract")
             .field("mem_size", &self.size())
