@@ -12,10 +12,17 @@ edition = "2018"
 keywords = ["janet", "embedding", "ffi"]
 
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu", "x86_64-unknown-freebsd",
-    "x86_64-unknown-netbsd", "x86_64-apple-darwin", "x86_64-sun-solaris",
-    "aarch64-unknown-linux-gnu", "i686-unknown-linux-gnu",
-    "x86_64-pc-windows-gnu", "x86_64-pc-windows-msvc"]
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "x86_64-unknown-freebsd",
+    "x86_64-unknown-netbsd",
+    "x86_64-apple-darwin",
+    "x86_64-sun-solaris",
+    "aarch64-unknown-linux-gnu",
+    "i686-unknown-linux-gnu",
+    "x86_64-pc-windows-gnu",
+    "x86_64-pc-windows-msvc",
+]
 all-features = false
 features = ["amalgation"]
 
@@ -23,7 +30,7 @@ features = ["amalgation"]
 
 [dependencies]
 evil-janet = "1.15.4"
-bstr = { version = "0.2.15", default-features = false }
+bstr = { version = "0.2.16", default-features = false }
 janetrs_macros = "0.2.0"
 janetrs_version = "0.1.0"
 
@@ -42,7 +49,11 @@ unicode = ["bstr/unicode"]
 # Use system janet.h
 system = ["evil-janet/system", "janetrs_macros/system", "janetrs_version/system"]
 # Use to link to system libjanet (not recommended generally)
-link-system = ["evil-janet/link-system", "janetrs_macros/system", "janetrs_version/system"]
+link-system = [
+    "evil-janet/link-system",
+    "janetrs_macros/system",
+    "janetrs_version/system",
+]
 
 [workspace]
 members = ["janetrs_macros", "janetrs_version"]
