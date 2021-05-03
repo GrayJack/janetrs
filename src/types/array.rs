@@ -2063,7 +2063,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetArray {
+    pub const fn as_raw(&self) -> *const CJanetArray {
         self.raw
     }
 

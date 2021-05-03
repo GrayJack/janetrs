@@ -227,7 +227,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetFiber {
+    pub const fn as_raw(&self) -> *const CJanetFiber {
         self.raw
     }
 

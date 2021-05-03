@@ -43,7 +43,7 @@ impl JanetAbstract {
     // false positive lint
     #[allow(clippy::wrong_self_convention)]
     #[inline]
-    pub fn as_raw(self) -> *mut c_void {
+    pub const fn as_raw(self) -> *mut c_void {
         self.raw
     }
 

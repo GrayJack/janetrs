@@ -80,7 +80,7 @@ impl JanetEnvironment {
 
     /// Get a reference the underlying environment table.
     #[inline]
-    pub fn table(&self) -> &JanetTable {
+    pub const fn table(&self) -> &JanetTable {
         &self.0
     }
 }

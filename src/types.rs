@@ -931,7 +931,7 @@ impl From<Janet> for TaggedJanet<'_> {
 
 impl TaggedJanet<'_> {
     #[inline]
-    pub fn kind(&self) -> JanetType {
+    pub const fn kind(&self) -> JanetType {
         match self {
             TaggedJanet::Abstract(_) => JanetType::Abstract,
             TaggedJanet::Array(_) => JanetType::Array,

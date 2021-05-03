@@ -9,6 +9,7 @@ documentation = "https://docs.rs/janetrs_macros"
 license-file = "../LICENSE"
 edition = "2018"
 keywords = ["janet", "embedding", "proc-macro"]
+categories = ["development-tools::procedural-macro-helpers"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -18,7 +19,7 @@ path = "src/lib.rs"
 proc-macro = true
 
 [dependencies]
-syn = {version = "1", features = ["extra-traits", "full"]}
+syn = { version = "1", features = ["extra-traits", "full"] }
 quote = "1"
 janetrs_version = "0.1"
 # janetrs = { version = "0.1.2" }

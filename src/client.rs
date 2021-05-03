@@ -403,7 +403,7 @@ impl JanetClient {
 
     /// Return a reference of the environment table of the runtime if it exist.
     #[inline]
-    pub fn env(&self) -> Option<&JanetEnvironment> {
+    pub const fn env(&self) -> Option<&JanetEnvironment> {
         self.env_table.as_ref()
     }
 }

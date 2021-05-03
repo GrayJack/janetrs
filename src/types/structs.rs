@@ -392,7 +392,7 @@ impl<'data> JanetStruct<'data> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const JanetKV {
+    pub const fn as_raw(&self) -> *const JanetKV {
         self.raw
     }
 }

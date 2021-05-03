@@ -128,7 +128,7 @@ impl JanetSymbol<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const u8 {
+    pub const fn as_raw(&self) -> *const u8 {
         self.raw
     }
 }
@@ -285,7 +285,7 @@ impl JanetKeyword<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const u8 {
+    pub const fn as_raw(&self) -> *const u8 {
         self.raw
     }
 }

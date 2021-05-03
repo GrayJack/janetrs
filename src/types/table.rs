@@ -776,7 +776,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// [`as_mut_ptr`]: ./struct.JanetTable.html#method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetTable {
+    pub const fn as_raw(&self) -> *const CJanetTable {
         self.raw
     }
 
@@ -1416,14 +1416,14 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     /// }
     /// ```
     #[inline]
-    pub fn into_key(self) -> Janet {
+    pub const fn into_key(self) -> Janet {
         self.key
     }
 
     /// Gets a reference to the key that would be used when inserting a value through the
     /// [`VacantEntry`].
     #[inline]
-    pub fn key(&self) -> &Janet {
+    pub const fn key(&self) -> &Janet {
         &self.key
     }
 }

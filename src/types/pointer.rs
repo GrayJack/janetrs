@@ -36,13 +36,13 @@ impl JanetPointer {
 
     /// Acquires the underlying `*mut` pointer.
     #[inline]
-    pub fn as_ptr(self) -> *mut c_void {
+    pub const fn as_ptr(self) -> *mut c_void {
         self.inner
     }
 
     /// Casts to a pointer of another type.
     #[inline]
-    pub fn cast<U>(self) -> *mut U {
+    pub const fn cast<U>(self) -> *mut U {
         self.inner as *mut U
     }
 }

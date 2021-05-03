@@ -957,7 +957,7 @@ impl<'data> JanetTuple<'data> {
     /// The caller must ensure that the fiber outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const CJanet {
+    pub const fn as_raw(&self) -> *const CJanet {
         self.raw
     }
 }

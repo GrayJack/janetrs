@@ -2496,7 +2496,7 @@ impl JanetBuffer<'_> {
     ///
     /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetBuffer {
+    pub const fn as_raw(&self) -> *const CJanetBuffer {
         self.raw
     }
 

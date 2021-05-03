@@ -41,7 +41,7 @@ pub enum CallErrorKind {
 
 impl<'data> CallError<'data> {
     #[inline]
-    fn new(
+    const fn new(
         kind: CallErrorKind, value: Janet, signal: JanetSignal, fiber: Option<JanetFiber<'data>>,
     ) -> Self {
         Self {
@@ -54,25 +54,25 @@ impl<'data> CallError<'data> {
 
     /// Returns the kind of the error.
     #[inline]
-    pub fn kind(&self) -> CallErrorKind {
+    pub const fn kind(&self) -> CallErrorKind {
         self.kind
     }
 
     /// Returns the error value.
     #[inline]
-    pub fn value(&self) -> Janet {
+    pub const fn value(&self) -> Janet {
         self.value
     }
 
     /// Returns the [`JanetSignal`] that caused the error.
     #[inline]
-    pub fn signal(&self) -> JanetSignal {
+    pub const fn signal(&self) -> JanetSignal {
         self.signal
     }
 
     /// Get a reference to the fiber that the error happened if it exists.
     #[inline]
-    pub fn fiber(&self) -> Option<&JanetFiber> {
+    pub const fn fiber(&self) -> Option<&JanetFiber> {
         self.fiber.as_ref()
     }
 
@@ -84,7 +84,7 @@ impl<'data> CallError<'data> {
 
     /// Consume the error and return the fiber that the error happened if it exists.
     #[inline]
-    pub fn take_fiber(self) -> Option<JanetFiber<'data>> {
+    pub const fn take_fiber(self) -> Option<JanetFiber<'data>> {
         self.fiber
     }
 
@@ -244,7 +244,7 @@ impl<'data> JanetFunction<'data> {
     /// The caller must ensure that the function outlives the pointer this function
     /// returns, or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw(&self) -> *const CJanetFunction {
+    pub const fn as_raw(&self) -> *const CJanetFunction {
         self.raw
     }
 
