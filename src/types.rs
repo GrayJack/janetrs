@@ -337,29 +337,58 @@ impl Janet {
 
     /// Returns the length of a [`Janet`] if it is of a applicable type (Abstract, Array,
     /// Buffer, Keyword, Struct, Symbol, Table, Tuple).
-    #[inline]
+    ///
+    /// Janet Panics:
+    /// If the `Janet` value is a Janet Abstract and the method to get the
+    /// length (janet) panics, this function janet panics as well.
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn len(&self) -> Option<i32> {
-        use JanetType as Jt;
-        if matches!(
-            self.kind(),
-            Jt::String
-                | Jt::Symbol
-                | Jt::Keyword
-                | Jt::Array
-                | Jt::Tuple
-                | Jt::Table
-                | Jt::Struct
-                | Jt::Buffer
-                | Jt::Abstract
-        ) {
-            Some(unsafe { evil_janet::janet_length(self.inner) })
-        } else {
-            None
+        match self.unwrap() {
+            TaggedJanet::Array(x) => Some(x.len()),
+            TaggedJanet::Buffer(x) => Some(x.len()),
+            TaggedJanet::Keyword(x) => Some(x.len()),
+            TaggedJanet::String(x) => Some(x.len()),
+            TaggedJanet::Struct(x) => Some(x.len()),
+            TaggedJanet::Symbol(x) => Some(x.len()),
+            TaggedJanet::Table(x) => Some(x.len()),
+            TaggedJanet::Tuple(x) => Some(x.len()),
+            TaggedJanet::Abstract(_) => {
+                self.get_method("length")
+                    .and_then(|method: Janet| match method.unwrap() {
+                        // I think Abstract methods can only be a C function because as far a
+                        // I(GrayJack) know, a JanetFunction cannot be created (as in written) by
+                        // the public Janet C API.
+                        TaggedJanet::CFunction(fun) => fun,
+                        _ => None,
+                    })
+                    .map(|f| {
+                        // Safety: We are trusting that am Abstract Janet method through a C
+                        // function will not cause UB. It can janet panic
+                        unsafe { f(1, [self.inner].as_mut_ptr()) }.into()
+                    })
+                    .and_then(|len: Janet| match len.unwrap() {
+                        TaggedJanet::Number(x) => {
+                            if x >= i32::MIN as f64
+                                && x <= i32::MAX as f64
+                                && (x - x as i32 as f64).abs() < f64::EPSILON
+                            {
+                                Some(x as i32)
+                            } else {
+                                None
+                            }
+                        },
+                        _ => None,
+                    })
+            },
+            _ => None,
         }
     }
 
     /// Returns `true` if `Janet` has a applicable type (Abstract, Array, Buffer, Keyword,
     /// Struct, Symbol, Table, Tuple) and the length of it is zero, and `false` otherwise.
+    ///
+    /// Janet Panic:
+    /// This function may panic for the same reason as [`Janet::len`]
     #[inline]
     pub fn is_empty(&self) -> bool {
         matches!(self.len(), Some(0))
@@ -369,6 +398,24 @@ impl Janet {
     #[inline]
     pub fn is_truthy(&self) -> bool {
         unsafe { evil_janet::janet_truthy(self.inner) == 0 }
+    }
+
+    /// Retuns a `Janet` value containing the requested method if it exists.
+    #[inline]
+    pub fn get_method(&self, method_name: &str) -> Option<Janet> {
+        let method_name: Janet = JanetKeyword::from(method_name).into();
+        let method: Janet = unsafe { evil_janet::janet_get(self.inner, method_name.inner) }.into();
+
+        if method.is_nil() {
+            return None;
+        }
+        Some(method)
+    }
+
+    /// Retuns `true` if the `Janet` has a method callled `method_name`
+    #[inline]
+    pub fn has_method(&self, method_name: &str) -> bool {
+        self.get_method(method_name).is_some()
     }
 
     /// Returns the type of [`Janet`] object.
