@@ -7,6 +7,8 @@ use core::{
 #[cfg(feature = "std")]
 use std::{error::Error as StdError, thread_local};
 
+use const_fn::const_fn;
+
 use crate::{
     env::JanetEnvironment,
     types::{Janet, JanetCFunction, JanetTable},
@@ -403,6 +405,7 @@ impl JanetClient {
 
     /// Return a reference of the environment table of the runtime if it exist.
     #[inline]
+    #[const_fn("1.48")]
     pub const fn env(&self) -> Option<&JanetEnvironment> {
         self.env_table.as_ref()
     }
