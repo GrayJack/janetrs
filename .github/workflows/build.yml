@@ -48,5 +48,10 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
         profile: minimal
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "12.0"
+        directory: ${{ runner.temp }}/llvm
     - name: Check and Run tests
       run: cargo test --features amalgation --verbose
