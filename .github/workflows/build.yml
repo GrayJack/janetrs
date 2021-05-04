@@ -35,18 +35,18 @@ jobs:
     - name: Check and Run tests
       run: cargo test --features amalgation --verbose
 
-  # build-windows:
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [windows-latest]
-  #       rust: [1.43.0, stable, beta, nightly]
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: ${{ matrix.rust }}
-  #       override: true
-  #       profile: minimal
-  #   - name: Check and Run tests
-  #     run: cargo test --features amalgation --verbose
+  build-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        rust: [1.43.0, stable, beta, nightly]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ matrix.rust }}
+        override: true
+        profile: minimal
+    - name: Check and Run tests
+      run: cargo test --features amalgation --verbose
