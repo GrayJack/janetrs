@@ -13,6 +13,8 @@ use core::{
 #[cfg(feature = "std")]
 use std::error;
 
+use const_fn::const_fn;
+
 use evil_janet::{Janet as CJanet, JanetType as CJanetType};
 
 pub mod array;
@@ -931,6 +933,7 @@ impl From<Janet> for TaggedJanet<'_> {
 
 impl TaggedJanet<'_> {
     #[inline]
+    #[const_fn("1.46")]
     pub const fn kind(&self) -> JanetType {
         match self {
             TaggedJanet::Abstract(_) => JanetType::Abstract,
