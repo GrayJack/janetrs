@@ -1725,65 +1725,67 @@ impl FusedIterator for IntoIter<'_> {}
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     use super::*;
     use crate::{client::JanetClient, table, types::JanetString};
 
     #[test]
-    fn index() {
-        let _client = JanetClient::init().unwrap();
+    fn index() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::new();
         table.entry(10).or_insert("abc");
 
         assert_eq!(&Janet::from("abc"), table[10]);
+        Ok(())
     }
 
     #[test]
-    fn creation() {
-        let _client = JanetClient::init().unwrap();
+    fn creation() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let table = JanetTable::new();
         assert_eq!(1, table.capacity());
 
         let table = JanetTable::with_capacity(10);
         assert_eq!(16, table.capacity());
+        Ok(())
     }
 
     #[test]
-    fn insert() {
-        let _client = JanetClient::init().unwrap();
+    fn insert() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::new();
 
         assert_eq!(None, table.insert(Janet::nil(), true));
         assert_eq!(None, table.insert(0, true));
         assert_eq!(Some(Janet::boolean(true)), table.insert(0, false));
+        Ok(())
     }
 
     #[test]
-    fn length() {
-        let _client = JanetClient::init().unwrap();
+    fn length() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::new();
         assert_eq!(0, table.len());
 
         assert_eq!(None, table.insert(0, true));
-        assert_eq!(1, table.len())
+        assert_eq!(1, table.len());
+        Ok(())
     }
 
     #[test]
-    fn get() {
-        let _client = JanetClient::init().unwrap();
+    fn get() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, 10.1);
 
         assert_eq!(None, table.get(Janet::nil()));
         assert_eq!(None, table.get(11));
         assert_eq!(Some(&Janet::number(10.1)), table.get(10));
+        Ok(())
     }
 
     #[test]
-    fn get_mut() {
-        let _client = JanetClient::init().unwrap();
+    fn get_mut() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, "ten");
 
@@ -1799,33 +1801,36 @@ mod tests {
             Some((&Janet::integer(10), &mut Janet::from("ten but modified")))
         );
         assert_eq!(table.get(11), None);
+        Ok(())
     }
 
     #[test]
-    fn get_owned() {
-        let _client = JanetClient::init().unwrap();
+    fn get_owned() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, 10.1);
 
         assert_eq!(None, table.get_owned(Janet::nil()));
         assert_eq!(None, table.get_owned(11));
         assert_eq!(Some(Janet::number(10.1)), table.get_owned(10));
+        Ok(())
     }
 
     #[test]
-    fn raw_get_owned() {
-        let _client = JanetClient::init().unwrap();
+    fn raw_get_owned() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, 10.1);
 
         assert_eq!(None, table.raw_get_owned(Janet::nil()));
         assert_eq!(None, table.raw_get_owned(11));
         assert_eq!(Some(Janet::number(10.1)), table.raw_get_owned(10));
+        Ok(())
     }
 
     #[test]
-    fn find() {
-        let _client = JanetClient::init().unwrap();
+    fn find() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, 10.1);
 
@@ -1835,11 +1840,12 @@ mod tests {
             Some((&mut Janet::integer(10), &mut Janet::number(10.1))),
             table.find(10)
         );
+        Ok(())
     }
 
     #[test]
-    fn remove() {
-        let _client = JanetClient::init().unwrap();
+    fn remove() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
         table.insert(10, 10.5);
         table.insert(12, 1);
@@ -1861,11 +1867,12 @@ mod tests {
         assert_eq!(Some(Janet::integer(1)), table.remove(12));
         assert_eq!(2, table.removed());
         assert!(table.is_empty());
+        Ok(())
     }
 
     #[test]
-    fn entry_api_vacant_or_insert() {
-        let _client = JanetClient::init().unwrap();
+    fn entry_api_vacant_or_insert() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
 
         let val = table.entry(10).or_insert(78.9);
@@ -1875,11 +1882,12 @@ mod tests {
         let val = table.entry(20).or_insert("default");
         assert_eq!(&mut Janet::from("default"), val);
         assert_eq!(2, table.len());
+        Ok(())
     }
 
     #[test]
-    fn entry_api_occupied_or_insert() {
-        let _client = JanetClient::init().unwrap();
+    fn entry_api_occupied_or_insert() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
 
         table.insert(10, "dez");
@@ -1887,11 +1895,12 @@ mod tests {
 
         assert_eq!(&mut Janet::from("dez"), table.entry(10).or_insert(10));
         assert_eq!(&mut Janet::from("onze"), table.entry(11).or_insert(11));
+        Ok(())
     }
 
     #[test]
-    fn entry_api_and_modify() {
-        let _client = JanetClient::init().unwrap();
+    fn entry_api_and_modify() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
 
         table.insert(10, "dez");
@@ -1915,11 +1924,12 @@ mod tests {
             .or_insert(false);
 
         assert_eq!(&mut Janet::boolean(false), test_vacant);
+        Ok(())
     }
 
     #[test]
-    fn entry_api_key() {
-        let _client = JanetClient::init().unwrap();
+    fn entry_api_key() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
 
         table.insert(10, "dez");
@@ -1934,11 +1944,12 @@ mod tests {
         let entry = table.entry(11);
         let test_vacant = entry.key();
         assert_eq!(&Janet::integer(11), test_vacant);
+        Ok(())
     }
 
     #[test]
-    fn entry_api_insert() {
-        let _client = JanetClient::init().unwrap();
+    fn entry_api_insert() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut table = JanetTable::with_capacity(2);
 
         let mut entry = table.entry(10).insert("dez");
@@ -1950,11 +1961,12 @@ mod tests {
         assert_eq!(&Janet::integer(10), entry.key());
         assert_eq!(&Janet::from("não dez"), entry.get());
         assert_eq!(&mut Janet::from("não dez"), entry.get_mut());
+        Ok(())
     }
 
     #[test]
-    fn iter() {
-        let _client = JanetClient::init().unwrap();
+    fn iter() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let table = table! {10 => "dez", 11 => "onze"};
         let mut iter = table.iter();
@@ -1969,11 +1981,12 @@ mod tests {
         );
         assert_eq!(iter.next(), None);
         assert_eq!(iter.next(), None);
+        Ok(())
     }
 
     #[test]
-    fn itermut() {
-        let _client = JanetClient::init().unwrap();
+    fn itermut() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let mut table = table! {10 => "dez", 11 => "onze"};
         let mut iter = table.iter_mut();
@@ -1988,11 +2001,12 @@ mod tests {
         );
         assert_eq!(iter.next(), None);
         assert_eq!(iter.next(), None);
+        Ok(())
     }
 
     #[test]
-    fn intoiter() {
-        let _client = JanetClient::init().unwrap();
+    fn intoiter() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let table = table! {10 => "dez", 11 => "onze"};
         let mut iter = table.into_iter();
@@ -2001,5 +2015,6 @@ mod tests {
         assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
         assert_eq!(iter.next(), None);
         assert_eq!(iter.next(), None);
+        Ok(())
     }
 }

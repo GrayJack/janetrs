@@ -2509,23 +2509,21 @@ mod tests {
     use super::*;
     use crate::client::JanetClient;
 
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     #[test]
-    fn creation_new() {
-        let _client = JanetClient::init().unwrap();
+    fn creation_new() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let string = JanetString::new("");
         assert!(string.is_empty());
 
         let string = JanetString::new("buffer");
         assert_eq!(6, string.len());
+        Ok(())
     }
 
     #[test]
-    fn creation_builder() {
-        let _client = JanetClient::init().unwrap();
+    fn creation_builder() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let string = JanetString::builder(0).finalize();
         assert!(string.is_empty());
@@ -2538,11 +2536,12 @@ mod tests {
 
         let string = JanetString::builder(10).finalize();
         assert_eq!(10, string.len());
+        Ok(())
     }
 
     #[test]
-    fn builder_no_panic() {
-        let _client = JanetClient::init().unwrap();
+    fn builder_no_panic() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let string = JanetString::builder(6).put("buffersssss").finalize();
 
@@ -2557,21 +2556,23 @@ mod tests {
 
         assert_eq!(6, string.len());
         assert_eq!(JanetString::new("buffea"), string);
+        Ok(())
     }
 
     #[test]
-    fn equal() {
-        let _client = JanetClient::init().unwrap();
+    fn equal() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let str1 = JanetString::new("buffer");
         let str2 = JanetString::builder(6).put("buffer").finalize();
 
         assert_eq!(str1, str2);
+        Ok(())
     }
 
     #[test]
-    fn ord() {
-        let _client = JanetClient::init().unwrap();
+    fn ord() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let str1 = JanetString::new("buffer");
         let str2 = JanetString::new("não");
@@ -2582,11 +2583,12 @@ mod tests {
 
         assert!(str2 < str3);
         assert!(str3 > str2);
+        Ok(())
     }
 
     #[test]
-    fn index() {
-        let _client = JanetClient::init().unwrap();
+    fn index() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let expected = b"test";
         let str1 = JanetString::new("test");
@@ -2595,15 +2597,17 @@ mod tests {
         assert_eq!(expected[1], str1[1]);
         assert_eq!(expected[2], str1[2]);
         assert_eq!(expected[3], str1[3]);
+        Ok(())
     }
 
     #[test]
-    fn from_char() {
-        let _client = JanetClient::init().unwrap();
+    fn from_char() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let expected = JanetString::new("α");
         let test = JanetString::from('α');
 
         assert_eq!(test, expected);
+        Ok(())
     }
 }

@@ -1262,8 +1262,8 @@ mod tests {
     use core::hash::{Hash, Hasher};
 
     #[cfg_attr(feature = "std", test)]
-    fn janet_eq_hash() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn janet_eq_hash() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let mut hasher1 = std::collections::hash_map::DefaultHasher::new();
         let mut hasher2 = std::collections::hash_map::DefaultHasher::new();
@@ -1284,14 +1284,18 @@ mod tests {
         assert_ne!(j1, j2);
         assert_ne!(hasher1.finish(), hasher2.finish());
         assert_eq!(j1 == j2, hasher1.finish() == hasher2.finish());
+
+        Ok(())
     }
 
     #[test]
-    fn dynamic() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn dynamic() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         unsafe { evil_janet::janet_setdyn("test\0".as_ptr() as *const _, Janet::from(10).into()) };
 
         assert_eq!(Some(Janet::number(10.0)), Janet::dynamic("test"));
+
+        Ok(())
     }
 }

@@ -1276,8 +1276,8 @@ mod tests {
     use crate::{client::JanetClient, tuple, types::*};
 
     #[test]
-    fn builder() {
-        let _client = JanetClient::init().unwrap();
+    fn builder() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let tuple = JanetTuple::builder(0).finalize();
         assert!(tuple.is_empty());
@@ -1289,11 +1289,13 @@ mod tests {
             .finalize();
 
         assert_eq!(3, tuple.len());
+
+        Ok(())
     }
 
     #[test]
-    fn get() {
-        let _client = JanetClient::init().unwrap();
+    fn get() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let tuple = JanetTuple::builder(3)
             .put(Janet::number(10.0))
@@ -1306,11 +1308,13 @@ mod tests {
         assert_eq!(Some(&Janet::nil()), tuple.get(1));
         assert_eq!(Some(&Janet::boolean(true)), tuple.get(2));
         assert_eq!(None, tuple.get(3));
+
+        Ok(())
     }
 
     #[test]
-    fn clone() {
-        let _client = JanetClient::init().unwrap();
+    fn clone() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let tuple = JanetTuple::builder(3)
             .put(Janet::number(10.0))
@@ -1326,11 +1330,13 @@ mod tests {
         assert_eq!(tuple.get(1), clone.get(1));
         assert_eq!(tuple.get(2), clone.get(2));
         assert_eq!(tuple.get(3), clone.get(3));
+
+        Ok(())
     }
 
     #[test]
-    fn collect() {
-        let _client = JanetClient::init().unwrap();
+    fn collect() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let vec = vec![Janet::nil(); 100];
 
         let jtup: JanetTuple<'_> = vec.into_iter().collect();
@@ -1349,11 +1355,13 @@ mod tests {
         );
         assert_eq!(Some(&Janet::boolean(true)), iter.next());
         assert_eq!(None, iter.next());
+
+        Ok(())
     }
 
     #[test]
-    fn iter_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn iter_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let array = tuple![1, "hey", true];
 
         let mut iter = array.iter();
@@ -1362,11 +1370,13 @@ mod tests {
         assert_eq!(Some(&Janet::from("hey")), iter.next());
         assert_eq!(Some(&Janet::boolean(true)), iter.next());
         assert_eq!(None, iter.next());
+
+        Ok(())
     }
 
     #[test]
-    fn iter_double_ended_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn iter_double_ended_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let numbers = tuple![1, 2, 3, 4, 5, 6];
 
         let mut iter = numbers.iter();
@@ -1379,11 +1389,13 @@ mod tests {
         assert_eq!(Some(&Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
+
+        Ok(())
     }
 
     #[test]
-    fn intoiter_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn intoiter_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let array = tuple![1, "hey", true];
 
         let mut iter = array.into_iter();
@@ -1392,11 +1404,13 @@ mod tests {
         assert_eq!(Some(Janet::from("hey")), iter.next());
         assert_eq!(Some(Janet::boolean(true)), iter.next());
         assert_eq!(None, iter.next());
+
+        Ok(())
     }
 
     #[test]
-    fn intoiter_double_ended_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn intoiter_double_ended_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let numbers = tuple![1, 2, 3, 4, 5, 6];
 
         let mut iter = numbers.into_iter();
@@ -1409,12 +1423,14 @@ mod tests {
         assert_eq!(Some(Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
+
+        Ok(())
     }
 
     #[test]
-    fn compare() {
+    fn compare() -> Result<(), crate::client::Error> {
         use core::cmp::Ordering::*;
-        let _client = JanetClient::init().unwrap();
+        let _client = JanetClient::init()?;
 
         let test = tuple![1, 2, 3, 4, 5, 6];
         let clone = test.clone();
@@ -1423,5 +1439,7 @@ mod tests {
 
         let test2 = tuple![1, 2];
         assert_eq!(test.cmp(&test2), Greater);
+
+        Ok(())
     }
 }

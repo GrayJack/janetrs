@@ -804,12 +804,9 @@ mod tests {
     use super::*;
     use crate::{client::JanetClient, structs, types::Janet};
 
-    #[cfg(not(feature = "std"))]
-    use serial_test::serial;
-
     #[test]
-    fn creation_and_get() {
-        let _client = JanetClient::init().unwrap();
+    fn creation_and_get() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let value1 = Janet::integer(10);
         let value2 = Janet::boolean(true);
@@ -826,11 +823,12 @@ mod tests {
         assert_eq!(Some(&value1), st.get(10.0));
         assert_eq!(Some(&value2), st.get(11.0));
         assert_eq!(None, st.get(12.0));
+        Ok(())
     }
 
     #[test]
-    fn get_owned() {
-        let _client = JanetClient::init().unwrap();
+    fn get_owned() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let value1 = Janet::integer(10);
         let value2 = Janet::boolean(true);
@@ -844,11 +842,12 @@ mod tests {
         assert_eq!(Some(value1), st.get_owned(10.0));
         assert_eq!(Some(value2), st.get_owned(11.0));
         assert_eq!(None, st.get_owned(12.0));
+        Ok(())
     }
 
     #[test]
-    fn find() {
-        let _client = JanetClient::init().unwrap();
+    fn find() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let key1 = Janet::number(10.0);
         let key2 = Janet::number(11.0);
@@ -865,11 +864,12 @@ mod tests {
         assert_eq!(Some((&key2, &value2)), st.find(key2));
         assert_eq!(Some((&Janet::nil(), &Janet::nil())), st.find(1));
         assert_eq!(None, st.find(Janet::nil()));
+        Ok(())
     }
 
     #[test]
-    fn clone() {
-        let _client = JanetClient::init().unwrap();
+    fn clone() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let key1 = Janet::number(10.0);
         let key2 = Janet::number(11.0);
@@ -887,11 +887,12 @@ mod tests {
         assert_ne!(st.raw, clone.raw);
         assert_eq!(st.get_key_value(key1), clone.get_key_value(key1));
         assert_eq!(st.get_key_value(key2), clone.get_key_value(key2));
+        Ok(())
     }
 
     #[test]
-    fn iter() {
-        let _client = JanetClient::init().unwrap();
+    fn iter() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let st = structs! {10 => "dez", 11 => "onze"};
         let mut iter = st.iter();
@@ -905,11 +906,12 @@ mod tests {
             Some((&Janet::integer(10), &Janet::from("dez")))
         );
         assert_eq!(iter.next(), None);
+        Ok(())
     }
 
     #[test]
-    fn intoiter() {
-        let _client = JanetClient::init().unwrap();
+    fn intoiter() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let st = structs! {10 => "dez", 11 => "onze"};
         let mut iter = st.into_iter();
@@ -917,15 +919,17 @@ mod tests {
         assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
         assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
         assert_eq!(iter.next(), None);
+        Ok(())
     }
 
     #[test]
-    fn index() {
-        let _client = JanetClient::init().unwrap();
+    fn index() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let st = crate::structs! {1 => 1, 2 => true, 3 => "help"};
 
         assert_eq!(&Janet::from(1), st[1]);
         assert_eq!(&Janet::from(true), st[2]);
         assert_eq!(&Janet::from("help"), st[3]);
+        Ok(())
     }
 }

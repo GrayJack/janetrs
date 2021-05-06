@@ -2506,19 +2506,20 @@ mod tests {
     use crate::{array, client::JanetClient};
 
     #[test]
-    fn creation() {
-        let _client = JanetClient::init().unwrap();
+    fn creation() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let array = JanetArray::new();
 
         assert_eq!(0, array.capacity());
 
         let array = JanetArray::with_capacity(10);
         assert_eq!(10, array.capacity());
+        Ok(())
     }
 
     #[test]
-    fn insert_and_length() {
-        let _client = JanetClient::init().unwrap();
+    fn insert_and_length() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = JanetArray::new();
 
         assert!(array.is_empty());
@@ -2528,11 +2529,12 @@ mod tests {
         }
 
         assert_eq!(10, array.len());
+        Ok(())
     }
 
     #[test]
-    fn pop_and_peek() {
-        let _client = JanetClient::init().unwrap();
+    fn pop_and_peek() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = JanetArray::new();
 
         for i in 0..10 {
@@ -2545,11 +2547,12 @@ mod tests {
 
             assert_eq!(last_peek, poped_last);
         }
+        Ok(())
     }
 
     #[test]
-    fn set_length() {
-        let _client = JanetClient::init().unwrap();
+    fn set_length() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = JanetArray::new();
 
         for i in 0..10 {
@@ -2564,22 +2567,24 @@ mod tests {
         assert_eq!(Janet::nil(), array.peek());
         array.set_len(-10);
         assert_eq!(19, array.len());
+        Ok(())
     }
 
     #[test]
-    fn get() {
-        let _client = JanetClient::init().unwrap();
+    fn get() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = JanetArray::new();
         array.push(10);
 
         assert_eq!(None, array.get(-1));
         assert_eq!(Some(&Janet::integer(10)), array.get(0));
         assert_eq!(None, array.get(1));
+        Ok(())
     }
 
     #[test]
-    fn get_mut() {
-        let _client = JanetClient::init().unwrap();
+    fn get_mut() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = JanetArray::new();
         array.push(10);
 
@@ -2589,11 +2594,12 @@ mod tests {
 
         *array.get_mut(0).unwrap() = Janet::boolean(true);
         assert_eq!(Some(&Janet::boolean(true)), array.get(0));
+        Ok(())
     }
 
     #[test]
-    fn iter_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn iter_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let array = array![1, "hey", true];
 
         let mut iter = array.iter();
@@ -2602,11 +2608,12 @@ mod tests {
         assert_eq!(Some(&Janet::from("hey")), iter.next());
         assert_eq!(Some(&Janet::boolean(true)), iter.next());
         assert_eq!(None, iter.next());
+        Ok(())
     }
 
     #[test]
-    fn iter_double_ended_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn iter_double_ended_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let numbers = array![1, 2, 3, 4, 5, 6];
 
         let mut iter = numbers.iter();
@@ -2619,11 +2626,12 @@ mod tests {
         assert_eq!(Some(&Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
+        Ok(())
     }
 
     #[test]
-    fn itermut_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn itermut_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = array![1, "hey", true];
 
         let mut iter = array.iter_mut();
@@ -2632,11 +2640,12 @@ mod tests {
         assert_eq!(Some(&mut Janet::from("hey")), iter.next());
         assert_eq!(Some(&mut Janet::boolean(true)), iter.next());
         assert_eq!(None, iter.next());
+        Ok(())
     }
 
     #[test]
-    fn itermut_double_ended_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn itermut_double_ended_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut numbers = array![1, 2, 3, 4, 5, 6];
 
         let mut iter = numbers.iter_mut();
@@ -2649,11 +2658,12 @@ mod tests {
         assert_eq!(Some(&mut Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
+        Ok(())
     }
 
     #[test]
-    fn intoiter_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn intoiter_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let array = array![1, "hey", true];
 
         let mut iter = array.into_iter();
@@ -2662,11 +2672,12 @@ mod tests {
         assert_eq!(Some(Janet::from("hey")), iter.next());
         assert_eq!(Some(Janet::boolean(true)), iter.next());
         assert_eq!(None, iter.next());
+        Ok(())
     }
 
     #[test]
-    fn intoiter_double_ended_iterator() {
-        let _client = JanetClient::init().unwrap();
+    fn intoiter_double_ended_iterator() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let numbers = array![1, 2, 3, 4, 5, 6];
 
         let mut iter = numbers.into_iter();
@@ -2679,11 +2690,12 @@ mod tests {
         assert_eq!(Some(Janet::integer(4)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
+        Ok(())
     }
 
     #[test]
-    fn collect() {
-        let _client = JanetClient::init().unwrap();
+    fn collect() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let vec = vec![Janet::nil(); 100];
 
         let jarr: JanetArray<'_> = vec.into_iter().collect();
@@ -2695,11 +2707,12 @@ mod tests {
         let jarr: JanetArray<'_> = vec.into_iter().collect();
         assert_eq!(jarr.len(), 100);
         assert!(jarr.iter().all(|j| j == Janet::number(101.0)));
+        Ok(())
     }
 
     #[test]
-    fn size_hint() {
-        let _client = JanetClient::init().unwrap();
+    fn size_hint() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut iter = array![Janet::nil(); 100].into_iter();
 
         // The code for all the iterators of the array are the same
@@ -2708,11 +2721,12 @@ mod tests {
         assert_eq!(iter.len(), 99);
         let _ = iter.next_back();
         assert_eq!(iter.len(), 98);
+        Ok(())
     }
 
     #[test]
-    fn insert() {
-        let _client = JanetClient::init().unwrap();
+    fn insert() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = array![1, 2, 3, 4];
 
         assert_eq!(array.len(), 4);
@@ -2725,22 +2739,24 @@ mod tests {
         assert_eq!(array[1], &Janet::integer(10));
         assert_eq!(array[2], &Janet::integer(2));
         assert_eq!(array[3], &Janet::integer(3));
+        Ok(())
     }
 
     #[test]
-    fn remove() {
-        let _client = JanetClient::init().unwrap();
+    fn remove() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = array![1, 2, 3, 4];
 
         assert_eq!(array.len(), 4);
         let rm = array.remove(1);
         assert_eq!(array.len(), 3);
         assert_eq!(rm, Janet::integer(2));
+        Ok(())
     }
 
     #[test]
-    fn clear() {
-        let _client = JanetClient::init().unwrap();
+    fn clear() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut array = array![1, 2, 3, 4, "5", 6.0];
 
         assert_eq!(array.len(), 6);
@@ -2750,5 +2766,6 @@ mod tests {
 
         assert!(array.is_empty());
         assert_eq!(array.capacity(), 6);
+        Ok(())
     }
 }

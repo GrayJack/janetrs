@@ -357,8 +357,8 @@ mod tests {
     use crate::types::Janet;
 
     #[test]
-    fn tuple0() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn tuple0() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let t = tuple![0, 1, 2, 3, true, "hey"];
 
@@ -369,11 +369,13 @@ mod tests {
         assert_eq!(t[3], &Janet::integer(3));
         assert_eq!(t[4], &Janet::boolean(true));
         assert_eq!(t[5], &Janet::from("hey"));
+
+        Ok(())
     }
 
     #[test]
-    fn tuple1() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn tuple1() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let t = tuple!["123"; 3];
 
@@ -381,19 +383,23 @@ mod tests {
         assert_eq!(t[0], &Janet::from("123"));
         assert_eq!(t[1], &Janet::from("123"));
         assert_eq!(t[2], &Janet::from("123"));
+
+        Ok(())
     }
 
     #[test]
-    fn array0() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn array0() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let arr = array![];
         assert!(arr.is_empty());
+
+        Ok(())
     }
 
     #[test]
-    fn array1() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn array1() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let arr = array![0; 5];
         assert_eq!(arr.len(), 5);
@@ -403,11 +409,13 @@ mod tests {
         assert_eq!(arr[2], &Janet::integer(0));
         assert_eq!(arr[3], &Janet::integer(0));
         assert_eq!(arr[4], &Janet::integer(0));
+
+        Ok(())
     }
 
     #[test]
-    fn array2() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn array2() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let arr = array![0, 10.0, 15.5, true, "abc"];
         assert_eq!(arr.len(), 5);
@@ -417,11 +425,13 @@ mod tests {
         assert_eq!(arr[2], &Janet::number(15.5));
         assert_eq!(arr[3], &Janet::boolean(true));
         assert_eq!(arr[4], &Janet::from("abc"));
+
+        Ok(())
     }
 
     #[test]
-    fn structs() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn structs() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let st = structs! {
             1 => "one",
@@ -431,11 +441,13 @@ mod tests {
         assert_eq!(st.len(), 2);
         assert_eq!(st.get(1), Some(&Janet::from("one")));
         assert_eq!(st.get(true), Some(&Janet::integer(1)));
+
+        Ok(())
     }
 
     #[test]
-    fn table() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn table() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let table = table! {};
         assert!(table.is_empty());
@@ -448,11 +460,13 @@ mod tests {
         assert_eq!(table.len(), 2);
         assert_eq!(table.get(1), Some(&Janet::from("one")));
         assert_eq!(table.get(true), Some(&Janet::integer(1)));
+
+        Ok(())
     }
 
     #[test]
-    fn empty() {
-        let _client = crate::client::JanetClient::init().unwrap();
+    fn empty() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
 
         let arr = array![];
         let tup = tuple![];
@@ -463,5 +477,7 @@ mod tests {
         assert!(tup.is_empty());
         assert!(stru.is_empty());
         assert!(tab.is_empty());
+
+        Ok(())
     }
 }

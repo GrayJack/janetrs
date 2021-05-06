@@ -345,8 +345,8 @@ mod tests {
     use core::convert::TryFrom;
 
     #[test]
-    fn exec_iterator() {
-        let client = JanetClient::init().unwrap().with_default_env();
+    fn exec_iterator() -> Result<(), crate::client::Error> {
+        let client = JanetClient::init()?.with_default_env();
 
         let fun = client
             .run(
@@ -368,5 +368,6 @@ mod tests {
         assert_eq!(Some(Janet::number(10.0)), iter.next());
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next());
+        Ok(())
     }
 }

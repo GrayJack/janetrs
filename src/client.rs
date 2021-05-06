@@ -442,11 +442,13 @@ mod tests {
     }
 
     #[test]
-    fn env_not_init() {
-        let client = JanetClient::init().unwrap();
+    fn env_not_init() -> Result<(), crate::client::Error> {
+        let client = JanetClient::init()?;
 
         let a = client.run("()");
 
         assert_eq!(Err(Error::EnvNotInit), a);
+
+        Ok(())
     }
 }

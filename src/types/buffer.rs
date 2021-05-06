@@ -3008,8 +3008,8 @@ mod tests {
     use crate::{client::JanetClient, types::JanetString};
 
     #[test]
-    fn creation() {
-        let _client = JanetClient::init().unwrap();
+    fn creation() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let test = JanetBuffer::new();
         assert!(test.is_empty());
@@ -3018,11 +3018,12 @@ mod tests {
         let test = JanetBuffer::with_capacity(100);
         assert!(test.is_empty());
         assert_eq!(100, test.capacity());
+        Ok(())
     }
 
     #[test]
-    fn pushs_and_length() {
-        let _client = JanetClient::init().unwrap();
+    fn pushs_and_length() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let mut test = JanetBuffer::with_capacity(10);
         assert!(test.is_empty());
@@ -3035,11 +3036,12 @@ mod tests {
 
         test.push_u8(b'a');
         assert_eq!(7, test.len());
+        Ok(())
     }
 
     #[test]
-    fn set_length() {
-        let _client = JanetClient::init().unwrap();
+    fn set_length() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut buffer = JanetBuffer::new();
 
         for i in 0..10 {
@@ -3053,11 +3055,12 @@ mod tests {
         assert_eq!(19, buffer.len());
         buffer.set_len(-10);
         assert_eq!(19, buffer.len());
+        Ok(())
     }
 
     #[test]
-    fn clone() {
-        let _client = JanetClient::init().unwrap();
+    fn clone() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut buffer = JanetBuffer::new();
         buffer.push_str("abcdefg");
 
@@ -3065,11 +3068,12 @@ mod tests {
         let buffer = JanetString::from(buffer);
 
         assert_eq!(clone, buffer);
+        Ok(())
     }
 
     #[test]
-    fn clear() {
-        let _client = JanetClient::init().unwrap();
+    fn clear() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
         let mut buffer = JanetBuffer::from("Hello!");
 
         assert_eq!(buffer.len(), 6);
@@ -3079,11 +3083,12 @@ mod tests {
 
         assert!(buffer.is_empty());
         assert_eq!(buffer.capacity(), 6);
+        Ok(())
     }
 
     #[test]
-    fn index_indexmut() {
-        let _client = JanetClient::init().unwrap();
+    fn index_indexmut() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
 
         let buffer = JanetBuffer::from("test\u{1F3B7}");
         let expected = "test\u{1F3B7}".as_bytes();
@@ -3105,5 +3110,6 @@ mod tests {
         assert_eq!(buffer[1], b"b"[0]);
         assert_eq!(buffer[2], b"c"[0]);
         assert_eq!(buffer[3], b"d"[0]);
+        Ok(())
     }
 }
