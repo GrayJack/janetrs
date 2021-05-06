@@ -510,6 +510,25 @@ impl PartialOrd<Janet> for &Janet {
     }
 }
 
+impl DeepEq for Janet {
+    #[inline]
+    fn deep_eq(&self, other: &Self) -> bool {
+        match (self.unwrap(), other.unwrap()) {
+            (TaggedJanet::Array(s), TaggedJanet::Array(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Array(s), TaggedJanet::Tuple(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Tuple(s), TaggedJanet::Array(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Buffer(s), TaggedJanet::Buffer(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Buffer(s), TaggedJanet::String(ref o)) => s.deep_eq(o),
+            (TaggedJanet::String(s), TaggedJanet::Buffer(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Struct(s), TaggedJanet::Struct(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Struct(s), TaggedJanet::Table(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Table(s), TaggedJanet::Struct(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Table(s), TaggedJanet::Table(ref o)) => s.deep_eq(o),
+            _ => self.eq(other),
+        }
+    }
+}
+
 impl From<CJanet> for Janet {
     #[inline]
     fn from(val: CJanet) -> Self {

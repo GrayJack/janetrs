@@ -9,7 +9,7 @@ use core::{
 
 use evil_janet::{JanetKV, JanetStructHead};
 
-use super::{Janet, JanetTable};
+use super::{DeepEq, Janet, JanetTable};
 
 #[derive(Debug)]
 pub struct JanetStructBuilder<'data> {
@@ -504,9 +504,48 @@ impl Ord for JanetStruct<'_> {
     }
 }
 
+impl DeepEq for JanetStruct<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &Self) -> bool {
+        if self.len() == other.len() {
+            return self.iter().all(|(s_key, s_val)| {
+                if let Some(o_val) = other.get(s_key) {
+                    s_val.deep_eq(o_val)
+                } else {
+                    false
+                }
+            });
+        }
+        false
+    }
+}
+
+impl super::DeepEq<JanetTable<'_>> for JanetStruct<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &JanetTable<'_>) -> bool {
+        if self.len() == other.len() {
+            return self.iter().all(|(s_key, s_val)| {
+                if let Some(o_val) = other.get(s_key) {
+                    s_val.deep_eq(o_val)
+                } else {
+                    false
+                }
+            });
+        }
+        false
+    }
+}
+
 impl From<JanetTable<'_>> for JanetStruct<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn from(table: JanetTable<'_>) -> Self {
+        From::<&JanetTable<'_>>::from(&table)
+    }
+}
+
+impl From<&JanetTable<'_>> for JanetStruct<'_> {
+    #[cfg_attr(feature = "inline-more", inline)]
+    fn from(table: &JanetTable<'_>) -> Self {
         let mut st = Self::builder(table.len());
 
         for (k, v) in table.into_iter() {

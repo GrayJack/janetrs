@@ -862,6 +862,38 @@ impl PartialEq for JanetTable<'_> {
 
 impl Eq for JanetTable<'_> {}
 
+impl super::DeepEq for JanetTable<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &Self) -> bool {
+        if self.len() == other.len() {
+            return self.iter().all(|(s_key, s_val)| {
+                if let Some(o_val) = other.get(s_key) {
+                    s_val.deep_eq(o_val)
+                } else {
+                    false
+                }
+            });
+        }
+        false
+    }
+}
+
+impl super::DeepEq<JanetStruct<'_>> for JanetTable<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &JanetStruct<'_>) -> bool {
+        if self.len() == other.len() {
+            return self.iter().all(|(s_key, s_val)| {
+                if let Some(o_val) = other.get(s_key) {
+                    s_val.deep_eq(o_val)
+                } else {
+                    false
+                }
+            });
+        }
+        false
+    }
+}
+
 impl Extend<(Janet, Janet)> for JanetTable<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = (Janet, Janet)>>(&mut self, iter: T) {
@@ -898,7 +930,14 @@ impl Default for JanetTable<'_> {
 impl From<JanetStruct<'_>> for JanetTable<'_> {
     #[inline]
     fn from(val: JanetStruct<'_>) -> Self {
-        unsafe { Self::from_raw(evil_janet::janet_struct_to_table(val.raw)) }
+        val.into_iter().collect()
+    }
+}
+
+impl From<&JanetStruct<'_>> for JanetTable<'_> {
+    #[inline]
+    fn from(val: &JanetStruct<'_>) -> Self {
+        val.into_iter().collect()
     }
 }
 

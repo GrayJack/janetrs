@@ -143,16 +143,44 @@ impl Clone for JanetSymbol<'_> {
     }
 }
 
-impl<'data> From<JanetString<'data>> for JanetSymbol<'data> {
+impl From<JanetString<'_>> for JanetSymbol<'_> {
     #[inline]
-    fn from(string: JanetString<'data>) -> Self {
-        unsafe { JanetSymbol::from_raw(string.raw) }
+    fn from(string: JanetString<'_>) -> Self {
+        JanetSymbol::new(string)
     }
 }
 
-impl<'data> From<JanetBuffer<'data>> for JanetSymbol<'data> {
+impl From<&JanetString<'_>> for JanetSymbol<'_> {
     #[inline]
-    fn from(buff: JanetBuffer<'data>) -> Self {
+    fn from(string: &JanetString<'_>) -> Self {
+        JanetSymbol::new(string)
+    }
+}
+
+impl From<JanetKeyword<'_>> for JanetSymbol<'_> {
+    #[inline]
+    fn from(key: JanetKeyword<'_>) -> Self {
+        JanetSymbol::new(key)
+    }
+}
+
+impl From<&JanetKeyword<'_>> for JanetSymbol<'_> {
+    #[inline]
+    fn from(key: &JanetKeyword<'_>) -> Self {
+        JanetSymbol::new(key)
+    }
+}
+
+impl From<JanetBuffer<'_>> for JanetSymbol<'_> {
+    #[inline]
+    fn from(buff: JanetBuffer<'_>) -> Self {
+        From::<&JanetBuffer<'_>>::from(&buff)
+    }
+}
+
+impl From<&JanetBuffer<'_>> for JanetSymbol<'_> {
+    #[inline]
+    fn from(buff: &JanetBuffer<'_>) -> Self {
         let slice = buff.as_bytes();
         JanetSymbol::new(slice)
     }
@@ -300,16 +328,44 @@ impl Clone for JanetKeyword<'_> {
     }
 }
 
-impl<'data> From<JanetString<'data>> for JanetKeyword<'data> {
+impl From<JanetString<'_>> for JanetKeyword<'_> {
     #[inline]
-    fn from(string: JanetString<'data>) -> Self {
-        unsafe { JanetKeyword::from_raw(string.raw) }
+    fn from(string: JanetString<'_>) -> Self {
+        JanetKeyword::new(string)
     }
 }
 
-impl<'data> From<JanetBuffer<'data>> for JanetKeyword<'data> {
+impl From<&JanetString<'_>> for JanetKeyword<'_> {
     #[inline]
-    fn from(buff: JanetBuffer<'data>) -> Self {
+    fn from(string: &JanetString<'_>) -> Self {
+        JanetKeyword::new(string)
+    }
+}
+
+impl From<JanetSymbol<'_>> for JanetKeyword<'_> {
+    #[inline]
+    fn from(sym: JanetSymbol<'_>) -> Self {
+        JanetKeyword::new(sym)
+    }
+}
+
+impl From<&JanetSymbol<'_>> for JanetKeyword<'_> {
+    #[inline]
+    fn from(sym: &JanetSymbol<'_>) -> Self {
+        JanetKeyword::new(sym)
+    }
+}
+
+impl From<JanetBuffer<'_>> for JanetKeyword<'_> {
+    #[inline]
+    fn from(buff: JanetBuffer<'_>) -> Self {
+        From::<&JanetBuffer<'_>>::from(&buff)
+    }
+}
+
+impl From<&JanetBuffer<'_>> for JanetKeyword<'_> {
+    #[inline]
+    fn from(buff: &JanetBuffer<'_>) -> Self {
         let slice = buff.as_bytes();
         JanetKeyword::new(slice)
     }

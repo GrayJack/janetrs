@@ -14,7 +14,7 @@ use core::{
 
 use evil_janet::{Janet as CJanet, JanetArray as CJanetArray};
 
-use super::{Janet, JanetExtend, JanetTuple};
+use super::{DeepEq, Janet, JanetExtend, JanetTuple};
 
 pub type Split<'a, P> = core::slice::Split<'a, Janet, P>;
 pub type SplitMut<'a, P> = core::slice::SplitMut<'a, Janet, P>;
@@ -2117,6 +2117,27 @@ impl PartialEq for JanetArray<'_> {
 }
 
 impl Eq for JanetArray<'_> {}
+
+impl super::DeepEq for JanetArray<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &Self) -> bool {
+        if self.len() == other.len() {
+            return self.iter().zip(other.iter()).all(|(s, o)| s.deep_eq(o));
+        }
+        false
+    }
+}
+
+impl DeepEq<JanetTuple<'_>> for JanetArray<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &JanetTuple) -> bool {
+        if self.len() == other.len() {
+            return self.iter().zip(other.iter()).all(|(s, o)| s.deep_eq(o));
+        }
+        false
+    }
+}
+
 
 impl AsRef<[Janet]> for JanetArray<'_> {
     #[inline]

@@ -2581,6 +2581,30 @@ impl PartialEq for JanetBuffer<'_> {
 
 impl Eq for JanetBuffer<'_> {}
 
+impl super::DeepEq for JanetBuffer<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &Self) -> bool {
+        let s = JanetString::from(self);
+        let o = JanetString::from(other);
+        s.eq(&o)
+    }
+}
+
+impl super::DeepEq<JanetString<'_>> for JanetBuffer<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &JanetString<'_>) -> bool {
+        let s = JanetString::from(self);
+        s.eq(other)
+    }
+}
+
+impl Default for JanetBuffer<'_> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl From<&[u8]> for JanetBuffer<'_> {
     #[inline]
     fn from(bytes: &[u8]) -> Self {
@@ -2641,42 +2665,30 @@ impl From<String> for JanetBuffer<'_> {
     }
 }
 
-impl From<JanetString<'_>> for JanetBuffer<'_> {
-    #[inline]
-    fn from(s: JanetString<'_>) -> Self {
-        let slice = s.as_bytes();
-        let mut buff = Self::with_capacity(s.len());
-        buff.push_bytes(slice);
-        buff
-    }
+macro_rules! buffer_from {
+    ($($t:ty)+) => {
+        $(
+            impl From<&$t> for JanetBuffer<'_> {
+                #[inline]
+                fn from(s: &$t) -> Self {
+                    let slice = s.as_bytes();
+                    let mut buff = Self::with_capacity(s.len());
+                    buff.push_bytes(slice);
+                    buff
+                }
+            }
+
+            impl From<$t> for JanetBuffer<'_> {
+                #[inline]
+                fn from(s: $t) -> Self {
+                    From::<&$t>::from(&s)
+                }
+            }
+        )+
+    };
 }
 
-impl From<JanetSymbol<'_>> for JanetBuffer<'_> {
-    #[inline]
-    fn from(s: JanetSymbol<'_>) -> Self {
-        let slice = s.as_bytes();
-        let mut buff = Self::with_capacity(s.len());
-        buff.push_bytes(slice);
-        buff
-    }
-}
-
-impl From<JanetKeyword<'_>> for JanetBuffer<'_> {
-    #[inline]
-    fn from(s: JanetKeyword<'_>) -> Self {
-        let slice = s.as_bytes();
-        let mut buff = Self::with_capacity(s.len());
-        buff.push_bytes(slice);
-        buff
-    }
-}
-
-impl Default for JanetBuffer<'_> {
-    #[inline]
-    fn default() -> Self {
-        Self::new()
-    }
-}
+buffer_from!(JanetString<'_> JanetKeyword<'_> JanetSymbol<'_>);
 
 impl AsRef<[u8]> for JanetBuffer<'_> {
     #[inline]

@@ -24,7 +24,7 @@ use bstr::{
     WordsWithBreakIndices, WordsWithBreaks,
 };
 
-use super::JanetBuffer;
+use super::{DeepEq, JanetBuffer};
 
 /// Builder for [`JanetString`]s.
 #[derive(Debug)]
@@ -2283,6 +2283,13 @@ impl Default for JanetString<'_> {
     }
 }
 
+impl DeepEq<JanetBuffer<'_>> for JanetString<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &JanetBuffer<'_>) -> bool {
+        other.deep_eq(self)
+    }
+}
+
 impl From<char> for JanetString<'_> {
     #[inline]
     fn from(ch: char) -> Self {
@@ -2301,25 +2308,46 @@ impl From<&char> for JanetString<'_> {
     }
 }
 
-impl<'data> From<JanetBuffer<'data>> for JanetString<'data> {
+impl From<JanetBuffer<'_>> for JanetString<'_> {
     #[inline]
-    fn from(buff: JanetBuffer<'data>) -> Self {
+    fn from(buff: JanetBuffer<'_>) -> Self {
+        From::<&JanetBuffer<'_>>::from(&buff)
+    }
+}
+
+impl From<&JanetBuffer<'_>> for JanetString<'_> {
+    #[inline]
+    fn from(buff: &JanetBuffer<'_>) -> Self {
         let slice = buff.as_bytes();
         JanetString::new(slice)
     }
 }
 
-impl<'data> From<super::JanetSymbol<'data>> for JanetString<'data> {
+impl From<super::JanetSymbol<'_>> for JanetString<'_> {
     #[inline]
-    fn from(sym: super::JanetSymbol<'data>) -> Self {
-        unsafe { JanetString::from_raw(sym.raw) }
+    fn from(sym: super::JanetSymbol<'_>) -> Self {
+        JanetString::new(sym)
     }
 }
 
-impl<'data> From<super::JanetKeyword<'data>> for JanetString<'data> {
+impl From<&super::JanetSymbol<'_>> for JanetString<'_> {
     #[inline]
-    fn from(key: super::JanetKeyword<'data>) -> Self {
-        unsafe { JanetString::from_raw(key.raw) }
+    fn from(sym: &super::JanetSymbol<'_>) -> Self {
+        JanetString::new(sym)
+    }
+}
+
+impl From<super::JanetKeyword<'_>> for JanetString<'_> {
+    #[inline]
+    fn from(key: super::JanetKeyword<'_>) -> Self {
+        JanetString::new(key)
+    }
+}
+
+impl From<&super::JanetKeyword<'_>> for JanetString<'_> {
+    #[inline]
+    fn from(key: &super::JanetKeyword<'_>) -> Self {
+        JanetString::new(key)
     }
 }
 

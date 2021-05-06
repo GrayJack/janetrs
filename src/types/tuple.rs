@@ -1052,6 +1052,13 @@ impl PartialEq for JanetTuple<'_> {
 
 impl Eq for JanetTuple<'_> {}
 
+impl super::DeepEq<JanetArray<'_>> for JanetTuple<'_> {
+    #[inline]
+    fn deep_eq(&self, other: &JanetArray<'_>) -> bool {
+        other.deep_eq(self)
+    }
+}
+
 impl Default for JanetTuple<'_> {
     #[inline]
     fn default() -> Self {
@@ -1069,8 +1076,15 @@ impl AsRef<[Janet]> for JanetTuple<'_> {
 }
 
 impl From<JanetArray<'_>> for JanetTuple<'_> {
-    #[cfg_attr(feature = "inline-more", inline)]
+    #[inline]
     fn from(arr: JanetArray<'_>) -> Self {
+        arr.into_iter().collect()
+    }
+}
+
+impl From<&JanetArray<'_>> for JanetTuple<'_> {
+    #[inline]
+    fn from(arr: &JanetArray<'_>) -> Self {
         arr.into_iter().collect()
     }
 }
