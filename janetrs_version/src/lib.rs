@@ -118,7 +118,10 @@ impl JanetVersion {
 impl fmt::Display for JanetVersion {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Janet {}.{}.{}", self.major, self.minor, self.patch)
+        fmt::Display::fmt(
+            &format_args!("Janet {}.{}.{}", self.major, self.minor, self.patch),
+            f,
+        )
     }
 }
 
