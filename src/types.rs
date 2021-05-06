@@ -516,17 +516,20 @@ impl PartialOrd<Janet> for &Janet {
 impl DeepEq for Janet {
     #[inline]
     fn deep_eq(&self, other: &Self) -> bool {
+        // HACK: The left side of the match binding doesn't require `ref` since Rust 1.49
+        // `binding by-move and by-ref in the same pattern is unstable`
+        // If bump the minimal rust version to >= 1.49, remove the first ref of the patterns
         match (self.unwrap(), other.unwrap()) {
-            (TaggedJanet::Array(s), TaggedJanet::Array(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Array(s), TaggedJanet::Tuple(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Tuple(s), TaggedJanet::Array(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Buffer(s), TaggedJanet::Buffer(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Buffer(s), TaggedJanet::String(ref o)) => s.deep_eq(o),
-            (TaggedJanet::String(s), TaggedJanet::Buffer(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Struct(s), TaggedJanet::Struct(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Struct(s), TaggedJanet::Table(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Table(s), TaggedJanet::Struct(ref o)) => s.deep_eq(o),
-            (TaggedJanet::Table(s), TaggedJanet::Table(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Array(ref s), TaggedJanet::Array(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Array(ref s), TaggedJanet::Tuple(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Tuple(ref s), TaggedJanet::Array(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Buffer(ref s), TaggedJanet::Buffer(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Buffer(ref s), TaggedJanet::String(ref o)) => s.deep_eq(o),
+            (TaggedJanet::String(ref s), TaggedJanet::Buffer(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Struct(ref s), TaggedJanet::Struct(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Struct(ref s), TaggedJanet::Table(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Table(ref s), TaggedJanet::Struct(ref o)) => s.deep_eq(o),
+            (TaggedJanet::Table(ref s), TaggedJanet::Table(ref o)) => s.deep_eq(o),
             _ => self.eq(other),
         }
     }
