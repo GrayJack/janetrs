@@ -49,6 +49,9 @@ use crate::env::JanetEnvironment;
 /// A deep equality is to check equality of the collections by value. That is needed
 /// because the [`PartialEq`] for Janet mutable data structures are simply check is the
 /// inner pointer are the same.
+///
+/// Using this trait to check for equality is probably much slower than [`PartialEq`]
+/// implementations.
 pub trait DeepEq<Rhs = Self> {
     fn deep_eq(&self, other: &Rhs) -> bool;
 }
