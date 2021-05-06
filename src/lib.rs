@@ -48,6 +48,8 @@
 //!  - We still don't know exactly how Janet panics would work on Rust, so we need to
 //!    explore that and documment it
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
+
 
 // Cause compilation error when both almagation and system is set
 #[cfg(all(feature = "amalgation", feature = "link-system"))]
@@ -60,6 +62,7 @@ extern crate alloc;
 
 pub use evil_janet as lowlevel;
 
+pub mod allocator;
 #[cfg(any(feature = "amalgation", feature = "link-system"))]
 pub mod client;
 pub mod env;
