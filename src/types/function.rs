@@ -110,13 +110,15 @@ impl Display for CallError<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
-            CallErrorKind::Arity => write!(f, "{}: Wrong number of arguments", self.value),
-            CallErrorKind::Yield => write!(
+            CallErrorKind::Arity => Display::fmt(
+                &format_args!("{}: Wrong number of arguments", self.value),
                 f,
-                "This function can yield more than one result. In those cases it's recommended to \
-                 create a JanetFiber to execute all its steps"
             ),
-            CallErrorKind::Run { .. } => write!(f, "Failed to execute the Janet function."),
+            CallErrorKind::Yield => f.pad(
+                "This function can yield more than one result. In those cases it's recommended to \
+                 create a JanetFiber to execute all its steps",
+            ),
+            CallErrorKind::Run { .. } => f.pad("Failed to execute the Janet function."),
         }
     }
 }

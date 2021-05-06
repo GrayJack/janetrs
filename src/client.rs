@@ -45,11 +45,11 @@ impl Display for Error {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::AlreadyInit => write!(f, "Janet client already initialized"),
-            Self::CompileError => write!(f, "Failed to compile code"),
-            Self::EnvNotInit => write!(f, "The environment table was not initialized"),
-            Self::ParseError => write!(f, "Failed to parse code"),
-            Self::RunError => write!(f, "Runtime VM error"),
+            Self::AlreadyInit => f.pad("Janet client already initialized"),
+            Self::CompileError => f.pad("Failed to compile code"),
+            Self::EnvNotInit => f.pad("The environment table was not initialized"),
+            Self::ParseError => f.pad("Failed to parse code"),
+            Self::RunError => f.pad("Runtime VM error"),
         }
     }
 }

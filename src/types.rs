@@ -69,7 +69,7 @@ impl error::Error for JanetConversionError {}
 
 impl Display for JanetConversionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Error converting Janet to concrete type")
+        f.pad("Error converting Janet to concrete type")
     }
 }
 
