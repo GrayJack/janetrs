@@ -20,12 +20,12 @@ aren't set, because most of then need it for the Janet runtime to function prope
 
 ## Cargo Features
 
-- `std`: Enable some trait impl for types that only exist on the `std` and the Error trait
-- `unicode`: Enable more methods for JanetString and JanetBuffer
-- `inline-more`: More aggressive inlining
-- `amalgation`: Link the Janet runtime to the package, enabling to use the client module
-- `system`: Use system header to get Janet functions
-- `link-system`: Link the Janet runtime to the package from the system, enabling to use the client module
+-   `std`: Enable some trait impl for types that only exist on the `std` and the Error trait
+-   `unicode`: Enable more methods for JanetString and JanetBuffer
+-   `inline-more`: More aggressive inlining
+-   `amalgation`: Link the Janet runtime to the package, enabling to use the client module
+-   `system`: Use system header to get Janet functions
+-   `link-system`: Link the Janet runtime to the package from the system, enabling to use the client module
 
 ## Licensing
 
@@ -33,13 +33,12 @@ This software is licensed under the terms of the [MIT Public License](./LICENSE)
 
 ### TODO: Types: Lacking or Incomplete
 
-- \[I\] JanetAbstract
-- [x] JanetCFunction
-- \[I\] JanetFiber
-- \[I\] JanetFunction
-- [x] JanetPointer
-- [ ] Janet Typed Array
-- [ ] GC functions
+-   [I] JanetAbstract
+-   [x] JanetCFunction
+-   [I] JanetFiber
+-   [I] JanetFunction
+-   [x] JanetPointer
+-   [I] GC functions
 
 `[ ]: Lacking`
 `[I]: Incomplete`
@@ -50,11 +49,9 @@ access the raw C API of Janet
 
 ### TODO: Lib level
 
-- Better docs.
-- We still don't know exactly how Janet panics would work on Rust, so we need to
-  explore that and document it
+-   Better docs.
 
 # Acknowledgments
 
-- [Calvin Rose](https://github.com/bakpakin) for creating this amazing language called Janet
-- [andrewchambers](https://github.com/andrewchambers) for janet_ll crate and discuss with us some ideas for the abstractions of this crate
+-   [Calvin Rose](https://github.com/bakpakin) for creating this amazing language called Janet
+-   [andrewchambers](https://github.com/andrewchambers) for janet_ll crate and discuss with us some ideas for the abstractions of this crate

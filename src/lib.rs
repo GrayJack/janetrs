@@ -33,8 +33,7 @@
 //!  - [I] JanetFiber
 //!  - [I] JanetFunction
 //!  - [X] JanetPointer
-//!  - [ ] Janet Typed Array
-//!  - [ ] GC functions
+//!  - [I] GC functions
 //!
 //!  `[ ]: Lacking`
 //!  `[I]: Incomplete`
@@ -63,8 +62,11 @@ pub use evil_janet as lowlevel;
 #[cfg(any(feature = "amalgation", feature = "link-system"))]
 pub mod client;
 pub mod env;
+mod gc;
 mod macros;
 pub mod types;
 pub mod util;
+
+pub use gc::{JanetGc, JanetGcLockGuard};
 
 pub use janetrs_macros::{cjvg, janet_fn, janet_version};
