@@ -960,6 +960,15 @@ impl<'data> JanetTuple<'data> {
     pub const fn as_raw(&self) -> *const CJanet {
         self.raw
     }
+
+    /// Return a raw pointer to the tuple first data.
+    ///
+    /// The caller must ensure that the array outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    #[inline]
+    pub fn as_ptr(&self) -> *const Janet {
+        self.raw as _
+    }
 }
 
 impl Debug for JanetTuple<'_> {

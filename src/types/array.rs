@@ -2054,9 +2054,9 @@ impl<'data> JanetArray<'data> {
         self.as_mut().rsplitn_mut(n, pred)
     }
 
-    /// Return a raw pointer to the buffer raw structure.
+    /// Return a raw pointer to the array raw structure.
     ///
-    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// The caller must ensure that the array outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     ///
     /// If you need to mutate the contents of the slice, use [`as_mut_ptr`].
@@ -2067,13 +2067,31 @@ impl<'data> JanetArray<'data> {
         self.raw
     }
 
-    /// Return a raw mutable pointer to the buffer raw structure.
+    /// Return a raw mutable pointer to the array raw structure.
     ///
-    /// The caller must ensure that the buffer outlives the pointer this function returns,
+    /// The caller must ensure that the array outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
     pub fn as_raw_mut(&mut self) -> *mut CJanetArray {
         self.raw
+    }
+
+    /// Return a raw pointer to the array first data.
+    ///
+    /// The caller must ensure that the array outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    #[inline]
+    pub fn as_ptr(&self) -> *const Janet {
+        unsafe { (*self.raw).data as _ }
+    }
+
+    /// Return a raw mutable pointer to the array first data.
+    ///
+    /// The caller must ensure that the array outlives the pointer this function returns,
+    /// or else it will end up pointing to garbage.
+    #[inline]
+    pub fn as_ptr_mut(&mut self) -> *mut Janet {
+        unsafe { (*self.raw).data as _ }
     }
 }
 
