@@ -2072,7 +2072,7 @@ impl<'data> JanetArray<'data> {
     /// The caller must ensure that the array outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw_mut(&mut self) -> *mut CJanetArray {
+    pub fn as_mut_raw(&mut self) -> *mut CJanetArray {
         self.raw
     }
 
@@ -2090,7 +2090,7 @@ impl<'data> JanetArray<'data> {
     /// The caller must ensure that the array outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_ptr_mut(&mut self) -> *mut Janet {
+    pub fn as_mut_ptr(&mut self) -> *mut Janet {
         unsafe { (*self.raw).data as _ }
     }
 }

@@ -2505,7 +2505,7 @@ impl JanetBuffer<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_mut_raw(&mut self) -> *mut CJanetBuffer {
+    pub fn as_raw_mut(&mut self) -> *mut CJanetBuffer {
         self.raw
     }
 
@@ -2523,7 +2523,7 @@ impl JanetBuffer<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_ptr_mut(&mut self) -> *mut u8 {
+    pub fn as_mut_ptr(&mut self) -> *mut u8 {
         unsafe { (*self.raw).data }
     }
 }
