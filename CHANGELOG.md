@@ -4,6 +4,8 @@ All notable changes to the library should be put here
 
 ## Unreleased ~ 0.3.0
 
+-   **BREAKING:** Rename `as_ptr_mut` to `as_mut_ptr`
+-   **BREAKING:** Rename `as_raw_mut` to `as_mut_raw`
 -   Add `DeepEq` trait
 -   Add `get_method` and `has_method` to `Janet`
 -   Add `JanetGc` and `JanetGcLockGuard` types to access soem Janet GC operations
