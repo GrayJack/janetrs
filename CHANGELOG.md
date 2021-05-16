@@ -12,6 +12,7 @@ All notable changes to the library should be put here
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
 -   Fix some clippy lints
 -   Impl `DeepEq` for most types
+-   Impl `Debug` and `Display` for `JanetSymbol` and `JanetKeyword`
 -   Make some functions const if using a recent enough Rust version
 
 ## 0.2.0

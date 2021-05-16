@@ -1,5 +1,10 @@
 //! Janet symbols and keywords types.
-use core::{convert::Infallible, marker::PhantomData, str::FromStr};
+use core::{
+    convert::Infallible,
+    fmt::{self, Debug, Display, Write},
+    marker::PhantomData,
+    str::FromStr,
+};
 
 
 use bstr::BStr;
@@ -7,7 +12,6 @@ use bstr::BStr;
 use super::{JanetBuffer, JanetString};
 
 /// Janet symbol type. Usually used to name things in Janet.
-#[derive(Debug)]
 #[repr(transparent)]
 pub struct JanetSymbol<'data> {
     pub(crate) raw: *const u8,
@@ -133,6 +137,24 @@ impl JanetSymbol<'_> {
     }
 }
 
+impl Debug for JanetSymbol<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let bstr: &BStr = self.as_bytes().as_ref();
+
+        Debug::fmt(bstr, f)
+    }
+}
+
+impl Display for JanetSymbol<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let bstr: &BStr = self.as_bytes().as_ref();
+
+        Display::fmt(bstr, f)
+    }
+}
+
 impl Clone for JanetSymbol<'_> {
     #[inline]
     fn clone(&self) -> Self {
@@ -211,7 +233,6 @@ impl FromStr for JanetSymbol<'_> {
 
 /// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
 /// the language, it is a normal string that cen be defined by the user.
-#[derive(Debug)]
 #[repr(transparent)]
 pub struct JanetKeyword<'data> {
     pub(crate) raw: *const u8,
@@ -315,6 +336,24 @@ impl JanetKeyword<'_> {
     #[inline]
     pub const fn as_raw(&self) -> *const u8 {
         self.raw
+    }
+}
+
+impl Debug for JanetKeyword<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let bstr: &BStr = self.as_bytes().as_ref();
+
+        Debug::fmt(bstr, f)
+    }
+}
+
+impl Display for JanetKeyword<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let bstr: &BStr = self.as_bytes().as_ref();
+        f.write_char(':')?;
+        Display::fmt(bstr, f)
     }
 }
 
