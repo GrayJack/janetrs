@@ -2533,6 +2533,7 @@ impl Debug for JanetBuffer<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
 
+        f.write_char('@')?;
         Debug::fmt(bstr, f)
     }
 }

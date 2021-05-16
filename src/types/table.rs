@@ -1,7 +1,7 @@
 //! Janet table (mutable HashMap) type.
 use core::{
     cmp::Ordering,
-    fmt::{self, Debug},
+    fmt::{self, Debug, Write},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::Index,
@@ -825,6 +825,7 @@ impl<'data> JanetTable<'data> {
 impl Debug for JanetTable<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_char('@')?;
         f.debug_map().entries(self.iter()).finish()
     }
 }

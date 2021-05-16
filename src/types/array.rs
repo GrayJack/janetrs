@@ -2,7 +2,7 @@
 use core::{
     cmp::Ordering,
     convert::{TryFrom, TryInto},
-    fmt::{self, Debug},
+    fmt::{self, Debug, Write},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::{Index, IndexMut},
@@ -2098,6 +2098,7 @@ impl<'data> JanetArray<'data> {
 impl Debug for JanetArray<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_char('@')?;
         f.debug_list().entries(self.iter()).finish()
     }
 }
