@@ -298,6 +298,7 @@ macro_rules! jpanic {
 /// ```
 ///
 /// [`JanetCFunction`]: ./types/struct.JanetCFunction.html
+#[crate::cjvg("1.12.2")]
 #[macro_export]
 macro_rules! jcatch {
     ($e:expr) => {{

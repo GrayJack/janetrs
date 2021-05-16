@@ -10,6 +10,7 @@ All notable changes to the library should be put here
 -   Add `get_method` and `has_method` to `Janet`
 -   Add `JanetGc` and `JanetGcLockGuard` types to access soem Janet GC operations
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
+-   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
 -   Fix some clippy lints
 -   Impl `DeepEq` for most types
 -   Impl `Debug` and `Display` for `JanetSymbol`
