@@ -1239,10 +1239,148 @@ macro_rules! impl_part {
     };
 }
 
+// Macro to impl PartialEq for Janet String-like types against Rust String-like types.
+// For JanetString, JanetSymbol and JanetKeyword it follow the same idea of comparing
+// bytes For JanetBuffer where PartialEq means comparison with other Janet Types means if
+// the address is the same, it is contra-intuitive, since in this case is byte comparison
+// as other String-like types, that is for convenience using Rust types.
+macro_rules! string_impl_partial_eq {
+    ($lhs:ty, $rhs:ty) => {
+        impl<'a, 'b> PartialEq<$rhs> for $lhs {
+            #[inline]
+            fn eq(&self, other: &$rhs) -> bool {
+                let other: &[u8] = other.as_ref();
+                PartialEq::eq(self.as_bytes(), other)
+            }
+        }
+
+        impl<'a, 'b> PartialEq<$lhs> for $rhs {
+            #[inline]
+            fn eq(&self, other: &$lhs) -> bool {
+                let this: &[u8] = self.as_ref();
+                PartialEq::eq(this, other.as_bytes())
+            }
+        }
+    };
+}
+
+// Macro to impl PartialOrd for Janet String-like types against Rust String-like types.
+// For JanetString, JanetSymbol and JanetKeyword it follow the same idea of comparing
+// bytes For JanetBuffer where PartialOrd means comparison with other Janet Types means if
+// the address is the same, it is contra-intuitive, since in this case is byte comparison
+// as other String-like types, that is for convenience using Rust types.
+macro_rules! string_impl_partial_ord {
+    ($lhs:ty, $rhs:ty) => {
+        impl<'a, 'b> PartialOrd<$rhs> for $lhs {
+            #[inline]
+            fn partial_cmp(&self, other: &$rhs) -> Option<Ordering> {
+                let other: &[u8] = other.as_ref();
+                PartialOrd::partial_cmp(self.as_bytes(), other)
+            }
+        }
+
+        impl<'a, 'b> PartialOrd<$lhs> for $rhs {
+            #[inline]
+            fn partial_cmp(&self, other: &$lhs) -> Option<Ordering> {
+                let this: &[u8] = self.as_ref();
+                PartialOrd::partial_cmp(this, other.as_bytes())
+            }
+        }
+    };
+}
+
 impl_string_like!(JanetString<'_> JanetKeyword<'_> JanetSymbol<'_>);
 impl_part!(JanetString<'_>, JanetKeyword<'_>);
 impl_part!(JanetString<'_>, JanetSymbol<'_>);
 impl_part!(JanetKeyword<'_>, JanetSymbol<'_>);
+
+string_impl_partial_eq!(JanetString<'_>, Vec<u8>);
+string_impl_partial_eq!(JanetString<'_>, [u8]);
+string_impl_partial_eq!(JanetString<'_>, &'a [u8]);
+string_impl_partial_eq!(JanetString<'_>, String);
+string_impl_partial_eq!(JanetString<'_>, str);
+string_impl_partial_eq!(JanetString<'_>, &'a str);
+string_impl_partial_eq!(JanetString<'_>, bstr::BStr);
+string_impl_partial_eq!(JanetString<'_>, &'a bstr::BStr);
+string_impl_partial_eq!(JanetString<'_>, bstr::BString);
+string_impl_partial_eq!(JanetString<'_>, &'a bstr::BString);
+
+string_impl_partial_ord!(JanetString<'_>, Vec<u8>);
+string_impl_partial_ord!(JanetString<'_>, [u8]);
+string_impl_partial_ord!(JanetString<'_>, &'a [u8]);
+string_impl_partial_ord!(JanetString<'_>, String);
+string_impl_partial_ord!(JanetString<'_>, str);
+string_impl_partial_ord!(JanetString<'_>, &'a str);
+string_impl_partial_ord!(JanetString<'_>, bstr::BStr);
+string_impl_partial_ord!(JanetString<'_>, &'a bstr::BStr);
+string_impl_partial_ord!(JanetString<'_>, bstr::BString);
+string_impl_partial_ord!(JanetString<'_>, &'a bstr::BString);
+
+string_impl_partial_eq!(JanetBuffer<'_>, Vec<u8>);
+string_impl_partial_eq!(JanetBuffer<'_>, [u8]);
+string_impl_partial_eq!(JanetBuffer<'_>, &'a [u8]);
+string_impl_partial_eq!(JanetBuffer<'_>, String);
+string_impl_partial_eq!(JanetBuffer<'_>, str);
+string_impl_partial_eq!(JanetBuffer<'_>, &'a str);
+string_impl_partial_eq!(JanetBuffer<'_>, bstr::BStr);
+string_impl_partial_eq!(JanetBuffer<'_>, &'a bstr::BStr);
+string_impl_partial_eq!(JanetBuffer<'_>, bstr::BString);
+string_impl_partial_eq!(JanetBuffer<'_>, &'a bstr::BString);
+
+string_impl_partial_ord!(JanetBuffer<'_>, Vec<u8>);
+string_impl_partial_ord!(JanetBuffer<'_>, [u8]);
+string_impl_partial_ord!(JanetBuffer<'_>, &'a [u8]);
+string_impl_partial_ord!(JanetBuffer<'_>, String);
+string_impl_partial_ord!(JanetBuffer<'_>, str);
+string_impl_partial_ord!(JanetBuffer<'_>, &'a str);
+string_impl_partial_ord!(JanetBuffer<'_>, bstr::BStr);
+string_impl_partial_ord!(JanetBuffer<'_>, &'a bstr::BStr);
+string_impl_partial_ord!(JanetBuffer<'_>, bstr::BString);
+string_impl_partial_ord!(JanetBuffer<'_>, &'a bstr::BString);
+
+string_impl_partial_eq!(JanetSymbol<'_>, Vec<u8>);
+string_impl_partial_eq!(JanetSymbol<'_>, [u8]);
+string_impl_partial_eq!(JanetSymbol<'_>, &'a [u8]);
+string_impl_partial_eq!(JanetSymbol<'_>, String);
+string_impl_partial_eq!(JanetSymbol<'_>, str);
+string_impl_partial_eq!(JanetSymbol<'_>, &'a str);
+string_impl_partial_eq!(JanetSymbol<'_>, bstr::BStr);
+string_impl_partial_eq!(JanetSymbol<'_>, &'a bstr::BStr);
+string_impl_partial_eq!(JanetSymbol<'_>, bstr::BString);
+string_impl_partial_eq!(JanetSymbol<'_>, &'a bstr::BString);
+
+string_impl_partial_ord!(JanetSymbol<'_>, Vec<u8>);
+string_impl_partial_ord!(JanetSymbol<'_>, [u8]);
+string_impl_partial_ord!(JanetSymbol<'_>, &'a [u8]);
+string_impl_partial_ord!(JanetSymbol<'_>, String);
+string_impl_partial_ord!(JanetSymbol<'_>, str);
+string_impl_partial_ord!(JanetSymbol<'_>, &'a str);
+string_impl_partial_ord!(JanetSymbol<'_>, bstr::BStr);
+string_impl_partial_ord!(JanetSymbol<'_>, &'a bstr::BStr);
+string_impl_partial_ord!(JanetSymbol<'_>, bstr::BString);
+string_impl_partial_ord!(JanetSymbol<'_>, &'a bstr::BString);
+
+string_impl_partial_eq!(JanetKeyword<'_>, Vec<u8>);
+string_impl_partial_eq!(JanetKeyword<'_>, [u8]);
+string_impl_partial_eq!(JanetKeyword<'_>, &'a [u8]);
+string_impl_partial_eq!(JanetKeyword<'_>, String);
+string_impl_partial_eq!(JanetKeyword<'_>, str);
+string_impl_partial_eq!(JanetKeyword<'_>, &'a str);
+string_impl_partial_eq!(JanetKeyword<'_>, bstr::BStr);
+string_impl_partial_eq!(JanetKeyword<'_>, &'a bstr::BStr);
+string_impl_partial_eq!(JanetKeyword<'_>, bstr::BString);
+string_impl_partial_eq!(JanetKeyword<'_>, &'a bstr::BString);
+
+string_impl_partial_ord!(JanetKeyword<'_>, Vec<u8>);
+string_impl_partial_ord!(JanetKeyword<'_>, [u8]);
+string_impl_partial_ord!(JanetKeyword<'_>, &'a [u8]);
+string_impl_partial_ord!(JanetKeyword<'_>, String);
+string_impl_partial_ord!(JanetKeyword<'_>, str);
+string_impl_partial_ord!(JanetKeyword<'_>, &'a str);
+string_impl_partial_ord!(JanetKeyword<'_>, bstr::BStr);
+string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BStr);
+string_impl_partial_ord!(JanetKeyword<'_>, bstr::BString);
+string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BString);
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
