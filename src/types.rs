@@ -439,22 +439,7 @@ impl Janet {
 impl fmt::Debug for Janet {
     #[cfg_attr(feature = "inline-more", inline)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let fmt_str = if f.alternate() { "%p\0" } else { "%q\0" };
-
-        // SAFETY: `janet_formatc` always returns a non-null valid sequence of `u8` in the
-        // form of `*const u8`
-        let s = unsafe {
-            JanetString::from_raw(evil_janet::janet_formatc(
-                fmt_str.as_ptr() as *const i8,
-                self.inner,
-            ))
-        };
-
-        f.debug_struct("Janet")
-            .field("inner", &self.inner)
-            .field("type", &self.kind())
-            .field("value", &format_args!("{}", s))
-            .finish()
+        f.debug_tuple("Janet").field(&self.unwrap()).finish()
     }
 }
 

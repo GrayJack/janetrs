@@ -15,6 +15,7 @@ All notable changes to the library should be put here
 -   Impl `Debug` and `Display` for `JanetSymbol`
 -   Impl `Debug` and `Display` for `JanetKeyword`
 -   Include "@" before the debug representation of Janet mutable types
+-   Refactor `Debug` implementation of `Janet` type
 -   Make some functions const if using a recent enough Rust version
 
 ## 0.2.0
