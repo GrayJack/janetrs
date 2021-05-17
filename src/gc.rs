@@ -8,8 +8,8 @@ pub struct JanetGc;
 
 impl JanetGc {
     /// Run the garbage collection if there is nothing locking or suspending the garbage
-    /// collector, like an active [`JanetGcGuard`] or a call to a Janet C API that locks
-    /// the GC.
+    /// collector, like an active [`JanetGcLockGuard`] or a call to a Janet C API that
+    /// locks the GC.
     ///
     /// If there is something locking the garbage collection, it simply does a no-op.
     #[inline]
