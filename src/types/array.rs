@@ -6,6 +6,7 @@ use core::{
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,
     ops::{Index, IndexMut},
+    ptr,
     slice::{
         Chunks, ChunksExact, ChunksExactMut, ChunksMut, RChunks, RChunksExact, RChunksExactMut,
         RChunksMut, Windows,
@@ -1075,6 +1076,135 @@ impl<'data> JanetArray<'data> {
         B: Ord,
     {
         self.binary_search_by(|k| f(k).cmp(b))
+    }
+
+    /// Removes consecutive repeated elements in the array according to the
+    /// [`DeepEq`] trait implementation.
+    ///
+    /// If the array is sorted, this removes all duplicates.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{DeepEq, Janet, TaggedJanet::Number},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    /// let mut arr = array![1, 2, 2, 3, 2];
+    ///
+    /// arr.dedup();
+    ///
+    /// assert!(arr.deep_eq(&array![1, 2, 3, 2]));
+    /// ```
+    #[inline]
+    pub fn dedup(&mut self) {
+        self.dedup_by(|a, b| a.deep_eq(b))
+    }
+
+    /// Removes all but the first of consecutive elements in the array that resolve to the
+    /// same key.
+    ///
+    /// If the array is sorted, this removes all duplicates.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{DeepEq, Janet, TaggedJanet::Number},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    /// let mut arr = array![10, 20, 21, 30, 20];
+    ///
+    /// arr.dedup_by_key(|i| {
+    ///     if let Number(i) = i.unwrap() {
+    ///         ((i / 10.0) as i32).into()
+    ///     } else {
+    ///         Janet::nil()
+    ///     }
+    /// });
+    ///
+    /// assert!(arr.deep_eq(&array![10, 20, 30, 20]));
+    /// ```
+    #[inline]
+    pub fn dedup_by_key<F>(&mut self, mut key: F)
+    where F: FnMut(&mut Janet) -> Janet {
+        self.dedup_by(|a, b| key(a) == key(b))
+    }
+
+    /// Removes all but the first of consecutive elements in the array satisfying a given
+    /// equality relation.
+    ///
+    /// The `same_bucket` function is passed references to two elements from the vector
+    /// and must determine if the elements compare equal. The elements are passed in
+    /// opposite order from their order in the slice, so if `same_bucket(a, b)`
+    /// returns `true`, `a` is removed.
+    ///
+    /// If the vector is sorted, this removes all duplicates.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{
+    ///     array,
+    ///     types::{DeepEq, Janet},
+    /// };
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    /// let mut arr = array!["foo", "bar", "bar", "baz", "bar"];
+    ///
+    /// arr.dedup_by(|&mut a, &mut b| a.eq(&b));
+    /// assert!(arr.deep_eq(&array!["foo", "bar", "baz", "bar"]));
+    /// ```
+    pub fn dedup_by<F>(&mut self, mut same_bucket: F)
+    where F: FnMut(&mut Janet, &mut Janet) -> bool {
+        let len = self.len() as usize;
+        if len <= 1 {
+            return;
+        }
+
+        // read: Offset of the element we want to check if it is duplicate.
+        // write: Offset of the place where we want to place the non-duplicate when we find it.
+        let (mut read, mut write) = (1, 1usize);
+        let ptr = self.as_mut_ptr();
+
+        // Safety: INVARIANT: arr.len() > read >= write > write-1 >= 0
+        unsafe {
+            while read < len {
+                let read_ptr = ptr.add(read);
+                let prev_ptr = ptr.add(write.wrapping_sub(1));
+
+                if !same_bucket(&mut *read_ptr, &mut *prev_ptr) {
+                    let write_ptr = ptr.add(write);
+
+                    ptr::copy(read_ptr, write_ptr, 1);
+
+                    // We have filled that place, so go further
+                    write += 1;
+                }
+
+                read += 1;
+            }
+
+            // How many items were left
+            // Basically array[read..].len()
+            let items_left = len.wrapping_sub(read);
+
+            // Pointer to first item in array[write..write+items_left] slice
+            let dropped_ptr = ptr.add(write);
+            // Pointer to first item in array[read..] slice
+            let valid_ptr = ptr.add(read);
+
+            // Copy `array[read..]` to `array[write..write+items_left]`.
+            // The slices can overlap, so `copy_nonoverlapping` cannot be used
+            ptr::copy(valid_ptr, dropped_ptr, items_left);
+
+            // How many items have been already dropped
+            // Basically array[read..write].len()
+            let dropped = read.wrapping_sub(write);
+
+            self.set_len((len - dropped) as i32);
+        }
     }
 
     /// Sorts the array.
@@ -2770,6 +2900,17 @@ mod tests {
         let rm = array.remove(1);
         assert_eq!(array.len(), 3);
         assert_eq!(rm, Janet::integer(2));
+        Ok(())
+    }
+
+    #[test]
+    fn dedup_by() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init().unwrap();
+        let mut arr = array!["foo", "bar", "bar", "baz", "bar"];
+
+        arr.dedup_by(|&mut a, &mut b| a.eq(&b));
+        assert!(arr.deep_eq(&array!["foo", "bar", "baz", "bar"]));
+
         Ok(())
     }
 

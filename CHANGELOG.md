@@ -7,6 +7,7 @@ All notable changes to the library should be put here
 -   **BREAKING:** Rename `as_ptr_mut` to `as_mut_ptr`
 -   **BREAKING:** Rename `as_raw_mut` to `as_mut_raw`
 -   Add `DeepEq` trait
+-   Add `dedup`, `dedup_by` and `dedup_by_key` for `JanetArray`
 -   Add `get_method` and `has_method` to `Janet`
 -   Add `JanetGc` and `JanetGcLockGuard` types to access soem Janet GC operations
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
