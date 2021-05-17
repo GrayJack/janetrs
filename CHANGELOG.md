@@ -6,16 +6,20 @@ All notable changes to the library should be put here
 
 -   **BREAKING:** Rename `as_ptr_mut` to `as_mut_ptr`
 -   **BREAKING:** Rename `as_raw_mut` to `as_mut_raw`
+-   **BREAKING:** Change definition of `IsJanetAbstract` trait
+-   **BREAKING:** `JanetAbstract::new` now takes a value
 -   Add `DeepEq` trait
 -   Add `dedup`, `dedup_by` and `dedup_by_key` for `JanetArray`
 -   Add `get_method` and `has_method` to `Janet`
 -   Add `JanetGc` and `JanetGcLockGuard` types to access soem Janet GC operations
+-   Add functions to get reference to a `JanetAbstract` data safely
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
 -   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
 -   Fix some clippy lints
 -   Impl `DeepEq` for most types
 -   Impl `Debug` and `Display` for `JanetSymbol`
 -   Impl `Debug` and `Display` for `JanetKeyword`
+-   Impl `IsJanetAbstract` for i64 and u64
 -   Include "@" before the debug representation of Janet mutable types
 -   Refactor `Debug` implementation of `Janet` type
 -   Make some functions const if using a recent enough Rust version
