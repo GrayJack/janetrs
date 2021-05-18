@@ -24,6 +24,8 @@ All notable changes to the library should be put here
 -   Impl `Debug` and `Display` for `JanetKeyword`
 -   Impl `IsJanetAbstract` for i64 and u64
 -   Impl `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetAbstract`
+-   Impl `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetFunction`
+-   Impl `PartialOrd` and `Ord` for `JanetFiber`
 -   Impl `From` and `TryFrom` between `i64` and `Janet`
 -   Impl `From` and `TryFrom` between `u64` and `Janet`
 -   Include "@" before the debug representation of Janet mutable types

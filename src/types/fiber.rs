@@ -9,7 +9,7 @@ use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 /// threads.
 ///
 /// TODO: A proper docs
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct JanetFiber<'data> {
     pub(crate) raw: *mut CJanetFiber,
@@ -129,7 +129,6 @@ impl<'data> JanetFiber<'data> {
     /// fiber.exec().for_each(|j| println!("{}", j));
     /// # Ok(()) }
     /// ```
-    // TODO: Change the example to use TaggedJanet
     #[inline]
     pub fn exec<'a>(&'a mut self) -> Exec<'a, 'data> {
         Exec {
@@ -170,7 +169,6 @@ impl<'data> JanetFiber<'data> {
     /// ```
     ///
     /// [`exec`]: #method.exec
-    // TODO: Change the example to use TaggedJanet
     #[inline]
     pub fn exec_input<'a>(&'a mut self, input: Janet) -> Exec<'a, 'data> {
         Exec { fiber: self, input }
@@ -208,7 +206,6 @@ impl<'data> JanetFiber<'data> {
     /// # Ok(()) }
     /// ```
     /// [`exec`]: #method.exec
-    // TODO: Change the example to use TaggedJanet
     #[inline]
     pub fn exec_with<'a, F>(&'a mut self, f: F) -> Exec<'a, 'data>
     where F: FnOnce() -> Janet {

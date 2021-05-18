@@ -126,6 +126,8 @@ impl Display for CallError<'_> {
 #[cfg(feature = "std")]
 impl error::Error for CallError<'_> {}
 
+/// A representation of a Janet function defined at the Janet side.
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct JanetFunction<'data> {
     pub(crate) raw: *mut CJanetFunction,
