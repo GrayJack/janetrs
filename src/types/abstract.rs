@@ -89,13 +89,35 @@ impl JanetAbstract {
         &mut *(self.raw as *mut A)
     }
 
-    /// Returns a reference to value if it's the same kind of abstract.
-    ///
-    /// # Error
-    /// This function may return [`AbstractError::MismatchedSize`] if this object size is
-    /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
-    /// if any of the function pointer in the [`JanetAbstractType`] are different.
-    pub fn get<A: IsJanetAbstract>(&self) -> Result<&A, AbstractError> {
+    /// Check if the `JanetAbstract` data is of the type `A`.
+    #[inline]
+    pub fn is<A: IsJanetAbstract>(&self) -> bool {
+        if self.size() != A::SIZE {
+            return false;
+        }
+        let ty_self = self.type_info();
+        let ty_a = A::type_info();
+
+        if ty_self.call != ty_a.call
+            || ty_self.compare != ty_a.compare
+            || ty_self.tostring != ty_a.tostring
+            || ty_self.marshal != ty_a.marshal
+            || ty_self.unmarshal != ty_a.unmarshal
+            || ty_self.hash != ty_a.hash
+            || ty_self.next != ty_a.next
+            || ty_self.put != ty_a.put
+            || ty_self.get != ty_a.get
+            || ty_self.gc != ty_a.gc
+            || ty_self.gcmark != ty_a.gcmark
+        {
+            return false;
+        }
+
+        true
+    }
+
+    #[inline]
+    pub fn check<A: IsJanetAbstract>(&self) -> Result<(), AbstractError> {
         if self.size() != A::SIZE {
             return Err(AbstractError::MismatchedSize);
         }
@@ -116,6 +138,19 @@ impl JanetAbstract {
         {
             return Err(AbstractError::MismatchedAbstractType);
         }
+
+        Ok(())
+    }
+
+    /// Returns a reference to value if it's the same kind of abstract.
+    ///
+    /// # Error
+    /// This function may return [`AbstractError::MismatchedSize`] if this object size is
+    /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
+    /// if any of the function pointer in the [`JanetAbstractType`] are different.
+    #[inline]
+    pub fn get<A: IsJanetAbstract>(&self) -> Result<&A, AbstractError> {
+        self.check::<A>()?;
 
         Ok(unsafe { &*(self.raw as *const A) })
     }
@@ -126,27 +161,9 @@ impl JanetAbstract {
     /// This function may return [`AbstractError::MismatchedSize`] if this object size is
     /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
     /// if any of the function pointer in the [`JanetAbstractType`] are different.
+    #[inline]
     pub fn get_mut<A: IsJanetAbstract>(&mut self) -> Result<&mut A, AbstractError> {
-        if self.size() != A::SIZE {
-            return Err(AbstractError::MismatchedSize);
-        }
-        let ty_self = self.type_info();
-        let ty_a = A::type_info();
-
-        if ty_self.call != ty_a.call
-            || ty_self.compare != ty_a.compare
-            || ty_self.tostring != ty_a.tostring
-            || ty_self.marshal != ty_a.marshal
-            || ty_self.unmarshal != ty_a.unmarshal
-            || ty_self.hash != ty_a.hash
-            || ty_self.next != ty_a.next
-            || ty_self.put != ty_a.put
-            || ty_self.get != ty_a.get
-            || ty_self.gc != ty_a.gc
-            || ty_self.gcmark != ty_a.gcmark
-        {
-            return Err(AbstractError::MismatchedAbstractType);
-        }
+        self.check::<A>()?;
 
         Ok(unsafe { &mut *(self.raw as *mut A) })
     }
