@@ -1,6 +1,7 @@
-//! FIXME: Work In Progress
+//! Module of the JanetAbstract abstractions.
 //!
-//! This module may change drastically in the near future
+//! In this module you can find the definitions of types and traits to allow to work with
+//! [`JanetAbstract`]. Most of those are re-exported at the supermodule of this module.
 use core::{cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData};
 
 pub use evil_janet::JanetAbstractType;

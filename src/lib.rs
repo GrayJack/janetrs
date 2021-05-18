@@ -20,19 +20,20 @@
 //! - `inline-more`: More agressive inlining
 //! - `amalgation`: Link the Janet runtime to the package, enabling to use the client
 //!   module
+//! - `unicode`: Enable some unicode methods for JanetString and JanetBuffer
 //! - `system`: Use system header to get Janet functions
 //! - `link-system`: Link the Janet runtime to the package from the system, enabling to
 //!   use the client module
+//! - `nightly`: Enable some parts of the crate that uses nightly features, to use this
+//!   feature you must compile the crate using a nightly rust version
 //!
 //! ## Licensing
 //! This software is licensed under the terms of the [MIT Public License](./LICENSE).
 //!
 //! ### TODO: Types: Lacking or Incomplete
-//!  - [I] JanetAbstract
-//!  - [X] JanetCFunction
-//!  - [I] JanetFiber
-//!  - [I] JanetFunction
-//!  - [X] JanetPointer
+//!  - [X] JanetAbstract
+//!  - [X] JanetFiber
+//!  - [X] JanetFunction
 //!  - [I] GC functions
 //!
 //!  `[ ]: Lacking`
@@ -44,8 +45,7 @@
 //!
 //! ### TODO: Lib level
 //!  - Better docs.
-//!  - We still don't know exactly how Janet panics would work on Rust, so we need to
-//!    explore that and documment it
+//!  - Marshalling mechanism
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
 

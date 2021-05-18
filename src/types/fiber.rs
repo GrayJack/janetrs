@@ -8,7 +8,14 @@ use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 /// A lightweight green thread in Janet. It does not correspond to operating system
 /// threads.
 ///
-/// TODO: A proper docs
+/// Fibers allow a process to stop and resume execution later, essentially enabling
+/// multiple returns from a function.
+///
+/// Different from traditional coroutines, Janet's fibers implement a signaling mechanism,
+/// which is used to differentiate different kinds of returns. When a fiber yields or
+/// throws an error, control is returned to the calling fiber. The parent fiber must then
+/// check what kind of state the fiber is in to differentiate errors from return values
+/// from user-defined signals
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct JanetFiber<'data> {

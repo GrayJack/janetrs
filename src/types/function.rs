@@ -36,8 +36,12 @@ pub struct CallError<'data> {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[non_exhaustive]
 pub enum CallErrorKind {
+    /// Wrong number of parameters passed.
     Arity,
+    /// Fail to run a [`JanetFunction`].
     Run,
+    /// [`JanetFunction`] yielded. That is not a problem per see, but some methods may
+    /// expect a [`JanetFunction`] to return instead of yielding a value.
     Yield,
 }
 

@@ -2,6 +2,11 @@ use core::ptr;
 
 use crate::types::{Janet, JanetCFunction, JanetSymbol, JanetTable};
 
+/// Representation of the Janet runtime environment, like global definitions, available
+/// functions and macros, etc.
+///
+/// The Janet environment is represented as a [`JanetTable`]. Undestanding it may prove
+/// helpful.
 #[derive(Debug)]
 #[repr(transparent)]
 pub struct JanetEnvironment(JanetTable<'static>);

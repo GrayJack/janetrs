@@ -20,12 +20,18 @@ aren't set, because most of then need it for the Janet runtime to function prope
 
 ## Cargo Features
 
--   `std`: Enable some trait impl for types that only exist on the `std` and the Error trait
+-   `std`: Enable some trait impl for types that only exist on the `std` and the Error
+    trait
 -   `unicode`: Enable more methods for JanetString and JanetBuffer
--   `inline-more`: More aggressive inlining
--   `amalgation`: Link the Janet runtime to the package, enabling to use the client module
+-   `inline-more`: More agressive inlining
+-   `amalgation`: Link the Janet runtime to the package, enabling to use the client
+    module
+-   `unicode`: Enable some unicode methods for JanetString and JanetBuffer
 -   `system`: Use system header to get Janet functions
--   `link-system`: Link the Janet runtime to the package from the system, enabling to use the client module
+-   `link-system`: Link the Janet runtime to the package from the system, enabling to
+    use the client module
+-   `nightly`: Enable some parts of the crate that uses nightly features, to use this
+    feature you must compile the crate using a nightly rust version
 
 ## Licensing
 
@@ -33,11 +39,9 @@ This software is licensed under the terms of the [MIT Public License](./LICENSE)
 
 ### TODO: Types: Lacking or Incomplete
 
--   [I] JanetAbstract
--   [x] JanetCFunction
--   [I] JanetFiber
--   [I] JanetFunction
--   [x] JanetPointer
+-   [x] JanetAbstract
+-   [x] JanetFiber
+-   [x] JanetFunction
 -   [I] GC functions
 
 `[ ]: Lacking`
@@ -50,6 +54,7 @@ access the raw C API of Janet
 ### TODO: Lib level
 
 -   Better docs.
+-   Marshalling mechanism
 
 # Acknowledgments
 
