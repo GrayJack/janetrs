@@ -182,12 +182,24 @@ impl Janet {
         }
     }
 
-    /// Create a abstract integer [`Janet`] with `value`.
+    /// Create a number [`Janet`] with a [`i32`] `value`.
     #[inline]
     pub fn integer(value: i32) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_integer(value) },
         }
+    }
+
+    /// Create a abstract integer [`Janet`] with `value`.
+    #[inline]
+    pub fn int64(value: i64) -> Self {
+        Self::j_abstract(JanetAbstract::new(value))
+    }
+
+    /// Create a abstract integer [`Janet`] with `value`.
+    #[inline]
+    pub fn uint64(value: u64) -> Self {
+        Self::j_abstract(JanetAbstract::new(value))
     }
 
     /// Create a array [`Janet`] with `value`.
@@ -541,33 +553,6 @@ impl From<&Janet> for Janet {
     }
 }
 
-impl From<bool> for Janet {
-    #[inline]
-    fn from(val: bool) -> Self {
-        Self::boolean(val)
-    }
-}
-
-impl From<&bool> for Janet {
-    #[inline]
-    fn from(val: &bool) -> Self {
-        Self::boolean(*val)
-    }
-}
-
-impl TryFrom<Janet> for bool {
-    type Error = JanetConversionError;
-
-    #[inline]
-    fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        if matches!(value.kind(), JanetType::Boolean) {
-            Ok(unsafe { evil_janet::janet_unwrap_boolean(value.inner) } != 0)
-        } else {
-            Err(JanetConversionError)
-        }
-    }
-}
-
 impl From<i32> for Janet {
     #[inline]
     fn from(val: i32) -> Self {
@@ -595,27 +580,62 @@ impl TryFrom<Janet> for i32 {
     }
 }
 
-impl From<f64> for Janet {
+impl From<i64> for Janet {
     #[inline]
-    fn from(val: f64) -> Self {
-        Self::number(val)
+    fn from(val: i64) -> Self {
+        Self::int64(val)
     }
 }
 
-impl From<&f64> for Janet {
+impl From<&i64> for Janet {
     #[inline]
-    fn from(val: &f64) -> Self {
-        Self::number(*val)
+    fn from(val: &i64) -> Self {
+        Self::int64(*val)
     }
 }
 
-impl TryFrom<Janet> for f64 {
+impl TryFrom<Janet> for i64 {
     type Error = JanetConversionError;
 
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        if matches!(value.kind(), JanetType::Number) {
-            Ok(unsafe { evil_janet::janet_unwrap_number(value.inner) })
+        if let TaggedJanet::Abstract(x) = value.unwrap() {
+            if x.is::<Self>() {
+                Ok(unsafe { *x.cast() })
+            } else {
+                Err(JanetConversionError)
+            }
+        } else {
+            Err(JanetConversionError)
+        }
+    }
+}
+
+impl From<u64> for Janet {
+    #[inline]
+    fn from(val: u64) -> Self {
+        Self::uint64(val)
+    }
+}
+
+impl From<&u64> for Janet {
+    #[inline]
+    fn from(val: &u64) -> Self {
+        Self::uint64(*val)
+    }
+}
+
+impl TryFrom<Janet> for u64 {
+    type Error = JanetConversionError;
+
+    #[inline]
+    fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        if let TaggedJanet::Abstract(x) = value.unwrap() {
+            if x.is::<Self>() {
+                Ok(unsafe { *x.cast() })
+            } else {
+                Err(JanetConversionError)
+            }
         } else {
             Err(JanetConversionError)
         }
@@ -649,18 +669,6 @@ impl From<&char> for Janet {
 impl From<JanetCFunction> for Janet {
     fn from(val: JanetCFunction) -> Self {
         Self::c_function(val)
-    }
-}
-
-impl TryFrom<Janet> for JanetCFunction {
-    type Error = JanetConversionError;
-
-    fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        if matches!(value.kind(), JanetType::CFunction) {
-            Ok(unsafe { evil_janet::janet_unwrap_cfunction(value.inner) })
-        } else {
-            Err(JanetConversionError)
-        }
     }
 }
 
@@ -752,32 +760,26 @@ macro_rules! from_for_janet {
             }
         }
     };
-}
 
-macro_rules! try_from_janet {
-    ($ty:ty, $kind:path, $unwrap_fn_name:ident) => {
-        impl TryFrom<Janet> for $ty {
-            type Error = JanetConversionError;
-
+    (deref $ty:ty, $fn_name:ident) => {
+        impl From<$ty> for Janet {
             #[inline]
-            fn try_from(value: Janet) -> Result<Self, Self::Error> {
-                if matches!(value.kind(), $kind) {
-                    Ok(unsafe { Self::from_raw(evil_janet::$unwrap_fn_name(value.inner)) })
-                } else {
-                    Err(JanetConversionError)
-                }
+            fn from(val: $ty) -> Self {
+                Self::$fn_name(*val)
             }
         }
     };
+}
 
-    ($ty:ty, $kind:path, $unwrap_fn_name:ident, $fn_name:ident) => {
+macro_rules! try_from_janet {
+    ($ty:ty, $kind:path) => {
         impl TryFrom<Janet> for $ty {
             type Error = JanetConversionError;
 
             #[inline]
             fn try_from(value: Janet) -> Result<Self, Self::Error> {
-                if matches!(value.kind(), $kind) {
-                    Ok(unsafe { Self::$fn_name(evil_janet::$unwrap_fn_name(value.inner)) })
+                if let $kind(x) = value.unwrap() {
+                    Ok(x)
                 } else {
                     Err(JanetConversionError)
                 }
@@ -787,52 +789,58 @@ macro_rules! try_from_janet {
 }
 
 from_for_janet!(JanetPointer, pointer);
-try_from_janet!(JanetPointer, JanetType::Pointer, janet_unwrap_pointer, new);
+try_from_janet!(JanetPointer, TaggedJanet::Pointer);
 
 from_for_janet!(JanetAbstract, j_abstract);
-try_from_janet!(JanetAbstract, JanetType::Abstract, janet_unwrap_abstract);
+try_from_janet!(JanetAbstract, TaggedJanet::Abstract);
 
 from_for_janet!(JanetTable<'_>, table);
 from_for_janet!(clone &JanetTable<'_>, table);
-try_from_janet!(JanetTable<'_>, JanetType::Table, janet_unwrap_table);
+try_from_janet!(JanetTable<'_>, TaggedJanet::Table);
 
 from_for_janet!(JanetArray<'_>, array);
 from_for_janet!(clone &JanetArray<'_>, array);
-try_from_janet!(JanetArray<'_>, JanetType::Array, janet_unwrap_array);
+try_from_janet!(JanetArray<'_>, TaggedJanet::Array);
 
 from_for_janet!(JanetBuffer<'_>, buffer);
 from_for_janet!(clone &JanetBuffer<'_>, buffer);
-try_from_janet!(JanetBuffer<'_>, JanetType::Buffer, janet_unwrap_buffer);
+try_from_janet!(JanetBuffer<'_>, TaggedJanet::Buffer);
 
 from_for_janet!(JanetTuple<'_>, tuple);
 from_for_janet!(clone &JanetTuple<'_>, tuple);
-try_from_janet!(JanetTuple<'_>, JanetType::Tuple, janet_unwrap_tuple);
+try_from_janet!(JanetTuple<'_>, TaggedJanet::Tuple);
 
 from_for_janet!(JanetString<'_>, string);
 from_for_janet!(clone &JanetString<'_>, string);
-try_from_janet!(JanetString<'_>, JanetType::String, janet_unwrap_string);
+try_from_janet!(JanetString<'_>, TaggedJanet::String);
 
 from_for_janet!(JanetStruct<'_>, structs);
 from_for_janet!(clone &JanetStruct<'_>, structs);
-try_from_janet!(JanetStruct<'_>, JanetType::Struct, janet_unwrap_struct);
+try_from_janet!(JanetStruct<'_>, TaggedJanet::Struct);
 
 from_for_janet!(JanetSymbol<'_>, symbol);
 from_for_janet!(clone &JanetSymbol<'_>, symbol);
-try_from_janet!(JanetSymbol<'_>, JanetType::Symbol, janet_unwrap_symbol);
+try_from_janet!(JanetSymbol<'_>, TaggedJanet::Symbol);
 
 from_for_janet!(JanetKeyword<'_>, keyword);
 from_for_janet!(clone &JanetKeyword<'_>, keyword);
-try_from_janet!(JanetKeyword<'_>, JanetType::Keyword, janet_unwrap_keyword);
+try_from_janet!(JanetKeyword<'_>, TaggedJanet::Keyword);
 
 from_for_janet!(JanetFunction<'_>, function);
-try_from_janet!(
-    JanetFunction<'_>,
-    JanetType::Function,
-    janet_unwrap_function
-);
+try_from_janet!(JanetFunction<'_>, TaggedJanet::Function);
 
 from_for_janet!(JanetFiber<'_>, fiber);
-try_from_janet!(JanetFiber<'_>, JanetType::Fiber, janet_unwrap_fiber);
+try_from_janet!(JanetFiber<'_>, TaggedJanet::Fiber);
+
+try_from_janet!(JanetCFunction, TaggedJanet::CFunction);
+
+from_for_janet!(bool, boolean);
+from_for_janet!(deref & bool, boolean);
+try_from_janet!(bool, TaggedJanet::Boolean);
+
+from_for_janet!(f64, number);
+from_for_janet!(deref & f64, number);
+try_from_janet!(f64, TaggedJanet::Number);
 
 macro_rules! janet_unwrap_unchecked {
     (abstracts $janet:expr) => {

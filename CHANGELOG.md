@@ -14,6 +14,8 @@ All notable changes to the library should be put here
 -   Add `JanetGc` and `JanetGcLockGuard` types to access soem Janet GC operations
 -   Add functions to get reference to a `JanetAbstract` data safely
 -   Add `JanetAbstract::is`
+-   Add `Janet::int64`
+-   Add `Janet::uint64`
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
 -   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
 -   Fix some clippy lints
@@ -22,8 +24,11 @@ All notable changes to the library should be put here
 -   Impl `Debug` and `Display` for `JanetKeyword`
 -   Impl `IsJanetAbstract` for i64 and u64
 -   Impl `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetAbstract`
+-   Impl `From` and `TryFrom` between `i64` and `Janet`
+-   Impl `From` and `TryFrom` between `u64` and `Janet`
 -   Include "@" before the debug representation of Janet mutable types
 -   Refactor `Debug` implementation of `Janet` type
+-   Refactor some implementations of `From` and `TryFrom` related to `Janet` type
 -   Reduce code duplication in `JanetAbstract` functions
 -   Make some functions const if using a recent enough Rust version
 
