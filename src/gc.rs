@@ -20,7 +20,8 @@ impl JanetGc {
     /// Lock the Janet GC and suspend any garbage collection until the guard is dropped.
     ///
     /// If there is any attempt to manually trigger the garbage collection while there is
-    /// a [`JanetGcGuard`] active (or any unsafe call to the Janet C API locking the GC)
+    /// a [`JanetGcLockGuard`] active (or any unsafe call to the Janet C API locking the
+    /// GC)
     #[inline]
     pub fn lock(&self) -> JanetGcLockGuard {
         let handle = unsafe { evil_janet::janet_gclock() };
