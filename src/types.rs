@@ -88,7 +88,7 @@ impl Display for JanetConversionError {
 ///
 /// ### Examples
 /// ```
-/// use janetrs::types::Janet;
+/// use janetrs::Janet;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let j_nil = Janet::nil();
@@ -103,7 +103,7 @@ impl Display for JanetConversionError {
 ///
 /// ### Example
 /// ```
-/// use janetrs::types::{Janet, TaggedJanet};
+/// use janetrs::{Janet, TaggedJanet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let jnt = Janet::wrap(10); // A Number Janet
@@ -136,7 +136,7 @@ impl Display for JanetConversionError {
 ///
 /// ### Example
 /// ```
-/// use janetrs::types::{Janet, JanetString};
+/// use janetrs::{Janet, JanetString};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let jnt = Janet::wrap(10); // A Number Janet

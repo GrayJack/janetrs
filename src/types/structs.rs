@@ -50,7 +50,7 @@ impl<'data> JanetStructBuilder<'data> {
 ///
 /// # Examples
 /// ```
-/// use janetrs::types::JanetStruct;
+/// use janetrs::JanetStruct;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let st = JanetStruct::builder(2)
@@ -110,7 +110,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetStruct;
+    /// use janetrs::JanetStruct;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = JanetStruct::builder(2)
@@ -128,7 +128,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetStruct;
+    /// use janetrs::JanetStruct;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = JanetStruct::builder(2)
@@ -149,7 +149,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetStruct};
+    /// use janetrs::{Janet, JanetStruct};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = JanetStruct::builder(2)
@@ -167,7 +167,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetStruct};
+    /// use janetrs::{Janet, JanetStruct};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = JanetStruct::builder(2)
@@ -217,7 +217,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetStruct};
+    /// use janetrs::{Janet, JanetStruct};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = JanetStruct::builder(2)
@@ -243,7 +243,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetStruct};
+    /// use janetrs::{Janet, JanetStruct};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = JanetStruct::builder(2).put(10, "ten").put(11, "eleven").finalize();
@@ -296,7 +296,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{structs, types::Janet};
+    /// use janetrs::{structs, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = structs! {10 => "ten"};
@@ -313,7 +313,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{structs, types::Janet};
+    /// use janetrs::{structs, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = structs! {10 => "ten"};
@@ -802,7 +802,7 @@ impl FusedIterator for IntoIter<'_> {}
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, structs, types::Janet};
+    use crate::{client::JanetClient, structs, Janet};
 
     #[test]
     fn creation_and_get() -> Result<(), crate::client::Error> {

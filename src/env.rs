@@ -1,6 +1,6 @@
 use core::ptr;
 
-use crate::types::{Janet, JanetCFunction, JanetSymbol, JanetTable};
+use crate::{Janet, JanetCFunction, JanetSymbol, JanetTable};
 
 /// Representation of the Janet runtime environment, like global definitions, available
 /// functions and macros, etc.

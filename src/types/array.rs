@@ -34,7 +34,7 @@ pub type RSplitNMut<'a, P> = core::slice::RSplitNMut<'a, Janet, P>;
 ///
 /// # Examples
 /// ```
-/// use janetrs::types::JanetArray;
+/// use janetrs::JanetArray;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let mut arr = JanetArray::new();
@@ -57,7 +57,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetArray;
+    /// use janetrs::JanetArray;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = JanetArray::new();
@@ -77,7 +77,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetArray;
+    /// use janetrs::JanetArray;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = JanetArray::with_capacity(20);
@@ -107,7 +107,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetArray;
+    /// use janetrs::JanetArray;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = JanetArray::with_capacity(20);
@@ -122,7 +122,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetArray;
+    /// use janetrs::JanetArray;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -140,7 +140,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetArray;
+    /// use janetrs::JanetArray;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -174,7 +174,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetArray;
+    /// use janetrs::JanetArray;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -258,7 +258,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetArray};
+    /// use janetrs::{Janet, JanetArray};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -277,7 +277,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetArray};
+    /// use janetrs::{Janet, JanetArray};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -300,7 +300,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetArray};
+    /// use janetrs::{Janet, JanetArray};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -319,7 +319,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetArray};
+    /// use janetrs::{Janet, JanetArray};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -361,7 +361,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetArray};
+    /// use janetrs::{Janet, JanetArray};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = JanetArray::new();
@@ -452,7 +452,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = array![1, "2", 3.0];
@@ -529,7 +529,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30];
@@ -553,7 +553,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut x = array![0, 1, 2];
@@ -578,7 +578,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let x = array![0, 1, 2];
@@ -603,7 +603,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut x = array![0, 1, 2];
@@ -629,7 +629,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30];
@@ -653,7 +653,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut x = array![0, 1, 2];
@@ -678,7 +678,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let x = array![0, 1, 2];
@@ -703,7 +703,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut x = array![0, 1, 2];
@@ -737,7 +737,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![1, 2, 3, 4, 5, 6];
@@ -784,7 +784,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![1, 0, 3, 0, 5, 6];
@@ -823,7 +823,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array!["a", "b", "c", "d"];
@@ -850,7 +850,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![1, 2, 3];
@@ -873,7 +873,7 @@ impl<'data> JanetArray<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -885,7 +885,7 @@ impl<'data> JanetArray<'data> {
     /// A panic upon overflow:
     ///
     /// ```should_panic
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// // this will panic at runtime
@@ -900,7 +900,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30];
@@ -913,7 +913,7 @@ impl<'data> JanetArray<'data> {
     /// Always returns `true` if `needle` is an empty slice:
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30];
@@ -930,7 +930,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30];
@@ -943,7 +943,7 @@ impl<'data> JanetArray<'data> {
     /// Always returns `true` if `needle` is an empty slice:
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30];
@@ -970,7 +970,7 @@ impl<'data> JanetArray<'data> {
     /// found; the fourth could match any position in `[1, 4]`.
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = array![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -989,7 +989,7 @@ impl<'data> JanetArray<'data> {
     /// sort order:
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = array![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -1025,7 +1025,7 @@ impl<'data> JanetArray<'data> {
     /// found; the fourth could match any position in `[1, 4]`.
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = array![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -1066,7 +1066,7 @@ impl<'data> JanetArray<'data> {
     /// TODO: Find a good example
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     /// ```
     #[inline]
@@ -1086,10 +1086,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{DeepEq, Janet, TaggedJanet::Number},
-    /// };
+    /// use janetrs::{array, DeepEq, Janet, TaggedJanet::Number};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     /// let mut arr = array![1, 2, 2, 3, 2];
     ///
@@ -1110,10 +1107,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{DeepEq, Janet, TaggedJanet::Number},
-    /// };
+    /// use janetrs::{array, DeepEq, Janet, TaggedJanet::Number};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     /// let mut arr = array![10, 20, 21, 30, 20];
     ///
@@ -1146,10 +1140,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{DeepEq, Janet},
-    /// };
+    /// use janetrs::{array, DeepEq, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     /// let mut arr = array!["foo", "bar", "bar", "baz", "bar"];
     ///
@@ -1229,7 +1220,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![-5, 4, 1, -3, 2];
@@ -1273,7 +1264,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![5, 4, 1, 3, 2];
@@ -1316,10 +1307,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![-5i32, 4, 1, -3, 2];
@@ -1358,7 +1346,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![-5, 4, 1, -3, 2];
@@ -1400,7 +1388,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![5, 4, 1, 3, 2];
@@ -1442,10 +1430,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![-5i32, 4, 1, -3, 2];
@@ -1491,7 +1476,7 @@ impl<'data> JanetArray<'data> {
 
     /// Creates a iterator over the mutable reference of the array itens.
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut arr = array![1, 2, "janet"];
@@ -1523,7 +1508,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array!['r', 'u', 's', 't'];
@@ -1537,7 +1522,7 @@ impl<'data> JanetArray<'data> {
     /// If the array is shorter than `size`:
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array!['f', 'o', 'o'];
@@ -1566,7 +1551,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array!['l', 'o', 'r', 'e', 'm'];
@@ -1602,7 +1587,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![0, 0, 0, 0, 0];
@@ -1645,7 +1630,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array!['l', 'o', 'r', 'e', 'm'];
@@ -1685,7 +1670,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![0, 0, 0, 0, 0];
@@ -1724,7 +1709,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array!['l', 'o', 'r', 'e', 'm'];
@@ -1760,7 +1745,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![0, 0, 0, 0, 0];
@@ -1803,7 +1788,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array!['l', 'o', 'r', 'e', 'm'];
@@ -1844,7 +1829,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, types::Janet};
+    /// use janetrs::{array, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![0, 0, 0, 0, 0];
@@ -1873,10 +1858,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array![10, 40, 33, 20];
@@ -1896,10 +1878,7 @@ impl<'data> JanetArray<'data> {
     /// iterator:
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array![10, 40, 33];
@@ -1917,10 +1896,7 @@ impl<'data> JanetArray<'data> {
     /// present between them:
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array![10, 6, 33, 20];
@@ -1946,10 +1922,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![10, 40, 30, 20, 60, 50];
@@ -1975,10 +1948,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = array![11, 22, 33, 0, 44, 55];
@@ -1996,10 +1966,7 @@ impl<'data> JanetArray<'data> {
     /// slice will be the first (or last) item returned by the iterator.
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![0, 1, 1, 2, 3, 5, 8];
@@ -2026,10 +1993,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![100, 400, 300, 200, 600, 500];
@@ -2063,10 +2027,7 @@ impl<'data> JanetArray<'data> {
     /// `[20, 60, 50]`):
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30, 20, 60, 50];
@@ -2094,10 +2055,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut v = array![10, 40, 30, 20, 60, 50];
@@ -2130,10 +2088,7 @@ impl<'data> JanetArray<'data> {
     /// by 3 (i.e., `[50]`, `[10, 40, 30, 20]`):
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = array![10, 40, 30, 20, 60, 50];
@@ -2162,10 +2117,7 @@ impl<'data> JanetArray<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{
-    ///     array,
-    ///     types::{Janet, TaggedJanet},
-    /// };
+    /// use janetrs::{array, Janet, TaggedJanet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = array![10, 40, 30, 20, 60, 50];

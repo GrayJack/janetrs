@@ -9,10 +9,7 @@ use std::{error::Error as StdError, thread_local};
 
 use const_fn::const_fn;
 
-use crate::{
-    env::JanetEnvironment,
-    types::{Janet, JanetCFunction, JanetTable},
-};
+use crate::{env::JanetEnvironment, Janet, JanetCFunction, JanetTable};
 
 // There are platforms where AtomicBool doesn't exist
 // At some point it would be awesome to find what targets doesn't have support for atomics
@@ -134,7 +131,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, types::Janet};
+    /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
@@ -163,7 +160,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, types::Janet};
+    /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
@@ -192,7 +189,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, types::Janet};
+    /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
@@ -221,7 +218,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, types::Janet};
+    /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
@@ -250,11 +247,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{
-    ///     client::JanetClient,
-    ///     lowlevel,
-    ///     types::{Janet, JanetType},
-    /// };
+    /// use janetrs::{client::JanetClient, lowlevel, Janet, JanetType};
     ///
     /// unsafe extern "C" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
     ///     Janet::nil().into()
@@ -288,11 +281,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{
-    ///     client::JanetClient,
-    ///     lowlevel,
-    ///     types::{Janet, JanetType},
-    /// };
+    /// use janetrs::{client::JanetClient, lowlevel, Janet, JanetType};
     ///
     /// unsafe extern "C" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
     ///     Janet::nil().into()
@@ -330,7 +319,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, types::Janet};
+    /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = JanetClient::init()?.with_default_env();
     ///
@@ -381,7 +370,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, types::Janet};
+    /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = JanetClient::init()?.with_default_env();
     ///

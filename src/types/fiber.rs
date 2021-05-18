@@ -115,10 +115,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{
-    ///     client::JanetClient,
-    ///     types::{JanetFiber, JanetFunction},
-    /// };
+    /// use janetrs::{client::JanetClient, JanetFiber, JanetFunction};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let _client = JanetClient::init()?.with_default_env();
     ///
@@ -151,10 +148,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{
-    ///     client::JanetClient,
-    ///     types::{Janet, JanetFiber, JanetFunction},
-    /// };
+    /// use janetrs::{client::JanetClient, Janet, JanetFiber, JanetFunction};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let _client = JanetClient::init()?.with_default_env();
     ///
@@ -189,10 +183,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{
-    ///     client::JanetClient,
-    ///     types::{Janet, JanetFiber, JanetFunction},
-    /// };
+    /// use janetrs::{client::JanetClient, Janet, JanetFiber, JanetFunction};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let _client = JanetClient::init()?.with_default_env();
     ///

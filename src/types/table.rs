@@ -24,7 +24,7 @@ use crate::cjvg;
 ///
 /// # Examples
 /// ```
-/// use janetrs::types::{Janet, JanetTable};
+/// use janetrs::{Janet, JanetTable};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 /// let mut table = JanetTable::new();
 ///
@@ -49,7 +49,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let table = JanetTable::new();
@@ -81,7 +81,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let table = JanetTable::with_capacity(20);
@@ -114,7 +114,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -129,7 +129,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(2);
@@ -150,7 +150,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -169,7 +169,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -187,7 +187,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetTable;
+    /// use janetrs::JanetTable;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -205,7 +205,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -223,7 +223,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -271,7 +271,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -293,7 +293,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetString, JanetTable};
+    /// use janetrs::{Janet, JanetString, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(2);
@@ -377,7 +377,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -403,7 +403,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -426,7 +426,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -452,7 +452,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -508,7 +508,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -536,7 +536,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::with_capacity(20);
@@ -594,7 +594,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -627,7 +627,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -645,7 +645,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -700,7 +700,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{table, types::Janet};
+    /// use janetrs::{table, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = table! { 1 => "10", true => 10.0};
@@ -745,7 +745,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{table, types::Janet};
+    /// use janetrs::{table, Janet};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = table! { 1 => "10", true => 10.0};
@@ -1064,7 +1064,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -1087,7 +1087,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -1107,7 +1107,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -1131,7 +1131,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -1154,7 +1154,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{Janet, JanetTable};
+    /// use janetrs::{Janet, JanetTable};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut table = JanetTable::new();
@@ -1190,7 +1190,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1217,7 +1217,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1253,7 +1253,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1283,7 +1283,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1315,7 +1315,7 @@ impl<'a> OccupiedEntry<'a, '_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1381,7 +1381,7 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1441,7 +1441,7 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::{
+    /// use janetrs::{
     ///     table::{Entry, JanetTable},
     ///     Janet,
     /// };
@@ -1727,7 +1727,7 @@ impl FusedIterator for IntoIter<'_> {}
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, table, types::JanetString};
+    use crate::{client::JanetClient, table, JanetString};
 
     #[test]
     fn index() -> Result<(), crate::client::Error> {

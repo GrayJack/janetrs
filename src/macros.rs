@@ -11,7 +11,7 @@ macro_rules! count {
 /// expressions. There are 2 forms of this macro:
 ///  * Create a [`JanetTuple`] containing a given list of elements
 /// ```
-/// use janetrs::{tuple, types::Janet};
+/// use janetrs::{tuple, Janet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let t = tuple![3, true, "hey"];
@@ -22,7 +22,7 @@ macro_rules! count {
 /// ```
 ///  * Create a [`JanetTuple`] from a given element and size
 /// ```
-/// use janetrs::{types::Janet, tuple};
+/// use janetrs::{Janet, tuple};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let t = tuple!["123"; 3];
@@ -44,12 +44,12 @@ macro_rules! count {
 /// [`JanetTuple`]: ./types/tuple/struct.JanetTuple.html
 #[macro_export]
 macro_rules! tuple {
-    ($elem: expr; $n: expr) => {$crate::types::JanetTuple::with_default_elem($crate::types::Janet::from($elem), $n)};
+    ($elem: expr; $n: expr) => {$crate::JanetTuple::with_default_elem($crate::Janet::from($elem), $n)};
 
     ($($val: expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
-        let tuple = $crate::types::JanetTuple::builder(LEN)
-            $(.put($crate::types::Janet::from($val)))*;
+        let tuple = $crate::JanetTuple::builder(LEN)
+            $(.put($crate::Janet::from($val)))*;
 
         tuple.finalize()
     }};
@@ -61,7 +61,7 @@ macro_rules! tuple {
 /// expressions. There are 2 forms of this macro:
 ///  * Create a [`JanetArray`] containing a given list of elements
 /// ```
-/// use janetrs::{array, types::Janet};
+/// use janetrs::{array, Janet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let arr = array![3, true, "hey"];
@@ -72,7 +72,7 @@ macro_rules! tuple {
 /// ```
 ///  * Create a [`JanetArray`] from a given element and size
 /// ```
-/// use janetrs::{types::Janet, array};
+/// use janetrs::{Janet, array};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let arr = array!["123"; 3];
@@ -94,18 +94,18 @@ macro_rules! tuple {
 /// [`JanetArray`]: ./types/tuple/struct.JanetArray.html
 #[macro_export]
 macro_rules! array {
-    () => { $crate::types::JanetArray::new() };
+    () => { $crate::JanetArray::new() };
 
     ($elem:expr; $n:expr) => {{
-        let mut arr = $crate::types::JanetArray::with_capacity($n);
-        (0..$n).for_each(|_| arr.push($crate::types::Janet::from($elem)));
+        let mut arr = $crate::JanetArray::with_capacity($n);
+        (0..$n).for_each(|_| arr.push($crate::Janet::from($elem)));
         arr
     }};
 
     ($($val:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
-        let mut arr = $crate::types::JanetArray::with_capacity(LEN);
-        $(arr.push($crate::types::Janet::from($val));)*
+        let mut arr = $crate::JanetArray::with_capacity(LEN);
+        $(arr.push($crate::Janet::from($val));)*
         arr
     }};
 }
@@ -116,7 +116,7 @@ macro_rules! array {
 /// pairs as the items of the struct.
 ///
 /// ```
-/// use janetrs::{structs, types::Janet};
+/// use janetrs::{structs, Janet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let st = structs! {
@@ -140,8 +140,8 @@ macro_rules! array {
 macro_rules! structs {
     ($($key:expr => $value:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
-        let st = $crate::types::JanetStruct::builder(LEN)
-            $(.put($crate::types::Janet::from($key), $crate::types::Janet::from($value)))*;
+        let st = $crate::JanetStruct::builder(LEN)
+            $(.put($crate::Janet::from($key), $crate::Janet::from($value)))*;
 
         st.finalize()
     }};
@@ -153,7 +153,7 @@ macro_rules! structs {
 /// pairs as the items of the struct.
 ///
 /// ```
-/// use janetrs::{table, types::Janet};
+/// use janetrs::{table, Janet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let table = table! {
@@ -175,12 +175,12 @@ macro_rules! structs {
 /// [`JanetTable`]: ./types/tuple/struct.JanetTable.html
 #[macro_export]
 macro_rules! table {
-    () => ($crate::types::JanetTable::new());
+    () => ($crate::JanetTable::new());
 
     ($($key:expr => $value:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
-        let mut table = $crate::types::JanetTable::with_capacity(LEN);
-        $(let _ = table.insert($crate::types::Janet::from($key), $crate::types::Janet::from($value));)*
+        let mut table = $crate::JanetTable::with_capacity(LEN);
+        $(let _ = table.insert($crate::Janet::from($key), $crate::Janet::from($value));)*
 
         table
     }};
@@ -196,7 +196,7 @@ macro_rules! table {
 ///
 /// # Examples
 /// ```
-/// use janetrs::{janet_mod, lowlevel, types::*};
+/// use janetrs::{janet_mod, lowlevel, Janet};
 ///
 /// #[no_mangle]
 /// unsafe extern "C" fn rust_hello(argc: i32, _argv: *mut lowlevel::Janet) -> lowlevel::Janet {
@@ -268,13 +268,13 @@ macro_rules! janet_mod {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::panic($crate::types::Janet::from("explicity panic"));
+        $crate::util::panic($crate::Janet::from("explicity panic"));
     };
     ($msg:expr $(,)?) => {
-        $crate::util::panic($crate::types::Janet::from($msg));
+        $crate::util::panic($crate::Janet::from($msg));
     };
     ($msg:expr, $($arg:tt)+) => {
-        $crate::util::panic($crate::types::Janet::from(format!($msg, $($arg)+).as_str()));
+        $crate::util::panic($crate::Janet::from(format!($msg, $($arg)+).as_str()));
     };
 }
 
@@ -283,7 +283,7 @@ macro_rules! jpanic {
 ///
 /// # Examples
 /// ```ignore
-/// use janetrs::{jcatch, jpanic, types::Janet};
+/// use janetrs::{jcatch, jpanic, Janet};
 ///
 /// fn panic_fn() {
 ///     jpanic!("Help!");
@@ -302,21 +302,19 @@ macro_rules! jpanic {
 #[macro_export]
 macro_rules! jcatch {
     ($e:expr) => {{
-        let mut state = $crate::types::function::JanetTryState::init();
+        let mut state = $crate::function::JanetTryState::init();
 
         if let Some(signal) = state.signal() {
             if matches!(
                 signal,
-                $crate::types::JanetSignal::Ok
-                    | $crate::types::JanetSignal::Yield
-                    | $crate::types::JanetSignal::User9
+                $crate::JanetSignal::Ok | $crate::JanetSignal::Yield | $crate::JanetSignal::User9
             ) {
                 Ok($e)
             } else {
                 Err(state.payload())
             }
         } else {
-            Err($crate::types::Janet::from("No fiber to run."))
+            Err($crate::Janet::from("No fiber to run."))
         }
     }};
 }

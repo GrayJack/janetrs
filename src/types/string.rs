@@ -94,7 +94,7 @@ impl<'data> JanetStringBuilder<'data> {
 /// # Example
 /// You can easily create a Janet string from Rust [`str`] and bytes slice with [`new`]:
 /// ```
-/// use janetrs::types::JanetString;
+/// use janetrs::JanetString;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let jstr = JanetString::new("Hello, World");
@@ -103,7 +103,7 @@ impl<'data> JanetStringBuilder<'data> {
 ///
 /// You can also use the [`builder`] API to create a in a more dynamic way
 /// ```
-/// use janetrs::types::JanetString;
+/// use janetrs::JanetString;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let size = 13;
@@ -128,7 +128,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("Hey there!");
@@ -182,7 +182,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("Hey there!");
@@ -198,7 +198,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("Hey there!");
@@ -216,7 +216,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("hello");
@@ -232,7 +232,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("Hey there");
@@ -248,7 +248,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(JanetString::new("foo bar").starts_with("foo"));
@@ -264,7 +264,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(!JanetString::new("foo bar").ends_with("foo"));
@@ -284,7 +284,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(JanetString::new("abc").is_ascii());
@@ -302,7 +302,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(JanetString::new("abc").is_utf8());
@@ -343,7 +343,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("HELLO Β");
@@ -353,7 +353,7 @@ impl<'data> JanetString<'data> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("农历新年");
@@ -363,7 +363,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -400,7 +400,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// use janetrs::{JanetBuffer, JanetString};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("HELLO Β");
@@ -413,7 +413,7 @@ impl<'data> JanetString<'data> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// use janetrs::{JanetBuffer, JanetString};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("农历新年");
@@ -426,7 +426,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// use janetrs::{JanetBuffer, JanetString};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -469,7 +469,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("HELLO Β");
@@ -479,7 +479,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -514,7 +514,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("hello β");
@@ -524,7 +524,7 @@ impl<'data> JanetString<'data> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("农历新年");
@@ -534,7 +534,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -571,7 +571,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// use janetrs::{JanetBuffer, JanetString};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("hello β");
@@ -584,7 +584,7 @@ impl<'data> JanetString<'data> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// use janetrs::{JanetBuffer, JanetString};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("农历新年");
@@ -597,7 +597,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::{JanetBuffer, JanetString};
+    /// use janetrs::{JanetBuffer, JanetString};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -638,7 +638,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("hello β");
@@ -648,7 +648,7 @@ impl<'data> JanetString<'data> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -672,7 +672,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(" foo\tbar\t\u{2003}\n");
@@ -694,7 +694,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(" foo\tbar\t\u{2003}\n");
@@ -716,7 +716,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(" foo\tbar\t\u{2003}\n");
@@ -736,7 +736,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("123foo5bar789");
@@ -755,7 +755,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("123foo5bar789");
@@ -777,7 +777,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("123foo5bar");
@@ -944,7 +944,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("foo bar baz");
@@ -973,7 +973,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("foo bar baz");
@@ -992,7 +992,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetString::new("foo bar baz").find_byte(b'z'));
@@ -1008,7 +1008,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetString::new("foo bar baz").rfind_byte(b'z'));
@@ -1029,7 +1029,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetString::new("foo bar baz").find_char('z'));
@@ -1051,7 +1051,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetString::new("foo bar baz").rfind_char('z'));
@@ -1086,7 +1086,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(JanetString::new("foo bar baz").find_byteset(b"zr"), Some(6));
@@ -1124,7 +1124,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1168,7 +1168,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1212,7 +1212,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1251,7 +1251,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("foo bar foo foo quux foo");
@@ -1263,7 +1263,7 @@ impl<'data> JanetString<'data> {
     /// immediately following the last byte:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let matches: Vec<usize> = JanetString::new("foo").find_iter("").collect();
@@ -1296,7 +1296,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("foo bar foo foo quux foo");
@@ -1308,7 +1308,7 @@ impl<'data> JanetString<'data> {
     /// immediately following the last byte:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let matches: Vec<usize> = JanetString::new("foo").rfind_iter("").collect();
@@ -1327,7 +1327,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("Hello");
@@ -1344,7 +1344,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61");
@@ -1371,7 +1371,7 @@ impl<'data> JanetString<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61");
@@ -1398,7 +1398,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("  foo\tbar\t\u{2003}\nquux   \n");
@@ -1413,7 +1413,7 @@ impl<'data> JanetString<'data> {
     /// A string consisting of just whitespace yields no elements:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1438,7 +1438,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("123foo999999bar1quux123456");
@@ -1454,7 +1454,7 @@ impl<'data> JanetString<'data> {
     /// yields no elements:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1480,7 +1480,7 @@ impl<'data> JanetString<'data> {
     /// grapheme cluster:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
@@ -1503,7 +1503,7 @@ impl<'data> JanetString<'data> {
     /// single grapheme cluster:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
@@ -1514,7 +1514,7 @@ impl<'data> JanetString<'data> {
     /// This shows that graphemes can be iterated over in reverse:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
@@ -1536,7 +1536,7 @@ impl<'data> JanetString<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(
@@ -1581,7 +1581,7 @@ impl<'data> JanetString<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(
@@ -1627,7 +1627,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"I want this. Not that. Right now."[..]);
@@ -1660,7 +1660,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"I want this. Not that. Right now."[..]);
@@ -1688,7 +1688,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("Mary had a little lamb");
@@ -1723,7 +1723,7 @@ impl<'data> JanetString<'data> {
     /// with empty strings yielded by the iterator:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("||||a||b|c");
@@ -1748,7 +1748,7 @@ impl<'data> JanetString<'data> {
     /// strings.
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("010");
@@ -1760,7 +1760,7 @@ impl<'data> JanetString<'data> {
     /// in the string, along with the beginning and end of the string.
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("rust");
@@ -1791,7 +1791,7 @@ impl<'data> JanetString<'data> {
     /// surprising behavior. For example, this code is correct:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("    a  b c");
@@ -1828,7 +1828,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("Mary had a little lamb");
@@ -1862,7 +1862,7 @@ impl<'data> JanetString<'data> {
     /// with empty strings yielded by the iterator:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("||||a||b|c");
@@ -1887,7 +1887,7 @@ impl<'data> JanetString<'data> {
     /// strings.
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("010");
@@ -1899,7 +1899,7 @@ impl<'data> JanetString<'data> {
     /// in the string, along with the beginning and end of the string.
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("rust");
@@ -1930,7 +1930,7 @@ impl<'data> JanetString<'data> {
     /// surprising behavior. For example, this code is correct:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("    a  b c");
@@ -1966,7 +1966,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("Mary had a little lamb");
@@ -2015,7 +2015,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::from("Mary had a little lamb");
@@ -2063,7 +2063,7 @@ impl<'data> JanetString<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"foo\xFD\xFEbar\xFF"[..]);
@@ -2107,7 +2107,7 @@ impl<'data> JanetString<'data> {
     /// word:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"can't jump 32.3 feet"[..]);
@@ -2146,7 +2146,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&br#"The quick ("brown") fox can't jump 32.3 feet, right?"#[..]);
@@ -2178,7 +2178,7 @@ impl<'data> JanetString<'data> {
     /// word:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&b"can't jump 32.3 feet"[..]);
@@ -2213,7 +2213,7 @@ impl<'data> JanetString<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetString;
+    /// use janetrs::JanetString;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetString::new(&br#"The quick ("brown") fox can't jump 32.3 feet, right?"#[..]);

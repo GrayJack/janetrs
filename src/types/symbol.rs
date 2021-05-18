@@ -26,7 +26,7 @@ impl JanetSymbol<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetSymbol;
+    /// use janetrs::JanetSymbol;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetSymbol::new("name");
@@ -53,7 +53,7 @@ impl JanetSymbol<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetSymbol;
+    /// use janetrs::JanetSymbol;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetSymbol::unique();
@@ -84,7 +84,7 @@ impl JanetSymbol<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetSymbol;
+    /// use janetrs::JanetSymbol;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetSymbol::new("name");
@@ -100,7 +100,7 @@ impl JanetSymbol<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetSymbol;
+    /// use janetrs::JanetSymbol;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetSymbol::new("name");
@@ -115,7 +115,7 @@ impl JanetSymbol<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetSymbol;
+    /// use janetrs::JanetSymbol;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetSymbol::new("hello");
@@ -247,7 +247,7 @@ impl JanetKeyword<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetKeyword;
+    /// use janetrs::JanetKeyword;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let k = JanetKeyword::new("name");
@@ -286,7 +286,7 @@ impl JanetKeyword<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetKeyword;
+    /// use janetrs::JanetKeyword;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let k = JanetKeyword::new("name");
@@ -302,7 +302,7 @@ impl JanetKeyword<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetKeyword;
+    /// use janetrs::JanetKeyword;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let k = JanetKeyword::new("name");
@@ -317,7 +317,7 @@ impl JanetKeyword<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetKeyword;
+    /// use janetrs::JanetKeyword;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetKeyword::new("hello");

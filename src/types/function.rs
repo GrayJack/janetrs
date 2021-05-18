@@ -12,10 +12,7 @@ use const_fn::const_fn;
 
 use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
 
-use crate::{
-    cjvg,
-    types::{Janet, JanetFiber, JanetSignal},
-};
+use crate::{cjvg, Janet, JanetFiber, JanetSignal};
 
 #[cjvg("1.12.2")]
 pub use trystate::JanetTryState;
@@ -280,7 +277,7 @@ impl fmt::Debug for JanetFunction<'_> {
 mod trystate {
     use core::mem::MaybeUninit;
 
-    use crate::types::{Janet, JanetSignal};
+    use crate::{Janet, JanetSignal};
 
     /// A structure that holds the old and new states of the Janet VM.
     ///

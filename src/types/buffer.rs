@@ -44,7 +44,7 @@ use super::{JanetExtend, JanetKeyword, JanetString, JanetSymbol};
 /// You can create a `JanetBuffer` from a Rust string literal.
 ///
 /// ```
-/// use janetrs::types::JanetBuffer;
+/// use janetrs::JanetBuffer;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let hello = JanetBuffer::from("Hello, world!");
@@ -54,7 +54,7 @@ use super::{JanetExtend, JanetKeyword, JanetString, JanetSymbol};
 /// [`str`] with the [`push_str`] method:
 ///
 /// ```
-/// use janetrs::types::JanetBuffer;
+/// use janetrs::JanetBuffer;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let mut buff = JanetBuffer::from("Hello, ");
@@ -66,7 +66,7 @@ use super::{JanetExtend, JanetKeyword, JanetString, JanetSymbol};
 /// [`push_u16`], [`push_u32`], [`push_u64`]:
 ///
 /// ```
-/// use janetrs::types::JanetBuffer;
+/// use janetrs::JanetBuffer;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let mut buff = JanetBuffer::with_capacity(20);
@@ -98,7 +98,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::new();
@@ -118,7 +118,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::with_capacity(10);
@@ -155,7 +155,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut buff = JanetBuffer::new();
@@ -172,7 +172,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut buff = JanetBuffer::new();
@@ -284,7 +284,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = JanetBuffer::from("abc");
@@ -341,7 +341,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("hello");
@@ -359,7 +359,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut buff = JanetBuffer::from("hello");
@@ -377,7 +377,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("Hey there");
@@ -393,7 +393,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(JanetBuffer::from("foo bar").starts_with("foo"));
@@ -409,7 +409,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(!JanetBuffer::from("foo bar").ends_with("foo"));
@@ -429,7 +429,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(JanetBuffer::from("abc").is_ascii());
@@ -447,7 +447,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert!(JanetBuffer::from("abc").is_utf8());
@@ -488,7 +488,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("HELLO Β");
@@ -498,7 +498,7 @@ impl JanetBuffer<'_> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("农历新年");
@@ -508,7 +508,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -542,7 +542,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("HELLO Β");
@@ -555,7 +555,7 @@ impl JanetBuffer<'_> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("农历新年");
@@ -568,7 +568,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -613,7 +613,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("HELLO Β");
@@ -623,7 +623,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -651,7 +651,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = JanetBuffer::from("HELLO Β");
@@ -662,7 +662,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
@@ -696,7 +696,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("hello β");
@@ -706,7 +706,7 @@ impl JanetBuffer<'_> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("农历新年");
@@ -716,7 +716,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -753,7 +753,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("hello β");
@@ -766,7 +766,7 @@ impl JanetBuffer<'_> {
     /// Scripts without case are not changed:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("农历新年");
@@ -779,7 +779,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -824,7 +824,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("hello β");
@@ -834,7 +834,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -862,7 +862,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = JanetBuffer::from("hello β");
@@ -873,7 +873,7 @@ impl JanetBuffer<'_> {
     /// Invalid UTF-8 remains as is:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = JanetBuffer::from(&b"foo\xFFbar\xE2\x98baz"[..]);
@@ -895,7 +895,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(" foo\tbar\t\u{2003}\n");
@@ -920,7 +920,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(" foo\tbar\t\u{2003}\n");
@@ -945,7 +945,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(" foo\tbar\t\u{2003}\n");
@@ -968,7 +968,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("123foo5bar789");
@@ -990,7 +990,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("123foo5bar789");
@@ -1012,7 +1012,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("123foo5bar");
@@ -1179,7 +1179,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("foo bar baz");
@@ -1208,7 +1208,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("foo bar baz");
@@ -1227,7 +1227,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetBuffer::from("foo bar baz").find_byte(b'z'));
@@ -1243,7 +1243,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetBuffer::from("foo bar baz").rfind_byte(b'z'));
@@ -1264,7 +1264,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetBuffer::from("foo bar baz").find_char('z'));
@@ -1286,7 +1286,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(Some(10), JanetBuffer::from("foo bar baz").rfind_char('z'));
@@ -1321,7 +1321,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1362,7 +1362,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1406,7 +1406,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1450,7 +1450,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1489,7 +1489,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("foo bar foo foo quux foo");
@@ -1501,7 +1501,7 @@ impl JanetBuffer<'_> {
     /// immediately following the last byte:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let matches: Vec<usize> = JanetBuffer::from("foo").find_iter("").collect();
@@ -1533,7 +1533,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("foo bar foo foo quux foo");
@@ -1545,7 +1545,7 @@ impl JanetBuffer<'_> {
     /// immediately following the last byte:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let matches: Vec<usize> = JanetBuffer::from("foo").rfind_iter("").collect();
@@ -1564,7 +1564,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("Hello");
@@ -1581,7 +1581,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61"[..]);
@@ -1608,7 +1608,7 @@ impl JanetBuffer<'_> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from(&b"\xE2\x98\x83\xFF\xF0\x9D\x9E\x83\xE2\x98\x61"[..]);
@@ -1635,7 +1635,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("  foo\tbar\t\u{2003}\nquux   \n");
@@ -1650,7 +1650,7 @@ impl JanetBuffer<'_> {
     /// A buffer consisting of just whitespace yields no elements:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1675,7 +1675,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("123foo999999bar1quux123456");
@@ -1691,7 +1691,7 @@ impl JanetBuffer<'_> {
     /// yields no elements:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -1717,7 +1717,7 @@ impl JanetBuffer<'_> {
     /// grapheme cluster:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let bs = JanetBuffer::from("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
@@ -1730,7 +1730,7 @@ impl JanetBuffer<'_> {
     /// not necessarily correspond to the length of the `&str` returned!
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut bytes = JanetBuffer::new();
@@ -1761,7 +1761,7 @@ impl JanetBuffer<'_> {
     /// single grapheme cluster:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
@@ -1772,7 +1772,7 @@ impl JanetBuffer<'_> {
     /// This shows that graphemes can be iterated over in reverse:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from("a\u{0300}\u{0316}\u{1F1FA}\u{1F1F8}");
@@ -1794,7 +1794,7 @@ impl JanetBuffer<'_> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(
@@ -1839,7 +1839,7 @@ impl JanetBuffer<'_> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(
@@ -1885,7 +1885,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&b"I want this. Not that. Right now."[..]);
@@ -1918,7 +1918,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&b"I want this. Not that. Right now."[..]);
@@ -1946,7 +1946,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("Mary had a little lamb");
@@ -1981,7 +1981,7 @@ impl JanetBuffer<'_> {
     /// with empty strings yielded by the iterator:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("||||a||b|c");
@@ -2006,7 +2006,7 @@ impl JanetBuffer<'_> {
     /// strings.
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("010");
@@ -2018,7 +2018,7 @@ impl JanetBuffer<'_> {
     /// in the string, along with the beginning and end of the string.
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("rust");
@@ -2049,7 +2049,7 @@ impl JanetBuffer<'_> {
     /// surprising behavior. For example, this code is correct:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("    a  b c");
@@ -2086,7 +2086,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("Mary had a little lamb");
@@ -2120,7 +2120,7 @@ impl JanetBuffer<'_> {
     /// with empty strings yielded by the iterator:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("||||a||b|c");
@@ -2145,7 +2145,7 @@ impl JanetBuffer<'_> {
     /// strings.
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("010");
@@ -2157,7 +2157,7 @@ impl JanetBuffer<'_> {
     /// in the string, along with the beginning and end of the string.
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("rust");
@@ -2188,7 +2188,7 @@ impl JanetBuffer<'_> {
     /// surprising behavior. For example, this code is correct:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("    a  b c");
@@ -2224,7 +2224,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("Mary had a little lamb");
@@ -2273,7 +2273,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = JanetBuffer::from("Mary had a little lamb");
@@ -2321,7 +2321,7 @@ impl JanetBuffer<'_> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&b"foo\xFD\xFEbar\xFF"[..]);
@@ -2365,7 +2365,7 @@ impl JanetBuffer<'_> {
     /// word:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&b"can't jump 32.3 feet"[..]);
@@ -2404,7 +2404,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&br#"The quick ("brown") fox can't jump 32.3 feet, right?"#[..]);
@@ -2436,7 +2436,7 @@ impl JanetBuffer<'_> {
     /// word:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&b"can't jump 32.3 feet"[..]);
@@ -2471,7 +2471,7 @@ impl JanetBuffer<'_> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::types::JanetBuffer;
+    /// use janetrs::JanetBuffer;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let buff = JanetBuffer::from(&br#"The quick ("brown") fox can't jump 32.3 feet, right?"#[..]);
@@ -3006,7 +3006,7 @@ impl JanetExtend<&CStr> for JanetBuffer<'_> {
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, types::JanetString};
+    use crate::{client::JanetClient, JanetString};
 
     #[test]
     fn creation() -> Result<(), crate::client::Error> {
