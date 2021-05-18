@@ -1,7 +1,7 @@
 //! FIXME: Work In Progress
 //!
 //! This module may change drastically in the near future
-use core::{cell::Cell, ffi::c_void, fmt, marker::PhantomData};
+use core::{cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData};
 
 pub use evil_janet::JanetAbstractType;
 
@@ -35,6 +35,7 @@ impl std::error::Error for AbstractError {}
 ///
 /// Works like a `*mut c_void` pointer, but the memory it uses are tracked by the Janet
 /// Garbage Collector.
+#[derive(PartialEq, Eq)]
 #[repr(transparent)]
 pub struct JanetAbstract {
     pub(crate) raw: *mut c_void,
@@ -194,6 +195,11 @@ impl JanetAbstract {
     pub fn type_info(&self) -> JanetAbstractType {
         unsafe { *(*evil_janet::janet_abstract_head(self.raw)).type_ }
     }
+
+    #[inline]
+    fn raw_type_info(&self) -> *const JanetAbstractType {
+        unsafe { (*evil_janet::janet_abstract_head(self.raw)).type_ }
+    }
 }
 
 impl fmt::Debug for JanetAbstract {
@@ -205,6 +211,75 @@ impl fmt::Debug for JanetAbstract {
     }
 }
 
+impl PartialOrd for JanetAbstract {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.raw == other.raw {
+            return Some(Ordering::Equal);
+        }
+        let self_ty = self.raw_type_info();
+        let other_ty = self.raw_type_info();
+
+        if self_ty != other_ty {
+            if self_ty > other_ty {
+                return Some(Ordering::Greater);
+            } else {
+                return Some(Ordering::Less);
+            }
+        }
+
+        let self_ty = self.type_info();
+
+        if let Some(f) = self_ty.compare {
+            let res = unsafe { f(self.raw, other.raw) };
+            match res {
+                -1 => Some(Ordering::Less),
+                0 => Some(Ordering::Equal),
+                1 => Some(Ordering::Greater),
+                _ => None,
+            }
+        } else if self.raw > other.raw {
+            Some(Ordering::Greater)
+        } else {
+            Some(Ordering::Less)
+        }
+    }
+}
+
+impl Ord for JanetAbstract {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.raw == other.raw {
+            return Ordering::Equal;
+        }
+        let self_ty = self.raw_type_info();
+        let other_ty = self.raw_type_info();
+
+        if self_ty != other_ty {
+            if self_ty > other_ty {
+                return Ordering::Greater;
+            } else {
+                return Ordering::Less;
+            }
+        }
+
+        let self_ty = self.type_info();
+
+        if let Some(f) = self_ty.compare {
+            let res = unsafe { f(self.raw, other.raw) };
+            match res {
+                -1 => Ordering::Less,
+                0 => Ordering::Equal,
+                1 => Ordering::Greater,
+                _ => unreachable!(),
+            }
+        } else if self.raw > other.raw {
+            Ordering::Greater
+        } else {
+            Ordering::Less
+        }
+    }
+}
 
 /// The trait that encodes the information required to instatiate the implementer as
 /// [`JanetAbstract`]

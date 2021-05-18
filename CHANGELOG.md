@@ -21,6 +21,7 @@ All notable changes to the library should be put here
 -   Impl `Debug` and `Display` for `JanetSymbol`
 -   Impl `Debug` and `Display` for `JanetKeyword`
 -   Impl `IsJanetAbstract` for i64 and u64
+-   Impl `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetAbstract`
 -   Include "@" before the debug representation of Janet mutable types
 -   Refactor `Debug` implementation of `Janet` type
 -   Reduce code duplication in `JanetAbstract` functions
