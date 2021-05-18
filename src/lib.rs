@@ -67,8 +67,10 @@ pub mod client;
 pub mod env;
 mod gc;
 mod macros;
-pub mod types;
+mod types;
 pub mod util;
+
+pub use types::*;
 
 pub use gc::{JanetGc, JanetGcLockGuard};
 

@@ -8,10 +8,11 @@ All notable changes to the library should be put here
 -   **BREAKING:** Rename `as_raw_mut` to `as_mut_raw`
 -   **BREAKING:** Change definition of `IsJanetAbstract` trait
 -   **BREAKING:** `JanetAbstract::new` now takes a value
+-   **BREAKING:** Make the `janetrs::types` module private and export everything inside it in the upper module
 -   Add `DeepEq` trait
 -   Add `dedup`, `dedup_by` and `dedup_by_key` for `JanetArray`
 -   Add `get_method` and `has_method` to `Janet`
--   Add `JanetGc` and `JanetGcLockGuard` types to access soem Janet GC operations
+-   Add `JanetGc` and `JanetGcLockGuard` types to access some Janet GC operations
 -   Add functions to get reference to a `JanetAbstract` data safely
 -   Add `JanetAbstract::is`
 -   Add `Janet::int64`
