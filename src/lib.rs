@@ -72,6 +72,6 @@ pub mod util;
 
 pub use types::*;
 
-pub use gc::{JanetGc, JanetGcLockGuard};
+pub use gc::{JanetGc, JanetGcLockGuard, JanetGcRootGuard};
 
 pub use janetrs_macros::{cjvg, janet_fn, janet_version};
