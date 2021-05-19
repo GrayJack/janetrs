@@ -42,7 +42,7 @@ This software is licensed under the terms of the [MIT Public License](./LICENSE)
 -   [x] JanetAbstract
 -   [x] JanetFiber
 -   [x] JanetFunction
--   [I] GC functions
+-   [x] GC functions
 
 `[ ]: Lacking`
 `[I]: Incomplete`

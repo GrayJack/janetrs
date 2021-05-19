@@ -34,7 +34,7 @@
 //!  - [X] JanetAbstract
 //!  - [X] JanetFiber
 //!  - [X] JanetFunction
-//!  - [I] GC functions
+//!  - [X] GC functions
 //!
 //!  `[ ]: Lacking`
 //!  `[I]: Incomplete`
