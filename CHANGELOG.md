@@ -21,15 +21,15 @@ All notable changes to the library should be put here
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
 -   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
 -   Fix some clippy lints
--   Impl `DeepEq` for most types
--   Impl `Debug` and `Display` for `JanetSymbol`
--   Impl `Debug` and `Display` for `JanetKeyword`
--   Impl `IsJanetAbstract` for i64 and u64
--   Impl `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetAbstract`
--   Impl `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetFunction`
--   Impl `PartialOrd` and `Ord` for `JanetFiber`
--   Impl `From` and `TryFrom` between `i64` and `Janet`
--   Impl `From` and `TryFrom` between `u64` and `Janet`
+-   Implement `DeepEq` for most types
+-   Implement `Debug` and `Display` for `JanetSymbol`
+-   Implement `Debug` and `Display` for `JanetKeyword`
+-   Implement `IsJanetAbstract` for i64 and u64
+-   Implement `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetAbstract`
+-   Implement `PartialEq`, `Eq`, `PartialOrd` and `Ord` for `JanetFunction`
+-   Implement `PartialOrd` and `Ord` for `JanetFiber`
+-   Implement `From` and `TryFrom` between `i64` and `Janet`
+-   Implement `From` and `TryFrom` between `u64` and `Janet`
 -   Include "@" before the debug representation of Janet mutable types
 -   Refactor `Debug` implementation of `Janet` type
 -   Refactor some implementations of `From` and `TryFrom` related to `Janet` type
@@ -58,6 +58,9 @@ All notable changes to the library should be put here
 ### Bug Fixes
 
 -   Fix change in behavior in `JanetBuffer` since Janet 1.13.0 and also enforce that on earlier versions
+-   Fix UB in `JanetTryState` safe API
+-   Fix `Default` implementation for `JanetEnvironment`
+-   Fix `JanetTuple` implementation of `PartialEq` to match the Janet implementation
 
 ## 0.1.2
 
