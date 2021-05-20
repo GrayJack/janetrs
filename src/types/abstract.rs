@@ -170,11 +170,19 @@ impl JanetAbstract {
         Ok(unsafe { &mut *(self.raw as *mut A) })
     }
 
+    /// Acquires the underlying pointer as const pointer.
+    // false positive lint
+    #[allow(clippy::wrong_self_convention)]
+    #[inline]
+    pub const fn as_raw(&self) -> *const c_void {
+        self.raw
+    }
+
     /// Acquires the underlying pointer.
     // false positive lint
     #[allow(clippy::wrong_self_convention)]
     #[inline]
-    pub const fn as_raw(self) -> *mut c_void {
+    pub fn as_mut_raw(&mut self) -> *mut c_void {
         self.raw
     }
 

@@ -785,7 +785,7 @@ impl<'data> JanetTable<'data> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
-    pub fn as_raw_mut(&mut self) -> *mut CJanetTable {
+    pub fn as_mut_raw(&mut self) -> *mut CJanetTable {
         self.raw
     }
 }

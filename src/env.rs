@@ -27,7 +27,7 @@ impl JanetEnvironment {
     #[inline]
     pub fn with_replacements(mut replacements: JanetTable<'static>) -> Self {
         // SAFETY: `janet_core_env` never returns a null pointer
-        Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(replacements.as_raw_mut())) })
+        Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(replacements.as_mut_raw())) })
     }
 
     /// Add a Janet immutable variable in the environment.
