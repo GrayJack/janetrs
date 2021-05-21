@@ -341,21 +341,6 @@ impl<'data> JanetArray<'data> {
         }
     }
 
-    /// Returns `true` if the array contains an element with the given `value`.
-    ///
-    /// # Examples
-    /// ```
-    /// use janetrs::array;
-    /// # let _client = janetrs::client::JanetClient::init().unwrap();
-    ///
-    /// let arr = array![1.0, "foo", 4.0];
-    /// assert!(arr.contains("foo"));
-    /// ```
-    pub fn contains(&self, value: impl Into<Janet>) -> bool {
-        let value = value.into();
-        self.iter().any(|&elem| elem == value)
-    }
-
     /// Returns a mutable reference to an element in the array at the`index`.
     /// Returns a reference to an element in the array at the`index`.
     ///
@@ -384,6 +369,47 @@ impl<'data> JanetArray<'data> {
                 Some(&mut (*ptr))
             }
         }
+    }
+
+    /// Returns a reference to an element, without doing bounds checking.
+    ///
+    /// # Safety
+    /// Calling this method with an out-of-bounds index is *[undefined behavior]*
+    /// even if the resulting reference is not used.
+    ///
+    /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+    #[inline]
+    pub unsafe fn get_unchecked(&self, index: i32) -> &Janet {
+        let item = (*self.raw).data.offset(index as isize) as *const Janet;
+        &*item
+    }
+
+    /// Returns a exclusive reference to an element, without doing bounds checking.
+    ///
+    /// # Safety
+    /// Calling this method with an out-of-bounds index is *[undefined behavior]*
+    /// even if the resulting reference is not used.
+    ///
+    /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+    #[inline]
+    pub unsafe fn get_unchecked_mut(&mut self, index: i32) -> &Janet {
+        let item = (*self.raw).data.offset(index as isize) as *mut Janet;
+        &mut *item
+    }
+
+    /// Returns `true` if the array contains an element with the given `value`.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::array;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = array![1.0, "foo", 4.0];
+    /// assert!(arr.contains("foo"));
+    /// ```
+    pub fn contains(&self, value: impl Into<Janet>) -> bool {
+        let value = value.into();
+        self.iter().any(|&elem| elem == value)
     }
 
     /// Moves all the elements of `other` into the array, leaving `other` empty.

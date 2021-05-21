@@ -152,6 +152,19 @@ impl<'data> JanetTuple<'data> {
         }
     }
 
+    /// Returns a reference to an element, without doing bounds checking.
+    ///
+    /// # Safety
+    /// Calling this method with an out-of-bounds index is *[undefined behavior]*
+    /// even if the resulting reference is not used.
+    ///
+    /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+    #[inline]
+    pub unsafe fn get_unchecked(&self, index: i32) -> &Janet {
+        let item = self.raw.offset(index as isize) as *const Janet;
+        &*item
+    }
+
     /// Returns the number of elements in the tuple, also referred to as its 'length'.
     ///
     /// # Examples

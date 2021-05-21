@@ -11,6 +11,8 @@ All notable changes to the library should be put here
 -   **BREAKING:** Make the `janetrs::types` module private and export everything inside it in the upper module
 -   Add `DeepEq` trait
 -   Add `dedup`, `dedup_by` and `dedup_by_key` for `JanetArray`
+-   Add `get_unchecked` and `get_unchecked_mut` for `JanetArray`
+-   Add `get_unchecked` for `JanetTuple`
 -   Add `get_method` and `has_method` to `Janet`
 -   Add `JanetGc` and `JanetGcLockGuard` types to access some Janet GC operations
 -   Add `JanetGcRootGuard` and the functions `JanetGc::root` and `JanetGc::unroot` to root a Janet object to the GC
