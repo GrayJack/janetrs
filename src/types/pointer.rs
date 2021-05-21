@@ -12,7 +12,7 @@ use core::{cell::Cell, ffi::c_void, fmt, marker::PhantomData};
 /// instead. It is only used by Janet internally for optimization properties and some
 /// Janet modules uses it as well for the same purposes.
 #[repr(transparent)]
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct JanetPointer {
     pub(crate) inner: *mut c_void,
     phatom: PhantomData<Cell<()>>,
@@ -44,6 +44,13 @@ impl JanetPointer {
     #[inline]
     pub const fn cast<U>(self) -> *mut U {
         self.inner as *mut U
+    }
+}
+
+impl fmt::Debug for JanetPointer {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.as_ptr(), f)
     }
 }
 
