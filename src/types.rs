@@ -602,6 +602,8 @@ impl fmt::Display for Janet {
             },
             TaggedJanet::Symbol(sym) => fmt::Display::fmt(&sym, f),
             TaggedJanet::Table(table) => {
+                // Classes in Janet are just tables with prototype with special keywords
+                // Ifa vailable we printo the class name
                 if let Some(proto) = table.prototype() {
                     if let Some(name) = proto.get(JanetKeyword::new("_name")) {
                         match name.unwrap() {
