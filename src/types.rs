@@ -603,13 +603,22 @@ impl fmt::Display for Janet {
             TaggedJanet::Symbol(sym) => fmt::Display::fmt(&sym, f),
             TaggedJanet::Table(table) => {
                 // Classes in Janet are just tables with prototype with special keywords
-                // Ifa vailable we printo the class name
+                // If a vailable we printo the class name
                 if let Some(proto) = table.prototype() {
                     if let Some(name) = proto.get(JanetKeyword::new("_name")) {
                         match name.unwrap() {
-                            TaggedJanet::Buffer(s) => fmt::Display::fmt(&s, f)?,
-                            TaggedJanet::String(s) => fmt::Display::fmt(&s, f)?,
-                            TaggedJanet::Symbol(s) => fmt::Display::fmt(&s, f)?,
+                            TaggedJanet::Buffer(s) => {
+                                f.write_char('@')?;
+                                fmt::Display::fmt(&s, f)?
+                            },
+                            TaggedJanet::String(s) => {
+                                f.write_char('@')?;
+                                fmt::Display::fmt(&s, f)?
+                            },
+                            TaggedJanet::Symbol(s) => {
+                                f.write_char('@')?;
+                                fmt::Display::fmt(&s, f)?
+                            },
                             _ => f.write_char('@')?,
                         }
                     } else {
