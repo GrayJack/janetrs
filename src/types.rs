@@ -466,7 +466,7 @@ macro_rules! struct_table_display {
                 let value = unsafe { $id.get_unchecked(key) };
 
                 fmt::Display::fmt(key, $f)?;
-                $f.write_str(": ")?;
+                $f.write_str(" : ")?;
                 fmt::Display::fmt(value, $f)?;
                 $f.write_str(", ")?;
             }
@@ -479,7 +479,7 @@ macro_rules! struct_table_display {
                 let value = unsafe { $id.get_unchecked(key) };
 
                 fmt::Display::fmt(key, $f)?;
-                $f.write_str(": ")?;
+                $f.write_str(" : ")?;
                 fmt::Display::fmt(value, $f)?;
                 $f.write_str(", ")?;
             }
@@ -489,13 +489,13 @@ macro_rules! struct_table_display {
             let value = unsafe { $id.get_unchecked(key) };
 
             fmt::Display::fmt(key, $f)?;
-            $f.write_str(": ")?;
+            $f.write_str(" : ")?;
             fmt::Display::fmt(value, $f)?;
         } else {
             let mut count = $id.len();
             for (key, value) in &$id {
                 fmt::Display::fmt(key, $f)?;
-                $f.write_str(": ")?;
+                $f.write_str(" : ")?;
                 fmt::Display::fmt(value, $f)?;
 
                 if count != 1 {
@@ -587,7 +587,7 @@ impl fmt::Display for Janet {
                 fmt::Debug::fmt(&fiber.as_raw(), f)?;
                 f.write_char('>')
             },
-            TaggedJanet::Function(_) => f.write_str("<FUnction>"),
+            TaggedJanet::Function(_) => f.write_str("<Function>"),
             TaggedJanet::Keyword(key) => fmt::Display::fmt(&key, f),
             TaggedJanet::Nil => f.write_str("nil"),
             TaggedJanet::Pointer(ptr) => {
