@@ -107,6 +107,19 @@ impl<'data> JanetTable<'data> {
         }
     }
 
+    /// Get the prototype table of the table.
+    #[inline]
+    pub fn prototype(&self) -> Option<Self> {
+        let proto = unsafe { (*self.raw).proto };
+
+        if proto.is_null() {
+            None
+        } else {
+            // SAFETY: we checked that it's not a null pointer
+            Some(unsafe { Self::from_raw(proto) })
+        }
+    }
+
     /// Returns the number of elements the table can hold without reallocating.
     ///
     /// This number is a lower bound; the [`JanetTable`] might be able to hold more, but
@@ -352,7 +365,7 @@ impl<'data> JanetTable<'data> {
     /// # SAFETY
     /// This function doesn't check for null pointer and if the key or value ar Janet nil
     #[inline]
-    unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &'data mut Janet {
+    pub(crate) unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &'data mut Janet {
         self.get_key_value_mut_unchecked(key).1
     }
 
@@ -362,7 +375,7 @@ impl<'data> JanetTable<'data> {
     /// # SAFETY
     /// This function doesn't check for null pointer and if the key or value ar Janet nil
     #[inline]
-    unsafe fn get_key_value_mut_unchecked(
+    pub(crate) unsafe fn get_key_value_mut_unchecked(
         &mut self, key: impl Into<Janet>,
     ) -> (&Janet, &'data mut Janet) {
         let key = key.into();

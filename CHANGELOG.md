@@ -14,6 +14,7 @@ All notable changes to the library should be put here
 -   Add `get_unchecked` and `get_unchecked_mut` for `JanetArray`
 -   Add `get_unchecked` for `JanetTuple`
 -   Add `get_method` and `has_method` to `Janet`
+-   Add `prototype` method for `JanetTable`
 -   Add `JanetGc` and `JanetGcLockGuard` types to access some Janet GC operations
 -   Add `JanetGcRootGuard` and the functions `JanetGc::root` and `JanetGc::unroot` to root a Janet object to the GC
 -   Add functions to get reference to a `JanetAbstract` data safely
