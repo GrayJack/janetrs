@@ -35,6 +35,7 @@ All notable changes to the library should be put here
 -   Implement `From` and `TryFrom` between `u64` and `Janet`
 -   Include "@" before the debug representation of Janet mutable types
 -   Refactor `Debug` implementation of `Janet` type
+-   Refactor `Display` implementation of `Janet` type
 -   Refactor some implementations of `From` and `TryFrom` related to `Janet` type
 -   Reduce code duplication in `JanetAbstract` functions
 -   Make some functions const if using a recent enough Rust version
