@@ -213,6 +213,22 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
+    /// Returns the key-value pair corresponding to the supplied `key`, with a reference
+    /// to value without checking for anything.
+    ///
+    /// # SAFETY
+    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    #[inline]
+    pub(crate) unsafe fn get_key_value_unchecked(
+        &self, key: impl Into<Janet>,
+    ) -> (&Janet, &'data mut Janet) {
+        let key = key.into();
+
+        let kv: *mut (Janet, Janet) = evil_janet::janet_struct_find(self.raw, key.inner) as *mut _;
+
+        (&(*kv).0, &mut (*kv).1)
+    }
+
     /// Returns a owned value corresponding to the supplied `key`.
     ///
     /// # Examples
