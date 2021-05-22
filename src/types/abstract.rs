@@ -49,12 +49,12 @@ impl JanetAbstract {
     #[inline]
     pub fn new<A: IsJanetAbstract>(value: A) -> Self {
         let mut s = Self {
-            raw:     unsafe { evil_janet::janet_abstract(&A::type_info(), A::SIZE as _) },
+            raw:     unsafe { evil_janet::janet_abstract(A::type_info(), A::SIZE as _) },
             phantom: PhantomData,
         };
 
         // SAFETY: The type are the same since `s` was created with `A` type data.
-        unsafe { *s.get_mut_unchecked() = value };
+        *unsafe { s.get_mut_unchecked() } = value;
 
         s
     }
@@ -300,22 +300,22 @@ pub trait IsJanetAbstract {
 
     /// Returns the table of the name of the `Self` and all possible polimorfic function
     /// pointer that a Abstract type can have in Janet.
-    fn type_info() -> JanetAbstractType;
+    fn type_info() -> &'static JanetAbstractType;
 }
 
 
 impl IsJanetAbstract for i64 {
-    const SIZE: usize = core::mem::size_of::<Self>();
+    const SIZE: usize = core::mem::size_of::<i64>();
 
-    fn type_info() -> JanetAbstractType {
-        unsafe { evil_janet::janet_s64_type }
+    fn type_info() -> &'static JanetAbstractType {
+        unsafe { &evil_janet::janet_s64_type }
     }
 }
 
 impl IsJanetAbstract for u64 {
-    const SIZE: usize = core::mem::size_of::<Self>();
+    const SIZE: usize = core::mem::size_of::<u64>();
 
-    fn type_info() -> JanetAbstractType {
-        unsafe { evil_janet::janet_u64_type }
+    fn type_info() -> &'static JanetAbstractType {
+        unsafe { &evil_janet::janet_u64_type }
     }
 }
