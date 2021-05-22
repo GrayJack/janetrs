@@ -213,6 +213,16 @@ impl<'data> JanetStruct<'data> {
         }
     }
 
+    /// Returns a reference to the value corresponding to the `key` without checking for
+    /// anything.
+    ///
+    /// # SAFETY
+    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    #[inline]
+    pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
+        self.get_key_value_unchecked(key).1
+    }
+
     /// Returns the key-value pair corresponding to the supplied `key`, with a reference
     /// to value without checking for anything.
     ///
