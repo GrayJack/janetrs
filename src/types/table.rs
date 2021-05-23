@@ -64,21 +64,6 @@ impl<'data> JanetTable<'data> {
 
     /// Create a empty [`JanetTable`] given to Janet the specified `capacity`.
     ///
-    /// That does not mean that Janet will create a table with the exact same `capacity`.
-    /// It seems to follow some heuristics:
-    ///  - `capacity` in 0..4 → Allocates `capacity` + 1
-    ///  - `capacity` in 4..8 → Allocates 8
-    ///  - `capacity` in 8..16 → Allocates 16
-    ///  - `capacity` in 16..32 → Allocates 32
-    ///  - ...
-    ///
-    /// Without loss of generality, it progresses like this:
-    ///  - `capacity` in 0..4 → Allocates `capacity` + 1
-    ///  - `capacity` in m..2m where m = 4 → Allocates 2m
-    ///  - `capacity` in p..2p where p = 2m → Allocates 2p
-    ///  - `capacity` in q..2q where q = last step value + 1 → Allocates 2q
-    ///  - ...
-    ///
     /// # Examples
     /// ```
     /// use janetrs::JanetTable;
@@ -94,6 +79,25 @@ impl<'data> JanetTable<'data> {
         }
     }
 
+    /// Create a empty [`JanetTable`] with a prototype table set to `proto`.
+    ///
+    /// It is initially created with capacity 1, so it will not allocate until it is
+    /// second inserted into.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{JanetTable, table};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let table = JanetTable::with_prototype(table!(":_name" => "MyClass"));
+    /// ```
+    #[inline]
+    pub fn with_prototype(proto: JanetTable<'data>) -> Self {
+        let mut t = Self::new();
+        t.set_prototype(&proto);
+        t
+    }
+
     /// Create a new [`JanetTable`] with a `raw_table`.
     ///
     /// # Safety
@@ -104,19 +108,6 @@ impl<'data> JanetTable<'data> {
         Self {
             raw,
             phatom: PhantomData,
-        }
-    }
-
-    /// Get the prototype table of the table.
-    #[inline]
-    pub fn prototype(&self) -> Option<Self> {
-        let proto = unsafe { (*self.raw).proto };
-
-        if proto.is_null() {
-            None
-        } else {
-            // SAFETY: we checked that it's not a null pointer
-            Some(unsafe { Self::from_raw(proto) })
         }
     }
 
@@ -212,6 +203,41 @@ impl<'data> JanetTable<'data> {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+
+    /// Get the prototype table of the table.
+    #[inline]
+    pub fn prototype(&self) -> Option<Self> {
+        let proto = unsafe { (*self.raw).proto };
+
+        if proto.is_null() {
+            None
+        } else {
+            // SAFETY: we checked that it's not a null pointer
+            let proto = unsafe { JanetTable::from_raw(proto) };
+            Some(proto)
+        }
+    }
+
+    /// Set the prototype of the table with the values of `proto`.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// ```
+    /// use janetrs::{table, Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! {1 => "a", 2 => "b"};
+    /// let proto = table! {":_name" => "MyClass"};
+    ///
+    /// table.set_prototype(&proto);
+    ///
+    /// assert_eq!(table.prototype(), Some(proto));
+    /// ```
+    #[inline]
+    pub fn set_prototype(&mut self, proto: &JanetTable) {
+        unsafe { (*self.raw).proto = proto.raw };
     }
 
     /// Returns the value corresponding to the supplied `key`.
@@ -363,7 +389,7 @@ impl<'data> JanetTable<'data> {
     /// anything.
     ///
     /// # SAFETY
-    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
         self.get_key_value_unchecked(key).1
@@ -373,7 +399,7 @@ impl<'data> JanetTable<'data> {
     /// checking for anything.
     ///
     /// # SAFETY
-    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &'data mut Janet {
         self.get_key_value_mut_unchecked(key).1
@@ -383,13 +409,20 @@ impl<'data> JanetTable<'data> {
     /// reference to value without checking for anything.
     ///
     /// # SAFETY
-    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_key_value_mut_unchecked(
         &mut self, key: impl Into<Janet>,
     ) -> (&Janet, &'data mut Janet) {
         let key = key.into();
 
+        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // are represented in memory the same way
+        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // the struct fields of the same type of the struct fields
+        //
+        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
         let kv: *mut (Janet, Janet) = evil_janet::janet_table_find(self.raw, key.inner) as *mut _;
 
         (&(*kv).0, &mut (*kv).1)
@@ -399,13 +432,20 @@ impl<'data> JanetTable<'data> {
     /// to value without checking for anything.
     ///
     /// # SAFETY
-    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_key_value_unchecked(
         &self, key: impl Into<Janet>,
     ) -> (&Janet, &'data Janet) {
         let key = key.into();
 
+        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // are represented in memory the same way
+        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // the struct fields of the same type of the struct fields
+        //
+        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
         let kv: *mut (Janet, Janet) = evil_janet::janet_table_find(self.raw, key.inner) as *mut _;
 
         (&(*kv).0, &(*kv).1)

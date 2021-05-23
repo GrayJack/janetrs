@@ -217,7 +217,7 @@ impl<'data> JanetStruct<'data> {
     /// anything.
     ///
     /// # SAFETY
-    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
         self.get_key_value_unchecked(key).1
@@ -227,13 +227,20 @@ impl<'data> JanetStruct<'data> {
     /// to value without checking for anything.
     ///
     /// # SAFETY
-    /// This function doesn't check for null pointer and if the key or value ar Janet nil
+    /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_key_value_unchecked(
         &self, key: impl Into<Janet>,
     ) -> (&Janet, &'data mut Janet) {
         let key = key.into();
 
+        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // are represented in memory the same way
+        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // the struct fields of the same type of the struct fields
+        //
+        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
         let kv: *mut (Janet, Janet) = evil_janet::janet_struct_find(self.raw, key.inner) as *mut _;
 
         (&(*kv).0, &mut (*kv).1)
