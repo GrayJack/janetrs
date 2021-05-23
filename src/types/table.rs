@@ -451,6 +451,226 @@ impl<'data> JanetTable<'data> {
         (&(*kv).0, &(*kv).1)
     }
 
+    /// Returns the reference to the value corresponding to the supplied `key`, with
+    /// prototype lookup.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{table, Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! {1 => "a", 2 => "b"};
+    /// let proto = table! {3 => "c"};
+    ///
+    /// table.set_prototype(&proto);
+    ///
+    /// assert_eq!(table.get_proto(3), Some(&Janet::from("c")));
+    /// assert_eq!(table.get_proto(11), None);
+    /// ```
+    #[inline]
+    pub fn get_proto(&self, key: impl Into<Janet>) -> Option<&Janet> {
+        self.get_key_value_proto(key).map(|(_, v)| v)
+    }
+
+    /// Returns the exclusivereference to the value corresponding to the supplied `key`,
+    /// with prototype lookup.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{table, Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! {1 => "a", 2 => "b"};
+    /// let proto = table! {3 => "c"};
+    ///
+    /// table.set_prototype(&proto);
+    ///
+    /// assert_eq!(table.get_proto_mut(3), Some(&mut Janet::from("c")));
+    /// assert_eq!(table.get_proto_mut(11), None);
+    /// ```
+    #[inline]
+    pub fn get_proto_mut(&mut self, key: impl Into<Janet>) -> Option<&mut Janet> {
+        self.get_key_value_proto_mut(key).map(|(_, v)| v)
+    }
+
+    /// Returns the key-value pair corresponding to the supplied `key` with a mutable
+    /// reference to value, with prototype lookup.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{table, Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! {1 => "a", 2 => "b"};
+    /// let proto = table! {3 => "c"};
+    ///
+    /// table.set_prototype(&proto);
+    ///
+    /// assert_eq!(
+    ///     table.get_key_value_proto_mut(3),
+    ///     Some((&Janet::integer(3), &mut Janet::from("c")))
+    /// );
+    /// assert_eq!(table.get_key_value_proto_mut(11), None);
+    /// ```
+    #[inline]
+    pub fn get_key_value_proto_mut(
+        &mut self, key: impl Into<Janet>,
+    ) -> Option<(&Janet, &mut Janet)> {
+        let key = key.into();
+
+        macro_rules! proto_lookup {
+            () => {
+                let mut proto = unsafe { (*self.raw).proto };
+                let mut depth = 0;
+                return loop {
+                    if proto.is_null() {
+                        break None;
+                    } else {
+                        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+                        // both types are represented in memory the same way
+                        // 2. A C struct are represented the same way in memory as tuple with the
+                        // same number of the struct fields of the same type
+                        // of the struct fields
+                        //
+                        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                        // Janet)`
+                        let kv: *mut (Janet, Janet) =
+                            unsafe { evil_janet::janet_table_find(proto, key.inner) as *mut _ };
+
+                        if kv.is_null() {
+                            if depth < evil_janet::JANET_MAX_PROTO_DEPTH {
+                                depth += 1;
+                                proto = unsafe { (*proto).proto };
+                                continue;
+                            } else {
+                                break None;
+                            }
+                        } else {
+                            // SAFETY: kv is safe to deref because we checked that it's not a null
+                            // pointer.
+                            unsafe {
+                                if (*kv).1.is_nil() {
+                                    if depth < evil_janet::JANET_MAX_PROTO_DEPTH {
+                                        depth += 1;
+                                        proto = (*proto).proto;
+                                        continue;
+                                    } else {
+                                        break None;
+                                    }
+                                } else {
+                                    break Some((&(*kv).0, &mut (*kv).1));
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        if !key.is_nil() {
+            // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // are represented in memory the same way
+            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // the struct fields of the same type of the struct fields
+            //
+            // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+            let kv: *mut (Janet, Janet) =
+                unsafe { evil_janet::janet_table_find(self.raw, key.inner) as *mut _ };
+
+            if kv.is_null() {
+                proto_lookup!();
+            } else {
+                // SAFETY: kv is safe to deref because we checked that it's not a null pointer.
+                #[allow(unused_unsafe)]
+                unsafe {
+                    if (*kv).1.is_nil() {
+                        proto_lookup!();
+                    } else {
+                        return Some((&(*kv).0, &mut (*kv).1));
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Returns the key-value pair corresponding to the supplied `key` with prototype
+    /// lookup.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::{table, Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = table! {1 => "a", 2 => "b"};
+    /// let proto = table! {3 => "c"};
+    ///
+    /// table.set_prototype(&proto);
+    ///
+    /// assert_eq!(
+    ///     table.get_key_value_proto(3),
+    ///     Some((&Janet::integer(3), &Janet::from("c")))
+    /// );
+    /// assert_eq!(table.get_key_value_proto(11), None);
+    /// ```
+    #[inline]
+    pub fn get_key_value_proto(&self, key: impl Into<Janet>) -> Option<(&Janet, &Janet)> {
+        let key = key.into();
+        match self.get_key_value(key) {
+            val @ Some(_) => val,
+            None => {
+                let mut proto = unsafe { (*self.raw).proto };
+                let mut depth = 0;
+                loop {
+                    if proto.is_null() {
+                        break None;
+                    } else {
+                        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
+                        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+                        // both types are represented in memory the same way
+                        // 2. A C struct are represented the same way in memory as tuple with the
+                        // same number of the struct fields of the same type
+                        // of the struct fields
+                        //
+                        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                        // Janet)`
+                        let kv: *mut (Janet, Janet) =
+                            unsafe { evil_janet::janet_table_find(proto, key.inner) as *mut _ };
+
+                        if kv.is_null() {
+                            if depth < evil_janet::JANET_MAX_PROTO_DEPTH {
+                                depth += 1;
+                                proto = unsafe { (*proto).proto };
+                                continue;
+                            } else {
+                                break None;
+                            }
+                        } else {
+                            // SAFETY: kv is safe to deref because we checked that it's not a null
+                            // pointer.
+                            unsafe {
+                                if (*kv).1.is_nil() {
+                                    if depth < evil_janet::JANET_MAX_PROTO_DEPTH {
+                                        depth += 1;
+                                        proto = (*proto).proto;
+                                        continue;
+                                    } else {
+                                        break None;
+                                    }
+                                } else {
+                                    break Some((&(*kv).0, &(*kv).1));
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+        }
+    }
+
     /// Returns the value corresponding to the supplied `key` checking prototype
     /// tables.
     ///
