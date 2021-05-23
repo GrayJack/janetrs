@@ -806,6 +806,10 @@ impl TryFrom<Janet> for u64 {
 impl From<&str> for Janet {
     #[inline]
     fn from(val: &str) -> Self {
+        if let Some(val) = val.strip_prefix(':') {
+            let s = JanetKeyword::new(val);
+            Self::keyword(s);
+        }
         let s = JanetString::new(val);
         Self::string(s)
     }
