@@ -1,7 +1,7 @@
 {
-    "rust-analyzer.checkOnSave.features": ["amalgation"],
+    "rust-analyzer.checkOnSave.features": ["amalgation", "nightly"],
     "rust-analyzer.cargo.features": [
-        "amalgation"
+        "amalgation", "nightly"
     ],
     "cSpell.ignoreWords": [
         "abcdefg",
