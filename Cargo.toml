@@ -11,6 +11,7 @@ readme = "README.md"
 edition = "2018"
 keywords = ["janet", "embedding", "ffi"]
 categories = ["api-bindings"]
+exclude = ["/.github", "/.vscode"]
 
 [package.metadata.docs.rs]
 targets = [
