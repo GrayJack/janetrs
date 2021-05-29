@@ -268,13 +268,13 @@ macro_rules! janet_mod {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::panic($crate::Janet::from("explicity panic"));
+        $crate::util::_panic($crate::Janet::from("explicity panic"));
     };
     ($msg:expr $(,)?) => {
-        $crate::util::panic($crate::Janet::from($msg));
+        $crate::util::_panic($crate::Janet::from($msg));
     };
     ($msg:expr, $($arg:tt)+) => {
-        $crate::util::panic($crate::Janet::from(format!($msg, $($arg)+).as_str()));
+        $crate::util::_panic($crate::Janet::from(format!($msg, $($arg)+).as_str()));
     };
 }
 

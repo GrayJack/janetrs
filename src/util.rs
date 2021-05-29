@@ -90,7 +90,7 @@ pub fn c_func(
 /// Just a wrapper for the janet panic function
 #[doc(hidden)]
 #[inline]
-pub fn panic(msg: Janet) -> ! {
+pub fn _panic(msg: Janet) -> ! {
     unsafe { evil_janet::janet_panicv(msg.inner) }
     #[allow(clippy::empty_loop)]
     loop {}
