@@ -5,10 +5,20 @@ use crate::Janet;
 /// The Janet Garbage Collector type.
 ///
 /// It allows the use of garbage collection operations in the Janet public C API.
-#[derive(Debug)]
-pub struct JanetGc;
+#[derive(Debug, Default)]
+pub struct JanetGc {
+    _phantom: core::marker::PhantomData<*const ()>,
+}
 
 impl JanetGc {
+    /// Obtain the [`JanetGc`].
+    #[inline]
+    pub fn obtain() -> Self {
+        Self {
+            _phantom: core::marker::PhantomData,
+        }
+    }
+
     /// Run the garbage collection if there is nothing locking or suspending the garbage
     /// collector, like an active [`JanetGcLockGuard`] or a call to a Janet C API that
     /// locks the GC.
@@ -42,7 +52,7 @@ impl JanetGc {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     /// use janetrs::JanetGc;
     ///
-    /// let gc = JanetGc;
+    /// let gc = JanetGc::obtain();
     ///
     /// let mut guard = gc.lock();
     ///
@@ -79,13 +89,17 @@ impl JanetGc {
 /// dropped (falls out of scope), the lock will be unlocked.
 #[derive(Debug)]
 pub struct JanetGcLockGuard {
-    handle: i32,
+    handle:   i32,
+    _phantom: core::marker::PhantomData<*const ()>,
 }
 
 impl JanetGcLockGuard {
     #[inline]
     pub(crate) fn new(handle: i32) -> Self {
-        Self { handle }
+        Self {
+            handle,
+            _phantom: core::marker::PhantomData,
+        }
     }
 }
 
@@ -100,14 +114,18 @@ impl Drop for JanetGcLockGuard {
 /// (falls out of scope), the rooting will be undone.
 #[derive(Debug)]
 pub struct JanetGcRootGuard {
-    value: Janet,
+    value:    Janet,
+    _phantom: core::marker::PhantomData<*const ()>,
 }
 
 impl JanetGcRootGuard {
     #[inline]
     fn new(value: Janet) -> Self {
         unsafe { evil_janet::janet_gcroot(value.inner) };
-        Self { value }
+        Self {
+            value,
+            _phantom: core::marker::PhantomData,
+        }
     }
 }
 
