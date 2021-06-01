@@ -1,5 +1,5 @@
 use janetrs_macros::*;
-use janetrs::types::{self, Janet};
+use janetrs::{self, Janet};
 
 #[janet_fn]
 pub fn function(_args: &mut [Janet]) -> Janet {
@@ -7,22 +7,17 @@ pub fn function(_args: &mut [Janet]) -> Janet {
 }
 
 #[janet_fn]
-pub fn function2(_args: &mut [types::Janet]) -> types::Janet {
-    Janet::nil()
-}
-
-#[janet_fn]
-pub fn function3(_args: &mut [janetrs::types::Janet]) -> janetrs::types::Janet {
+pub fn function2(_args: &mut [janetrs::Janet]) -> janetrs::Janet {
     Janet::nil()
 }
 
 #[janet_fn(check_mut_ref)]
-pub fn function4(_args: &mut [::janetrs::types::Janet]) -> ::janetrs::types::Janet {
+pub fn function3(_args: &mut [::janetrs::Janet]) -> ::janetrs::Janet {
     Janet::nil()
 }
 
 #[janet_version("1")]
-pub fn function5() {
+pub fn function4() {
     todo!()
 }
 

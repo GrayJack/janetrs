@@ -27,7 +27,7 @@ error: expected at least one argument to the janet_version proc-macro
     | / pub fn janet_version(
     | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
     | | ) -> proc_macro::TokenStream {
-    | |____________________________- in this expansion of `#[janet_version]`
+    | |____________________________- in this expansion of procedural macro `#[janet_version]`
 
 error: invalid string literal: invalid digit found in string
   --> $DIR/09-version-wrong:23:22
@@ -46,4 +46,4 @@ error: expected at max two argument to the janet_version proc-macro
     | / pub fn janet_version(
     | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
     | | ) -> proc_macro::TokenStream {
-    | |____________________________- in this expansion of `#[janet_version]`
+    | |____________________________- in this expansion of procedural macro `#[janet_version]`

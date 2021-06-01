@@ -1,17 +1,17 @@
-error: expected return type to be `janetrs::types::Janet`
+error: expected return type to be `janetrs::Janet`
  --> $DIR/01-paths:7:41
   |
 7 | pub fn function(_args: &mut [Janet]) -> Janets {
   |                                         ^^^^^^
 
-error: expected to be a `janetrs::types::Janet`
+error: expected to be a `janetrs::Janet`
   --> $DIR/01-paths:12:31
    |
 12 | pub fn function2(_args: &mut [tips::Janet]) -> types::Janet {
    |                               ^^^^^^^^^^^
 
-error: expected return type to be `janetrs::types::Janet`
-  --> $DIR/01-paths:17:5
+error: expected to be a `janetrs::Janet`
+  --> $DIR/01-paths:17:31
    |
 17 | pub fn function3(_args: &mut [types::Janet]) {}
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |                               ^^^^^^^^^^^^

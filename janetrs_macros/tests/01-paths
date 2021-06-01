@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 
 use janetrs_macros::*;
-use janetrs::types::{self, Janet};
+use janetrs::{self, Janet};
 
 #[janet_fn]
 pub fn function(_args: &mut [Janet]) -> Janets {

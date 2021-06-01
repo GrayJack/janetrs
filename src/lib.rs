@@ -27,21 +27,29 @@
 //! - `nightly`: Enable some parts of the crate that uses nightly features, to use this
 //!   feature you must compile the crate using a nightly rust version
 //!
+//! ## Environment variables
+//!
+//! **These variables are only used when the `amalgation` feature is enabled**
+//!
+//! It is possible to use environment variables to overwrite some Janet definitions.
+//!
+//! - `JANET_RECURSION_GUARD=<integer>`
+//! - `JANET_MAX_PROTO_DEPTH=<integer>`
+//! - `JANET_MAX_MACRO_EXPAND=<integer>`
+//! - `JANET_STACK_MAX=<integer>`
+//!
 //! ## Licensing
 //! This software is licensed under the terms of the [MIT Public License](./LICENSE).
 //!
-//! ### TODO: Types: Lacking or Incomplete
-//!  - [X] JanetAbstract
-//!  - [X] JanetFiber
-//!  - [X] JanetFunction
-//!  - [X] GC functions
+//! ### TODO: Types/Traits: Lacking or Incomplete
+//!  - [X] Marshaling
 //!
 //!  `[ ]: Lacking`
 //!  `[I]: Incomplete`
 //!  `[X]: Done`
 //!
-//! Probably there is much more missing, for that you can use the `lowlevel` module to
-//! access the raw C API of Janet
+//! Probably there is much more missing, for that you can use the
+//! [`lowlevel`](crate::lowlevel) module to access the raw C API of Janet if needed
 //!
 //! ### TODO: Lib level
 //!  - Better docs.

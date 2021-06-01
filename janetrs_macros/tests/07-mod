@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 
-use janetrs::{janet_mod, lowlevel, types::*};
+use janetrs::{janet_mod, lowlevel, *};
 use janetrs_macros::janet_fn;
 
 #[janet_fn]

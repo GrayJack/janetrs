@@ -40,26 +40,26 @@ pub fn janet_fn(
                         for j2 in &args[1..] {
                             if matches!(
                                 j1.kind(),
-                                janetrs::types::JanetType::Array
-                                    | janetrs::types::JanetType::Buffer
-                                    | janetrs::types::JanetType::CFunction
-                                    | janetrs::types::JanetType::Fiber
-                                    | janetrs::types::JanetType::Function
-                                    | janetrs::types::JanetType::Keyword
-                                    | janetrs::types::JanetType::Pointer
-                                    | janetrs::types::JanetType::Symbol
-                                    | janetrs::types::JanetType::Table
+                                ::janetrs::JanetType::Array
+                                    | ::janetrs::JanetType::Buffer
+                                    | ::janetrs::JanetType::CFunction
+                                    | ::janetrs::JanetType::Fiber
+                                    | ::janetrs::JanetType::Function
+                                    | ::janetrs::JanetType::Keyword
+                                    | ::janetrs::JanetType::Pointer
+                                    | ::janetrs::JanetType::Symbol
+                                    | ::janetrs::JanetType::Table
                             ) && matches!(
                                 j1.kind(),
-                                janetrs::types::JanetType::Array
-                                    | janetrs::types::JanetType::Buffer
-                                    | janetrs::types::JanetType::CFunction
-                                    | janetrs::types::JanetType::Fiber
-                                    | janetrs::types::JanetType::Function
-                                    | janetrs::types::JanetType::Keyword
-                                    | janetrs::types::JanetType::Pointer
-                                    | janetrs::types::JanetType::Symbol
-                                    | janetrs::types::JanetType::Table
+                                ::janetrs::JanetType::Array
+                                    | ::janetrs::JanetType::Buffer
+                                    | ::janetrs::JanetType::CFunction
+                                    | ::janetrs::JanetType::Fiber
+                                    | ::janetrs::JanetType::Function
+                                    | ::janetrs::JanetType::Keyword
+                                    | ::janetrs::JanetType::Pointer
+                                    | ::janetrs::JanetType::Symbol
+                                    | ::janetrs::JanetType::Table
                             ) && j1 == j2
                             {
                                 janetrs::jpanic!("Received two mutable references as arguments");
@@ -102,13 +102,13 @@ pub fn janet_fn(
                     {
                         if let syn::Type::Path(syn::TypePath { ref path, .. }) = **slice {
                             if !janet_path_checker(path) {
-                                return quote_spanned! {path.span() => compile_error!("expected to be a `janetrs::types::Janet`");}.into();
+                                return quote_spanned! {path.span() => compile_error!("expected to be a `janetrs::Janet`");}.into();
                             }
                         } else {
-                            return quote_spanned! {slice.span() => compile_error!("expected to be a `janetrs::types::Janet`");}.into();
+                            return quote_spanned! {slice.span() => compile_error!("expected to be a `janetrs::Janet`");}.into();
                         }
                     } else {
-                        return quote_spanned! {elem.span() => compile_error!("expected to be a slice of `janetrs::types::Janet`");}.into();
+                        return quote_spanned! {elem.span() => compile_error!("expected to be a slice of `janetrs::Janet`");}.into();
                     }
                 } else {
                     return quote_spanned! {ty.span() => compile_error!("expected argument to be a mutable reference and found something that is not a reference at all");}.into();
@@ -123,13 +123,13 @@ pub fn janet_fn(
             if let syn::ReturnType::Type(_, ty) = f.sig.output {
                 if let syn::Type::Path(syn::TypePath { ref path, .. }) = *ty {
                     if !janet_path_checker(path) {
-                        return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::types::Janet`");}.into();
+                        return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::Janet`");}.into();
                     }
                 } else {
-                    return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::types::Janet`");}.into();
+                    return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::Janet`");}.into();
                 }
             } else {
-                return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::types::Janet`");}.into();
+                return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::Janet`");}.into();
             }
 
             quote! {
@@ -140,7 +140,7 @@ pub fn janet_fn(
                     #f_clone
 
                     let args = unsafe { core::slice::from_raw_parts_mut(argv, argc as usize) };
-                    let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::types::Janet])};
+                    let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::Janet])};
 
                     #check
 
@@ -148,7 +148,7 @@ pub fn janet_fn(
                 }
             }
         } else {
-            quote_spanned! {f_clone.sig.inputs.span() => compile_error!("expected exactly one argument of type `&mut [janetrs::types::Janet]`");}
+            quote_spanned! {f_clone.sig.inputs.span() => compile_error!("expected exactly one argument of type `&mut [janetrs::Janet]`");}
         }
     } else {
         quote_spanned! {func.span() => compile_error!("expected fn item");}
@@ -170,29 +170,13 @@ fn janet_path_checker(path: &syn::Path) -> bool {
             *ident == test
         },
         2 => {
-            let mod_types = &path.segments.first().unwrap().ident;
+            let janetrs_mod = &path.segments.first().unwrap().ident;
             let janet_ident = &path.segments.last().unwrap().ident;
 
-            let mod_expected = syn::Ident::new("types", mod_types.span());
-            let janet_expected = syn::Ident::new("Janet", janet_ident.span());
-
-            *mod_types == mod_expected && *janet_ident == janet_expected
-        },
-        3 => {
-            let mut iter = path.segments.iter();
-            let (janetrs_mod, types_mod, janet_ident) = (
-                &iter.next().unwrap().ident,
-                &iter.next().unwrap().ident,
-                &iter.next().unwrap().ident,
-            );
-
             let janetrs_expected = syn::Ident::new("janetrs", janetrs_mod.span());
-            let types_expected = syn::Ident::new("types", types_mod.span());
             let janet_expected = syn::Ident::new("Janet", janet_ident.span());
 
-            *janetrs_mod == janetrs_expected
-                && *types_mod == types_expected
-                && *janet_ident == janet_expected
+            *janetrs_mod == janetrs_expected && *janet_ident == janet_expected
         },
         _ => false,
     }
@@ -201,6 +185,8 @@ fn janet_path_checker(path: &syn::Path) -> bool {
 
 const CURRENT_JANET: JanetVersion = JanetVersion::current();
 
+/// Conditional Janet Version Gate
+///
 /// **Usage:** `#[janet_version(<MIN_VERSION>, [MAX_VERSION])]` where `MIN_VERSION` and
 /// `MAX_VERSION` are string literals.
 ///
