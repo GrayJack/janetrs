@@ -33,6 +33,17 @@ aren't set, because most of then need it for the Janet runtime to function prope
 -   `nightly`: Enable some parts of the crate that uses nightly features, to use this
     feature you must compile the crate using a nightly rust version
 
+## Environment variables
+
+**These variables are only used when the `amalgation` feature is enabled**
+
+It is possible to use environment variables to overwrite some Janet definitions.
+
+-   `JANET_RECURSION_GUARD=<integer>`
+-   `JANET_MAX_PROTO_DEPTH=<integer>`
+-   `JANET_MAX_MACRO_EXPAND=<integer>`
+-   `JANET_STACK_MAX=<integer>`
+
 ## Licensing
 
 This software is licensed under the terms of the [MIT Public License](./LICENSE).

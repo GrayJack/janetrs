@@ -6,7 +6,7 @@ use core::{cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData};
 
 pub use evil_janet::JanetAbstractType;
 
-/// Possible error trying to get the abstract value
+/// Possible error trying to get the abstract value.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AbstractError {
     /// [`JanetAbstract`] head size information not the same as the requested
@@ -34,7 +34,10 @@ impl std::error::Error for AbstractError {}
 
 /// Type that represents the Janet Abstract type.
 ///
-/// Works like a `*mut c_void` pointer, but the memory it uses are tracked by the Janet
+/// Janet Abstract types is the way to expose non-native types to the Janet Runtime and
+/// allow the Janet user to interact with them.
+///
+/// It works like a `*mut c_void` pointer, but the memory it uses are tracked by the Janet
 /// Garbage Collector.
 #[derive(PartialEq, Eq)]
 #[repr(transparent)]
@@ -119,7 +122,7 @@ impl JanetAbstract {
     }
 
     #[inline]
-    pub fn check<A: IsJanetAbstract>(&self) -> Result<(), AbstractError> {
+    fn check<A: IsJanetAbstract>(&self) -> Result<(), AbstractError> {
         if self.size() != A::SIZE {
             return Err(AbstractError::MismatchedSize);
         }

@@ -62,6 +62,9 @@ impl<'data> JanetTupleBuilder<'data> {
 /// Janet [tuples](https://janet-lang.org/docs/data_structures/tuples.html) are immutable,
 /// sequential types that are similar to [Janet arrays].
 ///
+/// To facilitate the creation of this structure, you can use the macro
+/// [`tuple`](crate::tuple!).
+///
 /// # Example
 /// ```
 /// use janetrs::{Janet, JanetTuple};

@@ -32,6 +32,9 @@ pub type RSplitNMut<'a, P> = core::slice::RSplitNMut<'a, Janet, P>;
 ///
 /// Arrays are also mutable, meaning that values can be added or removed in place.
 ///
+/// To facilitate the creation of this structure, you can use the macro
+/// [`array`](crate::array!).
+///
 /// # Examples
 /// ```
 /// use janetrs::JanetArray;

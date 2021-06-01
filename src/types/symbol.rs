@@ -232,7 +232,7 @@ impl FromStr for JanetSymbol<'_> {
 }
 
 /// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
-/// the language, it is a normal string that cen be defined by the user.
+/// the language, it is a normal string that can be defined by the user.
 #[repr(transparent)]
 pub struct JanetKeyword<'data> {
     pub(crate) raw: *const u8,

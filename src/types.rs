@@ -75,18 +75,19 @@ impl Display for JanetConversionError {
 
 /// `Janet` is the central structure of the Janet Language.
 ///
-/// All possible Janet types is represented at some point as this structure, either to
+/// All possible Janet types are represented at some point as this structure, either to
 /// receive as argumenst ou return something to Janet VM.
 ///
 /// ## Creating new values
-/// With exception to `Janet` `nil` value the best way to create a `Janet` value is to use
-/// the [`Janet::wrap`] function, it can receive anything that can be turned [`Into`]
-/// `Janet`. For the `nil` value, there is a nice function for that, the [`Janet::nil`]
-/// function.
+/// With exception to `Janet` [`nil`](Janet::nil) value the best way to create a `Janet`
+/// value is to use the [`Janet::wrap`] function, it can receive anything that can be
+/// turned [`Into`] `Janet`. For the `nil` value, there is a nice function for that, the
+/// [`Janet::nil`] function.
 ///
 /// It is also possible to use the [`From`] trait to convert as well.
 ///
 /// ### Examples
+///
 /// ```
 /// use janetrs::Janet;
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
@@ -98,10 +99,12 @@ impl Display for JanetConversionError {
 /// ```
 ///
 /// ## Extracting/Unwraping Janet values
+///
 /// To extract/unwrap the `Janet` value you can use the [`Janet::unwrap`] method, that
 /// will return a [`TaggedJanet`] that you can pattern match to use the extracted value.
 ///
 /// ### Example
+///
 /// ```
 /// use janetrs::{Janet, TaggedJanet};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
@@ -135,6 +138,7 @@ impl Display for JanetConversionError {
 /// the context.
 ///
 /// ### Example
+///
 /// ```
 /// use janetrs::{Janet, JanetString};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();

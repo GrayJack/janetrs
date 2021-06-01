@@ -1,7 +1,5 @@
 use crate::Janet;
 
-// TODO: Should these types be Send and/or Sync?
-
 /// The Janet Garbage Collector type.
 ///
 /// It allows the use of garbage collection operations in the Janet public C API.

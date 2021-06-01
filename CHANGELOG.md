@@ -10,6 +10,7 @@ All notable changes to the library should be put here
 -   **BREAKING:** `JanetAbstract::new` now takes a value
 -   **BREAKING:** Make the `janetrs::types` module private and export everything inside it in the upper module
 -   **BREAKING:** Modify `From<&str>` for `Janet` to return a Janet keyword if `&str` starts with `:`
+-   Add ability to change some Janet behavior using the `amalgation` feature using environment variables
 -   Add `DeepEq` trait
 -   Add `dedup`, `dedup_by` and `dedup_by_key` for `JanetArray`
 -   Add `get_unchecked` and `get_unchecked_mut` for `JanetArray`

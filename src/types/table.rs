@@ -22,6 +22,9 @@ use crate::cjvg;
 /// value in a Janet table, and a single Janet table can have any mixture of Janet types
 /// as keys and values.
 ///
+/// To facilitate the creation of this structure, you can use the macro
+/// [`table`](crate::table!).
+///
 /// # Examples
 /// ```
 /// use janetrs::{Janet, JanetTable};

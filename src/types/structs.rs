@@ -11,6 +11,7 @@ use evil_janet::{JanetKV, JanetStructHead};
 
 use super::{DeepEq, Janet, JanetTable};
 
+/// Builder for [`JanetStruct`]s.
 #[derive(Debug)]
 pub struct JanetStructBuilder<'data> {
     raw:     *mut JanetKV,
@@ -47,6 +48,9 @@ impl<'data> JanetStructBuilder<'data> {
 ///
 /// They are semantically similar to [`JanetTable`]s, but are immutable. Like
 /// [`JanetTable`]s, they are backed by an efficient, native hash table.
+///
+/// To facilitate the creation of this structure, you can use the macro
+/// [`structs`](crate::structs!).
 ///
 /// # Examples
 /// ```
