@@ -6,9 +6,10 @@ All notable changes to the library should be put here
 
 ## 0.3.0
 
+### Changes
+
 -   **BREAKING:** Rename `as_ptr_mut` to `as_mut_ptr`
 -   **BREAKING:** Rename `as_raw_mut` to `as_mut_raw`
--   **BREAKING:** Change definition of `IsJanetAbstract` trait
 -   **BREAKING:** `JanetAbstract::new` now takes a value
 -   **BREAKING:** Make the `janetrs::types` module private and export everything inside it in the upper module
 -   **BREAKING:** Modify `From<&str>` for `Janet` to return a Janet keyword if `&str` starts with `:`
@@ -28,9 +29,6 @@ All notable changes to the library should be put here
 -   Add `Janet::int64`
 -   Add `Janet::uint64`
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
--   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
--   Fix some clippy lints
--   Fix compilation on no_std environment.
 -   Implement `DeepEq` for most types
 -   Implement `Debug` and `Display` for `JanetSymbol`
 -   Implement `Debug` and `Display` for `JanetKeyword`
@@ -45,6 +43,13 @@ All notable changes to the library should be put here
 -   Refactor `Display` implementation of `Janet` type
 -   Refactor some implementations of `From` and `TryFrom` related to `Janet` type
 -   Reduce code duplication in `JanetAbstract` functions
+
+### Fixes
+
+-   **BREAKING:** Change definition of `IsJanetAbstract` trait
+-   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
+-   Fix some clippy lints
+-   Fix compilation on no_std environment.
 -   Make some functions const if using a recent enough Rust version
 
 ## 0.2.0

@@ -50,10 +50,7 @@ This software is licensed under the terms of the [MIT Public License](./LICENSE)
 
 ### TODO: Types: Lacking or Incomplete
 
--   [x] JanetAbstract
--   [x] JanetFiber
--   [x] JanetFunction
--   [x] GC functions
+-   [ ] Marshaling
 
 `[ ]: Lacking`
 `[I]: Incomplete`

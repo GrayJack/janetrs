@@ -42,7 +42,7 @@
 //! This software is licensed under the terms of the [MIT Public License](./LICENSE).
 //!
 //! ### TODO: Types/Traits: Lacking or Incomplete
-//!  - [X] Marshaling
+//!  - [ ] Marshaling
 //!
 //!  `[ ]: Lacking`
 //!  `[I]: Incomplete`
