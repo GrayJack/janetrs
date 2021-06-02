@@ -18,6 +18,8 @@ jobs:
         profile: minimal
     - name: Check and Run tests
       run: cargo test --features amalgation --verbose
+    - name: Check no_std
+      run: cargo check --no-default-features --features=amalgation --verbose
 
   build-macos:
     runs-on: ${{ matrix.os }}
@@ -34,6 +36,8 @@ jobs:
         profile: minimal
     - name: Check and Run tests
       run: cargo test --features amalgation --verbose
+    - name: Check no_std
+      run: cargo check --no-default-features --features=amalgation --verbose
 
   # build-windows:
   #   runs-on: ${{ matrix.os }}
@@ -55,3 +59,5 @@ jobs:
   #       directory: ${{ runner.temp }}/llvm
   #   - name: Check and Run tests
   #     run: cargo test --features amalgation --verbose
+  #   - name: Check no_std
+  #     run: cargo check --no-default-features --features=amalgation --verbose
