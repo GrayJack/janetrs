@@ -4,6 +4,12 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
+## 0.3.1
+
+### Fixes
+
+-   Fix compiler complaining about alloc crate when `std` feature is active while using a macro
+
 ## 0.3.0
 
 ### Changes

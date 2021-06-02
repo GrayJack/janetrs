@@ -265,6 +265,7 @@ macro_rules! janet_mod {
 /// jpanic!(4); // In simple cases you can use any type that Janet implements From trait
 /// jpanic!("this is a {} {message}", "fancy", message = "message");
 /// ```
+#[cfg(not(feature = "std"))]
 #[macro_export]
 macro_rules! jpanic {
     () => {
@@ -274,7 +275,34 @@ macro_rules! jpanic {
         $crate::util::_panic($crate::Janet::from($msg));
     };
     ($msg:expr, $($arg:tt)+) => {
-        $crate::util::_panic($crate::Janet::from(alloc::format!($msg, $($arg)+).as_str()));
+        $crate::util::_panic($crate::Janet::from(::alloc::format!($msg, $($arg)+).as_str()));
+    };
+}
+
+/// Causes a panic in the Janet side. Diferently of the Rust `panic!` macro, this macro
+/// does **not** terminate the current thread. Instead, it sends a error signal with the
+/// passed message where the Janet runtime takes care to properly exit.
+///
+/// # Examples
+/// ```ignore
+/// use janetrs::jpanic;
+/// # let _client = janetrs::client::JanetClient::init().unwrap();
+/// jpanic!();
+/// jpanic!("this is a terrible mistake!");
+/// jpanic!(4); // In simple cases you can use any type that Janet implements From trait
+/// jpanic!("this is a {} {message}", "fancy", message = "message");
+/// ```
+#[cfg(feature = "std")]
+#[macro_export]
+macro_rules! jpanic {
+    () => {
+        $crate::util::_panic($crate::Janet::from("explicity panic"));
+    };
+    ($msg:expr $(,)?) => {
+        $crate::util::_panic($crate::Janet::from($msg));
+    };
+    ($msg:expr, $($arg:tt)+) => {
+        $crate::util::_panic($crate::Janet::from(::std::format!($msg, $($arg)+).as_str()));
     };
 }
 
