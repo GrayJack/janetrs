@@ -10,6 +10,7 @@ All notable changes to the library should be put here
 -   **BREAKING:** `JanetAbstract::new` now takes a value
 -   **BREAKING:** Make the `janetrs::types` module private and export everything inside it in the upper module
 -   **BREAKING:** Modify `From<&str>` for `Janet` to return a Janet keyword if `&str` starts with `:`
+-   **BREAKING:** Modify `CallError::stacktrace` function.
 -   Add ability to change some Janet behavior using the `amalgation` feature using environment variables
 -   Add `DeepEq` trait
 -   Add `dedup`, `dedup_by` and `dedup_by_key` for `JanetArray`
@@ -27,6 +28,7 @@ All notable changes to the library should be put here
 -   Create `janetrs_version` crate to use as common code used by `janet_version` macro and `janetrs::util` module
 -   Expose `jcatch!` macro only if Janet version supports the underlying mechanism
 -   Fix some clippy lints
+-   Fix compilation on no_std environment.
 -   Implement `DeepEq` for most types
 -   Implement `Debug` and `Display` for `JanetSymbol`
 -   Implement `Debug` and `Display` for `JanetKeyword`

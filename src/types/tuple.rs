@@ -1015,7 +1015,6 @@ impl Ord for JanetTuple<'_> {
             x @ Greater => x,
             Equal => {
                 for (s, o) in self.iter().zip(other.iter()) {
-                    dbg!(s, o);
                     match s.cmp(o) {
                         x @ Less => return x,
                         x @ Greater => return x,
@@ -1275,6 +1274,7 @@ impl FusedIterator for IntoIter<'_> {}
 mod tests {
     use super::*;
     use crate::{client::JanetClient, tuple, *};
+    use alloc::vec;
 
     #[test]
     fn builder() -> Result<(), crate::client::Error> {

@@ -5,8 +5,14 @@ use core::{
     ptr,
 };
 
+#[cfg(not(feature = "std"))]
+use core::fmt::Write;
+
 #[cfg(feature = "std")]
-use std::error;
+use std::{
+    error,
+    io::{self, Write},
+};
 
 use const_fn::const_fn;
 
@@ -92,18 +98,38 @@ impl<'data> CallError<'data> {
         self.fiber
     }
 
-    /// Display the stacktrace in the Stderr
+    /// Display the stacktrace in the given `output`
+    #[cfg(feature = "std")]
     #[inline]
-    pub fn stacktrace(&mut self) {
+    pub fn stacktrace<W: Write + ?Sized>(&mut self, output: &mut W) -> io::Result<()> {
         if let CallErrorKind::Run = self.kind {
             if let Some(ref mut fiber) = self.fiber {
                 fiber.display_stacktrace(self.value);
             } else {
-                eprintln!("There is no stacktrace.")
+                writeln!(output, "There is no stacktrace.")?;
             }
         } else {
-            eprintln!("There is no stacktrace.")
+            writeln!(output, "There is no stacktrace.")?;
         }
+
+        Ok(())
+    }
+
+    /// Display the stacktrace in the given `output`
+    #[cfg(not(feature = "std"))]
+    #[inline]
+    pub fn stacktrace<W: Write + ?Sized>(&mut self, output: &mut W) -> fmt::Result {
+        if let CallErrorKind::Run = self.kind {
+            if let Some(ref mut fiber) = self.fiber {
+                fiber.display_stacktrace(self.value);
+            } else {
+                output.write_str("There is no stacktrace.\n")?;
+            }
+        } else {
+            output.write_str("There is no stacktrace.\n")?;
+        }
+
+        Ok(())
     }
 }
 

@@ -2634,6 +2634,7 @@ impl FusedIterator for IntoIter<'_> {}
 mod tests {
     use super::*;
     use crate::{array, client::JanetClient};
+    use alloc::vec;
 
     #[test]
     fn creation() -> Result<(), crate::client::Error> {

@@ -10,6 +10,8 @@ use core::{
     fmt::{self, Display, Write},
 };
 
+use alloc::{string::String, vec::Vec};
+
 #[cfg(feature = "std")]
 use std::error;
 
@@ -562,16 +564,16 @@ impl fmt::Display for Janet {
             TaggedJanet::String(s) => fmt::Display::fmt(&s, f),
             TaggedJanet::Abstract(a) => {
                 // Special cases for integers
-                if let Ok(int) = dbg!(a.get::<i64>()) {
+                if let Ok(int) = a.get::<i64>() {
                     return fmt::Display::fmt(int, f);
                 }
 
-                if let Ok(int) = dbg!(a.get::<u64>()) {
+                if let Ok(int) = a.get::<u64>() {
                     return fmt::Display::fmt(int, f);
                 }
 
                 // If the abstract has tostring function
-                if let Some(tostring) = dbg!(a.type_info()).tostring {
+                if let Some(tostring) = a.type_info().tostring {
                     let buff = JanetBuffer::with_capacity(30);
                     unsafe { tostring(a.raw, buff.raw) }
                     return fmt::Display::fmt(&buff, f);
@@ -1480,7 +1482,9 @@ string_impl_partial_eq!(JanetString<'_>, str);
 string_impl_partial_eq!(JanetString<'_>, &'a str);
 string_impl_partial_eq!(JanetString<'_>, bstr::BStr);
 string_impl_partial_eq!(JanetString<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetString<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetString<'_>, &'a bstr::BString);
 
 string_impl_partial_ord!(JanetString<'_>, Vec<u8>);
@@ -1491,7 +1495,9 @@ string_impl_partial_ord!(JanetString<'_>, str);
 string_impl_partial_ord!(JanetString<'_>, &'a str);
 string_impl_partial_ord!(JanetString<'_>, bstr::BStr);
 string_impl_partial_ord!(JanetString<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetString<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetString<'_>, &'a bstr::BString);
 
 string_impl_partial_eq!(JanetBuffer<'_>, Vec<u8>);
@@ -1502,7 +1508,9 @@ string_impl_partial_eq!(JanetBuffer<'_>, str);
 string_impl_partial_eq!(JanetBuffer<'_>, &'a str);
 string_impl_partial_eq!(JanetBuffer<'_>, bstr::BStr);
 string_impl_partial_eq!(JanetBuffer<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetBuffer<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetBuffer<'_>, &'a bstr::BString);
 
 string_impl_partial_ord!(JanetBuffer<'_>, Vec<u8>);
@@ -1513,7 +1521,9 @@ string_impl_partial_ord!(JanetBuffer<'_>, str);
 string_impl_partial_ord!(JanetBuffer<'_>, &'a str);
 string_impl_partial_ord!(JanetBuffer<'_>, bstr::BStr);
 string_impl_partial_ord!(JanetBuffer<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetBuffer<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetBuffer<'_>, &'a bstr::BString);
 
 string_impl_partial_eq!(JanetSymbol<'_>, Vec<u8>);
@@ -1524,7 +1534,9 @@ string_impl_partial_eq!(JanetSymbol<'_>, str);
 string_impl_partial_eq!(JanetSymbol<'_>, &'a str);
 string_impl_partial_eq!(JanetSymbol<'_>, bstr::BStr);
 string_impl_partial_eq!(JanetSymbol<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetSymbol<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetSymbol<'_>, &'a bstr::BString);
 
 string_impl_partial_ord!(JanetSymbol<'_>, Vec<u8>);
@@ -1535,7 +1547,9 @@ string_impl_partial_ord!(JanetSymbol<'_>, str);
 string_impl_partial_ord!(JanetSymbol<'_>, &'a str);
 string_impl_partial_ord!(JanetSymbol<'_>, bstr::BStr);
 string_impl_partial_ord!(JanetSymbol<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetSymbol<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetSymbol<'_>, &'a bstr::BString);
 
 string_impl_partial_eq!(JanetKeyword<'_>, Vec<u8>);
@@ -1546,7 +1560,9 @@ string_impl_partial_eq!(JanetKeyword<'_>, str);
 string_impl_partial_eq!(JanetKeyword<'_>, &'a str);
 string_impl_partial_eq!(JanetKeyword<'_>, bstr::BStr);
 string_impl_partial_eq!(JanetKeyword<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetKeyword<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_eq!(JanetKeyword<'_>, &'a bstr::BString);
 
 string_impl_partial_ord!(JanetKeyword<'_>, Vec<u8>);
@@ -1557,15 +1573,19 @@ string_impl_partial_ord!(JanetKeyword<'_>, str);
 string_impl_partial_ord!(JanetKeyword<'_>, &'a str);
 string_impl_partial_ord!(JanetKeyword<'_>, bstr::BStr);
 string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BStr);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetKeyword<'_>, bstr::BString);
+#[cfg(feature = "std")]
 string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BString);
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
+    #[cfg(feature = "std")]
     use core::hash::{Hash, Hasher};
 
     #[cfg_attr(feature = "std", test)]
+    #[cfg(feature = "std")]
     fn janet_eq_hash() -> Result<(), crate::client::Error> {
         let _client = crate::client::JanetClient::init()?;
 

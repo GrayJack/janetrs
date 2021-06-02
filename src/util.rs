@@ -66,7 +66,7 @@ pub fn c_func(
     doc: Option<&str>,
 ) {
     if let Some(prefix) = namespace {
-        let full_name = format!("{}/{}", prefix.trim(), fn_name.trim());
+        let full_name = alloc::format!("{}/{}", prefix.trim(), fn_name.trim());
         let mut cfun = JanetTable::with_capacity(2);
 
         cfun.insert(JanetKeyword::new("value"), f);

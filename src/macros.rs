@@ -274,7 +274,7 @@ macro_rules! jpanic {
         $crate::util::_panic($crate::Janet::from($msg));
     };
     ($msg:expr, $($arg:tt)+) => {
-        $crate::util::_panic($crate::Janet::from(format!($msg, $($arg)+).as_str()));
+        $crate::util::_panic($crate::Janet::from(alloc::format!($msg, $($arg)+).as_str()));
     };
 }
 

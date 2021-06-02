@@ -1,6 +1,6 @@
 [package]
 name = "janetrs"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Eric Shimizu Karbstein <gr41.j4ck@gmail.com>"]
 description = "High level binding for Janet programming language"
 repository = "https://github.com/GrayJack/janetrs"
@@ -19,7 +19,7 @@ targets = [
     "x86_64-unknown-freebsd",
     "x86_64-unknown-netbsd",
     "x86_64-apple-darwin",
-    "x86_64-sun-solaris",
+    "x86_64-unknown-illumos",
     "aarch64-unknown-linux-gnu",
     "i686-unknown-linux-gnu",
     "x86_64-pc-windows-gnu",
@@ -40,7 +40,7 @@ janetrs_version = "0.1.0"
 [dev-dependencies]
 
 [features]
-default = ["std", "unicode"]
+# default = ["std", "unicode"]
 # To use Error trait and alocations
 std = ["bstr/std"]
 # Use to statically link to janet runtime and have Janet client
