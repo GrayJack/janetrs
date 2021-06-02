@@ -40,7 +40,7 @@ janetrs_version = "0.1.0"
 [dev-dependencies]
 
 [features]
-# default = ["std", "unicode"]
+default = ["std", "unicode"]
 # To use Error trait and alocations
 std = ["bstr/std"]
 # Use to statically link to janet runtime and have Janet client
