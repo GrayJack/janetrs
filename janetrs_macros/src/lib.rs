@@ -8,7 +8,7 @@ use janetrs_version::JanetVersion;
 /// **Usage**: `#[janet_fn]` or `#[janet_fn(check_mut_ref)]`
 ///
 /// Macro that tranforms a high-level Janet function (`fn(&mut [Janet]) -> Janet`)
-/// to the thing the Janet C API is expection (`fn(i32, *mut janetrs::lowlevel::Janet) ->
+/// to the thing the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) ->
 /// janetrs::lowlevel::Janet`)
 ///
 ///
@@ -78,7 +78,6 @@ pub fn janet_fn(
     };
 
     let ts = if let syn::Item::Fn(f) = func {
-        // dbg!(&f);
         let f_clone = f.clone();
         let attrs = f.attrs;
         let vis = f.vis;
