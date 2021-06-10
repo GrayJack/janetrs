@@ -172,6 +172,38 @@ impl<'data> JanetTable<'data> {
         unsafe { evil_janet::janet_table_clear(self.raw) }
     }
 
+    /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
+    /// reuse.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::JanetTable;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut table = JanetTable::with_capacity(20);
+    /// table.insert(10, "ten");
+    ///
+    /// table.clear();
+    /// assert!(table.is_empty());
+    /// ```
+    #[cjvg("1.0.0", "1.10.1")]
+    #[inline]
+    pub fn clear(&mut self) {
+        let capacity = self.capacity();
+
+        unsafe {
+            let data = (*self.raw).data;
+            for i in 0..capacity {
+                let kv = data.add(i);
+                (*kv).key = evil_janet::janet_wrap_nil();
+                (*kv).value = evil_janet::janet_wrap_nil();
+            }
+
+            (*self.raw).count = 0;
+            (*self.raw).deleted = 0;
+        }
+    }
+
     /// Returns the number of elements of the table, also refered to as its 'length'.
     ///
     /// # Examples
