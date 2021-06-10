@@ -4,6 +4,10 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
+## 0.3.2
+
+-   Add `JanetTable::clear` in Janet version below 1.10.1
+
 ## 0.3.1
 
 ### Fixes
