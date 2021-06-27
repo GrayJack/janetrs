@@ -23,6 +23,7 @@ pub mod array;
 pub mod buffer;
 pub mod fiber;
 pub mod function;
+pub mod io;
 #[path = "types/abstract.rs"]
 pub mod janet_abstract;
 pub mod pointer;
@@ -839,6 +840,7 @@ impl From<&char> for Janet {
 }
 
 impl From<JanetCFunction> for Janet {
+    #[inline]
     fn from(val: JanetCFunction) -> Self {
         Self::c_function(val)
     }

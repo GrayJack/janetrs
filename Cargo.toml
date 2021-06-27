@@ -31,11 +31,12 @@ features = ["amalgation", "nightly"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bstr = { version = "0.2.16", default-features = false }
+bstr = { version="0.2.16", default-features=false }
 const_fn = "0.4"
-evil-janet = "1"
+evil-janet = "1.16"
 janetrs_macros = "0.3.0"
 janetrs_version = "0.1.0"
+libc = { version="0.2" }
 
 [dev-dependencies]
 
