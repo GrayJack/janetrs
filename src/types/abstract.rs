@@ -15,6 +15,8 @@ pub enum AbstractError {
     /// [`JanetAbstract`] head [`JanetAbstractType`] information not the same as the
     /// requested [`IsJanetAbstract`] [`JanetAbstractType`]
     MismatchedAbstractType,
+    /// Pointer to the data is NULL
+    NullDataPointer,
 }
 
 impl fmt::Display for AbstractError {
@@ -25,6 +27,7 @@ impl fmt::Display for AbstractError {
             Self::MismatchedAbstractType => {
                 f.pad("Mismatched fn pointers between requested type and actual type")
             },
+            Self::NullDataPointer => f.pad("Data pointer is NULL"),
         }
     }
 }
@@ -157,7 +160,12 @@ impl JanetAbstract {
     pub fn get<A: IsJanetAbstract>(&self) -> Result<&A, AbstractError> {
         self.check::<A>()?;
 
-        Ok(unsafe { &*(self.raw as *const A) })
+        let ptr = self.raw as *const A;
+        if ptr.is_null() {
+            return Err(AbstractError::NullDataPointer);
+        }
+
+        Ok(unsafe { &*ptr })
     }
 
     /// Returns a exclusive reference to value if it's the same kind of abstract.
@@ -169,6 +177,11 @@ impl JanetAbstract {
     #[inline]
     pub fn get_mut<A: IsJanetAbstract>(&mut self) -> Result<&mut A, AbstractError> {
         self.check::<A>()?;
+
+        let ptr = self.raw as *const A;
+        if ptr.is_null() {
+            return Err(AbstractError::NullDataPointer);
+        }
 
         Ok(unsafe { &mut *(self.raw as *mut A) })
     }
