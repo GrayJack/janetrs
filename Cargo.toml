@@ -36,7 +36,7 @@ const_fn = "0.4"
 evil-janet = "1.16"
 janetrs_macros = "0.3.0"
 janetrs_version = "0.1.0"
-libc = { version="0.2" }
+libc = { version="0.2", features=["extra_traits"] }
 
 [dev-dependencies]
 

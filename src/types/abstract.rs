@@ -165,6 +165,7 @@ impl JanetAbstract {
             return Err(AbstractError::NullDataPointer);
         }
 
+        // SAFETY: The pointer was checked if its NULL
         Ok(unsafe { &*ptr })
     }
 
@@ -178,12 +179,13 @@ impl JanetAbstract {
     pub fn get_mut<A: IsJanetAbstract>(&mut self) -> Result<&mut A, AbstractError> {
         self.check::<A>()?;
 
-        let ptr = self.raw as *const A;
+        let ptr = self.raw as *mut A;
         if ptr.is_null() {
             return Err(AbstractError::NullDataPointer);
         }
 
-        Ok(unsafe { &mut *(self.raw as *mut A) })
+        // SAFETY: The pointer was checked if its NULL
+        Ok(unsafe { &mut *(ptr) })
     }
 
     /// Acquires the underlying pointer as const pointer.
