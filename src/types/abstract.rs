@@ -337,3 +337,64 @@ impl IsJanetAbstract for u64 {
         unsafe { &evil_janet::janet_u64_type }
     }
 }
+
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn creation_and_getting_value() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
+
+        let test = JanetAbstract::new(10u64);
+        let test2 = JanetAbstract::new(12i64);
+
+        let val = test.get::<u64>();
+        let val2 = test2.get::<i64>();
+        let val3 = test.get::<i64>();
+
+        assert_eq!(Ok(&10), val);
+        assert_eq!(Ok(&12), val2);
+        assert_eq!(Err(AbstractError::MismatchedAbstractType), val3);
+
+        Ok(())
+    }
+
+    #[test]
+    fn get_mut() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
+
+        let mut test = JanetAbstract::new(10u64);
+        let mut test2 = JanetAbstract::new(12i64);
+
+        let val = test.get_mut::<u64>();
+        let val2 = test2.get_mut::<i64>();
+
+        assert_eq!(Ok(&mut 10), val);
+        assert_eq!(Ok(&mut 12), val2);
+
+        if let Ok(val) = val {
+            *val = 1000;
+            assert_eq!(&mut 1000, val);
+        }
+
+        if let Ok(val2) = val2 {
+            *val2 = 2000;
+            assert_eq!(&mut 2000, val2);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn size() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
+
+        let test = JanetAbstract::new(10u64);
+        let test2 = JanetAbstract::new(12i64);
+
+        assert_eq!(u64::SIZE, test.size());
+        assert_eq!(u64::SIZE, test2.size());
+
+        Ok(())
+    }
+}
