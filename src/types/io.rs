@@ -263,3 +263,27 @@ impl core::ops::BitOrAssign<i32> for FileFlags {
         self.0.bitor_assign(rhs)
     }
 }
+
+#[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
+mod tests {
+    use super::*;
+    use crate::JanetAbstract;
+
+    #[test]
+    fn it_works() -> Result<(), crate::client::Error> {
+        let client = crate::client::JanetClient::init()?.with_default_env();
+
+        let stdout_janet = client.env().unwrap().resolve("stdout").unwrap();
+
+        let stdout: JanetAbstract = stdout_janet.try_unwrap().unwrap();
+
+        let file: &JanetFile = stdout.get().unwrap();
+        let flags = file.flags();
+
+        assert!(flags.is_append());
+        assert!(flags.is_not_closeable());
+        assert!(flags.is_serializeble());
+
+        Ok(())
+    }
+}
