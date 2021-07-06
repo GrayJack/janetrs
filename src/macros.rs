@@ -306,8 +306,8 @@ macro_rules! jpanic {
     };
 }
 
-/// Execute a [`JanetCFunction`] and catch any janet panic that may happen as a
-/// [`Result`].
+/// Execute a function ([`JanetCFunction`], Rust function or extern C function) and catch
+/// any janet panic that may happen as a [`Result`].
 ///
 /// # Examples
 /// ```ignore
