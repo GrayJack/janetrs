@@ -1188,7 +1188,7 @@ impl<'data> JanetArray<'data> {
         let (mut read, mut write) = (1, 1usize);
         let ptr = self.as_mut_ptr();
 
-        // Safety: INVARIANT: arr.len() > read >= write > write-1 >= 0
+        // SAFETY: INVARIANT: arr.len() > read >= write > write-1 >= 0
         unsafe {
             while read < len {
                 let read_ptr = ptr.add(read);
@@ -2272,7 +2272,7 @@ impl DeepEq<JanetTuple<'_>> for JanetArray<'_> {
 impl AsRef<[Janet]> for JanetArray<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
-        // Safety: Janet uses i32 as max size for all collections and indexing, so it always has
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX
         unsafe { core::slice::from_raw_parts((*self.raw).data as *mut Janet, self.len() as usize) }
     }
@@ -2281,7 +2281,7 @@ impl AsRef<[Janet]> for JanetArray<'_> {
 impl AsMut<[Janet]> for JanetArray<'_> {
     #[inline]
     fn as_mut(&mut self) -> &mut [Janet] {
-        // Safety: Janet uses i32 as max size for all collections and indexing, so it always has
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX and we have exclusive access to the data
         unsafe {
             core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len() as usize)

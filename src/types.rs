@@ -386,8 +386,8 @@ impl Janet {
                         _ => None,
                     })
                     .map(|f| {
-                        // Safety: We are trusting that am Abstract Janet method through a C
-                        // function will not cause UB. It can janet panic
+                        // SAFETY: We are trusting that am Abstract Janet method through a C
+                        // function will not cause UB. It can janet panic.
                         unsafe { f(1, [self.inner].as_mut_ptr()) }.into()
                     })
                     .and_then(|len: Janet| match len.unwrap() {

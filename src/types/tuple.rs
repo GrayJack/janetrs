@@ -127,7 +127,7 @@ impl<'data> JanetTuple<'data> {
 
     // Get the [`JanetTupleHead`] from the `JanetStruct` pointer.
     fn head(&self) -> &JanetTupleHead {
-        // Safety: Janet tuple are always be a valid pointer
+        // SAFETY: Janet tuple are always be a valid pointer
         unsafe { &*janet_tuple_head(self.raw) }
     }
 
@@ -1036,7 +1036,7 @@ impl PartialEq for JanetTuple<'_> {
         }
 
         // If the hash is the same
-        // Safety: Janet tuple must always be a valid ponter
+        // SAFETY: Janet tuple must always be a valid ponter
         if self.head().hash.eq(&self.head().hash) {
             return true;
         }
@@ -1069,7 +1069,7 @@ impl Default for JanetTuple<'_> {
 impl AsRef<[Janet]> for JanetTuple<'_> {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
-        // Safety: Janet uses i32 as max size for all collections and indexing, so it always has
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX
         unsafe { core::slice::from_raw_parts(self.raw as *const _, self.len() as usize) }
     }

@@ -100,7 +100,7 @@ impl<'data> JanetStruct<'data> {
     // Get the [`JanetStructHead`] from the `JanetStruct` pointer.
     #[inline]
     fn head(&self) -> &JanetStructHead {
-        // Safety: Janet struct are always be a valid pointer
+        // SAFETY: Janet struct are always be a valid pointer
         unsafe { &*evil_janet::janet_struct_head(self.raw) }
     }
 
@@ -220,7 +220,7 @@ impl<'data> JanetStruct<'data> {
     /// Returns a reference to the value corresponding to the `key` without checking for
     /// anything.
     ///
-    /// # SAFETY
+    /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
@@ -230,7 +230,7 @@ impl<'data> JanetStruct<'data> {
     /// Returns the key-value pair corresponding to the supplied `key`, with a reference
     /// to value without checking for anything.
     ///
-    /// # SAFETY
+    /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_key_value_unchecked(

@@ -1,3 +1,4 @@
+//! Module for the Janet environment structure and methods.
 use core::ptr;
 
 use crate::{Janet, JanetCFunction, JanetSymbol, JanetTable};

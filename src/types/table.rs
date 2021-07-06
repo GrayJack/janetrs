@@ -423,7 +423,7 @@ impl<'data> JanetTable<'data> {
     /// Returns a reference to the value corresponding to the `key` without checking for
     /// anything.
     ///
-    /// # SAFETY
+    /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
@@ -433,7 +433,7 @@ impl<'data> JanetTable<'data> {
     /// Returns a mutable reference to the value corresponding to the `key` without
     /// checking for anything.
     ///
-    /// # SAFETY
+    /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &'data mut Janet {
@@ -443,7 +443,7 @@ impl<'data> JanetTable<'data> {
     /// Returns the key-value pair corresponding to the supplied `key`, with a mutable
     /// reference to value without checking for anything.
     ///
-    /// # SAFETY
+    /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_key_value_mut_unchecked(
@@ -466,7 +466,7 @@ impl<'data> JanetTable<'data> {
     /// Returns the key-value pair corresponding to the supplied `key`, with a reference
     /// to value without checking for anything.
     ///
-    /// # SAFETY
+    /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
     pub(crate) unsafe fn get_key_value_unchecked(

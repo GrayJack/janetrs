@@ -347,7 +347,7 @@ macro_rules! jcatch {
     }};
 }
 
-/// Macro that tries to run a expression, and if it panics in Rust side, it tries to
+/// Macro that tries to run a expression, and if it panics in the Rust side, it tries to
 /// recover from that and pass the Rust panic string to a Janet Panic.
 ///
 /// This uses the [`catch_unwind`] function, and therefore have the same guarantees as it.
