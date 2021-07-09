@@ -15,7 +15,7 @@ use utils::{janet_path_checker, Arg, Args, ArityArgs};
 ///
 /// The optional argument `arity` adds a arity check for the function. It must receive the
 /// kind of arity check. These kinds are `fix`, for fixed arity, and `range`, for ranged
-/// or variadic arity. The `fix` kind receives a integer of the number of the parametes
+/// or variadic arity. The `fix` kind receives a integer of the number of the parameters
 /// the Janet function must have and the `range` kind can receive two arguments, the first
 /// one if mandatory while the second one is optional, the first represents the minimal of
 /// arguments the Janet function have to receive and the second represents the maximum of
@@ -177,7 +177,7 @@ const CURRENT_JANET: JanetVersion = JanetVersion::current();
 /// `MAX_VERSION` are string literals.
 ///
 /// A macro da conditionally includes the `input` if the version of Janet is bigger or
-/// equal to the passed minimal version and smaller than the passed maximun version.
+/// equal to the passed minimal version and smaller than the passed maximum version.
 ///
 /// That means that the range is open in the maximum version: [MIN_VERSION, MAX_VERSION).
 #[proc_macro_attribute]
@@ -259,7 +259,7 @@ fn parse_args(arg: &str) -> Result<JanetVersion, String> {
 /// `MAX_VERSION` are string literals.
 ///
 /// A macro da conditionally includes the `input` if the version of Janet is bigger or
-/// equal to the passed minimal version and smaller than the passed maximun version.
+/// equal to the passed minimal version and smaller than the passed maximum version.
 ///
 /// That means that the range is open in the maximum version: [MIN_VERSION, MAX_VERSION).
 #[proc_macro_attribute]

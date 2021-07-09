@@ -5,6 +5,8 @@ All notable changes to the library should be put here
 ## Unreleased
 
 -   Add `JanetFile` type
+-   Add option to `janet_fn` attribute macro to include arity checks
+-   Refactor the `janet_fn` attribute macro parameter parsing
 
 ## 0.3.2
 
