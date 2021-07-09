@@ -1,5 +1,55 @@
-error: Invalid argument. Valid arguments: `check_mut_ref`.
+error: Invalid argument for the macro. Expected `arity` or `check_mut_ref`
  --> $DIR/08-wrong-args:4:12
   |
 4 | #[janet_fn(a)]
   |            ^
+
+error: expected integer literal
+  --> $DIR/08-wrong-args:10:22
+   |
+10 | #[janet_fn(arity(fix("")))]
+   |                      ^^
+
+error: unexpected end of input, expected parentheses
+  --> $DIR/08-wrong-args:15:21
+   |
+15 | #[janet_fn(arity(fix))]
+   |                     ^
+
+error: unexpected end of input, expected integer literal
+  --> $DIR/08-wrong-args:20:22
+   |
+20 | #[janet_fn(arity(fix()))]
+   |                      ^
+
+error: Invalid number of arguments for `range`: Expected at least 1, with max of 2 arguments, got 0
+  --> $DIR/08-wrong-args:25:24
+   |
+25 | #[janet_fn(arity(range()))]
+   |                        ^
+
+error: Repeated argument kind: There must be only one argument of each kind, that is, only one of `arity` or `check_mut_ref`
+  --> $DIR/08-wrong-args:30:1
+   |
+30 |   #[janet_fn(check_mut_ref, check_mut_ref)]
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ in this macro invocation
+   |
+  ::: $WORKSPACE/janetrs_macros/src/lib.rs
+   |
+   | / pub fn janet_fn(
+   | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
+   | | ) -> proc_macro::TokenStream {
+   | |____________________________- in this expansion of procedural macro `#[janet_fn]`
+
+error: expected a maximum of two arguments to the janet_fn proc-macro
+  --> $DIR/08-wrong-args:35:1
+   |
+35 |   #[janet_fn(arity(fix(1)), check_mut_ref, arity(fix(2)))]
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ in this macro invocation
+   |
+  ::: $WORKSPACE/janetrs_macros/src/lib.rs
+   |
+   | / pub fn janet_fn(
+   | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
+   | | ) -> proc_macro::TokenStream {
+   | |____________________________- in this expansion of procedural macro `#[janet_fn]`

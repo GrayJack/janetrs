@@ -7,4 +7,34 @@ pub fn rust_hello(_args: &mut [Janet]) -> Janet {
     Janet::nil()
 }
 
+#[janet_fn(arity(fix("")))]
+pub fn test1(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn(arity(fix))]
+pub fn test2(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn(arity(fix()))]
+pub fn test3(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn(arity(range()))]
+pub fn test4(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn(check_mut_ref, check_mut_ref)]
+pub fn test5(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn(arity(fix(1)), check_mut_ref, arity(fix(2)))]
+pub fn test6(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
 fn main() {}

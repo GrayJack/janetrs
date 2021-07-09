@@ -5,11 +5,22 @@ use syn::{parse_macro_input, spanned::Spanned};
 
 use janetrs_version::JanetVersion;
 
-/// **Usage**: `#[janet_fn]` or `#[janet_fn(check_mut_ref)]`
-///
+mod utils;
+use utils::{janet_path_checker, Arg, Args, ArityArgs};
+
 /// Macro that tranforms a high-level Janet function (`fn(&mut [Janet]) -> Janet`)
 /// to the thing the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) ->
 /// janetrs::lowlevel::Janet`)
+///
+///
+/// The optional argument `arity` adds a arity check for the function. It must receive the
+/// kind of arity check. These kinds are `fix`, for fixed arity, and `range`, for ranged
+/// or variadic arity. The `fix` kind receives a integer of the number of the parametes
+/// the Janet function must have and the `range` kind can receive two arguments, the first
+/// one if mandatory while the second one is optional, the first represents the minimal of
+/// arguments the Janet function have to receive and the second represents the maximum of
+/// arguments the Janet function can receive. If the maximum is not set for the range
+/// arity, the maximum check is disabled, allowing variadic arguments.
 ///
 ///
 /// The optional arg `check_mut_ref` adds a check to see if the function received more
@@ -17,65 +28,66 @@ use janetrs_version::JanetVersion;
 /// Janet Types act like types with interior mutability and the check is expensive, but if
 /// you want to make sure that your function never receives the same pointer more than
 /// once you can use this.
+///
+///
+/// **Usages**:
+/// - `#[janet_fn]`
+/// - `#[janet_fn(arity(fix(<N>)))]` where `N` is an integer literal
+/// - `#[janet_fn(arity(range(<MIN> [, MAX])))]` where `MIN` and `MAX` are integer
+///   literals
+/// - `#[janet_fn(check_mut_ref)]`
+/// - `#[janet_fn(arity(<...>), check_mut_ref)]` Combining both
 #[proc_macro_attribute]
 pub fn janet_fn(
     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let func = parse_macro_input!(input as syn::Item);
 
-    let args = parse_macro_input!(args as syn::AttributeArgs);
+    let args = parse_macro_input!(args as Args);
 
-    if args.len() > 1 {
-        return quote! {compile_error!("expected at max one argument to the janet_fn proc-macro");}
-            .into();
-    }
-
-    let check = if args.is_empty() {
-        quote! {}
-    } else if let syn::NestedMeta::Meta(syn::Meta::Path(ref path)) = args[0] {
-        if let Some(ident) = path.get_ident() {
-            if *ident == "check_mut_ref" {
-                quote! {
-                    for j1 in &args[0..args.len() - 1] {
-                        for j2 in &args[1..] {
-                            if matches!(
-                                j1.kind(),
-                                ::janetrs::JanetType::Array
-                                    | ::janetrs::JanetType::Buffer
-                                    | ::janetrs::JanetType::CFunction
-                                    | ::janetrs::JanetType::Fiber
-                                    | ::janetrs::JanetType::Function
-                                    | ::janetrs::JanetType::Keyword
-                                    | ::janetrs::JanetType::Pointer
-                                    | ::janetrs::JanetType::Symbol
-                                    | ::janetrs::JanetType::Table
-                            ) && matches!(
-                                j1.kind(),
-                                ::janetrs::JanetType::Array
-                                    | ::janetrs::JanetType::Buffer
-                                    | ::janetrs::JanetType::CFunction
-                                    | ::janetrs::JanetType::Fiber
-                                    | ::janetrs::JanetType::Function
-                                    | ::janetrs::JanetType::Keyword
-                                    | ::janetrs::JanetType::Pointer
-                                    | ::janetrs::JanetType::Symbol
-                                    | ::janetrs::JanetType::Table
-                            ) && j1 == j2
-                            {
-                                janetrs::jpanic!("Received two mutable references as arguments");
-                            }
-                        }
+    let extra = args.0.iter().map(|arg| match arg {
+        Arg::CheckMutRef => quote! {
+            for j1 in &args[0..args.len() - 1] {
+                for j2 in &args[1..] {
+                    if matches!(
+                        j1.kind(),
+                        ::janetrs::JanetType::Array
+                            | ::janetrs::JanetType::Buffer
+                            | ::janetrs::JanetType::CFunction
+                            | ::janetrs::JanetType::Fiber
+                            | ::janetrs::JanetType::Function
+                            | ::janetrs::JanetType::Keyword
+                            | ::janetrs::JanetType::Pointer
+                            | ::janetrs::JanetType::Symbol
+                            | ::janetrs::JanetType::Table
+                    ) && matches!(
+                        j1.kind(),
+                        ::janetrs::JanetType::Array
+                            | ::janetrs::JanetType::Buffer
+                            | ::janetrs::JanetType::CFunction
+                            | ::janetrs::JanetType::Fiber
+                            | ::janetrs::JanetType::Function
+                            | ::janetrs::JanetType::Keyword
+                            | ::janetrs::JanetType::Pointer
+                            | ::janetrs::JanetType::Symbol
+                            | ::janetrs::JanetType::Table
+                    ) && j1 == j2
+                    {
+                        ::janetrs::jpanic!("Received two mutable references as arguments");
                     }
                 }
-            } else {
-                return quote_spanned! {ident.span() => compile_error!("Invalid argument. Valid arguments: `check_mut_ref`.");}.into();
             }
-        } else {
-            quote! {}
-        }
-    } else {
-        quote! {}
-    };
+        },
+        Arg::Arity(ArityArgs::Fix(n)) => quote! {
+            ::janetrs::util::check_fix_arity(args, #n);
+        },
+        Arg::Arity(ArityArgs::Range(min, None)) => quote! {
+            ::janetrs::util::check_range_arity(args, #min, None);
+        },
+        Arg::Arity(ArityArgs::Range(min, Some(max))) => quote! {
+            ::janetrs::util::check_range_arity(args, #min, Some(#max));
+        },
+    });
 
     let ts = if let syn::Item::Fn(f) = func {
         let f_clone = f.clone();
@@ -141,7 +153,7 @@ pub fn janet_fn(
                     let args = unsafe { core::slice::from_raw_parts_mut(argv, argc as usize) };
                     let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::Janet])};
 
-                    #check
+                    #(#extra)*
 
                     #name(args).into()
                 }
@@ -154,31 +166,6 @@ pub fn janet_fn(
     };
 
     ts.into()
-}
-
-fn janet_path_checker(path: &syn::Path) -> bool {
-    match path.segments.len() {
-        1 => {
-            let ident = if let Some(i) = path.get_ident() {
-                i
-            } else {
-                return false;
-            };
-            let test = syn::Ident::new("Janet", ident.span());
-
-            *ident == test
-        },
-        2 => {
-            let janetrs_mod = &path.segments.first().unwrap().ident;
-            let janet_ident = &path.segments.last().unwrap().ident;
-
-            let janetrs_expected = syn::Ident::new("janetrs", janetrs_mod.span());
-            let janet_expected = syn::Ident::new("Janet", janet_ident.span());
-
-            *janetrs_mod == janetrs_expected && *janet_ident == janet_expected
-        },
-        _ => false,
-    }
 }
 
 

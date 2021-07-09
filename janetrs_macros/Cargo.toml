@@ -19,7 +19,7 @@ path = "src/lib.rs"
 proc-macro = true
 
 [dependencies]
-syn = { version = "1", features = ["extra-traits", "full"] }
+syn = { version="1", features=["extra-traits", "full"] }
 quote = "1"
 janetrs_version = "0.1"
 # janetrs = { version = "0.1.2" }
@@ -36,5 +36,5 @@ name = "tests"
 path = "tests/progress.rs"
 
 [dev-dependencies]
-trybuild = { version = "1.0", features = ["diff"] }
-janetrs = { path = "../../janetrs" }
+trybuild = { version="1.0", features=["diff"] }
+janetrs = { path="../../janetrs" }
