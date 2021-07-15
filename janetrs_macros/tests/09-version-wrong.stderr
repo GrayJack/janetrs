@@ -17,17 +17,12 @@ error: invalid string literal: invalid digit found in string
    |                 ^^^^^^^^
 
 error: expected at least one argument to the janet_version proc-macro
-   --> $DIR/09-version-wrong:18:1
-    |
-18  |   #[janet_version()]
-    |   ^^^^^^^^^^^^^^^^^^ in this macro invocation
-    |
-   ::: $WORKSPACE/janetrs_macros/src/lib.rs
-    |
-    | / pub fn janet_version(
-    | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
-    | | ) -> proc_macro::TokenStream {
-    | |____________________________- in this expansion of procedural macro `#[janet_version]`
+  --> $DIR/09-version-wrong:18:1
+   |
+18 | #[janet_version()]
+   | ^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `janet_version` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: invalid string literal: invalid digit found in string
   --> $DIR/09-version-wrong:23:22
@@ -36,14 +31,7 @@ error: invalid string literal: invalid digit found in string
    |                      ^^^^^
 
 error: expected at max two argument to the janet_version proc-macro
-   --> $DIR/09-version-wrong:28:1
-    |
-28  |   #[janet_version("1", "2", "3")]
-    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ in this macro invocation
-    |
-   ::: $WORKSPACE/janetrs_macros/src/lib.rs
-    |
-    | / pub fn janet_version(
-    | |     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
-    | | ) -> proc_macro::TokenStream {
-    | |____________________________- in this expansion of procedural macro `#[janet_version]`
+  --> $DIR/09-version-wrong:28:17
+   |
+28 | #[janet_version("1", "2", "3")]
+   |                 ^^^^^^^^^^^^^

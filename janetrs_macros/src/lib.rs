@@ -184,16 +184,17 @@ const CURRENT_JANET: JanetVersion = JanetVersion::current();
 pub fn janet_version(
     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
+    let global_span = proc_macro2::TokenStream::from(args.clone()).span();
     let args = parse_macro_input!(args as syn::AttributeArgs);
     // let input = parse_macro_input!(input as syn::Item);
 
     if args.len() > 2 {
-        return quote!{compile_error!("expected at max two argument to the janet_version proc-macro");}
+        return quote_spanned!{global_span => compile_error!("expected at max two argument to the janet_version proc-macro");}
             .into();
     }
 
     if args.is_empty() {
-        return quote!{compile_error!("expected at least one argument to the janet_version proc-macro");}
+        return quote_spanned!{global_span => compile_error!("expected at least one argument to the janet_version proc-macro");}
             .into();
     }
 

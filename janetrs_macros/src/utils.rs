@@ -1,10 +1,12 @@
-use syn::{parse::Parse, punctuated::Punctuated, Token};
+use syn::{parse::Parse, punctuated::Punctuated, spanned::Spanned, Token};
 
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum ArityArgs {
     Fix(usize),
     Range(usize, Option<usize>),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Arg {
     CheckMutRef,
     Arity(ArityArgs),
@@ -14,18 +16,19 @@ pub(crate) struct Args(pub(crate) Vec<Arg>);
 
 impl Parse for Args {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let args_span = input.cursor().token_stream().span();
         let content: Punctuated<_, Token![,]> = input.parse_terminated(Arg::parse)?;
         if content.len() > 2 {
             return Err(syn::parse::Error::new(
-                input.span(),
+                args_span,
                 "expected a maximum of two arguments to the janet_fn proc-macro",
             ));
         }
 
         if content.len() == 2 && content[0] == content[1] {
             return Err(syn::parse::Error::new(
-                input.span(),
-                "Repeated argument kind: There must be only one argument of each kind, that is, \
+                args_span,
+                "repeated argument kind: There must be only one argument of each kind, that is, \
                  only one of `arity` or `check_mut_ref`",
             ));
         }
@@ -57,7 +60,7 @@ impl Parse for Arg {
                 return Ok(Arg::Arity(ArityArgs::Fix(num)));
             } else if arity_type == "range" {
                 let arity_buff;
-                syn::parenthesized!(arity_buff in content);
+                let paren = syn::parenthesized!(arity_buff in content);
 
                 let arity_args: Punctuated<_, Token![,]> =
                     arity_buff.parse_terminated(syn::LitInt::parse)?;
@@ -70,9 +73,9 @@ impl Parse for Arg {
                     ),
                     x => {
                         return Err(Error::new(
-                            arity_buff.span(),
+                            paren.span,
                             &format!(
-                                "Invalid number of arguments for `range`: Expected at least 1, \
+                                "invalid number of arguments for `range`: Expected at least 1, \
                                  with max of 2 arguments, got {}",
                                 x
                             ),
@@ -84,14 +87,14 @@ impl Parse for Arg {
             } else {
                 return Err(syn::parse::Error::new(
                     arity_type.span(),
-                    "Invalid arity type. Expected either `fix` or `range`",
+                    "invalid arity type. Expected either `fix` or `range`",
                 ));
             }
         }
 
         Err(syn::parse::Error::new(
             ident.span(),
-            "Invalid argument for the macro. Expected `arity` or `check_mut_ref`",
+            "invalid argument for the macro. Expected `arity` or `check_mut_ref`",
         ))
     }
 }
@@ -99,10 +102,10 @@ impl Parse for Arg {
 impl PartialEq for Arg {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Arg::CheckMutRef, Arg::CheckMutRef) => true,
-            (Arg::CheckMutRef, Arg::Arity(_)) => false,
-            (Arg::Arity(_), Arg::CheckMutRef) => false,
-            (Arg::Arity(_), Arg::Arity(_)) => true,
+            (Self::CheckMutRef, Self::CheckMutRef) => true,
+            (Self::CheckMutRef, Self::Arity(_)) => false,
+            (Self::Arity(_), Self::CheckMutRef) => false,
+            (Self::Arity(_), Self::Arity(_)) => true,
         }
     }
 }
