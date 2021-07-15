@@ -23,14 +23,10 @@ syn = { version = "1", features = ["extra-traits", "full"] }
 quote = "1"
 proc-macro2 = "1"
 janetrs_version = "0.1"
-# janetrs = { version = "0.1.2" }
 
 [features]
 default = []
 system = ["janetrs_version/system"]
-# embed = ["janetrs/amalgation"]
-# system = ["janetrs/link-system"]
-# _test = ["embed"]
 
 [[test]]
 name = "tests"
