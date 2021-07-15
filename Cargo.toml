@@ -31,12 +31,12 @@ features = ["amalgation", "nightly"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bstr = { version="0.2.16", default-features=false }
+bstr = { version = "0.2.16", default-features = false }
 const_fn = "0.4"
 evil-janet = "1.16"
-janetrs_macros = "0.4.0"
+janetrs_macros = "0.4.1"
 janetrs_version = "0.1.0"
-libc = { version="0.2", features=["extra_traits"] }
+libc = { version = "0.2", features = ["extra_traits"] }
 
 [dev-dependencies]
 
@@ -51,7 +51,11 @@ inline-more = []
 # Unicode conveniences
 unicode = ["bstr/unicode"]
 # Use system janet.h
-system = ["evil-janet/system", "janetrs_macros/system", "janetrs_version/system"]
+system = [
+    "evil-janet/system",
+    "janetrs_macros/system",
+    "janetrs_version/system",
+]
 # Use to link to system libjanet (not recommended generally)
 link-system = [
     "evil-janet/link-system",
