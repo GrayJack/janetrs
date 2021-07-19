@@ -514,7 +514,7 @@ impl JanetBuffer<'_> {
     /// let s = JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
     /// assert_eq!(&b"foo\xFFbar\xE2\x98baz"[..], s.to_lowercase().as_bytes());
     /// ```
-    #[cfg(feature = "unicode")]
+    #[cfg(all(feature = "std", feature = "unicode"))]
     #[inline]
     pub fn to_lowercase(&self) -> Self {
         self.as_bytes().to_lowercase().into()
@@ -725,7 +725,7 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]).as_bytes()
     /// );
     /// ```
-    #[cfg(feature = "unicode")]
+    #[cfg(all(feature = "std", feature = "unicode"))]
     #[inline]
     pub fn to_uppercase(&self) -> Self {
         self.as_bytes().to_uppercase().into()

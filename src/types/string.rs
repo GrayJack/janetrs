@@ -372,7 +372,7 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..])
     /// );
     /// ```
-    #[cfg(feature = "unicode")]
+    #[cfg(all(feature = "std", feature = "unicode"))]
     #[inline]
     pub fn to_lowercase(&self) -> Self {
         self.as_bytes().to_lowercase().into()
@@ -543,7 +543,7 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..])
     /// );
     /// ```
-    #[cfg(feature = "unicode")]
+    #[cfg(all(feature = "std", feature = "unicode"))]
     #[inline]
     pub fn to_uppercase(&self) -> Self {
         self.as_bytes().to_uppercase().into()

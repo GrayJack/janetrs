@@ -7,8 +7,9 @@ All notable changes to the library should be put here
 -   Add `JanetFile` type
 -   Add `JanetRng` type
 -   Add option to `janet_fn` attribute macro to include arity checks
--   Refactor the `janet_fn` attribute macro parameter parsing
 -   Improve error report of attribute macros
+-   Refactor the `janet_fn` attribute macro parameter parsing
+-   Fix compilation when no_std and with unicode feature enabled
 
 ## 0.3.2
 
