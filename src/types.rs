@@ -33,12 +33,15 @@ pub mod symbol;
 pub mod table;
 pub mod tuple;
 
+mod random;
+
 pub use array::JanetArray;
 pub use buffer::JanetBuffer;
 pub use fiber::JanetFiber;
 pub use function::{JanetCFunction, JanetFunction};
 pub use janet_abstract::{IsJanetAbstract, JanetAbstract};
 pub use pointer::JanetPointer;
+pub use random::JanetRng;
 pub use string::JanetString;
 pub use structs::JanetStruct;
 pub use symbol::{JanetKeyword, JanetSymbol};

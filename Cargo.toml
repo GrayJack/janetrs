@@ -37,6 +37,7 @@ evil-janet = "1.16"
 janetrs_macros = "0.4.1"
 janetrs_version = "0.1.0"
 libc = { version = "0.2", features = ["extra_traits"] }
+rand_core = "0.6"
 
 [dev-dependencies]
 
