@@ -4,6 +4,7 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
+-   **BREAKING:** Make `JanetGc::collect` an unsafe function
 -   Add `JanetFile` type
 -   Add `JanetRng` type
 -   Add option to `janet_fn` attribute macro to include arity checks

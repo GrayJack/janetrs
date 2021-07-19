@@ -22,9 +22,15 @@ impl JanetGc {
     /// locks the GC.
     ///
     /// If there is something locking the garbage collection, it simply does a no-op.
+    ///
+    /// # Safety
+    /// This function will free all memory allocated with the Janet scratch memory API and
+    /// any [non-rooted](JanetGc::root) object that have no reference to a live object (as
+    /// example, an empty [`JanetTable`](crate::JanetTable) or
+    /// [`JanetArray`](crate::JanetArray) )
     #[inline]
-    pub fn collect(&self) {
-        unsafe { evil_janet::janet_collect() }
+    pub unsafe fn collect(&self) {
+        evil_janet::janet_collect()
     }
 
     /// Lock the Janet GC and suspend any garbage collection until the guard is dropped.
