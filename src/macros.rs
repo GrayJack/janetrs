@@ -196,21 +196,17 @@ macro_rules! table {
 ///
 /// # Examples
 /// ```
-/// use janetrs::{janet_mod, lowlevel, Janet};
+/// use janetrs::{janet_mod, Janet, janet_fn};
 ///
-/// #[no_mangle]
-/// unsafe extern "C" fn rust_hello(argc: i32, _argv: *mut lowlevel::Janet) -> lowlevel::Janet {
-///     lowlevel::janet_fixarity(argc, 0);
+/// #[janet_fn(arity(fix(0)))]
+/// fn rust_hello(args: &mut [Janet]) -> Janet {
 ///     println!("Hello from Rust!");
-///
-///     Janet::nil().into()
+///     Janet::nil()
 /// }
 ///
-/// #[no_mangle]
-/// unsafe extern "C" fn hi(argc: i32, _argv: *mut lowlevel::Janet) -> lowlevel::Janet {
-///     lowlevel::janet_fixarity(argc, 0);
-///
-///     Janet::from("Hi! My name is GrayJack!").into()
+/// #[janet_fn(arity(fix(0)))]
+/// fn hi(args: &mut [Janet]) -> Janet {
+///     Janet::from("Hi! My name is GrayJack!")
 /// }
 ///
 /// janet_mod!("rust";
