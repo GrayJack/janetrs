@@ -7,6 +7,7 @@ All notable changes to the library should be put here
 -   **BREAKING:** Make `JanetGc::collect` an unsafe function
 -   Add `JanetFile` type
 -   Add `JanetRng` type
+-   Add `janet_abstract::register` function to register an abstract type.
 -   Add option to `janet_fn` attribute macro to include arity checks
 -   Improve error report of attribute macros
 -   Refactor the `janet_fn` attribute macro parameter parsing

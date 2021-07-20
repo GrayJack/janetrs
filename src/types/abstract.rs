@@ -321,6 +321,23 @@ pub trait IsJanetAbstract {
     fn type_info() -> &'static JanetAbstractType;
 }
 
+/// Register the [`JanetAbstractType`] of a type `T` that implements [`IsJanetAbstract`].
+///
+/// Registering the type is required to be able to marshal the type.
+#[inline]
+pub fn register<T: IsJanetAbstract>() {
+    let at = T::type_info();
+    unsafe {
+        let syn = evil_janet::janet_wrap_symbol(evil_janet::janet_csymbol(at.name));
+
+        // If `abs_type_ptr` is NULL, the type is not registered, so we then register it
+        let abs_type_ptr = evil_janet::janet_get_abstract_type(syn);
+        if abs_type_ptr.is_null() {
+            evil_janet::janet_register_abstract_type(at)
+        }
+    }
+}
+
 
 impl IsJanetAbstract for i64 {
     const SIZE: usize = core::mem::size_of::<i64>();
