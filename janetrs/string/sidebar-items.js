@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JanetString","Janet strings are a immutable type that are similar to Janet buffers."],["JanetStringBuilder","Builder for [`JanetString`]s."]]});

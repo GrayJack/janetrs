@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["FiberStatus","This tipe represents a the status of a [`JanetFiber`]."]],"struct":[["Exec","An iterator that executes the function related to the fiber untill it completes."],["JanetFiber","A lightweight green thread in Janet. It does not correspond to operating system threads."]]});

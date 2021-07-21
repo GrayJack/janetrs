@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FileFlags","Flags related to the [`JanetFile`]."],["JanetFile","Janet internal representation of a file in the Janet C API."]]});

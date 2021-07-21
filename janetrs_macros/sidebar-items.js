@@ -1,0 +1,1 @@
+initSidebarItems({"attr":[["cjvg","Conditional Janet Version Gate"],["janet_fn","Macro that tranforms a high-level Janet function (`fn(&mut [Janet]) -> Janet`) to the thing the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) -> janetrs::lowlevel::Janet`)"],["janet_version","Conditional Janet Version Gate"]]});

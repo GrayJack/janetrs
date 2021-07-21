@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Scratch","Memory allocator that will certainly be cleaned up in the next Janet Garbage Collection cicle."]]});

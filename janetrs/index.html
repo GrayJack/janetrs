@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Janetrs"><meta name="keywords" content="rust, rustlang, rust-lang, janetrs"><title>janetrs - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg"><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../janetrs/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate janetrs</h2><div class="block version"><div class="narrow-helper"></div><p>Version 0.3.2</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all janetrs's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div><div id="sidebar-vars" data-name="janetrs" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">janetrs</a><button id="copy-path" onclick="copy_path(this)" title="copy path"><img src="../clipboard.svg" width="19" height="18" alt="Copy item import" title="Copy item import to clipboard"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/janetrs/lib.rs.html#1-85" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h1 id="janetrs" class="section-header"><a href="#janetrs">Janetrs</a></h1>
+<p>A crate with high level bindings to Janet C API.</p>
+<h2 id="goals" class="section-header"><a href="#goals">Goals</a></h2>
+<p>Provide a safe and ergonomic interface to the Janet C API to create Janet clients and
+Janet modules/libraries using Rust.</p>
+<p>This project still are in it’s early stages, so breaking changes may happen, there is
+no minimal supported Rust version (MSRV) yet.</p>
+<p>Notice that most doc tests will fail if the feature “almagation” or “link-system”
+aren’t set, because most of then need it for the Janet runtime to function properly.</p>
+<h2 id="cargo-features" class="section-header"><a href="#cargo-features">Cargo Features</a></h2>
+<ul>
+<li><code>std</code>: Enable some trait impl for types that only exist on the <code>std</code> and the Error
+trait</li>
+<li><code>unicode</code>: Enable more methods for JanetString and JanetBuffer</li>
+<li><code>inline-more</code>: More agressive inlining</li>
+<li><code>amalgation</code>: Link the Janet runtime to the package, enabling to use the client
+module</li>
+<li><code>unicode</code>: Enable some unicode methods for JanetString and JanetBuffer</li>
+<li><code>system</code>: Use system header to get Janet functions</li>
+<li><code>link-system</code>: Link the Janet runtime to the package from the system, enabling to
+use the client module</li>
+<li><code>nightly</code>: Enable some parts of the crate that uses nightly features, to use this
+feature you must compile the crate using a nightly rust version</li>
+</ul>
+<h2 id="environment-variables" class="section-header"><a href="#environment-variables">Environment variables</a></h2>
+<p><strong>These variables are only used when the <code>amalgation</code> feature is enabled</strong></p>
+<p>It is possible to use environment variables to overwrite some Janet definitions.</p>
+<ul>
+<li><code>JANET_RECURSION_GUARD=&lt;integer&gt;</code></li>
+<li><code>JANET_MAX_PROTO_DEPTH=&lt;integer&gt;</code></li>
+<li><code>JANET_MAX_MACRO_EXPAND=&lt;integer&gt;</code></li>
+<li><code>JANET_STACK_MAX=&lt;integer&gt;</code></li>
+</ul>
+<h2 id="licensing" class="section-header"><a href="#licensing">Licensing</a></h2>
+<p>This software is licensed under the terms of the <a href="./LICENSE">MIT Public License</a>.</p>
+<h3 id="todo-typestraits-lacking-or-incomplete" class="section-header"><a href="#todo-typestraits-lacking-or-incomplete">TODO: Types/Traits: Lacking or Incomplete</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Marshaling</li>
+</ul>
+<p><code>[ ]: Lacking</code>
+<code>[I]: Incomplete</code>
+<code>[X]: Done</code></p>
+<p>Probably there is much more missing, for that you can use the
+<a href="../evil_janet/index.html"><code>lowlevel</code></a> module to access the raw C API of Janet if needed</p>
+<h3 id="todo-lib-level" class="section-header"><a href="#todo-lib-level">TODO: Lib level</a></h3>
+<ul>
+<li>Better docs.</li>
+<li>Marshalling mechanism</li>
+</ul>
+</div></details><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<div class="item-table"><div class="item-left import-item"><code>pub use <a class="mod" href="../evil_janet/index.html" title="mod evil_janet">evil_janet</a> as lowlevel;</code></div><div class="item-right docblock-short"></div></div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="mod" href="allocator/index.html" title="janetrs::allocator mod">allocator</a></div><div class="item-right docblock-short"><p>This module provides a allocator that uses the Janet scratch memory API to create
+objects tracked by the Janet Garbage Collector.</p>
+</div><div class="item-left module-item"><a class="mod" href="array/index.html" title="janetrs::array mod">array</a></div><div class="item-right docblock-short"><p>Janet array (vector) type.</p>
+</div><div class="item-left module-item"><a class="mod" href="buffer/index.html" title="janetrs::buffer mod">buffer</a></div><div class="item-right docblock-short"><p>Janet buffer (string) type.</p>
+</div><div class="item-left module-item"><a class="mod" href="client/index.html" title="janetrs::client mod">client</a></div><div class="item-right docblock-short"><p>This module implements anything required to run a Janet client.</p>
+</div><div class="item-left module-item"><a class="mod" href="env/index.html" title="janetrs::env mod">env</a></div><div class="item-right docblock-short"><p>Module for the Janet environment structure and methods.</p>
+</div><div class="item-left module-item"><a class="mod" href="fiber/index.html" title="janetrs::fiber mod">fiber</a></div><div class="item-right docblock-short"><p>Janet fibers (soft threads) type.</p>
+</div><div class="item-left module-item"><a class="mod" href="function/index.html" title="janetrs::function mod">function</a></div><div class="item-right docblock-short"><p>Janet function types.</p>
+</div><div class="item-left module-item"><a class="mod" href="io/index.html" title="janetrs::io mod">io</a></div><div class="item-right docblock-short"><p>Module for I/O related types and functions</p>
+</div><div class="item-left module-item"><a class="mod" href="janet_abstract/index.html" title="janetrs::janet_abstract mod">janet_abstract</a></div><div class="item-right docblock-short"><p>Module of the JanetAbstract abstractions.</p>
+</div><div class="item-left module-item"><a class="mod" href="pointer/index.html" title="janetrs::pointer mod">pointer</a></div><div class="item-right docblock-short"><p>Module for the Janet Pointer type.</p>
+</div><div class="item-left module-item"><a class="mod" href="string/index.html" title="janetrs::string mod">string</a></div><div class="item-right docblock-short"><p>Janet String type.</p>
+</div><div class="item-left module-item"><a class="mod" href="structs/index.html" title="janetrs::structs mod">structs</a></div><div class="item-right docblock-short"><p>Janet Struct (immutable HashMap) type.</p>
+</div><div class="item-left module-item"><a class="mod" href="symbol/index.html" title="janetrs::symbol mod">symbol</a></div><div class="item-right docblock-short"><p>Janet symbols and keywords types.</p>
+</div><div class="item-left module-item"><a class="mod" href="table/index.html" title="janetrs::table mod">table</a></div><div class="item-right docblock-short"><p>Janet table (mutable HashMap) type.</p>
+</div><div class="item-left module-item"><a class="mod" href="tuple/index.html" title="janetrs::tuple mod">tuple</a></div><div class="item-right docblock-short"><p>Janet tuple type.</p>
+</div><div class="item-left module-item"><a class="mod" href="util/index.html" title="janetrs::util mod">util</a></div><div class="item-right docblock-short"><p>Module for stuff that are not required either to use in a application or to write
+janet modules.</p>
+</div></div><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="macro" href="macro.array.html" title="janetrs::array macro">array</a></div><div class="item-right docblock-short"><p>Creates a <a href="./types/tuple/struct.JanetArray.html"><code>JanetArray</code></a> containing the arguments.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.janet_mod.html" title="janetrs::janet_mod macro">janet_mod</a></div><div class="item-right docblock-short"><p>A macro to make life easier creating modules for Janet from Rust.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.jcatch.html" title="janetrs::jcatch macro">jcatch</a></div><div class="item-right docblock-short"><p>Execute a function (<a href="./types/struct.JanetCFunction.html"><code>JanetCFunction</code></a>, Rust function or extern C function) and catch
+any janet panic that may happen as a <a href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="Result"><code>Result</code></a>.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.jpanic.html" title="janetrs::jpanic macro">jpanic</a></div><div class="item-right docblock-short"><p>Causes a panic in the Janet side. Diferently of the Rust <code>panic!</code> macro, this macro
+does <strong>not</strong> terminate the current thread. Instead, it sends a error signal with the
+passed message where the Janet runtime takes care to properly exit.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.jtry.html" title="janetrs::jtry macro">jtry</a></div><div class="item-right docblock-short"><p>Macro that tries to run a expression, and if it panics in the Rust side, it tries to
+recover from that and pass the Rust panic string to a Janet Panic.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.structs.html" title="janetrs::structs macro">structs</a></div><div class="item-right docblock-short"><p>Creates a <a href="./types/tuple/struct.JanetStruct.html"><code>JanetStruct</code></a> containing the arguments key-value pairs.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.table.html" title="janetrs::table macro">table</a></div><div class="item-right docblock-short"><p>Creates a <a href="./types/tuple/struct.JanetTable.html"><code>JanetTable</code></a> containing the arguments key-value pairs.</p>
+</div><div class="item-left module-item"><a class="macro" href="macro.tuple.html" title="janetrs::tuple macro">tuple</a></div><div class="item-right docblock-short"><p>Creates a <a href="./types/tuple/struct.JanetTuple.html"><code>JanetTuple</code></a> containing the arguments.</p>
+</div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.Janet.html" title="janetrs::Janet struct">Janet</a></div><div class="item-right docblock-short"><p><code>Janet</code> is the central structure of the Janet Language.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetAbstract.html" title="janetrs::JanetAbstract struct">JanetAbstract</a></div><div class="item-right docblock-short"><p>Type that represents the Janet Abstract type.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetArray.html" title="janetrs::JanetArray struct">JanetArray</a></div><div class="item-right docblock-short"><p>Janet <a href="https://janet-lang.org/docs/data_structures/arrays.html">arrays</a> are a fundamental
+datatype in Janet. Janet Arrays are values that contain a sequence of other values.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetBuffer.html" title="janetrs::JanetBuffer struct">JanetBuffer</a></div><div class="item-right docblock-short"><p>Janet <a href="https://janet-lang.org/docs/data_structures/buffers.html">buffers</a> are the mutable
+version of <a href="./../string/struct.JanetString.html"><code>JanetStrings</code></a>. Since Janet strings can hold any sequence of bytes,
+including zeros, buffers share this same property and can be used to hold any
+arbitrary memory, which makes them very simple but versatile data structures. They can
+be used to accumulate small strings into a large string, to implement a bitset, or to
+represent sound or images in a program.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetConversionError.html" title="janetrs::JanetConversionError struct">JanetConversionError</a></div><div class="item-right docblock-short"><p>The error when converting <a href="struct.Janet.html" title="Janet"><code>Janet</code></a>s to C Janet types.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetFiber.html" title="janetrs::JanetFiber struct">JanetFiber</a></div><div class="item-right docblock-short"><p>A lightweight green thread in Janet. It does not correspond to operating system
+threads.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetFunction.html" title="janetrs::JanetFunction struct">JanetFunction</a></div><div class="item-right docblock-short"><p>A representation of a Janet function defined at the Janet side.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetGc.html" title="janetrs::JanetGc struct">JanetGc</a></div><div class="item-right docblock-short"><p>The Janet Garbage Collector type.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetGcLockGuard.html" title="janetrs::JanetGcLockGuard struct">JanetGcLockGuard</a></div><div class="item-right docblock-short"><p>An RAII implementation of a “scoped lock” of the Janet GC. When this structure is
+dropped (falls out of scope), the lock will be unlocked.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetGcRootGuard.html" title="janetrs::JanetGcRootGuard struct">JanetGcRootGuard</a></div><div class="item-right docblock-short"><p>An RAII implementation of a rooted <a href="struct.Janet.html" title="Janet"><code>Janet</code></a> value. When this structure is dropped
+(falls out of scope), the rooting will be undone.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetKeyword.html" title="janetrs::JanetKeyword struct">JanetKeyword</a></div><div class="item-right docblock-short"><p>Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
+the language, it is a normal string that can be defined by the user.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetPointer.html" title="janetrs::JanetPointer struct">JanetPointer</a></div><div class="item-right docblock-short"><p>Janet pointer type.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetRng.html" title="janetrs::JanetRng struct">JanetRng</a></div><div class="item-right docblock-short"><p>Type representing the Janet pseudorandom number generator</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetString.html" title="janetrs::JanetString struct">JanetString</a></div><div class="item-right docblock-short"><p>Janet strings are a immutable type that are similar to <a href="./../buffer/struct.JanetBuffer.html">Janet buffers</a>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetStruct.html" title="janetrs::JanetStruct struct">JanetStruct</a></div><div class="item-right docblock-short"><p><code>JanetStruct</code>s are immutable data structures that map keys to values.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetSymbol.html" title="janetrs::JanetSymbol struct">JanetSymbol</a></div><div class="item-right docblock-short"><p>Janet symbol type. Usually used to name things in Janet.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetTable.html" title="janetrs::JanetTable struct">JanetTable</a></div><div class="item-right docblock-short"><p>Janet <a href="https://janet-lang.org/docs/data_structures/tables.html">table</a>s are mutable data structures that map keys to values. Values are put
+into a Janet table with a key, and can be looked up later with the same key. Tables
+are implemented with an underlying open hash table, so they are quite fast and cache
+friendly.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.JanetTuple.html" title="janetrs::JanetTuple struct">JanetTuple</a></div><div class="item-right docblock-short"><p>Janet <a href="https://janet-lang.org/docs/data_structures/tuples.html">tuples</a> are immutable,
+sequential types that are similar to <a href="array/struct.JanetArray.html">Janet arrays</a>.</p>
+</div></div><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="enum" href="enum.JanetSignal.html" title="janetrs::JanetSignal enum">JanetSignal</a></div><div class="item-right docblock-short"><p>Signals that can be produced by a <a href="function/struct.JanetFunction.html" title="JanetFunction"><code>JanetFunction</code></a> and <a href="function/type.JanetCFunction.html" title="JanetCFunction"><code>JanetCFunction</code></a>
+representing that those worked correctly or not.</p>
+</div><div class="item-left module-item"><a class="enum" href="enum.JanetType.html" title="janetrs::JanetType enum">JanetType</a></div><div class="item-right docblock-short"><p>Representation of all Janet types.</p>
+</div><div class="item-left module-item"><a class="enum" href="enum.TaggedJanet.html" title="janetrs::TaggedJanet enum">TaggedJanet</a></div><div class="item-right docblock-short"><p>Janet type in the form of a Tagged Union.</p>
+</div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.DeepEq.html" title="janetrs::DeepEq trait">DeepEq</a></div><div class="item-right docblock-short"><p>A trait to express a deep equality.</p>
+</div><div class="item-left module-item"><a class="trait" href="trait.IsJanetAbstract.html" title="janetrs::IsJanetAbstract trait">IsJanetAbstract</a></div><div class="item-right docblock-short"><p>The trait that encodes the information required to instatiate the implementer as
+<a href="janet_abstract/struct.JanetAbstract.html" title="JanetAbstract"><code>JanetAbstract</code></a></p>
+</div><div class="item-left module-item"><a class="trait" href="trait.JanetExtend.html" title="janetrs::JanetExtend trait">JanetExtend</a></div><div class="item-right docblock-short"><p>Trait that express the ability of a Janet collection to extend it with another
+collection.</p>
+</div></div><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="type" href="type.JanetCFunction.html" title="janetrs::JanetCFunction type">JanetCFunction</a></div><div class="item-right docblock-short"><p>C function pointer that is accepted by Janet as a type.</p>
+</div></div><h2 id="attributes" class="section-header"><a href="#attributes">Attribute Macros</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="attr" href="attr.cjvg.html" title="janetrs::cjvg attr">cjvg</a></div><div class="item-right docblock-short"><p>Conditional Janet Version Gate</p>
+</div><div class="item-left module-item"><a class="attr" href="attr.janet_fn.html" title="janetrs::janet_fn attr">janet_fn</a></div><div class="item-right docblock-short"><p>Macro that tranforms a high-level Janet function (<code>fn(&amp;mut [Janet]) -&gt; Janet</code>)
+to the thing the Janet C API is expecting (<code>fn(i32, *mut janetrs::lowlevel::Janet) -&gt; janetrs::lowlevel::Janet</code>)</p>
+</div><div class="item-left module-item"><a class="attr" href="attr.janet_version.html" title="janetrs::janet_version attr">janet_version</a></div><div class="item-right docblock-short"><p>Conditional Janet Version Gate</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="janetrs" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>

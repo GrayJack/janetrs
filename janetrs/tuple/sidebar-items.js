@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IntoIter","An iterator that moves out of a [`JanetTuple`]."],["Iter","An iterator over a reference to the [`JanetTuple`] elements."],["JanetTuple","Janet tuples are immutable, sequential types that are similar to Janet arrays."],["JanetTupleBuilder","Builder for [`JanetTuple`]s."]],"type":[["RSplit",""],["RSplitN",""],["Split",""],["SplitN",""]]});

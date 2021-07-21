@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["bstr","const_fn","evil_janet","janetrs","janetrs_macros","janetrs_version","lazy_static","libc","memchr","proc_macro2","quote","rand_core","regex_automata","syn","unicode_xid"];

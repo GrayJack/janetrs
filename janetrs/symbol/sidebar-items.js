@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JanetKeyword","Janet keyword. Janet being a lisp-like language a keyword is not a especial word of the language, it is a normal string that can be defined by the user."],["JanetSymbol","Janet symbol type. Usually used to name things in Janet."]]});

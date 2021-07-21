@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JanetEnvironment","Representation of the Janet runtime environment, like global definitions, available functions and macros, etc."]]});

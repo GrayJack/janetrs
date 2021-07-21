@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JanetBuildConfig","Janet configuration in the build."],["JanetVersion","Janet version representation."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JanetPointer","Janet pointer type."]]});

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["janetrs"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html\" title=\"trait core::fmt::Write\">Write</a> for <a class=\"struct\" href=\"janetrs/buffer/struct.JanetBuffer.html\" title=\"struct janetrs::buffer::JanetBuffer\">JanetBuffer</a>&lt;'_&gt;","synthetic":false,"types":["janetrs::types::buffer::JanetBuffer"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
