@@ -16,7 +16,7 @@ use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 /// throws an error, control is returned to the calling fiber. The parent fiber must then
 /// check what kind of state the fiber is in to differentiate errors from return values
 /// from user-defined signals
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[repr(transparent)]
 pub struct JanetFiber<'data> {
     pub(crate) raw: *mut CJanetFiber,

@@ -100,6 +100,7 @@ impl<'data> CallError<'data> {
 
     /// Display the stacktrace in the given `output`
     #[cfg(feature = "std")]
+    #[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
     #[inline]
     pub fn stacktrace<W: Write + ?Sized>(&mut self, output: &mut W) -> io::Result<()> {
         if let CallErrorKind::Run = self.kind {
@@ -151,10 +152,11 @@ impl Display for CallError<'_> {
 }
 
 #[cfg(feature = "std")]
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
 impl error::Error for CallError<'_> {}
 
 /// A representation of a Janet function defined at the Janet side.
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[repr(transparent)]
 pub struct JanetFunction<'data> {
     pub(crate) raw: *mut CJanetFunction,

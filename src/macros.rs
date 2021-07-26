@@ -361,6 +361,7 @@ macro_rules! jcatch {
 ///
 /// [`catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
 #[cfg(feature = "std")]
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
 #[macro_export]
 macro_rules! jtry {
     ($e:expr) => {{
