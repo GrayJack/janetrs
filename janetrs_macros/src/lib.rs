@@ -8,6 +8,8 @@ use janetrs_version::JanetVersion;
 mod utils;
 use utils::{janet_path_checker, Arg, Args, ArityArgs};
 
+use crate::utils::ModArgs;
+
 /// Macro that tranforms a high-level Janet function (`fn(&mut [Janet]) -> Janet`)
 /// to the thing the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) ->
 /// janetrs::lowlevel::Janet`)
@@ -288,4 +290,105 @@ pub fn cjvg(
     args: proc_macro::TokenStream, input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     janet_version(args, input)
+}
+
+/// Declare a Janet module.
+///
+/// This macro can detect and get the documentation from the function, so you just need to
+/// pass the function name for Janet and the identifier of the native function.
+///
+/// # Examples
+/// ```ignore
+/// use janetrs::{janet_mod, Janet, janet_fn};
+///
+/// /// (rust/hello)
+/// ///
+/// /// Rust says hello to you! 🦀
+/// #[janet_fn(arity(fix(0)))]
+/// fn rust_hello(args: &mut [Janet]) -> Janet {
+///     println!("Hello from Rust!");
+///     Janet::nil()
+/// }
+///
+/// /// (rust/hi)
+/// ///
+/// /// I introducing myself to you! 🙆
+/// #[janet_fn(arity(fix(0)))]
+/// fn hi(args: &mut [Janet]) -> Janet {
+///     Janet::from("Hi! My name is GrayJack!")
+/// }
+///
+/// declare_janet_mod!("rust";
+///     {"hello", rust_hello},
+///     {"hi", hi}
+/// );
+/// ```
+#[proc_macro]
+pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ModArgs {
+        mod_name,
+        fn_names,
+        fn_ptr_idents,
+        fn_doc_idents,
+        fn_line_idents,
+        fn_file_idents,
+    } = parse_macro_input!(input as ModArgs);
+
+    let ts = quote! {
+        #[no_mangle]
+        pub unsafe extern "C" fn _janet_mod_config() -> ::janetrs::lowlevel::JanetBuildConfig {
+            ::janetrs::lowlevel::JanetBuildConfig {
+                major: ::janetrs::lowlevel::JANET_VERSION_MAJOR,
+                minor: ::janetrs::lowlevel::JANET_VERSION_MINOR,
+                patch: ::janetrs::lowlevel::JANET_VERSION_PATCH,
+                bits:  ::janetrs::lowlevel::JANET_CURRENT_CONFIG_BITS,
+            }
+        }
+
+        #[::janetrs::cjvg("1.17.0")]
+        #[no_mangle]
+        pub unsafe extern "C" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
+            ::janetrs::lowlevel::janet_cfuns_ext(env, #mod_name.as_ptr() as *const _, [
+                #(
+                    ::janetrs::lowlevel::JanetRegExt {
+                        name: #fn_names.as_ptr() as *const _,
+                        cfun: Some(#fn_ptr_idents),
+                        documentation: #fn_doc_idents.as_ptr() as *const _,
+                        source_file: #fn_file_idents.as_ptr() as *const _,
+                        source_line: #fn_line_idents,
+                    },
+                )*
+
+                ::janetrs::lowlevel::JanetRegExt {
+                    name: std::ptr::null(),
+                    cfun: None,
+                    documentation: std::ptr::null(),
+                    source_file: std::ptr::null(),
+                    source_line: 0
+                },
+            ].as_ptr())
+        }
+
+        #[::janetrs::cjvg("1.0.0", "1.17.0")]
+        #[no_mangle]
+        pub unsafe extern "C" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
+            ::janetrs::lowlevel::janet_cfuns(env, #mod_name.as_ptr() as *const _, [
+                #(
+                    ::janetrs::lowlevel::JanetReg {
+                        name: #fn_names.as_ptr() as *const _,
+                        cfun: Some(#fn_ptr_idents),
+                        documentation: #fn_doc_idents.as_ptr() as *const _,
+                    },
+                )*
+
+                ::janetrs::lowlevel::JanetReg {
+                    name: std::ptr::null(),
+                    cfun: None,
+                    documentation: std::ptr::null(),
+                },
+            ].as_ptr())
+        }
+    };
+
+    ts.into()
 }

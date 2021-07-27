@@ -1,0 +1,34 @@
+use janetrs_macros::*;
+use janetrs::{self, Janet};
+
+#[janet_fn]
+pub fn function(_args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+#[janet_fn]
+pub fn function2(_args: &mut [janetrs::Janet]) -> janetrs::Janet {
+    Janet::nil()
+}
+
+declare_janet_mod!(10;
+    {"function1", function},
+    {"function2", function2},
+);
+
+declare_janet_mod!("test";
+    {10, function},
+    {"function2", function2},
+);
+
+declare_janet_mod!("test";
+    {"function1", 10},
+    {"function2", function2},
+);
+
+declare_janet_mod!("test";
+    {"function1", function},
+    {"function2", "function2"},
+);
+
+fn main() {}

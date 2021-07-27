@@ -7,10 +7,13 @@ All notable changes to the library should be put here
 -   **BREAKING:** Make `JanetGc::collect` an unsafe function
 -   Add `JanetFile` type
 -   Add `JanetRng` type
+-   Add `declare_janet_mod` macro to generate the machinery that Janet requires do create a Janet native module
+    - It satisfies the same purpose as `janet_mod`, but it can get the documentation string from the function doc-comments and for Janet versions above 1.17.0 it also add source map information for Janet
 -   Add `janet_abstract::register` function to register an abstract type.
 -   Add option to `janet_fn` attribute macro to include arity checks
 -   Improve error report of attribute macros
 -   Refactor the `janet_fn` attribute macro parameter parsing
+-   `janet_fn` now emits code with the function documentation and source map information as constants to be used by another macro `declare_janet_mod`
 -   Fix compilation when no_std and with unicode feature enabled
 
 ## 0.3.2

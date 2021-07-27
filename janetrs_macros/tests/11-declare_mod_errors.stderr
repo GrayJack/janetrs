@@ -1,0 +1,23 @@
+error: expected string literal
+  --> $DIR/11-declare_mod_errors:14:20
+   |
+14 | declare_janet_mod!(10;
+   |                    ^^
+
+error: expected string literal
+  --> $DIR/11-declare_mod_errors:20:6
+   |
+20 |     {10, function},
+   |      ^^
+
+error: expected identifier
+  --> $DIR/11-declare_mod_errors:25:19
+   |
+25 |     {"function1", 10},
+   |                   ^^
+
+error: expected identifier
+  --> $DIR/11-declare_mod_errors:31:19
+   |
+31 |     {"function2", "function2"},
+   |                   ^^^^^^^^^^^

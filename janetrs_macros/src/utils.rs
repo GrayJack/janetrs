@@ -208,3 +208,109 @@ impl syn::parse::Parse for DocArgs {
         Ok(this)
     }
 }
+
+
+/// Args for the `define_janet_mod` macro
+pub(crate) struct ModArgs {
+    pub(crate) mod_name:       syn::LitStr,
+    pub(crate) fn_names:       Vec<syn::LitStr>,
+    pub(crate) fn_ptr_idents:  Vec<syn::Ident>,
+    pub(crate) fn_doc_idents:  Vec<syn::Ident>,
+    pub(crate) fn_line_idents: Vec<syn::Ident>,
+    pub(crate) fn_file_idents: Vec<syn::Ident>,
+}
+
+#[derive(Clone)]
+pub(crate) struct JanetFn {
+    pub(crate) fn_name:       syn::LitStr,
+    pub(crate) fn_ptr_ident:  syn::Ident,
+    pub(crate) fn_doc_ident:  syn::Ident,
+    pub(crate) fn_line_ident: syn::Ident,
+    pub(crate) fn_file_ident: syn::Ident,
+}
+
+impl Parse for ModArgs {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let mod_name = {
+            let mod_name: syn::LitStr = input.parse()?;
+            let mut name = mod_name.value();
+            name.push('\0');
+            syn::LitStr::new(&name, mod_name.span())
+        };
+        let _a: Token![;] = input.parse()?;
+
+        let mut fn_names = Vec::with_capacity(10);
+        let mut fn_ptr_idents = Vec::with_capacity(10);
+        let mut fn_doc_idents = Vec::with_capacity(10);
+        let mut fn_line_idents = Vec::with_capacity(10);
+        let mut fn_file_idents = Vec::with_capacity(10);
+
+        let fn_infos: Punctuated<_, Token![,]> = input.parse_terminated(JanetFn::parse)?;
+
+        for JanetFn {
+            fn_name,
+            fn_ptr_ident,
+            fn_doc_ident,
+            fn_line_ident,
+            fn_file_ident,
+        } in fn_infos.into_iter()
+        {
+            fn_names.push(fn_name);
+            fn_ptr_idents.push(fn_ptr_ident);
+            fn_doc_idents.push(fn_doc_ident);
+            fn_line_idents.push(fn_line_ident);
+            fn_file_idents.push(fn_file_ident);
+        }
+
+        Ok(Self {
+            mod_name,
+            fn_names,
+            fn_ptr_idents,
+            fn_doc_idents,
+            fn_line_idents,
+            fn_file_idents,
+        })
+    }
+}
+
+impl Parse for JanetFn {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let content;
+        syn::braced!(content in input);
+
+        let fn_name = {
+            let orig_name: syn::LitStr = content.parse()?;
+            let mut name = orig_name.value();
+            name.push('\0');
+            syn::LitStr::new(&name, orig_name.span())
+        };
+
+        let _a: Token![,] = content.parse()?;
+        let fn_ptr_ident: syn::Ident = content.parse()?;
+
+        let fn_doc_ident = {
+            let mut docstring = fn_ptr_ident.to_string();
+            docstring.push_str("_docstring_");
+            syn::Ident::new(&docstring, fn_ptr_ident.span())
+        };
+        let fn_file_ident = {
+            let mut file = fn_ptr_ident.to_string();
+            file.push_str("_file_");
+            syn::Ident::new(&file, fn_ptr_ident.span())
+        };
+        let fn_line_ident = {
+            let mut line = fn_ptr_ident.to_string();
+            line.push_str("_line_");
+            syn::Ident::new(&line, fn_ptr_ident.span())
+        };
+
+
+        Ok(Self {
+            fn_name,
+            fn_ptr_ident,
+            fn_doc_ident,
+            fn_line_ident,
+            fn_file_ident,
+        })
+    }
+}
