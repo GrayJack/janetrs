@@ -229,12 +229,12 @@ macro_rules! janet_mod {
 
         #[no_mangle]
         pub unsafe extern "C" fn _janet_init(env: *mut $crate::lowlevel::JanetTable) {
-            $crate::lowlevel::janet_cfuns(env, concat!($mod_name, "\0").as_ptr() as *const i8, [
+            $crate::lowlevel::janet_cfuns(env, concat!($mod_name, "\0").as_ptr() as *const _, [
                 $(
                     $crate::lowlevel::JanetReg {
-                        name: concat!($fn_name, "\0").as_ptr() as *const i8,
+                        name: concat!($fn_name, "\0").as_ptr() as *const _,
                         cfun: Some($fn),
-                        documentation: concat!($fn_doc, "\0").as_ptr() as *const i8,
+                        documentation: concat!($fn_doc, "\0").as_ptr() as *const _,
                     },
                 )*
 
