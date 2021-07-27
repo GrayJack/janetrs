@@ -92,8 +92,24 @@ pub fn janet_fn(
     let ts = if let syn::Item::Fn(f) = func {
         let f_clone = f.clone();
         let attrs = f.attrs;
+        let doc_str = utils::get_doc(attrs.as_ref());
         let vis = f.vis;
         let name = f.sig.ident;
+        let name_docstring_ = {
+            let mut docstring = name.to_string();
+            docstring.push_str("_docstring_");
+            syn::Ident::new(&docstring, name.span())
+        };
+        let name_file_ = {
+            let mut file = name.to_string();
+            file.push_str("_file_");
+            syn::Ident::new(&file, name.span())
+        };
+        let name_line_ = {
+            let mut line = name.to_string();
+            line.push_str("_line_");
+            syn::Ident::new(&line, name.span())
+        };
         // let syn::ReturnType::Type(_, type_path) = f.sig.output;
 
         // check for inputs
@@ -144,9 +160,13 @@ pub fn janet_fn(
             }
 
             quote! {
-                #(#attrs)*
-                #[no_mangle]
-                #vis unsafe extern "C" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
+                #[allow(non_upper_case_globals)]
+                const #name_docstring_: &str = #doc_str;
+                #[allow(non_upper_case_globals)]
+                const #name_file_: &str = ::core::concat!(::core::file!(), "\0");
+                #[allow(non_upper_case_globals)]
+                const #name_line_: u32 = ::core::line!() + 1;
+                #(#attrs)* #[no_mangle] #vis unsafe extern "C" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
                     #[inline]
                     #f_clone
 
