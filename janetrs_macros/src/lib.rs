@@ -167,7 +167,7 @@ pub fn janet_fn(
                 #[allow(non_upper_case_globals)]
                 const #name_file_: &str = ::core::concat!(::core::file!(), "\0");
                 #[allow(non_upper_case_globals)]
-                const #name_line_: u32 = ::core::line!() + 1;
+                const #name_line_: i32 = ::core::line!() + 1;
                 #(#attrs)* #[no_mangle] #vis unsafe extern "C" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
                     #[inline]
                     #f_clone
@@ -355,7 +355,7 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
                         cfun: Some(#fn_ptr_idents),
                         documentation: #fn_doc_idents.as_ptr() as *const _,
                         source_file: #fn_file_idents.as_ptr() as *const _,
-                        source_line: #fn_line_idents,
+                        source_line: #fn_line_idents as i32,
                     },
                 )*
 
