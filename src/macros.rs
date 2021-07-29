@@ -248,9 +248,9 @@ macro_rules! janet_mod {
     };
 }
 
-/// Causes a panic in the Janet side. Diferently of the Rust `panic!` macro, this macro
-/// does **not** terminate the current thread. Instead, it sends a error signal with the
-/// passed message where the Janet runtime takes care to properly exit.
+/// Causes a panic in the Janet side (exception). Diferently of the Rust `panic!` macro,
+/// this macro does **not** terminate the current thread. Instead, it sends a error signal
+/// with the passed message where the Janet runtime takes care to properly exit.
 ///
 /// # Examples
 /// ```ignore
@@ -275,9 +275,9 @@ macro_rules! jpanic {
     };
 }
 
-/// Causes a panic in the Janet side. Diferently of the Rust `panic!` macro, this macro
-/// does **not** terminate the current thread. Instead, it sends a error signal with the
-/// passed message where the Janet runtime takes care to properly exit.
+/// Causes a panic in the Janet side (exception). Diferently of the Rust `panic!` macro,
+/// this macro does **not** terminate the current thread. Instead, it sends a error signal
+/// with the passed message where the Janet runtime takes care to properly exit.
 ///
 /// # Examples
 /// ```ignore
