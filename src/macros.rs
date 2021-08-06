@@ -265,13 +265,13 @@ macro_rules! janet_mod {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::_panic($crate::Janet::from("explicity panic"));
+        $crate::util::_panic($crate::Janet::from("explicity panic"))
     };
     ($msg:expr $(,)?) => {
-        $crate::util::_panic($crate::Janet::from($msg));
+        $crate::util::_panic($crate::Janet::from($msg))
     };
     ($msg:expr, $($arg:tt)+) => {
-        $crate::util::_panic($crate::Janet::from(::alloc::format!($msg, $($arg)+).as_str()));
+        $crate::util::_panic($crate::Janet::from(::alloc::format!($msg, $($arg)+).as_str()))
     };
 }
 
@@ -292,13 +292,13 @@ macro_rules! jpanic {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::_panic($crate::Janet::from("explicity panic"));
+        $crate::util::_panic($crate::Janet::from("explicity panic"))
     };
     ($msg:expr $(,)?) => {
-        $crate::util::_panic($crate::Janet::from($msg));
+        $crate::util::_panic($crate::Janet::from($msg))
     };
     ($msg:expr, $($arg:tt)+) => {
-        $crate::util::_panic($crate::Janet::from(::std::format!($msg, $($arg)+).as_str()));
+        $crate::util::_panic($crate::Janet::from(::std::format!($msg, $($arg)+).as_str()))
     };
 }
 
