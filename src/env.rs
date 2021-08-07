@@ -34,31 +34,31 @@ impl JanetEnvironment {
     /// Add a Janet immutable variable in the environment.
     #[inline]
     pub fn add_def(&mut self, name: &str, value: impl Into<Janet>) {
-        crate::util::def(&mut self.0, name, value, None)
+        crate::util::def(&mut self.0, name, value, None);
     }
 
     /// Add a Janet immutable variable in the environment with a documentation string.
     #[inline]
     pub fn add_def_with_doc(&mut self, name: &str, value: impl Into<Janet>, doc_str: &str) {
-        crate::util::def(&mut self.0, name, value, Some(doc_str))
+        crate::util::def(&mut self.0, name, value, Some(doc_str));
     }
 
     /// Add a Janet mutable variable in the environment.
     #[inline]
     pub fn add_var(&mut self, name: &str, value: impl Into<Janet>) {
-        crate::util::var(&mut self.0, name, value, None)
+        crate::util::var(&mut self.0, name, value, None);
     }
 
     /// Add a Janet mutable variable in the environment with a documentation string.
     #[inline]
     pub fn add_var_with_doc(&mut self, name: &str, value: impl Into<Janet>, doc_str: &str) {
-        crate::util::var(&mut self.0, name, value, Some(doc_str))
+        crate::util::var(&mut self.0, name, value, Some(doc_str));
     }
 
     /// Add a C function in the environment and register it on the VM.
     #[inline]
     pub fn add_c_func(&mut self, namespace: Option<&str>, name: &str, f: JanetCFunction) {
-        crate::util::c_func(&mut self.0, namespace, name, f, None)
+        crate::util::c_func(&mut self.0, namespace, name, f, None);
     }
 
     /// Add a C function in the environment with a documentation string and register it on
@@ -67,7 +67,7 @@ impl JanetEnvironment {
     pub fn add_c_func_with_doc(
         &mut self, namespace: Option<&str>, name: &str, f: JanetCFunction, doc_str: &str,
     ) {
-        crate::util::c_func(&mut self.0, namespace, name, f, Some(doc_str))
+        crate::util::c_func(&mut self.0, namespace, name, f, Some(doc_str));
     }
 
     /// Search the given `symbol` in the environment and returns the value if found.

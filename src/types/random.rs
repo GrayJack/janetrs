@@ -26,7 +26,7 @@ impl fmt::Debug for JanetRng {
 }
 
 impl IsJanetAbstract for JanetRng {
-    const SIZE: usize = mem::size_of::<JanetRng>();
+    const SIZE: usize = mem::size_of::<Self>();
 
     #[inline]
     fn type_info() -> &'static evil_janet::JanetAbstractType {

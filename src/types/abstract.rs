@@ -248,12 +248,8 @@ impl PartialOrd for JanetAbstract {
         let self_ty = self.raw_type_info();
         let other_ty = self.raw_type_info();
 
-        if self_ty != other_ty {
-            if self_ty > other_ty {
-                return Some(Ordering::Greater);
-            } else {
-                return Some(Ordering::Less);
-            }
+        if self_ty != other_ty && self_ty > other_ty {
+            return Some(Ordering::Greater);
         }
 
         let self_ty = self.type_info();
@@ -283,12 +279,8 @@ impl Ord for JanetAbstract {
         let self_ty = self.raw_type_info();
         let other_ty = self.raw_type_info();
 
-        if self_ty != other_ty {
-            if self_ty > other_ty {
-                return Ordering::Greater;
-            } else {
-                return Ordering::Less;
-            }
+        if self_ty != other_ty && self_ty > other_ty {
+            return Ordering::Greater;
         }
 
         let self_ty = self.type_info();
@@ -325,7 +317,6 @@ pub trait IsJanetAbstract {
 /// Register the [`JanetAbstractType`] of a type `T` that implements [`IsJanetAbstract`].
 ///
 /// Registering the type is required to be able to marshal the type.
-#[inline]
 pub fn register<T: IsJanetAbstract>() {
     let at = T::type_info();
     unsafe {
@@ -334,14 +325,14 @@ pub fn register<T: IsJanetAbstract>() {
         // If `abs_type_ptr` is NULL, the type is not registered, so we then register it
         let abs_type_ptr = evil_janet::janet_get_abstract_type(syn);
         if abs_type_ptr.is_null() {
-            evil_janet::janet_register_abstract_type(at)
+            evil_janet::janet_register_abstract_type(at);
         }
     }
 }
 
 
 impl IsJanetAbstract for i64 {
-    const SIZE: usize = core::mem::size_of::<i64>();
+    const SIZE: usize = core::mem::size_of::<Self>();
 
     fn type_info() -> &'static JanetAbstractType {
         unsafe { &evil_janet::janet_s64_type }
@@ -349,7 +340,7 @@ impl IsJanetAbstract for i64 {
 }
 
 impl IsJanetAbstract for u64 {
-    const SIZE: usize = core::mem::size_of::<u64>();
+    const SIZE: usize = core::mem::size_of::<Self>();
 
     fn type_info() -> &'static JanetAbstractType {
         unsafe { &evil_janet::janet_u64_type }

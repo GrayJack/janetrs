@@ -976,7 +976,7 @@ impl Clone for JanetTuple<'_> {
         let len = self.len();
         let mut clone = Self::builder(len);
 
-        for elem in self.into_iter().cloned() {
+        for elem in self.into_iter().copied() {
             clone = clone.put(elem);
         }
 
@@ -986,16 +986,14 @@ impl Clone for JanetTuple<'_> {
 
 impl PartialOrd for JanetTuple<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        use core::cmp::Ordering::*;
+        use core::cmp::Ordering::{Equal, Greater, Less};
 
         match self.len().cmp(&other.len()) {
-            x @ Less => Some(x),
-            x @ Greater => Some(x),
+            x @ (Less | Greater) => Some(x),
             Equal => {
                 for (s, o) in self.iter().zip(other.iter()) {
                     match s.partial_cmp(o) {
-                        x @ Some(Less) => return x,
-                        x @ Some(Greater) => return x,
+                        x @ Some(Less | Greater) => return x,
                         Some(Equal) => continue,
                         None => return None,
                     }
@@ -1008,16 +1006,14 @@ impl PartialOrd for JanetTuple<'_> {
 
 impl Ord for JanetTuple<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
-        use core::cmp::Ordering::*;
+        use core::cmp::Ordering::{Equal, Greater, Less};
 
         match self.len().cmp(&other.len()) {
-            x @ Less => x,
-            x @ Greater => x,
+            x @ (Less | Greater) => x,
             Equal => {
                 for (s, o) in self.iter().zip(other.iter()) {
                     match s.cmp(o) {
-                        x @ Less => return x,
-                        x @ Greater => return x,
+                        x @ (Less | Greater) => return x,
                         Equal => continue,
                     }
                 }
@@ -1241,7 +1237,7 @@ impl<'a> Iterator for IntoIter<'_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.tup.get(self.index_head).cloned();
+            let ret = self.tup.get(self.index_head).copied();
             self.index_head += 1;
             ret
         }
@@ -1261,7 +1257,7 @@ impl DoubleEndedIterator for IntoIter<'_> {
             None
         } else {
             self.index_tail -= 1;
-            self.tup.get(self.index_tail).cloned()
+            self.tup.get(self.index_tail).copied()
         }
     }
 }

@@ -80,7 +80,7 @@ pub fn c_func(
 
         env.insert(JanetSymbol::new(&full_name), cfun);
     } else {
-        def(env, fn_name, f, doc)
+        def(env, fn_name, f, doc);
     }
 
     let mut null_name = crate::types::JanetBuffer::from(fn_name);

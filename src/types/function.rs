@@ -334,10 +334,10 @@ mod trystate {
 
             state.payload = Janet::nil().into();
 
-            JanetTryState { inner: state }
+            Self { inner: state }
         }
 
-        /// Check if the VM have a valid JanetFiber.
+        /// Check if the VM have a valid [`JanetFiber`](crate::JanetFiber).
         #[inline]
         pub fn is_valid_to_run(&self) -> bool {
             !self.inner.vm_fiber.is_null()

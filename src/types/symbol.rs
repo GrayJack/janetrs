@@ -21,8 +21,8 @@ pub struct JanetSymbol<'data> {
 impl JanetSymbol<'_> {
     /// Create a [`JanetSymbol`] with given `name`.
     ///
-    /// If the given `name` is bigger than i32::MAX the generated symbol will have a name
-    /// trucated to that max size. That's unrealistic thought.
+    /// If the given `name` is bigger than [`i32::MAX`] the generated symbol will have a
+    /// name trucated to that max size. That's unrealistic thought.
     ///
     /// # Examples
     /// ```

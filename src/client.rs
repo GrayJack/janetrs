@@ -152,7 +152,7 @@ impl JanetClient {
         }
 
         if let Some(ref mut env) = self.env_table {
-            env.add_def(name, value)
+            env.add_def(name, value);
         }
     }
 
@@ -181,7 +181,7 @@ impl JanetClient {
         }
 
         if let Some(ref mut env) = self.env_table {
-            env.add_def_with_doc(name, value, doc)
+            env.add_def_with_doc(name, value, doc);
         }
     }
 
@@ -210,7 +210,7 @@ impl JanetClient {
         }
 
         if let Some(ref mut env) = self.env_table {
-            env.add_var(name, value)
+            env.add_var(name, value);
         }
     }
 
@@ -239,7 +239,7 @@ impl JanetClient {
         }
 
         if let Some(ref mut env) = self.env_table {
-            env.add_var_with_doc(name, value, doc)
+            env.add_var_with_doc(name, value, doc);
         }
     }
 
@@ -273,7 +273,7 @@ impl JanetClient {
         }
 
         if let Some(ref mut env) = self.env_table {
-            env.add_c_func(namespace, name, f)
+            env.add_c_func(namespace, name, f);
         }
     }
 
@@ -309,7 +309,7 @@ impl JanetClient {
         }
 
         if let Some(ref mut env) = self.env_table {
-            env.add_c_func_with_doc(namespace, name, f, doc)
+            env.add_c_func_with_doc(namespace, name, f, doc);
         }
     }
 

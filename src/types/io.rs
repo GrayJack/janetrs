@@ -35,14 +35,14 @@ impl JanetFile {
 
     /// Return the flags of the JanetFile.
     #[inline]
-    pub fn flags(&self) -> FileFlags {
+    pub const fn flags(&self) -> FileFlags {
         FileFlags((self.raw).flags)
     }
 
     /// Returns a exclusive reference to the flags of the JanetFile.
     #[inline]
     pub fn flags_mut(&mut self) -> &mut FileFlags {
-        unsafe { core::mem::transmute::<&mut i32, &mut FileFlags>(&mut (self.raw).flags) }
+        unsafe { &mut *(&mut (self.raw).flags as *mut i32 as *mut FileFlags) }
     }
 }
 
@@ -161,37 +161,37 @@ impl FileFlags {
         (self.0 & Self::CLOSED.0) == Self::CLOSED.0
     }
 
-    /// Check if the flag has the not_closeable value.
+    /// Check if the flag has the `not_closeable` value.
     #[inline]
     pub const fn is_not_closeable(self) -> bool {
         (self.0 & Self::NOT_CLOSEABLE.0) == Self::NOT_CLOSEABLE.0
     }
 
-    /// Check if the flag has the no_nil value.
+    /// Check if the flag has the `no_nil` value.
     #[inline]
     pub const fn is_no_nil(self) -> bool {
         (self.0 & Self::NO_NIL.0) == Self::NO_NIL.0
     }
 
-    /// Check if the flag has the piped value.
+    /// Check if the flag has the `piped` value.
     #[inline]
     pub const fn is_piped(self) -> bool {
         (self.0 & Self::PIPED.0) == Self::PIPED.0
     }
 
-    /// Check if the flag has the read value.
+    /// Check if the flag has the `read` value.
     #[inline]
     pub const fn is_read(self) -> bool {
         (self.0 & Self::READ.0) == Self::READ.0
     }
 
-    /// Check if the flag has the serializeble value.
+    /// Check if the flag has the `serializeble` value.
     #[inline]
     pub const fn is_serializeble(self) -> bool {
         (self.0 & Self::SERIALIZEBLE.0) == Self::SERIALIZEBLE.0
     }
 
-    /// Check if the flag has the write value.
+    /// Check if the flag has the `write` value.
     #[inline]
     pub const fn is_write(self) -> bool {
         (self.0 & Self::WRITE.0) == Self::WRITE.0

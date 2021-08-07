@@ -326,7 +326,7 @@ impl Janet {
         // let mut key = String::from(key.to_str().ok()?);
         // key.push('\0');
 
-        let janet = Janet::from(unsafe { evil_janet::janet_dyn(key.as_ptr() as *const _) });
+        let janet = Self::from(unsafe { evil_janet::janet_dyn(key.as_ptr() as *const _) });
 
         if janet.is_nil() { None } else { Some(janet) }
     }
@@ -340,7 +340,7 @@ impl Janet {
 
     /// Wraps a value into a [`Janet`].
     #[inline]
-    pub fn wrap(value: impl Into<Janet>) -> Self {
+    pub fn wrap(value: impl Into<Self>) -> Self {
         value.into()
     }
 
@@ -382,7 +382,7 @@ impl Janet {
             TaggedJanet::Tuple(x) => Some(x.len()),
             TaggedJanet::Abstract(_) => {
                 self.get_method("length")
-                    .and_then(|method: Janet| match method.unwrap() {
+                    .and_then(|method: Self| match method.unwrap() {
                         // I think Abstract methods can only be a C function because as far a
                         // I(GrayJack) know, a JanetFunction cannot be created (as in written) by
                         // the public Janet C API.
@@ -394,7 +394,7 @@ impl Janet {
                         // function will not cause UB. It can janet panic.
                         unsafe { f(1, [self.inner].as_mut_ptr()) }.into()
                     })
-                    .and_then(|len: Janet| match len.unwrap() {
+                    .and_then(|len: Self| match len.unwrap() {
                         TaggedJanet::Number(x) => {
                             if x >= i32::MIN as f64
                                 && x <= i32::MAX as f64
@@ -430,9 +430,9 @@ impl Janet {
 
     /// Retuns a `Janet` value containing the requested method if it exists.
     #[inline]
-    pub fn get_method(&self, method_name: &str) -> Option<Janet> {
-        let method_name: Janet = JanetKeyword::from(method_name).into();
-        let method: Janet = unsafe { evil_janet::janet_get(self.inner, method_name.inner) }.into();
+    pub fn get_method(&self, method_name: &str) -> Option<Self> {
+        let method_name: Self = JanetKeyword::from(method_name).into();
+        let method: Self = unsafe { evil_janet::janet_get(self.inner, method_name.inner) }.into();
 
         if method.is_nil() {
             return None;
@@ -620,15 +620,15 @@ impl fmt::Display for Janet {
                         match name.unwrap() {
                             TaggedJanet::Buffer(s) => {
                                 f.write_char('@')?;
-                                fmt::Display::fmt(&s, f)?
+                                fmt::Display::fmt(&s, f)?;
                             },
                             TaggedJanet::String(s) => {
                                 f.write_char('@')?;
-                                fmt::Display::fmt(&s, f)?
+                                fmt::Display::fmt(&s, f)?;
                             },
                             TaggedJanet::Symbol(s) => {
                                 f.write_char('@')?;
-                                fmt::Display::fmt(&s, f)?
+                                fmt::Display::fmt(&s, f)?;
                             },
                             _ => f.write_char('@')?,
                         }
@@ -655,16 +655,16 @@ impl fmt::Display for Janet {
 #[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
 impl error::Error for Janet {}
 
-impl PartialEq<&Janet> for Janet {
+impl PartialEq<&Self> for Janet {
     #[inline]
-    fn eq(&self, other: &&Janet) -> bool {
+    fn eq(&self, other: &&Self) -> bool {
         self.eq(*other)
     }
 }
 
-impl PartialOrd<&Janet> for Janet {
+impl PartialOrd<&Self> for Janet {
     #[inline]
-    fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &&Self) -> Option<Ordering> {
         self.partial_cmp(*other)
     }
 }
@@ -719,9 +719,9 @@ impl From<&CJanet> for Janet {
     }
 }
 
-impl From<&Janet> for Janet {
+impl From<&Self> for Janet {
     #[inline]
-    fn from(val: &Janet) -> Self {
+    fn from(val: &Self) -> Self {
         *val
     }
 }
@@ -1307,7 +1307,7 @@ impl From<u32> for JanetSignal {
 
 impl From<JanetSignal> for u32 {
     fn from(val: JanetSignal) -> Self {
-        val as u32
+        val as _
     }
 }
 

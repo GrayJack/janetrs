@@ -437,7 +437,7 @@ impl<'data> JanetArray<'data> {
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn append(&mut self, other: &mut Self) {
         other.iter().for_each(|&j| self.push(j));
-        other.clear()
+        other.clear();
     }
 
     /// Inserts an element at position `index` within the array, shifting all elements
@@ -495,7 +495,7 @@ impl<'data> JanetArray<'data> {
 
         // Shift all elements to the right
         for i in index..self.len() - 1 {
-            self[i] = self[i + 1]
+            self[i] = self[i + 1];
         }
 
         self.set_len(self.len() - 1);

@@ -491,19 +491,16 @@ impl Eq for JanetStruct<'_> {}
 impl PartialOrd for JanetStruct<'_> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        use core::cmp::Ordering::*;
+        use core::cmp::Ordering::{Equal, Greater, Less};
 
         match self.len().cmp(&other.len()) {
-            x @ Less => Some(x),
-            x @ Greater => Some(x),
+            x @ (Less | Greater) => Some(x),
             Equal => match self.head().hash.cmp(&other.head().hash) {
-                x @ Less => Some(x),
-                x @ Greater => Some(x),
+                x @ (Less | Greater) => Some(x),
                 Equal => {
                     for (s, ref o) in self.iter().zip(other.iter()) {
                         match s.partial_cmp(o) {
-                            x @ Some(Less) => return x,
-                            x @ Some(Greater) => return x,
+                            x @ Some(Less | Greater) => return x,
                             Some(Equal) => continue,
                             None => return None,
                         }
@@ -518,19 +515,16 @@ impl PartialOrd for JanetStruct<'_> {
 impl Ord for JanetStruct<'_> {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        use core::cmp::Ordering::*;
+        use core::cmp::Ordering::{Equal, Greater, Less};
 
         match self.len().cmp(&other.len()) {
-            x @ Less => x,
-            x @ Greater => x,
+            x @ (Less | Greater) => x,
             Equal => match self.head().hash.cmp(&other.head().hash) {
-                x @ Less => x,
-                x @ Greater => x,
+                x @ (Less | Greater) => x,
                 Equal => {
                     for (s, ref o) in self.iter().zip(other.iter()) {
                         match s.cmp(o) {
-                            x @ Less => return x,
-                            x @ Greater => return x,
+                            x @ (Less | Greater) => return x,
                             Equal => continue,
                         }
                     }
@@ -585,7 +579,7 @@ impl From<&JanetTable<'_>> for JanetStruct<'_> {
     fn from(table: &JanetTable<'_>) -> Self {
         let mut st = Self::builder(table.len());
 
-        for (k, v) in table.into_iter() {
+        for (k, v) in table {
             st = st.put(k, v);
         }
 
