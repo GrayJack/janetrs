@@ -214,6 +214,7 @@ macro_rules! table {
 ///     {"hi", hi, "(rust/hi)\n\nHi! My name is..."}
 /// );
 /// ```
+#[deprecated(since = "0.4.0", note = "use `declare_janet_mod` instead")]
 #[macro_export]
 macro_rules! janet_mod {
     ($mod_name:literal; $({$fn_name:literal, $fn:expr, $fn_doc:literal}),* $(,)?) => {
