@@ -11,9 +11,15 @@ pub fn function2(_args: &mut [janetrs::Janet]) -> janetrs::Janet {
     Janet::nil()
 }
 
+#[janet_fn]
+pub fn function3(_args: &mut [janetrs::Janet]) -> janetrs::Janet {
+    Janet::nil()
+}
+
 declare_janet_mod!("test";
     {"function1", function},
-    {"function2", function2},
+    {"function2", function2, "My doc string here"},
+    {"function3", function3,}
 );
 
 fn main() {}

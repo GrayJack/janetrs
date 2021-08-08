@@ -31,4 +31,9 @@ declare_janet_mod!("test";
     {"function2", "function2"},
 );
 
+declare_janet_mod!("test";
+    {"function1", function},
+    {"function2", function2, 10},
+);
+
 fn main() {}

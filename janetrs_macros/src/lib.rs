@@ -332,7 +332,61 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
         fn_doc_idents,
         fn_line_idents,
         fn_file_idents,
+        fn_doc_lits,
     } = parse_macro_input!(input as ModArgs);
+
+    let regs_ext = fn_doc_lits.iter().enumerate().map(|(i, doc_lit)| {
+        let fn_name = &fn_names[i];
+        let fn_ptr_ident = &fn_ptr_idents[i];
+        let fn_doc_ident = &fn_doc_idents[i];
+        let fn_line_ident = &fn_line_idents[i];
+        let fn_file_ident = &fn_file_idents[i];
+        if let Some(fn_doc_lit) = doc_lit {
+            quote! {
+                ::janetrs::lowlevel::JanetRegExt {
+                    name: #fn_name.as_ptr() as *const _,
+                    cfun: Some(#fn_ptr_ident),
+                    documentation: #fn_doc_lit.as_ptr() as *const _,
+                    source_file: #fn_file_ident.as_ptr() as *const _,
+                    source_line: #fn_line_ident as i32,
+                },
+            }
+        } else {
+            quote! {
+                ::janetrs::lowlevel::JanetRegExt {
+                    name: #fn_name.as_ptr() as *const _,
+                    cfun: Some(#fn_ptr_ident),
+                    documentation: #fn_doc_ident.as_ptr() as *const _,
+                    source_file: #fn_file_ident.as_ptr() as *const _,
+                    source_line: #fn_line_ident as i32,
+                },
+            }
+        }
+    });
+
+    let regs = fn_doc_lits.iter().enumerate().map(|(i, doc_lit)| {
+        let fn_name = &fn_names[i];
+        let fn_ptr_ident = &fn_ptr_idents[i];
+        let fn_doc_ident = &fn_doc_idents[i];
+
+        if let Some(fn_doc_lit) = doc_lit {
+            quote! {
+                ::janetrs::lowlevel::JanetReg {
+                    name: #fn_name.as_ptr() as *const _,
+                    cfun: Some(#fn_ptr_ident),
+                    documentation: #fn_doc_lit.as_ptr() as *const _,
+                },
+            }
+        } else {
+            quote! {
+                ::janetrs::lowlevel::JanetReg {
+                    name: #fn_name.as_ptr() as *const _,
+                    cfun: Some(#fn_ptr_ident),
+                    documentation: #fn_doc_ident.as_ptr() as *const _,
+                },
+            }
+        }
+    });
 
     let ts = quote! {
         #[no_mangle]
@@ -350,13 +404,7 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
         pub unsafe extern "C" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
             ::janetrs::lowlevel::janet_cfuns_ext(env, #mod_name.as_ptr() as *const _, [
                 #(
-                    ::janetrs::lowlevel::JanetRegExt {
-                        name: #fn_names.as_ptr() as *const _,
-                        cfun: Some(#fn_ptr_idents),
-                        documentation: #fn_doc_idents.as_ptr() as *const _,
-                        source_file: #fn_file_idents.as_ptr() as *const _,
-                        source_line: #fn_line_idents as i32,
-                    },
+                    #regs_ext
                 )*
 
                 ::janetrs::lowlevel::JanetRegExt {
@@ -374,11 +422,7 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
         pub unsafe extern "C" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
             ::janetrs::lowlevel::janet_cfuns(env, #mod_name.as_ptr() as *const _, [
                 #(
-                    ::janetrs::lowlevel::JanetReg {
-                        name: #fn_names.as_ptr() as *const _,
-                        cfun: Some(#fn_ptr_idents),
-                        documentation: #fn_doc_idents.as_ptr() as *const _,
-                    },
+                    #regs
                 )*
 
                 ::janetrs::lowlevel::JanetReg {

@@ -218,6 +218,7 @@ pub(crate) struct ModArgs {
     pub(crate) fn_doc_idents:  Vec<syn::Ident>,
     pub(crate) fn_line_idents: Vec<syn::Ident>,
     pub(crate) fn_file_idents: Vec<syn::Ident>,
+    pub(crate) fn_doc_lits:    Vec<Option<syn::LitStr>>,
 }
 
 #[derive(Clone)]
@@ -227,6 +228,7 @@ pub(crate) struct JanetFn {
     pub(crate) fn_doc_ident:  syn::Ident,
     pub(crate) fn_line_ident: syn::Ident,
     pub(crate) fn_file_ident: syn::Ident,
+    pub(crate) fn_doc_lit:    Option<syn::LitStr>,
 }
 
 impl Parse for ModArgs {
@@ -244,6 +246,7 @@ impl Parse for ModArgs {
         let mut fn_doc_idents = Vec::with_capacity(10);
         let mut fn_line_idents = Vec::with_capacity(10);
         let mut fn_file_idents = Vec::with_capacity(10);
+        let mut fn_doc_lits = Vec::with_capacity(10);
 
         let fn_infos: Punctuated<_, Token![,]> = input.parse_terminated(JanetFn::parse)?;
 
@@ -253,6 +256,7 @@ impl Parse for ModArgs {
             fn_doc_ident,
             fn_line_ident,
             fn_file_ident,
+            fn_doc_lit,
         } in fn_infos.into_iter()
         {
             fn_names.push(fn_name);
@@ -260,6 +264,7 @@ impl Parse for ModArgs {
             fn_doc_idents.push(fn_doc_ident);
             fn_line_idents.push(fn_line_ident);
             fn_file_idents.push(fn_file_ident);
+            fn_doc_lits.push(fn_doc_lit);
         }
 
         Ok(Self {
@@ -269,6 +274,7 @@ impl Parse for ModArgs {
             fn_doc_idents,
             fn_line_idents,
             fn_file_idents,
+            fn_doc_lits,
         })
     }
 }
@@ -304,6 +310,34 @@ impl Parse for JanetFn {
             syn::Ident::new(&line, fn_ptr_ident.span())
         };
 
+        let fn_doc_lit = match content.parse::<Token![,]>() {
+            Ok(_) => {
+                if content.is_empty() {
+                    None
+                } else {
+                    let orig_doc_str: syn::LitStr = content.parse()?;
+                    let mut name = orig_doc_str.value();
+                    name.push('\0');
+
+                    Some(syn::LitStr::new(&name, orig_doc_str.span()))
+                }
+            },
+            Err(_) => None,
+        };
+
+        // let fn_doc_lit = if content.peek(Token![,]) && content.peek2(syn::LitStr) {
+        //     let _a: Token![,] = content.parse()?;
+        //     let orig_doc_str: syn::LitStr = content.parse()?;
+        //     let mut name = orig_doc_str.value();
+        //     name.push('\0');
+
+        //     Some(syn::LitStr::new(&name, orig_doc_str.span()))
+        // } else if content.peek(Token![,]) {
+        //     let _a: Token![,] = content.parse()?;
+        //     None
+        // } else {
+        //     None
+        // };
 
         Ok(Self {
             fn_name,
@@ -311,6 +345,7 @@ impl Parse for JanetFn {
             fn_doc_ident,
             fn_line_ident,
             fn_file_ident,
+            fn_doc_lit,
         })
     }
 }

@@ -21,3 +21,9 @@ error: expected identifier
    |
 31 |     {"function2", "function2"},
    |                   ^^^^^^^^^^^
+
+error: expected string literal
+  --> $DIR/11-declare_mod_errors:36:30
+   |
+36 |     {"function2", function2, 10},
+   |                              ^^
