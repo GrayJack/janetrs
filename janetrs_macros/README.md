@@ -43,3 +43,39 @@ A macro da conditionally includes the `input` if the version of Janet is bigger 
 equal to the passed minimal version and smaller than the passed maximum version.
 
 That means that the range is open in the maximum version: [MIN_VERSION, MAX_VERSION).
+
+### Janet Module Declaration
+**Usages:**
+```rust
+use janetrs::{janet_mod, Janet, janet_fn};
+
+/// (rust/hello)
+///
+/// Rust says hello to you! 🦀
+#[janet_fn(arity(fix(0)))]
+fn rust_hello(args: &mut [Janet]) -> Janet {
+    println!("Hello from Rust!");
+    Janet::nil()
+}
+
+/// (rust/hi)
+///
+/// I introducing myself to you! 🙆
+#[janet_fn(arity(fix(0)))]
+fn hi(args: &mut [Janet]) -> Janet {
+    Janet::from("Hi! My name is GrayJack!")
+}
+
+#[janet_fn(arity(fix(0)))]
+fn no_doc_fn(args: &mut [Janet]) -> Janet {
+    Janet::nil()
+}
+
+declare_janet_mod!("rust";
+    {"hello", rust_hello},
+    {"hi", hi},
+    {"no_doc_fn", no_doc_fn, "Using custom docs as string literal"},
+);
+```
+
+A macro to declare a Janet module/library and the exposed functions.
