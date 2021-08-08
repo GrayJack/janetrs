@@ -318,9 +318,15 @@ pub fn cjvg(
 ///     Janet::from("Hi! My name is GrayJack!")
 /// }
 ///
+/// #[janet_fn(arity(fix(0)))]
+/// fn no_doc_fn(args: &mut [Janet]) -> Janet {
+///     Janet::nil()
+/// }
+///
 /// declare_janet_mod!("rust";
 ///     {"hello", rust_hello},
-///     {"hi", hi}
+///     {"hi", hi},
+///     {"no_doc_fn", no_doc_fn, "Using custom docs as string literal"},
 /// );
 /// ```
 #[proc_macro]
