@@ -1,6 +1,6 @@
 [package]
 name = "janetrs_macros"
-version = "0.4.5"
+version = "0.4.6"
 authors = ["Eric Shimizu Karbstein <gr41.j4ck@gmail.com>"]
 description = "Attribute macros for JanetRS"
 repository = "https://github.com/GrayJack/janetrs"

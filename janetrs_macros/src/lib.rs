@@ -1,6 +1,6 @@
 extern crate proc_macro;
 
-use quote::{quote, quote_spanned};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse_macro_input, spanned::Spanned};
 
 use janetrs_version::JanetVersion;
@@ -441,4 +441,75 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     };
 
     ts.into()
+}
+
+/// Checks the specified version of Janet is equal of the used Janet. Emits a boolean.
+///
+/// **Usage:** `check_janet_version!(<MIN_VERSION>, [MAX_VERSION])` where `MIN_VERSION`
+/// and `MAX_VERSION` are string literals.
+///
+/// That means that the range is open in the maximum version: [MIN_VERSION, MAX_VERSION).
+#[proc_macro]
+pub fn check_janet_version(args: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let global_span = proc_macro2::TokenStream::from(args.clone()).span();
+    let args = parse_macro_input!(args as syn::AttributeArgs);
+    // let input = parse_macro_input!(input as syn::Item);
+
+    if args.len() > 2 {
+        return quote_spanned!{global_span => compile_error!("expected at max two argument to the janet_version proc-macro");}
+            .into();
+    }
+
+    if args.is_empty() {
+        return quote_spanned!{global_span => compile_error!("expected at least one argument to the janet_version proc-macro");}
+            .into();
+    }
+
+    let min_lit = if let syn::NestedMeta::Lit(syn::Lit::Str(ref lit)) = args[0] {
+        lit
+    } else {
+        return quote_spanned! {args[0].span() => compile_error!("the argument must be a string literal");}.into();
+    };
+
+    let max_lit = match args.get(1) {
+        Some(syn::NestedMeta::Lit(syn::Lit::Str(ref lit))) => Some(lit),
+        None => None,
+        _ => return quote_spanned! {args[1].span() => compile_error!("the argument must be a string literal");}.into()
+    };
+
+    match parse_args(&min_lit.value()) {
+        Ok(req_min_ver) => {
+            if let Some(max_lit) = max_lit {
+                match parse_args(&max_lit.value()) {
+                    Ok(req_max_ver) => {
+                        if req_min_ver <= CURRENT_JANET && req_max_ver > CURRENT_JANET {
+                            syn::LitBool::new(true, global_span)
+                                .to_token_stream()
+                                .into()
+                        } else {
+                            syn::LitBool::new(false, global_span)
+                                .to_token_stream()
+                                .into()
+                        }
+                    },
+                    Err(err) => {
+                        let err = format!("invalid string literal: {}", err);
+                        (quote_spanned! {max_lit.span() => compile_error!(#err);}).into()
+                    },
+                }
+            } else if req_min_ver <= CURRENT_JANET {
+                syn::LitBool::new(true, global_span)
+                    .to_token_stream()
+                    .into()
+            } else {
+                syn::LitBool::new(false, global_span)
+                    .to_token_stream()
+                    .into()
+            }
+        },
+        Err(err) => {
+            let err = format!("invalid string literal: {}", err);
+            (quote_spanned! {min_lit.span() => compile_error!(#err);}).into()
+        },
+    }
 }
