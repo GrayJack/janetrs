@@ -82,4 +82,4 @@ pub use types::*;
 
 pub use gc::{JanetGc, JanetGcLockGuard, JanetGcRootGuard};
 
-pub use janetrs_macros::{cjvg, declare_janet_mod, janet_fn, janet_version};
+pub use janetrs_macros::{check_janet_version, cjvg, declare_janet_mod, janet_fn, janet_version};

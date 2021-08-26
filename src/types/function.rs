@@ -26,6 +26,9 @@ pub use trystate::JanetTryState;
 /// C function pointer that is accepted by Janet as a type.
 pub type JanetCFunction = evil_janet::JanetCFunction;
 
+/// raw C Function
+pub type JanetRawCFunction = unsafe extern "C" fn(i32, *mut evil_janet::Janet) -> evil_janet::Janet;
+
 /// Error type that happens when calling a [`JanetFunction`] on the Rust side.
 #[derive(Debug)]
 pub struct CallError<'data> {

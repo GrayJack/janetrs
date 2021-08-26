@@ -5,8 +5,16 @@ All notable changes to the library should be put here
 ## Unreleased
 
 - **BREAKING:** Make `JanetGc::collect` an unsafe function
+- **BREAKING:** Remove `JanetEnvironment::add_def_with_doc`,
+  `JanetEnvironment::add_var_with_doc`, `JanetEnvironment::add_c_func_with_doc`
+  and `JanetClient` functions with the same names
+- **BREAKING:** Remove `util::def`, `util::var`, `util::c_func`
+- **BREAKING:** Rename `JanetEnviornment::add_c_func` to
+  `JanetEnvironment::add_c_fn` `JanetEnvironment::add_c_fn`
 - Add `JanetFile` type
 - Add `JanetRng` type
+- Add `DefOptions`, `VarOptions`, `CFunOptions` to interact with the Janet
+  environment
 - Add `declare_janet_mod` macro to generate the machinery that Janet requires do
   create a Janet native module
   - It satisfies the same purpose as `janet_mod`, but it can get the
@@ -16,6 +24,7 @@ All notable changes to the library should be put here
 - Add option to `janet_fn` attribute macro to include arity checks
 - Improve error report of attribute macros
 - Refactor the `janet_fn` attribute macro parameter parsing
+- Refactor the `JanetEnvironment` and `JanetClient` API
 - `janet_fn` now emits code with the function documentation and source map
   information as constants to be used by another macro `declare_janet_mod`
 - Fix compilation when no_std and with unicode feature enabled
