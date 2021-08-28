@@ -1,7 +1,7 @@
 //! Module for the Janet environment structure and methods.
 use core::ptr;
 
-use alloc::format;
+use alloc::{format, string::String};
 
 use crate::{
     function::JanetRawCFunction, Janet, JanetKeyword, JanetString, JanetSymbol, JanetTable,
