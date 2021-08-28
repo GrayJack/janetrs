@@ -319,7 +319,7 @@ impl Janet {
 
     /// Get a dynamic [keywrord](self::JanetKeyword) binding from the environment if it
     /// exists.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn dynamic(key: impl AsRef<[u8]>) -> Option<Self> {
         let mut key: JanetBuffer = key.as_ref().into();
         key.push('\0');
@@ -332,14 +332,14 @@ impl Janet {
     }
 
     /// Resolve a `symbol` in the core environment.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn from_core<'a>(symbol: impl Into<JanetSymbol<'a>>) -> Option<Self> {
         let env = JanetEnvironment::default();
         env.resolve(symbol)
     }
 
     /// Wraps a value into a [`Janet`].
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn wrap(value: impl Into<Self>) -> Self {
         value.into()
     }
@@ -352,7 +352,7 @@ impl Janet {
 
     /// Tries to unwrap the [`Janet`] into a concrete type that implements
     /// [`TryFrom`]<[`Janet`]>.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn try_unwrap<T: TryFrom<Self>>(self) -> Result<T, T::Error> {
         T::try_from(self)
     }
@@ -476,9 +476,9 @@ macro_rules! struct_table_display {
                 let key = unsafe { keys.get_unchecked(i) };
                 let value = unsafe { $id.get_unchecked(key) };
 
-                fmt::Display::fmt(key, $f)?;
+                Display::fmt(key, $f)?;
                 $f.write_str(" : ")?;
-                fmt::Display::fmt(value, $f)?;
+                Display::fmt(value, $f)?;
                 $f.write_str(", ")?;
             }
 
@@ -489,9 +489,9 @@ macro_rules! struct_table_display {
                 let key = unsafe { keys.get_unchecked(i) };
                 let value = unsafe { $id.get_unchecked(key) };
 
-                fmt::Display::fmt(key, $f)?;
+                Display::fmt(key, $f)?;
                 $f.write_str(" : ")?;
-                fmt::Display::fmt(value, $f)?;
+                Display::fmt(value, $f)?;
                 $f.write_str(", ")?;
             }
 
@@ -499,15 +499,15 @@ macro_rules! struct_table_display {
             let key = unsafe { keys.get_unchecked(len - 1) };
             let value = unsafe { $id.get_unchecked(key) };
 
-            fmt::Display::fmt(key, $f)?;
+            Display::fmt(key, $f)?;
             $f.write_str(" : ")?;
-            fmt::Display::fmt(value, $f)?;
+            Display::fmt(value, $f)?;
         } else {
             let mut count = $id.len();
-            for (key, value) in &$id {
-                fmt::Display::fmt(key, $f)?;
+            for (key, value) in $id.iter() {
+                Display::fmt(key, $f)?;
                 $f.write_str(" : ")?;
-                fmt::Display::fmt(value, $f)?;
+                Display::fmt(value, $f)?;
 
                 if count != 1 {
                     $f.write_str(", ")?;
@@ -529,7 +529,7 @@ macro_rules! array_tuple_display {
             for i in 0..5 {
                 // SAFETY: We are in-bounds
                 let it = unsafe { $id.get_unchecked(i) };
-                fmt::Display::fmt(it, $f)?;
+                Display::fmt(it, $f)?;
                 $f.write_str(", ")?;
             }
 
@@ -538,16 +538,16 @@ macro_rules! array_tuple_display {
             for i in len - 5..len - 1 {
                 // SAFETY: We are in-bounds
                 let it = unsafe { $id.get_unchecked(i) };
-                fmt::Display::fmt(it, $f)?;
+                Display::fmt(it, $f)?;
                 $f.write_str(", ")?;
             }
 
             // SAFETY: We are in-bounds
             let it = unsafe { $id.get_unchecked(len) };
-            fmt::Display::fmt(it, $f)?;
+            Display::fmt(it, $f)?;
         } else {
-            for it in &$id {
-                fmt::Display::fmt(it, $f)?;
+            for it in $id.iter() {
+                Display::fmt(it, $f)?;
 
                 if len != 1 {
                     $f.write_str(", ")?;
@@ -559,95 +559,10 @@ macro_rules! array_tuple_display {
     };
 }
 
-impl fmt::Display for Janet {
+impl Display for Janet {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.unwrap() {
-            TaggedJanet::Boolean(b) => fmt::Display::fmt(&b, f),
-            TaggedJanet::Buffer(s) => fmt::Display::fmt(&s, f),
-            TaggedJanet::Number(n) => fmt::Display::fmt(&n, f),
-            TaggedJanet::String(s) => fmt::Display::fmt(&s, f),
-            TaggedJanet::Abstract(a) => {
-                // Special cases for integers
-                if let Ok(int) = a.get::<i64>() {
-                    return fmt::Display::fmt(int, f);
-                }
-
-                if let Ok(int) = a.get::<u64>() {
-                    return fmt::Display::fmt(int, f);
-                }
-
-                // If the abstract has tostring function
-                if let Some(tostring) = a.type_info().tostring {
-                    let buff = JanetBuffer::with_capacity(30);
-                    unsafe { tostring(a.raw, buff.raw) }
-                    return fmt::Display::fmt(&buff, f);
-                }
-
-                // In case there is no tostring function, default to this
-                f.write_str("<Abstract>")
-            },
-            TaggedJanet::Array(arr) => {
-                f.write_str("@[")?;
-                array_tuple_display!(arr, f);
-                f.write_char(']')
-            },
-            TaggedJanet::CFunction(_) => f.write_str("<C function>"),
-            TaggedJanet::Fiber(fiber) => {
-                f.write_str("<Fiber ")?;
-                fmt::Debug::fmt(&fiber.as_raw(), f)?;
-                f.write_char('>')
-            },
-            TaggedJanet::Function(_) => f.write_str("<Function>"),
-            TaggedJanet::Keyword(key) => fmt::Display::fmt(&key, f),
-            TaggedJanet::Nil => f.write_str("nil"),
-            TaggedJanet::Pointer(ptr) => {
-                f.write_char('<')?;
-                fmt::Pointer::fmt(&ptr, f)?;
-                f.write_char('>')
-            },
-            TaggedJanet::Struct(st) => {
-                f.write_char('{')?;
-                struct_table_display!(st, f);
-                f.write_char('}')
-            },
-            TaggedJanet::Symbol(sym) => fmt::Display::fmt(&sym, f),
-            TaggedJanet::Table(table) => {
-                // Classes in Janet are just tables with prototype with special keywords
-                // If a vailable we printo the class name
-                if let Some(proto) = table.prototype() {
-                    if let Some(name) = proto.get(JanetKeyword::new("_name")) {
-                        match name.unwrap() {
-                            TaggedJanet::Buffer(s) => {
-                                f.write_char('@')?;
-                                fmt::Display::fmt(&s, f)?;
-                            },
-                            TaggedJanet::String(s) => {
-                                f.write_char('@')?;
-                                fmt::Display::fmt(&s, f)?;
-                            },
-                            TaggedJanet::Symbol(s) => {
-                                f.write_char('@')?;
-                                fmt::Display::fmt(&s, f)?;
-                            },
-                            _ => f.write_char('@')?,
-                        }
-                    } else {
-                        f.write_char('@')?;
-                    }
-                } else {
-                    f.write_char('@')?;
-                }
-                f.write_char('{')?;
-                struct_table_display!(table, f);
-                f.write_char('}')
-            },
-            TaggedJanet::Tuple(tup) => {
-                f.write_char('[')?;
-                array_tuple_display!(tup, f);
-                f.write_char(']')
-            },
-        }
+        Display::fmt(&self.unwrap(), f)
     }
 }
 
@@ -1102,6 +1017,98 @@ pub enum TaggedJanet<'data> {
     Symbol(JanetSymbol<'data>),
     Table(JanetTable<'data>),
     Tuple(JanetTuple<'data>),
+}
+
+impl Display for TaggedJanet<'_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TaggedJanet::Boolean(b) => Display::fmt(b, f),
+            TaggedJanet::Buffer(s) => Display::fmt(s, f),
+            TaggedJanet::Number(n) => Display::fmt(n, f),
+            TaggedJanet::String(s) => Display::fmt(s, f),
+            TaggedJanet::Abstract(a) => {
+                // Special cases for integers
+                if let Ok(int) = a.get::<i64>() {
+                    return Display::fmt(int, f);
+                }
+
+                if let Ok(int) = a.get::<u64>() {
+                    return Display::fmt(int, f);
+                }
+
+                // If the abstract has tostring function
+                if let Some(tostring) = a.type_info().tostring {
+                    let buff = JanetBuffer::with_capacity(30);
+                    unsafe { tostring(a.raw, buff.raw) }
+                    return Display::fmt(&buff, f);
+                }
+
+                // In case there is no tostring function, default to this
+                f.write_str("<Abstract>")
+            },
+            TaggedJanet::Array(arr) => {
+                f.write_str("@[")?;
+                array_tuple_display!(arr, f);
+                f.write_char(']')
+            },
+            TaggedJanet::CFunction(_) => f.write_str("<C function>"),
+            TaggedJanet::Fiber(fiber) => {
+                f.write_str("<Fiber ")?;
+                fmt::Debug::fmt(&fiber.as_raw(), f)?;
+                f.write_char('>')
+            },
+            TaggedJanet::Function(_) => f.write_str("<Function>"),
+            TaggedJanet::Keyword(key) => Display::fmt(key, f),
+            TaggedJanet::Nil => f.write_str("nil"),
+            TaggedJanet::Pointer(ptr) => {
+                f.write_char('<')?;
+                fmt::Pointer::fmt(&ptr, f)?;
+                f.write_char('>')
+            },
+            TaggedJanet::Struct(st) => {
+                f.write_char('{')?;
+                struct_table_display!(st, f);
+                f.write_char('}')
+            },
+            TaggedJanet::Symbol(sym) => Display::fmt(sym, f),
+            TaggedJanet::Table(table) => {
+                // Classes in Janet are just tables with prototype with special keywords
+                // If a vailable we printo the class name
+                if let Some(proto) = table.prototype() {
+                    if let Some(name) = proto.get(JanetKeyword::new("_name")) {
+                        match name.unwrap() {
+                            TaggedJanet::Buffer(s) => {
+                                f.write_char('@')?;
+                                Display::fmt(&s, f)?;
+                            },
+                            TaggedJanet::String(s) => {
+                                f.write_char('@')?;
+                                Display::fmt(&s, f)?;
+                            },
+                            TaggedJanet::Symbol(s) => {
+                                f.write_char('@')?;
+                                Display::fmt(&s, f)?;
+                            },
+                            _ => f.write_char('@')?,
+                        }
+                    } else {
+                        f.write_char('@')?;
+                    }
+                } else {
+                    f.write_char('@')?;
+                }
+                f.write_char('{')?;
+                struct_table_display!(table, f);
+                f.write_char('}')
+            },
+            TaggedJanet::Tuple(tup) => {
+                f.write_char('[')?;
+                array_tuple_display!(tup, f);
+                f.write_char(']')
+            },
+        }
+    }
 }
 
 impl From<Janet> for TaggedJanet<'_> {
