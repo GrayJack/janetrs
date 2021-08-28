@@ -350,6 +350,85 @@ impl Janet {
         self.into()
     }
 
+    /// Returns the contained value or a provided default
+    ///
+    /// Consumes the `self` argument then, if the conversion to type `T` goes correctly,
+    /// returns the contained value, otherwise if the conversion fails, returns the
+    /// given `default` value for that type.
+    ///
+    /// Arguments passed to `unwrap_or` are eagerly evaluated; if you are passing
+    /// the result of a function call, it is recommended to use
+    /// [`unwrap_or_else`](#unwrap_os_else), which is lazily evaluated.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use janetrs::Janet;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let default = 2.0;
+    /// let x = Janet::number(9.0);
+    /// assert_eq!(x.unwrap_or(default), 9.0);
+    ///
+    /// let x = Janet::boolean(true);
+    /// assert_eq!(x.unwrap_or(default), default);
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn unwrap_or<T: TryFrom<Self>>(self, default: T) -> T {
+        T::try_from(self).unwrap_or(default)
+    }
+
+    /// Returns the contained value or computes it from a closure.
+    ///
+    /// The closure holds the value of the conversion error to better handle it to decide
+    /// a default value to return.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use janetrs::Janet;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let default = |_| 1.0;
+    /// let x = Janet::number(9.0);
+    /// assert_eq!(x.unwrap_or_else(default), 9.0);
+    ///
+    /// let x = Janet::boolean(true);
+    /// assert_eq!(x.unwrap_or_else(default), 1.0);
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn unwrap_or_else<T, F>(self, op: F) -> T
+    where
+        T: TryFrom<Self>,
+        F: FnOnce(T::Error) -> T,
+    {
+        T::try_from(self).unwrap_or_else(op)
+    }
+
+    /// Returns the contained value or a default
+    ///
+    /// Consumes the `self` argument then, if the conversion to type `T` goes correctly,
+    /// returns the contained value, otherwise if the conversion fails, returns the
+    /// default value for that type.
+    ///
+    /// # Examples
+    ///
+    /// /// ```
+    /// use janetrs::Janet;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let x = Janet::number(9.0);
+    /// assert_eq!(x.unwrap_or_default(default), 9.0);
+    ///
+    /// let x = Janet::boolean(true);
+    /// assert_eq!(x.unwrap_or_default(default), 0.0);
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn unwrap_or_default<T>(self) -> T
+    where T: TryFrom<Self> + Default {
+        T::try_from(self).unwrap_or_default()
+    }
+
     /// Tries to unwrap the [`Janet`] into a concrete type that implements
     /// [`TryFrom`]<[`Janet`]>.
     #[cfg_attr(feature = "inline-more", inline)]

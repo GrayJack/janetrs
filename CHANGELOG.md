@@ -22,6 +22,7 @@ All notable changes to the library should be put here
     above 1.17.0 it also add source map information for Janet
 - Add `janet_abstract::register` function to register an abstract type.
 - Add option to `janet_fn` attribute macro to include arity checks
+- Add `Janet::unwrap_or`, `Janet::unwrap_or_else` and `Janet::unwrap_or_default`
 - Implement `Display` for `TaggedJanet` and defer the `Janet` display
   implementation to that
 - Improve error report of attribute macros
