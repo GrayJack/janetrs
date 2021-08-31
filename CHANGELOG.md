@@ -19,8 +19,8 @@ All notable changes to the library should be put here
 - Add `declare_janet_mod` macro to generate the machinery that Janet requires do
   create a Janet native module
   - It satisfies the same purpose as `janet_mod`, but it can get the
-    documentation string from the function doc-comments and for Janet versions
-    above 1.17.0 it also add source map information for Janet
+    documentation string from the function doc-comments and, for Janet versions
+    above 1.17.0, it also add source map information for Janet
 - Add `janet_abstract::register` function to register an abstract type.
 - Add option to `janet_fn` attribute macro to include arity checks
 - Add `Janet::unwrap_or`, `Janet::unwrap_or_else` and `Janet::unwrap_or_default`
