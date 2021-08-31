@@ -2,7 +2,7 @@
 
 All notable changes to the library should be put here
 
-## Unreleased
+## 0.4.0
 
 - **BREAKING:** Make `JanetGc::collect` an unsafe function
 - **BREAKING:** Remove `JanetEnvironment::add_def_with_doc`,

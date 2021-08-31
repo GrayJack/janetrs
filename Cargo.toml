@@ -1,6 +1,6 @@
 [package]
 name = "janetrs"
-version = "0.3.2"
+version = "0.4.0"
 authors = ["Eric Shimizu Karbstein <gr41.j4ck@gmail.com>"]
 description = "High level binding for Janet programming language"
 repository = "https://github.com/GrayJack/janetrs"
