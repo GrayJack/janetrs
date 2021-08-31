@@ -321,10 +321,12 @@ impl Janet {
     /// exists.
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn dynamic(key: impl AsRef<[u8]>) -> Option<Self> {
-        let mut key: JanetBuffer = key.as_ref().into();
+        Self::_dynamic(key.as_ref())
+    }
+
+    fn _dynamic(key: &[u8]) -> Option<Self> {
+        let mut key: JanetBuffer = key.into();
         key.push('\0');
-        // let mut key = String::from(key.to_str().ok()?);
-        // key.push('\0');
 
         let janet = Self::from(unsafe { evil_janet::janet_dyn(key.as_ptr() as *const _) });
 

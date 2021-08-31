@@ -720,7 +720,7 @@ impl<'data> JanetTable<'data> {
     /// assert_eq!(table.get_owned(10), Some(Janet::from("ten")));
     /// assert_eq!(table.get_owned(11), None);
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
 
@@ -749,7 +749,7 @@ impl<'data> JanetTable<'data> {
     /// );
     /// assert_eq!(table.get_owned_key_value(11), None);
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
         self.get_owned(key).map(|v| (key, v))
@@ -769,7 +769,7 @@ impl<'data> JanetTable<'data> {
     /// assert_eq!(table.raw_get_owned(10), Some(Janet::from("ten")));
     /// assert_eq!(table.raw_get_owned(11), None);
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn raw_get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
 
@@ -798,7 +798,7 @@ impl<'data> JanetTable<'data> {
     /// );
     /// assert_eq!(table.raw_get_owned_key_value(11), None);
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn raw_get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
         self.raw_get_owned(key).map(|v| (key, v))
@@ -970,7 +970,7 @@ impl<'data> JanetTable<'data> {
     /// assert!(table.contains_key(10));
     /// assert!(!table.contains_key(11));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn contains_key(&self, key: impl Into<Janet>) -> bool {
         self.get(key).is_some()
     }
@@ -988,7 +988,7 @@ impl<'data> JanetTable<'data> {
     /// assert!(table.contains("ten"));
     /// assert!(!table.contains(11));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn contains(&self, value: impl Into<Janet>) -> bool {
         let value = value.into();
         self.values().any(|&v| v == value)

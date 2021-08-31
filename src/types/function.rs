@@ -104,7 +104,7 @@ impl<'data> CallError<'data> {
     /// Display the stacktrace in the given `output`
     #[cfg(feature = "std")]
     #[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn stacktrace<W: Write + ?Sized>(&mut self, output: &mut W) -> io::Result<()> {
         if let CallErrorKind::Run = self.kind {
             if let Some(ref mut fiber) = self.fiber {
@@ -121,7 +121,7 @@ impl<'data> CallError<'data> {
 
     /// Display the stacktrace in the given `output`
     #[cfg(not(feature = "std"))]
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn stacktrace<W: Write + ?Sized>(&mut self, output: &mut W) -> fmt::Result {
         if let CallErrorKind::Run = self.kind {
             if let Some(ref mut fiber) = self.fiber {
@@ -186,7 +186,7 @@ impl<'data> JanetFunction<'data> {
     ///
     /// If the executions was successful returns the output, otherwise return the
     /// [`CallError`] with information returned by the call.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError<'data>> {
         let args = args.as_ref();
         let mut out = Janet::nil();
@@ -229,7 +229,7 @@ impl<'data> JanetFunction<'data> {
     ///
     /// If the executions was successful returns the output, otherwise return the
     /// [`CallError`] with information returned by the call.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn call_with_fiber<'fiber>(
         &mut self, mut fiber: JanetFiber<'fiber>, args: impl AsRef<[Janet]>,
     ) -> Result<Janet, CallError<'fiber>> {
@@ -270,7 +270,7 @@ impl<'data> JanetFunction<'data> {
     ///
     /// # Janet Panics
     /// Panics if anything goes wrong trying to call the function.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn call_or_panic(&mut self, args: impl AsRef<[Janet]>) -> Janet {
         let args = args.as_ref();
 

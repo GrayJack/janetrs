@@ -263,7 +263,7 @@ impl<'data> JanetStruct<'data> {
     ///     .finalize();
     /// assert_eq!(st.get_owned(10), Some(Janet::from("ten")));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn get_owned(&self, key: impl Into<Janet>) -> Option<Janet> {
         let key = key.into();
 
@@ -285,7 +285,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// let st = JanetStruct::builder(2).put(10, "ten").put(11, "eleven").finalize();
     /// assert_eq!(st.get_owned_key_value(10), Some((Janet::integer(10), Janet::from("ten"))));
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn get_owned_key_value(&self, key: impl Into<Janet>) -> Option<(Janet, Janet)> {
         let key = key.into();
         self.get_owned(key).map(|v| (key, v))
@@ -341,7 +341,7 @@ impl<'data> JanetStruct<'data> {
     /// assert!(st.contains_key(10));
     /// assert!(!st.contains_key(11));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn contains_key(&self, key: impl Into<Janet>) -> bool {
         self.get(key).is_some()
     }
@@ -358,7 +358,7 @@ impl<'data> JanetStruct<'data> {
     /// assert!(st.contains("ten"));
     /// assert!(!st.contains(11));
     /// ```
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn contains(&self, value: impl Into<Janet>) -> bool {
         let value = value.into();
         self.values().any(|&v| v == value)

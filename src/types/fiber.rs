@@ -51,7 +51,7 @@ impl<'data> JanetFiber<'data> {
     /// given environments.
     ///
     /// In case any passed argument is invalid, returns `None`.
-    #[inline]
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn with_env(
         env: JanetTable, capacity: i32, f: &mut JanetFunction, args: impl AsRef<[Janet]>,
     ) -> Option<Self> {

@@ -211,6 +211,7 @@ impl<'data> JanetTuple<'data> {
     /// let tup = tuple![1.0, "foo", 4.0];
     /// assert!(tup.contains("foo"));
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn contains(&self, value: impl Into<Janet>) -> bool {
         let value = value.into();
         self.iter().any(|&elem| elem == value)
@@ -388,6 +389,7 @@ impl<'data> JanetTuple<'data> {
     /// // this will panic at runtime
     /// b"0123456789abcdef".repeat(usize::MAX);
     /// ```
+    #[inline]
     pub fn repeat(&self, n: usize) -> JanetArray {
         self.as_ref().repeat(n).into_iter().collect()
     }
@@ -418,6 +420,7 @@ impl<'data> JanetTuple<'data> {
     /// let v = tuple![];
     /// assert!(v.starts_with(&[]));
     /// ```
+    #[inline]
     pub fn starts_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().starts_with(needle)
     }
@@ -448,6 +451,7 @@ impl<'data> JanetTuple<'data> {
     /// let v = tuple![];
     /// assert!(v.ends_with(&[]));
     /// ```
+    #[inline]
     pub fn ends_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().ends_with(needle)
     }
@@ -499,6 +503,7 @@ impl<'data> JanetTuple<'data> {
     ///     tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55].as_ref()
     /// );
     /// ```
+    #[inline]
     pub fn binary_search(&self, x: &Janet) -> Result<usize, usize> {
         self.binary_search_by(|p| p.cmp(x))
     }
@@ -985,6 +990,7 @@ impl Clone for JanetTuple<'_> {
 }
 
 impl PartialOrd for JanetTuple<'_> {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         use core::cmp::Ordering::{Equal, Greater, Less};
 
@@ -1005,6 +1011,7 @@ impl PartialOrd for JanetTuple<'_> {
 }
 
 impl Ord for JanetTuple<'_> {
+    #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         use core::cmp::Ordering::{Equal, Greater, Less};
 

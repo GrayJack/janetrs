@@ -334,6 +334,7 @@ pub fn register<T: IsJanetAbstract>() {
 impl IsJanetAbstract for i64 {
     const SIZE: usize = core::mem::size_of::<Self>();
 
+    #[inline]
     fn type_info() -> &'static JanetAbstractType {
         unsafe { &evil_janet::janet_s64_type }
     }
@@ -342,6 +343,7 @@ impl IsJanetAbstract for i64 {
 impl IsJanetAbstract for u64 {
     const SIZE: usize = core::mem::size_of::<Self>();
 
+    #[inline]
     fn type_info() -> &'static JanetAbstractType {
         unsafe { &evil_janet::janet_u64_type }
     }

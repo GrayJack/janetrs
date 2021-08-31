@@ -410,6 +410,7 @@ impl<'data> JanetArray<'data> {
     /// let arr = array![1.0, "foo", 4.0];
     /// assert!(arr.contains("foo"));
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn contains(&self, value: impl Into<Janet>) -> bool {
         let value = value.into();
         self.iter().any(|&elem| elem == value)
@@ -920,6 +921,7 @@ impl<'data> JanetArray<'data> {
     /// // this will panic at runtime
     /// b"0123456789abcdef".repeat(usize::MAX);
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn repeat(&self, n: usize) -> Self {
         self.as_ref().repeat(n).into_iter().collect()
     }
@@ -950,6 +952,7 @@ impl<'data> JanetArray<'data> {
     /// let v = array![];
     /// assert!(v.starts_with(&[]));
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn starts_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().starts_with(needle)
     }
@@ -980,6 +983,7 @@ impl<'data> JanetArray<'data> {
     /// let v = array![];
     /// assert!(v.ends_with(&[]));
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn ends_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().ends_with(needle)
     }
@@ -1030,6 +1034,7 @@ impl<'data> JanetArray<'data> {
     ///     array![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55].as_ref()
     /// );
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn binary_search(&self, x: &Janet) -> Result<usize, usize> {
         self.binary_search_by(|p| p.cmp(x))
     }
@@ -1176,6 +1181,7 @@ impl<'data> JanetArray<'data> {
     /// arr.dedup_by(|&mut a, &mut b| a.eq(&b));
     /// assert!(arr.deep_eq(&array!["foo", "bar", "baz", "bar"]));
     /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn dedup_by<F>(&mut self, mut same_bucket: F)
     where F: FnMut(&mut Janet, &mut Janet) -> bool {
         let len = self.len() as usize;
