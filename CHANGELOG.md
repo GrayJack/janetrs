@@ -13,6 +13,7 @@ All notable changes to the library should be put here
   `JanetEnvironment::add_c_fn` `JanetEnvironment::add_c_fn`
 - Add `JanetFile` type
 - Add `JanetRng` type
+- Add `JanetTable::try_insert` and related error type
 - Add `DefOptions`, `VarOptions`, `CFunOptions` to interact with the Janet
   environment
 - Add `declare_janet_mod` macro to generate the machinery that Janet requires do

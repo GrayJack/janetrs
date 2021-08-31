@@ -957,6 +957,43 @@ impl<'data> JanetTable<'data> {
         old_value
     }
 
+    /// Tries to insert a key-value pair into the map, and returns
+    /// a mutable reference to the value in the entry.
+    ///
+    /// # Errors
+    ///
+    /// If the map already had this key present, nothing is updated, and
+    /// an error containing the occupied entry and the value is returned.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use janetrs::{Janet, JanetTable};
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let mut map = JanetTable::new();
+    /// assert_eq!(map.try_insert(37, "a").unwrap(), &Janet::from("a"));
+    ///
+    /// let err = map.try_insert(37, "b").unwrap_err();
+    /// assert_eq!(err.entry.key(), &Janet::from(37));
+    /// assert_eq!(err.entry.get(), &Janet::from("a"));
+    /// assert_eq!(err.value, Janet::from("b"));
+    /// ```
+    #[cfg_attr(feature = "inline-more", inline)]
+    pub fn try_insert(
+        &mut self, key: impl Into<Janet>, value: impl Into<Janet>,
+    ) -> Result<&mut Janet, OccupiedError<'_, 'data>> {
+        match self.entry(key) {
+            Entry::Occupied(entry) => Err(OccupiedError {
+                entry,
+                value: value.into(),
+            }),
+            Entry::Vacant(entry) => Ok(entry.insert(value)),
+        }
+    }
+
     /// Returns `true` if the table contains a value for the specified `key`.
     ///
     /// # Examples
@@ -1519,7 +1556,7 @@ pub struct OccupiedEntry<'a, 'data> {
     table: &'a mut JanetTable<'data>,
 }
 
-impl<'a> OccupiedEntry<'a, '_> {
+impl<'a, 'data> OccupiedEntry<'a, 'data> {
     /// Gets a reference to the value in the entry.
     ///
     /// # Examples
@@ -1801,6 +1838,45 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
         &self.key
     }
 }
+
+
+/// The error returned by [`try_insert`](JanetTable::try_insert) when the key already
+/// exists.
+///
+/// Contains the occupied entry, and the value that was not inserted.
+pub struct OccupiedError<'a, 'data> {
+    /// The entry in the map that was already occupied.
+    pub entry: OccupiedEntry<'a, 'data>,
+    /// The value which was not inserted, because the entry was already occupied.
+    pub value: Janet,
+}
+
+impl Debug for OccupiedError<'_, '_> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("OccupiedError")
+            .field("key", self.entry.key())
+            .field("old_value", self.entry.get())
+            .field("new_value", &self.value)
+            .finish()
+    }
+}
+
+impl<'a, 'data> fmt::Display for OccupiedError<'a, 'data> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "failed to insert {:?}, key {:?} already exists with value {:?}",
+            self.value,
+            self.entry.key(),
+            self.entry.get()
+        ))
+    }
+}
+
+#[cfg(feature = "std")]
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
+impl std::error::Error for OccupiedError<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetTable`] key-value pairs.
 #[derive(Clone)]
