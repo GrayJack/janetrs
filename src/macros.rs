@@ -303,6 +303,36 @@ macro_rules! jpanic {
     };
 }
 
+/// A macro helper to use the default message when getting the wrong types in the function
+/// argument when the situations that are more complex than the ones handled in
+/// [`JanetArgs`](crate::JanetArgs), like multiple accepted types.
+///
+/// # Examples
+///
+/// ```
+/// use janetrs::{bad_slot, janet_fn, Janet};
+///
+/// #[janet_fn(arity(fix(1)))]
+/// fn hi(args: &mut [Janet]) -> Janet {
+///     match args.get(1).unwrap() {
+///         TaggedJanet::Buffer(name) => println!("Hi, {}", name),
+///         TaggedJanet::String(name) => println!("Hi, {}", name),
+///         _ => bad_slot!(args, 0, "string|buffer"),
+///     }
+/// }
+/// ```
+#[macro_export]
+macro_rules! bad_slot {
+    ($args:ident, $index:expr, $expected:expr) => {
+        $crate::jpanic!(
+            "bad slot #{}, expected {}, got {}",
+            $index,
+            $expected,
+            $args[$index].kind()
+        )
+    };
+}
+
 /// Execute a function ([`JanetCFunction`], Rust function or extern C function) and catch
 /// any janet panic that may happen as a [`Result`].
 ///

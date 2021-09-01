@@ -2,6 +2,15 @@
 
 All notable changes to the library should be put here
 
+## Unreleased
+
+- Add the trait `JanetArgs` that extend functionality of `[Janet]` used in Rust
+  defined Janet functions
+- Add the trait `JanetTypeName` that defines the name of the types displayed
+  janet messages
+- Add `bad_slot!` macro to shorten and help developing Rust defined Janet
+  functions
+
 ## 0.4.0
 
 - **BREAKING:** Make `JanetGc::collect` an unsafe function

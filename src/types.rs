@@ -415,7 +415,7 @@ impl Janet {
     ///
     /// # Examples
     ///
-    /// /// ```
+    /// ```
     /// use janetrs::Janet;
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
@@ -1698,6 +1698,168 @@ string_impl_partial_ord!(JanetKeyword<'_>, bstr::BStr);
 string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BStr);
 string_impl_partial_ord!(#[cfg(feature = "std")]; JanetKeyword<'_>, bstr::BString);
 string_impl_partial_ord!(#[cfg(feature = "std")]; JanetKeyword<'_>, &'a bstr::BString);
+
+
+/// Trait that only exist to extend methods over `[Janet]` so it's easier to get
+/// #[janet_fn] args.
+pub trait JanetArgs {
+    /// Get the argument at the `index` position and tries to convert to `T`.
+    fn get_unwraped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error>;
+
+    /// Get the argument at the `index` position and convert to `T`, if that fails,
+    /// returns the `default` value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{bad_slot, janet_fn, Janet, JanetArgs};
+    ///
+    /// // Lets say it's a function that if receives an argument, if is not the wanted type, it
+    /// // defaults to the given value.
+    /// #[janet_fn(arity(range(0, 1)))]
+    /// fn my_func(args: &mut [Janet]) -> Janet {
+    ///     let  = args.get_or(0, false);
+    ///
+    ///     // Rest of the function
+    /// }
+    /// ```
+    fn get_or<T: TryFrom<Janet>>(&self, index: usize, default: T) -> T;
+
+    /// Get the argument at the `index` position, if it's Janet nil, returns the `default`
+    /// value, but janet panics if the the value is different than nil and fail to convert
+    /// to `T`.
+    ///
+    /// # Janet Panics
+    /// This function may panic if the conversion fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{bad_slot, janet_fn, Janet, JanetArgs};
+    ///
+    /// // Lets say it's a function that receives a second argument that change de behavior of
+    /// // the function
+    /// #[janet_fn(arity(range(1, 2)))]
+    /// fn my_func(args: &mut [Janet]) -> Janet {
+    ///     let my_flag = args.get_opt(1, false);
+    ///
+    ///     // Rest of the function
+    /// }
+    /// ```
+    fn get_opt<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize, default: T) -> T;
+
+    /// Get the argument at the `index` position and convert to `T`, if that fails, it
+    /// janet panics.
+    ///
+    /// # Janet Panics
+    /// This function may panic if the conversion fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use janetrs::{bad_slot, janet_fn, Janet, JanetArgs};
+    ///
+    /// #[janet_fn(arity(fix(1)))]
+    /// fn my_func(args: &mut [Janet]) -> Janet {
+    ///     let my_str: JanetString = args.get_panic(0);
+    ///
+    ///     // Rest of the function
+    /// }
+    /// ```
+    fn get_panic<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize) -> T;
+}
+
+impl JanetArgs for [Janet] {
+    fn get_unwraped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error> {
+        T::try_from(*self.get(index).unwrap_or(&Janet::nil()))
+    }
+
+    fn get_or<T: TryFrom<Janet>>(&self, index: usize, default: T) -> T {
+        self.get(index)
+            .and_then(|val| T::try_from(*val).ok())
+            .unwrap_or(default)
+    }
+
+    fn get_panic<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize) -> T {
+        match self.get(index) {
+            Some(&val) => T::try_from(val).unwrap_or_else(|_| {
+                crate::jpanic!(
+                    "bad slot #{}, expected {}, got {}",
+                    index,
+                    T::name(),
+                    val.kind()
+                )
+            }),
+            None => crate::jpanic!("bad slot #{}, there is no value in this slot", index),
+        }
+    }
+
+    fn get_opt<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize, default: T) -> T {
+        let val = self.get(index).copied().unwrap_or_else(Janet::nil);
+        if val.is_nil() {
+            return default;
+        }
+
+        match T::try_from(val) {
+            Ok(x) => x,
+            Err(_) => crate::jpanic!(
+                "bad slot #{}, expected {}, got {}",
+                index,
+                T::name(),
+                val.kind()
+            ),
+        }
+    }
+}
+
+/// Trait defining the name of the type known to Janet
+pub trait JanetTypeName {
+    /// Returns a string with the name of the type
+    fn name() -> String;
+}
+
+macro_rules! type_name {
+    ($($t:ty : $helper:ident),+ $(,)?) => {
+        $(
+            impl JanetTypeName for $t {
+                fn name() -> String {
+                    JanetType::$helper.to_string()
+                }
+            }
+        )+
+    };
+
+    ($($t:ty : $helper:literal),+ $(,)?) => {
+        $(
+            impl JanetTypeName for $t {
+                fn name() -> String {
+                    $helper.to_string()
+                }
+            }
+        )+
+    };
+}
+
+type_name!(
+    bool: Boolean,
+    f64: Number,
+    JanetString<'_>: String,
+    JanetSymbol<'_>: Symbol,
+    JanetKeyword<'_>: Keyword,
+    JanetBuffer<'_>: Buffer,
+    JanetTuple<'_>: Tuple,
+    JanetArray<'_>: Array,
+    JanetStruct<'_>: Struct,
+    JanetTable<'_>: Table,
+    JanetPointer: Pointer,
+    JanetAbstract: Abstract,
+    JanetFunction<'_>: Function,
+    JanetCFunction: CFunction,
+    JanetFiber<'_>: Fiber,
+);
+
+type_name!(i64: "s64", u64: "u64", io::JanetFile: "file", JanetRng: "rng");
+
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
