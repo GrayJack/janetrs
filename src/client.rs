@@ -55,7 +55,7 @@ impl Display for Error {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
+#[cfg_attr(_doc, doc(cfg(feature = "std")))]
 impl StdError for Error {}
 
 /// Janet client that initialize the Janet runtime.

@@ -56,7 +56,7 @@ impl IsJanetAbstract for JanetFile {
 }
 
 #[cfg(all(unix, feature = "std"))]
-#[cfg_attr(feature = "_doc", doc(cfg(all(unix, feature = "std"))))]
+#[cfg_attr(_doc, doc(cfg(all(unix, feature = "std"))))]
 impl AsRawFd for JanetFile {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -65,7 +65,7 @@ impl AsRawFd for JanetFile {
 }
 
 #[cfg(all(unix, feature = "std"))]
-#[cfg_attr(feature = "_doc", doc(cfg(all(unix, feature = "std"))))]
+#[cfg_attr(_doc, doc(cfg(all(unix, feature = "std"))))]
 impl IntoRawFd for JanetFile {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -74,7 +74,7 @@ impl IntoRawFd for JanetFile {
 }
 
 #[cfg(all(windows, feature = "std"))]
-#[cfg_attr(feature = "_doc", doc(cfg(all(windows, feature = "std"))))]
+#[cfg_attr(_doc, doc(cfg(all(windows, feature = "std"))))]
 impl AsRawHandle for JanetFile {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
@@ -87,7 +87,7 @@ impl AsRawHandle for JanetFile {
 }
 
 #[cfg(all(windows, feature = "std"))]
-#[cfg_attr(feature = "_doc", doc(cfg(all(windows, feature = "std"))))]
+#[cfg_attr(_doc, doc(cfg(all(windows, feature = "std"))))]
 impl IntoRawHandle for JanetFile {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {

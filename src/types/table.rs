@@ -1875,7 +1875,7 @@ impl<'a, 'data> fmt::Display for OccupiedError<'a, 'data> {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
+#[cfg_attr(_doc, doc(cfg(feature = "std")))]
 impl std::error::Error for OccupiedError<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetTable`] key-value pairs.

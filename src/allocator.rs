@@ -155,7 +155,7 @@ impl Scratch {
 }
 
 #[cfg(feature = "nightly")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "nightly")))]
+#[cfg_attr(_doc, doc(cfg(feature = "nightly")))]
 unsafe impl Allocator for Scratch {
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.malloc(layout).ok_or(AllocError)

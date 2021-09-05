@@ -103,7 +103,7 @@ impl<'data> CallError<'data> {
 
     /// Display the stacktrace in the given `output`
     #[cfg(feature = "std")]
-    #[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
+    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn stacktrace<W: Write + ?Sized>(&mut self, output: &mut W) -> io::Result<()> {
         if let CallErrorKind::Run = self.kind {
@@ -155,7 +155,7 @@ impl Display for CallError<'_> {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "std")))]
+#[cfg_attr(_doc, doc(cfg(feature = "std")))]
 impl error::Error for CallError<'_> {}
 
 /// A representation of a Janet function defined at the Janet side.

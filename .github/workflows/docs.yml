@@ -21,13 +21,21 @@ jobs:
         toolchain: nightly
         profile: minimal
         override: true
-        components: rustfmt, rust-src
+        components: rust-src
+
+    - name: Cache cargo output
+      uses: Swatinem/rust-cache@v1
 
     # - name: Install targets
     #   run: rustup target install x86_64-unknown-freebsd x86_64-unknown-netbsd x86_64-apple-darwin x86_64-fuchsia
 
     - name: Build Documentation
-      run: cargo doc --features amalgation,nightly,_doc
+      uses: actions-rs/cargo@v1
+      with:
+        command: doc
+        args: --features amalgation,nightly -Zrustdoc-map
+      env:
+        RUSTDOCFLAGS: --cfg _doc
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3
