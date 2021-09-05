@@ -10,7 +10,10 @@ use core::{
     fmt::{self, Display, Write},
 };
 
-use alloc::{string::String, vec::Vec};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 #[cfg(feature = "std")]
 use std::error;
