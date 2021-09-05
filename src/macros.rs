@@ -310,15 +310,16 @@ macro_rules! jpanic {
 /// # Examples
 ///
 /// ```
-/// use janetrs::{bad_slot, janet_fn, Janet};
+/// use janetrs::{bad_slot, janet_fn, Janet, TaggedJanet};
 ///
 /// #[janet_fn(arity(fix(1)))]
 /// fn hi(args: &mut [Janet]) -> Janet {
-///     match args.get(1).unwrap() {
+///     match args[1].unwrap() {
 ///         TaggedJanet::Buffer(name) => println!("Hi, {}", name),
 ///         TaggedJanet::String(name) => println!("Hi, {}", name),
 ///         _ => bad_slot!(args, 0, "string|buffer"),
 ///     }
+///     Janet::nil()
 /// }
 /// ```
 #[macro_export]

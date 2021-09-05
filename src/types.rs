@@ -420,10 +420,10 @@ impl Janet {
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let x = Janet::number(9.0);
-    /// assert_eq!(x.unwrap_or_default(default), 9.0);
+    /// assert_eq!(x.unwrap_or_default::<f64>(), 9.0);
     ///
     /// let x = Janet::boolean(true);
-    /// assert_eq!(x.unwrap_or_default(default), 0.0);
+    /// assert_eq!(x.unwrap_or_default::<f64>(), 0.0);
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn unwrap_or_default<T>(self) -> T
@@ -1539,7 +1539,7 @@ macro_rules! string_impl_partial_eq {
     };
     (#[cfg($attr:meta)]; $lhs:ty, $rhs:ty) => {
         #[cfg($attr)]
-        #[cfg_attr(feature = "_doc", doc(cfg($attr)))]
+        #[cfg_attr(_doc, doc(cfg($attr)))]
         impl<'a, 'b> PartialEq<$rhs> for $lhs {
             #[inline]
             fn eq(&self, other: &$rhs) -> bool {
@@ -1718,9 +1718,10 @@ pub trait JanetArgs {
     /// // defaults to the given value.
     /// #[janet_fn(arity(range(0, 1)))]
     /// fn my_func(args: &mut [Janet]) -> Janet {
-    ///     let  = args.get_or(0, false);
+    ///     let my_flag = args.get_or(0, false);
     ///
     ///     // Rest of the function
+    ///     todo!()
     /// }
     /// ```
     fn get_or<T: TryFrom<Janet>>(&self, index: usize, default: T) -> T;
@@ -1744,6 +1745,7 @@ pub trait JanetArgs {
     ///     let my_flag = args.get_opt(1, false);
     ///
     ///     // Rest of the function
+    ///     todo!()
     /// }
     /// ```
     fn get_opt<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize, default: T) -> T;
@@ -1757,13 +1759,14 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{bad_slot, janet_fn, Janet, JanetArgs};
+    /// use janetrs::{bad_slot, janet_fn, Janet, JanetArgs, JanetString};
     ///
     /// #[janet_fn(arity(fix(1)))]
     /// fn my_func(args: &mut [Janet]) -> Janet {
     ///     let my_str: JanetString = args.get_panic(0);
     ///
     ///     // Rest of the function
+    ///     todo!()
     /// }
     /// ```
     fn get_panic<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize) -> T;
