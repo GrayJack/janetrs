@@ -24,7 +24,7 @@ function properly.
 - `std`: Enable some trait impl for types that only exist on the `std` and the
   Error trait
 - `unicode`: Enable more methods for JanetString and JanetBuffer
-- `inline-more`: More agressive inlining
+- `inline-more`: More aggressive inlining
 - `amalgation`: Link the Janet runtime to the package, enabling to use the
   client module
 - `unicode`: Enable some unicode methods for JanetString and JanetBuffer
