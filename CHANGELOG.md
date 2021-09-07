@@ -2,7 +2,7 @@
 
 All notable changes to the library should be put here
 
-## Unreleased
+## 0.4.1
 
 - Add the trait `JanetArgs` that extend functionality of `[Janet]` used in Rust
   defined Janet functions
