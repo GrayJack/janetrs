@@ -2,7 +2,9 @@
 
 [![Hits-of-Code](https://hitsofcode.com/github/grayjack/janetrs?branch=dev)](https://hitsofcode.com/view/github/grayjack/janetrs?branch=dev)
 [![Build Status](https://github.com/GrayJack/janetrs/workflows/Check%20and%20Test/badge.svg)](https://github.com/GrayJack/janetrs/actions)
-[![Docs dev branch](https://img.shields.io/badge/Docs-dev%20branch-blue)](https://grayjack.github.io/janetrs/janetrs/index.html)
+[![Crates.io](https://img.shields.io/crates/v/janetrs?logo=rust)](https://crates.io/crates/janetrs)
+[![Docs latest release](https://img.shields.io/static/v1?label=Docs&message=latest&color=blue&logo=rust)](https://docs.rs/janetrs/)
+[![Docs dev branch](https://img.shields.io/static/v1?label=Docs&message=dev&color=lightgray&logo=rust)](https://grayjack.github.io/janetrs/janetrs/index.html)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENCE)
 
 A crate with high level bindings to Janet C API.
