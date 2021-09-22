@@ -39,28 +39,28 @@ jobs:
     - name: Check no_std
       run: cargo check --no-default-features --features=amalgation --verbose
 
-  build-windows:
-    name: windows
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        rust: [1.53.0, stable, beta, nightly]
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        override: true
-        profile: minimal
-    - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: "12.0"
-        directory: ${{ runner.temp }}/llvm
-    - name: Set LIBCLANG_PATH
-      run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-      # if: matrix.os == 'windows-latest'
-    - name: Check and Run tests
-      run: cargo test --features amalgation --verbose
-    - name: Check no_std
-      run: cargo check --no-default-features --features=amalgation --verbose
+  # build-windows:
+  #   name: windows
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       rust: [1.53.0, stable, beta, nightly]
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - uses: actions-rs/toolchain@v1
+  #     with:
+  #       toolchain: ${{ matrix.rust }}
+  #       override: true
+  #       profile: minimal
+  #   - name: Install LLVM and Clang
+  #     uses: KyleMayes/install-llvm-action@v1
+  #     with:
+  #       version: "12.0"
+  #       directory: ${{ runner.temp }}/llvm
+  #   - name: Set LIBCLANG_PATH
+  #     run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+  #     # if: matrix.os == 'windows-latest'
+  #   - name: Check and Run tests
+  #     run: cargo test --features amalgation --verbose
+  #   - name: Check no_std
+  #     run: cargo check --no-default-features --features=amalgation --verbose
