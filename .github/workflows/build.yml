@@ -1,6 +1,6 @@
 name: Check and Test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build-linux:
@@ -16,10 +16,12 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
         profile: minimal
-    - name: Check and Run tests
-      run: cargo test --features amalgation --verbose
+    - name: Cache cargo output
+      uses: Swatinem/rust-cache@v1
     - name: Check no_std
       run: cargo check --no-default-features --features=amalgation --verbose
+    - name: Check and Run tests
+      run: cargo test --features amalgation --verbose
 
   build-macos:
     name: macos
@@ -34,10 +36,12 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
         profile: minimal
-    - name: Check and Run tests
-      run: cargo test --features amalgation --verbose
+    - name: Cache cargo output
+      uses: Swatinem/rust-cache@v1
     - name: Check no_std
       run: cargo check --no-default-features --features=amalgation --verbose
+    - name: Check and Run tests
+      run: cargo test --features amalgation --verbose
 
   # build-windows:
   #   name: windows
@@ -52,6 +56,8 @@ jobs:
   #       toolchain: ${{ matrix.rust }}
   #       override: true
   #       profile: minimal
+  #   - name: Cache cargo output
+  #     uses: Swatinem/rust-cache@v1
   #   - name: Install LLVM and Clang
   #     uses: KyleMayes/install-llvm-action@v1
   #     with:
@@ -60,7 +66,7 @@ jobs:
   #   - name: Set LIBCLANG_PATH
   #     run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
   #     # if: matrix.os == 'windows-latest'
-  #   - name: Check and Run tests
-  #     run: cargo test --features amalgation --verbose
   #   - name: Check no_std
   #     run: cargo check --no-default-features --features=amalgation --verbose
+  #   - name: Check and Run tests
+  #     run: cargo test --features amalgation --verbose
