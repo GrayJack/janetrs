@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: format
+    name: Format
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

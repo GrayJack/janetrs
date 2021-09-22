@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build-linux:
-    name: linux
+    name: Linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,7 +24,7 @@ jobs:
       run: cargo test --features amalgation --verbose
 
   build-macos:
-    name: macos
+    name: MacOS
     runs-on: macOS-latest
     strategy:
       matrix:
@@ -44,7 +44,7 @@ jobs:
       run: cargo test --features amalgation --verbose
 
   # build-windows:
-  #   name: windows
+  #   name: Windows
   #   runs-on: windows-latest
   #   strategy:
   #     matrix:

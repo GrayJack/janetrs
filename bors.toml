@@ -1,8 +1,8 @@
 status = [
-    "format",
-    "linux (1.53.0)",
-    "linux (stable)",
-    "macos (1.53.0)",
-    "macos (stable)",
+    "Format",
+    "Linux (1.53.0)",
+    "Linux (stable)",
+    "MacOS (1.53.0)",
+    "MacOS (stable)",
 ]
 delete_merged_branches = true
