@@ -2,6 +2,15 @@
 
 All notable changes to the library should be put here
 
+## Unreleased
+
+- **BREAKING:** Rename `JanetClient::with_default_env` ->
+  `JanetClient::load_env_default`
+- **BREAKING:** Rename `JanetClient::with_replacements` ->
+  `JanetClient::load_env_replacements`
+- Add two new functions to initialize `JanetClient`:
+  `JanetClient::init_with_replacements` and `JanetClient::init_with_default_env`
+
 ## 0.4.1
 
 - Add the trait `JanetArgs` that extend functionality of `[Janet]` used in Rust

@@ -275,7 +275,7 @@ mod tests {
 
     #[test]
     fn it_works() -> Result<(), crate::client::Error> {
-        let client = crate::client::JanetClient::init()?.with_default_env();
+        let client = crate::client::JanetClient::init_with_default_env()?;
 
         let stdout_janet = client.env().unwrap().resolve("stdout").unwrap();
 

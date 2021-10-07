@@ -330,7 +330,6 @@ pub fn register<T: IsJanetAbstract>() {
     }
 }
 
-
 impl IsJanetAbstract for i64 {
     const SIZE: usize = core::mem::size_of::<Self>();
 

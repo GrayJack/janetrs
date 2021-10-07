@@ -95,7 +95,7 @@ impl JanetClient {
         Ok(Self { env_table: None })
     }
 
-    /// Initialize Jant global state without checking.
+    /// Initialize Janet global state without checking.
     ///
     /// This must be called only once per thread if using Janet in a multithreaded
     /// environment, as all Janet global state is thread local by default.
@@ -110,22 +110,54 @@ impl JanetClient {
         Self { env_table: None }
     }
 
+    /// Initialize Janet global state and load the default environment of Janet.
+    ///
+    /// This must be called only once per thread if using Janet in a multithreaded
+    /// environment, as all Janet global state is thread local by default.
+    ///
+    /// If tried to initialize the client more than once it returns a `Err` variant.
+    ///
+    /// The default environment of Janet constains all the Janet C code as well as the
+    /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
+    #[inline]
+    pub fn init_with_default_env() -> Result<Self, Error> {
+        let mut client = Self::init()?;
+        client.env_table = Some(JanetEnvironment::default());
+        Ok(client)
+    }
+
+    /// Initialize Janet global state.
+    ///
+    /// This must be called only once per thread if using Janet in a multithreaded
+    /// environment, as all Janet global state is thread local by default.
+    ///
+    /// If tried to initialize the client more than once it returns a `Err` variant.
+    ///
+    /// If an item in the `replacements` table has the same name as a item in the default
+    /// environment table, the item is replaced by the newer.
+    #[inline]
+    pub fn init_with_replacements(replacements: JanetTable<'static>) -> Result<Self, Error> {
+        let mut client = Self::init()?;
+        client.env_table = Some(JanetEnvironment::with_replacements(replacements));
+        Ok(client)
+    }
+
     /// Load the default environment of Janet.
     ///
     /// The default environment of Janet constains all the Janet C code as well as the
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     #[inline]
-    pub fn with_default_env(mut self) -> Self {
+    pub fn load_env_default(mut self) -> Self {
         self.env_table = Some(JanetEnvironment::default());
         self
     }
 
-    /// Load the deafult environment of Janet with the givern `replacements` table.
+    /// Load the default environment of Janet with the given `replacements` table.
     ///
     /// If an item in the `replacements` table has the same name as a item in the default
     /// environment table, the item is replaced by the newer.
     #[inline]
-    pub fn with_replacements(mut self, replacements: JanetTable<'static>) -> Self {
+    pub fn load_env_replacements(mut self, replacements: JanetTable<'static>) -> Self {
         self.env_table = Some(JanetEnvironment::with_replacements(replacements));
         self
     }
@@ -231,7 +263,7 @@ impl JanetClient {
     /// ```
     /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let client = JanetClient::init()?.with_default_env();
+    /// let client = JanetClient::init_with_default_env()?;
     ///
     /// let out = client.run_bytes(b"(def x 10) (+ x x)")?;
     ///
@@ -282,7 +314,7 @@ impl JanetClient {
     /// ```
     /// use janetrs::{client::JanetClient, Janet};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let client = JanetClient::init()?.with_default_env();
+    /// let client = JanetClient::init_with_default_env()?;
     ///
     /// let out = client.run("(def x 10) (+ x x)")?;
     ///

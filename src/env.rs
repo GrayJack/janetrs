@@ -318,7 +318,7 @@ mod tests {
 
     #[test]
     fn add_def() -> Result<(), crate::client::Error> {
-        let mut _client = crate::client::JanetClient::init()?.with_default_env();
+        let mut _client = crate::client::JanetClient::init_with_default_env()?;
         let env = _client.env_mut().unwrap();
 
         env.add_def(DefOptions::new("test", Janet::number(1.0)));
@@ -332,7 +332,7 @@ mod tests {
     #[test]
     fn add_var() -> Result<(), crate::client::Error> {
         use crate::array;
-        let mut _client = crate::client::JanetClient::init()?.with_default_env();
+        let mut _client = crate::client::JanetClient::init_with_default_env()?;
         let env = _client.env_mut().unwrap();
 
         env.add_var(VarOptions::new("test", Janet::number(1.0)));

@@ -341,7 +341,7 @@ mod tests {
 
     #[test]
     fn exec_iterator() -> Result<(), crate::client::Error> {
-        let client = JanetClient::init()?.with_default_env();
+        let client = JanetClient::init_with_default_env()?;
 
         let fun = client
             .run(
