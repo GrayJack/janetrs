@@ -3,6 +3,41 @@
     "rust-analyzer.cargo.features": [
         "amalgation", "nightly"
     ],
+    "rust-analyzer.completion.snippets": {
+        "JanetRS Test": {
+            "prefix": ["janetrstest", "test"],
+            "description": "Make a test function",
+            "body": [
+                "#[test]",
+                "fn $1() -> Result<(), crate::client::Error> {",
+                "\tlet _client = crate::client::JanetClient::init()?;",
+                "\t$2",
+                "\tOk(())",
+                "}"
+            ],
+            "scope": "item",
+        },
+
+        "JanetRS Module Test": {
+            "prefix": ["janetrstestmod", "testmod"],
+            "description": "Make a test module",
+            "body": [
+                "#[cfg(all(test, any(feature = \"amalgation\", feature = \"link-system\")))]",
+                "mod tests {",
+                "\tuse super::*;",
+                "\tuse crate::client::JanetClient;",
+                "",
+                "\t#[test]",
+                "\tfn $1() -> Result<(), crate::client::Error> {",
+                "\t\tlet _client = crate::client::JanetClient::init()?;",
+                "\t\t$2",
+                "\t\tOk(())",
+                "\t}",
+                "}"
+            ],
+            "scope": "item",
+        }
+    },
     "cSpell.ignoreWords": [
         "abcdefg",
         "barfoz",
@@ -37,5 +72,6 @@
     "cSpell.words": [
         "amalgation",
         "repr"
-    ]
+    ],
+    "FSharp.suggestGitignore": false
 }

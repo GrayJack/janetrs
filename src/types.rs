@@ -1704,7 +1704,7 @@ string_impl_partial_ord!(#[cfg(feature = "std")]; JanetKeyword<'_>, &'a bstr::BS
 
 
 /// Trait that only exist to extend methods over `[Janet]` so it's easier to get
-/// #[janet_fn] args.
+/// [`janet_fn`](crate::janet_fn) args.
 pub trait JanetArgs {
     /// Get the argument at the `index` position and tries to convert to `T`.
     fn get_unwraped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error>;

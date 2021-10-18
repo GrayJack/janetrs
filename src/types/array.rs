@@ -163,7 +163,7 @@ impl<'data> JanetArray<'data> {
     /// array length, this append [`Janet`] `nil` values into the array, and if `new_len`
     /// is lesser than the current array length, the Janet garbage collector will handle
     /// the elements not used anymore, that's the reason this function is safe to call
-    /// compared to the Rust [`Vec`] method with the same name.
+    /// compared to the Rust [`Vec`](alloc::vec::Vec) method with the same name.
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
     #[inline]

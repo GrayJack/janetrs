@@ -34,7 +34,7 @@ rustdoc-args = ["--cfg", "_doc"]
 [dependencies]
 bstr = { version = "0.2.16", default-features = false }
 const_fn = "0.4"
-evil-janet = "1.17"
+evil-janet = "1"
 janetrs_macros = "0.4.6"
 janetrs_version = "0.1.0"
 libc = { version = "0.2", features = ["extra_traits"] }

@@ -242,6 +242,7 @@ impl JanetFiber<'_> {
         unsafe { evil_janet::janet_stacktrace(self.raw, err.inner) }
     }
 }
+
 /// An iterator that executes the function related to the fiber untill it completes.
 ///
 /// **Executing this iterator may trigger a GC collection**
