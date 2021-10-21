@@ -8,7 +8,8 @@ homepage = "https://crates.io/crates/janetrs"
 documentation = "https://docs.rs/janetrs"
 license-file = "LICENSE"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
+rust-version = "1.56.0"
 keywords = ["janet", "embedding", "ffi"]
 categories = ["api-bindings"]
 exclude = ["/.github", "/.vscode"]
@@ -33,7 +34,6 @@ rustdoc-args = ["--cfg", "_doc"]
 
 [dependencies]
 bstr = { version = "0.2.16", default-features = false }
-const_fn = "0.4"
 evil-janet = "1"
 janetrs_macros = "0.4.6"
 janetrs_version = "0.1.0"

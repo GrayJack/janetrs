@@ -338,8 +338,6 @@ mod tests {
     use super::*;
     use crate::client::JanetClient;
 
-    use core::convert::TryFrom;
-
     #[test]
     fn exec_iterator() -> Result<(), crate::client::Error> {
         let client = JanetClient::init_with_default_env()?;

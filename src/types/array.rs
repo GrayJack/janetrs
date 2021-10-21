@@ -1,7 +1,6 @@
 //! Janet array (vector) type.
 use core::{
     cmp::Ordering,
-    convert::{TryFrom, TryInto},
     fmt::{self, Debug, Write},
     iter::{FromIterator, FusedIterator},
     marker::PhantomData,

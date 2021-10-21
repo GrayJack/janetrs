@@ -18,7 +18,7 @@ This project still are in it's early stages, so breaking changes may happen,
 there is no minimal supported Rust version (MSRV) yet.
 
 Notice that most doc tests will fail if the feature "almagation" or
-"link-system" aren't set, because most of then need it for the Janet runtime to
+"link-system" aren't set, because most of then need the Janet runtime to
 function properly.
 
 ## Cargo Features

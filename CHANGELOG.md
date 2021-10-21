@@ -10,6 +10,7 @@ All notable changes to the library should be put here
   `JanetClient::load_env_replacements`
 - Add two new functions to initialize `JanetClient`:
   `JanetClient::init_with_replacements` and `JanetClient::init_with_default_env`
+- Migrate to Rust 2021
 
 ## 0.4.1
 

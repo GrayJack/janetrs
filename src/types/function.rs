@@ -14,8 +14,6 @@ use std::{
     io::{self, Write},
 };
 
-use const_fn::const_fn;
-
 use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
 
 use crate::{cjvg, Janet, JanetFiber, JanetSignal};
@@ -84,7 +82,6 @@ impl<'data> CallError<'data> {
 
     /// Get a reference to the fiber that the error happened if it exists.
     #[inline]
-    #[const_fn("1.48")]
     pub const fn fiber(&self) -> Option<&JanetFiber> {
         self.fiber.as_ref()
     }

@@ -7,7 +7,8 @@ repository = "https://github.com/GrayJack/janetrs"
 homepage = "https://crates.io/crates/janetrs_macros"
 documentation = "https://docs.rs/janetrs_macros"
 license-file = "../LICENSE"
-edition = "2018"
+edition = "2021"
+rust-version = "1.56.0"
 keywords = ["janet", "utils"]
 categories = ["api-bindings"]
 
@@ -15,7 +16,6 @@ categories = ["api-bindings"]
 
 [dependencies]
 evil-janet = "1"
-const_fn = "0.4"
 
 [features]
 default = []

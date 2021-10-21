@@ -6,7 +6,6 @@
 //!  - `'data` is the lifetime of data that is owned by the Janet GC.
 use core::{
     cmp::Ordering,
-    convert::TryFrom,
     fmt::{self, Display, Write},
 };
 
@@ -17,8 +16,6 @@ use alloc::{
 
 #[cfg(feature = "std")]
 use std::error;
-
-use const_fn::const_fn;
 
 use evil_janet::{Janet as CJanet, JanetType as CJanetType};
 
@@ -1221,7 +1218,6 @@ impl From<Janet> for TaggedJanet<'_> {
 
 impl TaggedJanet<'_> {
     #[inline]
-    #[const_fn("1.46")]
     pub const fn kind(&self) -> JanetType {
         match self {
             TaggedJanet::Abstract(_) => JanetType::Abstract,

@@ -3,7 +3,6 @@ use core::{
     cmp::Ordering,
     convert::Infallible,
     fmt::{self, Debug, Display, Write},
-    iter::FromIterator,
     marker::PhantomData,
     ops::{Index, IndexMut},
     str::FromStr,
