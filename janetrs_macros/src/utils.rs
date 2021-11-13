@@ -34,6 +34,7 @@ pub(crate) enum ArityArgs {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Arg {
     CheckMutRef,
+    Catch,
     Arity(ArityArgs),
 }
 
@@ -70,6 +71,10 @@ impl Parse for Arg {
 
         if ident == "check_mut_ref" {
             return Ok(Arg::CheckMutRef);
+        }
+
+        if ident == "catch" {
+            return Ok(Arg::Catch);
         }
 
         if ident == "arity" {
@@ -126,11 +131,12 @@ impl Parse for Arg {
 
 impl PartialEq for Arg {
     fn eq(&self, other: &Self) -> bool {
+        #[allow(clippy::match_like_matches_macro)]
         match (self, other) {
-            (Self::CheckMutRef, Self::CheckMutRef) => true,
-            (Self::CheckMutRef, Self::Arity(_)) => false,
-            (Self::Arity(_), Self::CheckMutRef) => false,
+            (Self::Catch, Self::Catch) => true,
             (Self::Arity(_), Self::Arity(_)) => true,
+            (Self::CheckMutRef, Self::CheckMutRef) => true,
+            _ => false,
         }
     }
 }

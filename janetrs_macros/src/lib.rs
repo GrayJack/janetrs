@@ -14,6 +14,8 @@ use crate::utils::ModArgs;
 /// to the thing the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) ->
 /// janetrs::lowlevel::Janet`)
 ///
+/// The optional argument `catch` adds code to catch Rust panics and transform them to
+/// Janet panics. This argument is ignored if the `std` feature is deactivated.
 ///
 /// The optional argument `arity` adds a arity check for the function. It must receive the
 /// kind of arity check. These kinds are `fix`, for fixed arity, and `range`, for ranged
@@ -37,6 +39,7 @@ use crate::utils::ModArgs;
 /// - `#[janet_fn(arity(fix(<N>)))]` where `N` is an integer literal
 /// - `#[janet_fn(arity(range(<MIN> [, MAX])))]` where `MIN` and `MAX` are integer
 ///   literals
+/// - `#[janet_fn(catch)]`
 /// - `#[janet_fn(check_mut_ref)]`
 /// - `#[janet_fn(arity(<...>), check_mut_ref)]` Combining both
 #[proc_macro_attribute]
@@ -47,52 +50,78 @@ pub fn janet_fn(
 
     let args = parse_macro_input!(args as Args);
 
-    let extra = args.0.iter().map(|arg| match arg {
-        Arg::CheckMutRef => quote! {
-            for j1 in &args[0..args.len() - 1] {
-                for j2 in &args[1..] {
-                    if matches!(
-                        j1.kind(),
-                        ::janetrs::JanetType::Array
-                            | ::janetrs::JanetType::Buffer
-                            | ::janetrs::JanetType::CFunction
-                            | ::janetrs::JanetType::Fiber
-                            | ::janetrs::JanetType::Function
-                            | ::janetrs::JanetType::Keyword
-                            | ::janetrs::JanetType::Pointer
-                            | ::janetrs::JanetType::Symbol
-                            | ::janetrs::JanetType::Table
-                    ) && matches!(
-                        j1.kind(),
-                        ::janetrs::JanetType::Array
-                            | ::janetrs::JanetType::Buffer
-                            | ::janetrs::JanetType::CFunction
-                            | ::janetrs::JanetType::Fiber
-                            | ::janetrs::JanetType::Function
-                            | ::janetrs::JanetType::Keyword
-                            | ::janetrs::JanetType::Pointer
-                            | ::janetrs::JanetType::Symbol
-                            | ::janetrs::JanetType::Table
-                    ) && j1 == j2
-                    {
-                        ::janetrs::jpanic!("Received two mutable references as arguments");
+    let mut is_catch = false;
+
+    let extra: Vec<_> = args
+        .0
+        .iter()
+        .map(|arg| match arg {
+            Arg::Catch => {
+                is_catch = true;
+                quote! {}
+            },
+            Arg::CheckMutRef => quote! {
+                for j1 in &args[0..args.len() - 1] {
+                    for j2 in &args[1..] {
+                        if matches!(
+                            j1.kind(),
+                            ::janetrs::JanetType::Array
+                                | ::janetrs::JanetType::Buffer
+                                | ::janetrs::JanetType::CFunction
+                                | ::janetrs::JanetType::Fiber
+                                | ::janetrs::JanetType::Function
+                                | ::janetrs::JanetType::Keyword
+                                | ::janetrs::JanetType::Pointer
+                                | ::janetrs::JanetType::Symbol
+                                | ::janetrs::JanetType::Table
+                        ) && matches!(
+                            j1.kind(),
+                            ::janetrs::JanetType::Array
+                                | ::janetrs::JanetType::Buffer
+                                | ::janetrs::JanetType::CFunction
+                                | ::janetrs::JanetType::Fiber
+                                | ::janetrs::JanetType::Function
+                                | ::janetrs::JanetType::Keyword
+                                | ::janetrs::JanetType::Pointer
+                                | ::janetrs::JanetType::Symbol
+                                | ::janetrs::JanetType::Table
+                        ) && j1 == j2
+                        {
+                            ::janetrs::jpanic!("Received two mutable references as arguments");
+                        }
                     }
                 }
-            }
-        },
-        Arg::Arity(ArityArgs::Fix(n)) => quote! {
-            ::janetrs::util::check_fix_arity(args, #n);
-        },
-        Arg::Arity(ArityArgs::Range(min, None)) => quote! {
-            ::janetrs::util::check_range_arity(args, #min, None);
-        },
-        Arg::Arity(ArityArgs::Range(min, Some(max))) => quote! {
-            ::janetrs::util::check_range_arity(args, #min, Some(#max));
-        },
-    });
+            },
+            Arg::Arity(ArityArgs::Fix(n)) => quote! {
+                ::janetrs::util::check_fix_arity(args, #n);
+            },
+            Arg::Arity(ArityArgs::Range(min, None)) => quote! {
+                ::janetrs::util::check_range_arity(args, #min, None);
+            },
+            Arg::Arity(ArityArgs::Range(min, Some(max))) => quote! {
+                ::janetrs::util::check_range_arity(args, #min, Some(#max));
+            },
+        })
+        .collect();
 
     let ts = if let syn::Item::Fn(f) = func {
         let f_clone = f.clone();
+        let fun_clone = if cfg!(feature = "std") && is_catch {
+            let clone = f.clone();
+            let attrs = clone.attrs;
+            let vis = clone.vis;
+            let sig = clone.sig;
+            let block = clone.block;
+            quote! {
+                #(#attrs)* #vis #sig {
+                    ::janetrs::jtry!(#block)
+                }
+            }
+        } else {
+            let clone = f.clone();
+            quote! { #clone }
+        };
+        // let f_clone = f.clone();
         let attrs = f.attrs;
         let doc_str = utils::get_doc(attrs.as_ref());
         let vis = f.vis;
@@ -170,7 +199,7 @@ pub fn janet_fn(
                 const #name_line_: u32 = ::core::line!() + 1;
                 #(#attrs)* #[no_mangle] #vis unsafe extern "C" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
                     #[inline]
-                    #f_clone
+                    #fun_clone
 
                     let args = unsafe { core::slice::from_raw_parts_mut(argv, argc as usize) };
                     let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::Janet])};
