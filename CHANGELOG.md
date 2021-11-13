@@ -8,6 +8,8 @@ All notable changes to the library should be put here
   `JanetClient::load_env_default`
 - **BREAKING:** Rename `JanetClient::with_replacements` ->
   `JanetClient::load_env_replacements`
+- Add `catch` arg to `janet_fn` attribute macro that adds code to catch Rust
+  panics and transform them into Janet panics
 - Add two new functions to initialize `JanetClient`:
   `JanetClient::init_with_replacements` and `JanetClient::init_with_default_env`
 - Migrate to Rust 2021
