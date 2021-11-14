@@ -1,6 +1,8 @@
 //! Module for I/O related types and functions
 
 use core::{fmt, mem};
+#[cfg(feature = "std")]
+use std::io::{self, Read, Seek, SeekFrom, Write};
 #[cfg(all(unix, feature = "std"))]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(all(windows, feature = "std"))]
@@ -44,6 +46,36 @@ impl JanetFile {
     pub fn flags_mut(&mut self) -> &mut FileFlags {
         unsafe { &mut *(&mut (self.raw).flags as *mut i32 as *mut FileFlags) }
     }
+
+    #[cfg(feature = "std")]
+    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    fn last_error(&self) -> Option<io::Error> {
+        let errno = unsafe { libc::ferror(self.raw.file as _) };
+
+        if errno != 0 {
+            return Some(io::Error::from_raw_os_error(errno));
+        }
+
+        let err = io::Error::last_os_error();
+        match err.raw_os_error() {
+            Some(errno) if errno != 0 => Some(err),
+            _ => None,
+        }
+    }
+
+    #[cfg(feature = "std")]
+    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    fn position(&self) -> io::Result<u64> {
+        let offset = unsafe { libc::ftell((self.raw).file as _) };
+
+        if offset < 0 {
+            if let Some(err) = self.last_error() {
+                return Err(err);
+            }
+        }
+
+        Ok(offset as u64)
+    }
 }
 
 impl IsJanetAbstract for JanetFile {
@@ -52,6 +84,117 @@ impl IsJanetAbstract for JanetFile {
     #[inline]
     fn type_info() -> &'static evil_janet::JanetAbstractType {
         unsafe { &evil_janet::janet_file_type }
+    }
+}
+
+impl fmt::Write for JanetFile {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        if s.is_empty() {
+            return Ok(());
+        }
+
+        // SAFETY: We check for the errors after the call
+        let _ = unsafe {
+            libc::fwrite(
+                s.as_ptr() as _,
+                mem::size_of::<u8>(),
+                s.len(),
+                self.as_file_ptr(),
+            )
+        };
+
+        let errno = unsafe { libc::ferror(self.as_file_ptr()) };
+
+        match errno {
+            0 => Ok(()),
+            _ => Err(fmt::Error),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+impl Read for JanetFile {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        if buf.is_empty() {
+            return Ok(0);
+        }
+
+        // SAFETY: We check for the errors after the call
+        let read_bytes = unsafe {
+            libc::fread(
+                buf.as_mut_ptr() as _,
+                mem::size_of::<u8>(),
+                buf.len(),
+                self.as_file_ptr(),
+            )
+        };
+
+        match self.last_error() {
+            Some(err) => Err(err),
+            None => Ok(read_bytes),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+impl Write for JanetFile {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        if buf.is_empty() {
+            return Ok(0);
+        }
+
+        // SAFETY: We check for the errors after the call
+        let writen_bytes = unsafe {
+            libc::fwrite(
+                buf.as_ptr() as _,
+                mem::size_of::<u8>(),
+                buf.len(),
+                self.as_file_ptr(),
+            )
+        };
+
+        match self.last_error() {
+            Some(err) => Err(err),
+            None => Ok(writen_bytes),
+        }
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        // SAFETY: We check for the errors after the call
+        let res = unsafe { libc::fflush(self.as_file_ptr()) };
+
+        match (res, self.last_error()) {
+            (x, Some(err)) if x != 0 => Err(err),
+            _ => Ok(()),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+impl Seek for JanetFile {
+    fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
+        // SAFETY: We check for the errors after the call
+        let res = unsafe {
+            match pos {
+                SeekFrom::Start(offset) => {
+                    libc::fseek(self.as_file_ptr(), offset as _, libc::SEEK_SET)
+                },
+                SeekFrom::End(offset) => libc::fseek(self.as_file_ptr(), offset, libc::SEEK_END),
+                SeekFrom::Current(offset) => {
+                    libc::fseek(self.as_file_ptr(), offset, libc::SEEK_CUR)
+                },
+            }
+        };
+
+        if res != 0 {
+            if let Some(err) = self.last_error() {
+                return Err(err);
+            }
+        }
+        self.position()
     }
 }
 
@@ -125,6 +268,7 @@ impl fmt::Debug for JanetFile {
             .finish()
     }
 }
+
 
 
 /// Flags related to the [`JanetFile`].
@@ -271,7 +415,20 @@ impl core::ops::BitOrAssign<i32> for FileFlags {
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::JanetAbstract;
+    use crate::{Janet, JanetAbstract};
+
+    fn make_tmp() -> Janet {
+        unsafe {
+            let tmp = libc::tmpfile();
+            evil_janet::janet_makefile(
+                tmp as _,
+                (evil_janet::JANET_FILE_WRITE
+                    | evil_janet::JANET_FILE_READ
+                    | evil_janet::JANET_FILE_BINARY) as _,
+            )
+            .into()
+        }
+    }
 
     #[test]
     fn it_works() -> Result<(), crate::client::Error> {
@@ -287,6 +444,30 @@ mod tests {
         assert!(flags.is_append());
         assert!(flags.is_not_closeable());
         assert!(flags.is_serializeble());
+
+        Ok(())
+    }
+
+    #[cfg_attr(feature = "std", test)]
+    fn read_write_seek() -> Result<(), crate::client::Error> {
+        use std::io::{Read, Seek, SeekFrom, Write};
+        let _client = crate::client::JanetClient::init()?;
+
+        let jtmp = make_tmp();
+        let mut atmp: JanetAbstract = jtmp.try_unwrap().unwrap();
+        let tmp: &mut JanetFile = atmp.get_mut().unwrap();
+
+        assert_eq!(tmp.write(b"test").unwrap(), 4);
+        assert_eq!(tmp.seek(SeekFrom::Current(0)).unwrap(), 4);
+
+        let mut buff = [0; 4];
+        assert_eq!(tmp.read(&mut buff[..]).unwrap(), 0);
+        assert_eq!(tmp.seek(SeekFrom::Start(0)).unwrap(), 0);
+
+        tmp.flush().unwrap();
+
+        assert_eq!(tmp.read(&mut buff[..]).unwrap(), 4);
+        assert_eq!(buff, &b"test"[..]);
 
         Ok(())
     }
