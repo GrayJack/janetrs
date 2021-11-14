@@ -117,7 +117,7 @@ impl<'data> JanetFiber<'data> {
     /// ```
     /// use janetrs::{client::JanetClient, JanetFiber, JanetFunction};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let _client = JanetClient::init()?.with_default_env();
+    /// let _client = JanetClient::init_with_default_env()?;
     ///
     /// let f = _client.run(
     ///     "(fn []
@@ -150,7 +150,7 @@ impl<'data> JanetFiber<'data> {
     /// ```
     /// use janetrs::{client::JanetClient, Janet, JanetFiber, JanetFunction};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let _client = JanetClient::init()?.with_default_env();
+    /// let _client = JanetClient::init_with_default_env()?;
     ///
     /// let f = _client.run(
     ///     "(fn [x]
@@ -162,7 +162,7 @@ impl<'data> JanetFiber<'data> {
     /// )?;
     /// let mut f_concrete: JanetFunction = f.try_unwrap()?;
     ///
-    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10.into()]).unwrap();
+    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10i64.into()]).unwrap();
     /// fiber
     ///     .exec_input(Janet::integer(12))
     ///     .for_each(|j| println!("{}", j));
@@ -185,7 +185,7 @@ impl<'data> JanetFiber<'data> {
     /// ```
     /// use janetrs::{client::JanetClient, Janet, JanetFiber, JanetFunction};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let _client = JanetClient::init()?.with_default_env();
+    /// let _client = JanetClient::init_with_default_env()?;
     ///
     /// let f = _client.run(
     ///     "(fn [x]
@@ -197,7 +197,7 @@ impl<'data> JanetFiber<'data> {
     /// )?;
     /// let mut f_concrete: JanetFunction = f.try_unwrap()?;
     ///
-    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10.into()]).unwrap();
+    /// let mut fiber = JanetFiber::new(64, &mut f_concrete, &[10i64.into()]).unwrap();
     /// fiber
     ///     .exec_with(|| Janet::integer(3))
     ///     .for_each(|j| println!("{}", j));
