@@ -125,7 +125,6 @@ impl JanetAbstract {
         true
     }
 
-    #[inline]
     fn check<A: IsJanetAbstract>(&self) -> Result<(), AbstractError> {
         if self.size() != A::SIZE {
             return Err(AbstractError::MismatchedSize);

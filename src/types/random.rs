@@ -2,7 +2,7 @@ use core::{fmt, mem};
 
 use rand_core::{RngCore, SeedableRng};
 
-use super::IsJanetAbstract;
+use crate::{IsJanetAbstract, Janet, JanetAbstract};
 
 /// Type representing the Janet pseudorandom number generator
 ///
@@ -31,6 +31,20 @@ impl IsJanetAbstract for JanetRng {
     #[inline]
     fn type_info() -> &'static evil_janet::JanetAbstractType {
         unsafe { &evil_janet::janet_rng_type }
+    }
+}
+
+impl From<JanetRng> for JanetAbstract {
+    #[inline]
+    fn from(value: JanetRng) -> Self {
+        Self::new(value)
+    }
+}
+
+impl From<JanetRng> for Janet {
+    #[inline]
+    fn from(value: JanetRng) -> Self {
+        Self::j_abstract(JanetAbstract::new(value))
     }
 }
 

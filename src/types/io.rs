@@ -10,7 +10,7 @@ use std::os::windows::io::{AsRawHandle, IntoRawHandle, RawHandle};
 
 use libc::FILE;
 
-use crate::IsJanetAbstract;
+use crate::{IsJanetAbstract, Janet, JanetAbstract};
 
 /// Janet internal representation of a file in the Janet C API.
 #[repr(transparent)]
@@ -84,6 +84,20 @@ impl IsJanetAbstract for JanetFile {
     #[inline]
     fn type_info() -> &'static evil_janet::JanetAbstractType {
         unsafe { &evil_janet::janet_file_type }
+    }
+}
+
+impl From<JanetFile> for JanetAbstract {
+    #[inline]
+    fn from(value: JanetFile) -> Self {
+        Self::new(value)
+    }
+}
+
+impl From<JanetFile> for Janet {
+    #[inline]
+    fn from(value: JanetFile) -> Self {
+        Self::j_abstract(JanetAbstract::new(value))
     }
 }
 
