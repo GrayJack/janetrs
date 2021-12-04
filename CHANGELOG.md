@@ -2,7 +2,7 @@
 
 All notable changes to the library should be put here
 
-## Unreleased
+## 0.5.0
 
 - **BREAKING:** Rename `JanetClient::with_default_env` ->
   `JanetClient::load_env_default`
