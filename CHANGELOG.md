@@ -12,6 +12,8 @@ All notable changes to the library should be put here
   panics and transform them into Janet panics
 - Add two new functions to initialize `JanetClient`:
   `JanetClient::init_with_replacements` and `JanetClient::init_with_default_env`
+- Add `JanetFile::temp`
+- Fix `tuple::{IntoIter, Iter}::size_hint` implementation
 - Migrate to Rust 2021
 
 ## 0.4.1

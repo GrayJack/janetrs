@@ -1200,7 +1200,7 @@ impl<'a> Iterator for Iter<'a, '_> {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.tup.len() as usize;
+        let exact = (self.index_tail - self.index_head) as usize;
         (exact, Some(exact))
     }
 }
@@ -1252,7 +1252,7 @@ impl<'a> Iterator for IntoIter<'_> {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.tup.len() as usize;
+        let exact = (self.index_tail - self.index_head) as usize;
         (exact, Some(exact))
     }
 }
@@ -1385,12 +1385,19 @@ mod tests {
 
         let mut iter = numbers.iter();
 
+        assert_eq!(iter.len(), 6);
         assert_eq!(Some(&Janet::integer(1)), iter.next());
+        assert_eq!(iter.len(), 5);
         assert_eq!(Some(&Janet::integer(6)), iter.next_back());
+        assert_eq!(iter.len(), 4);
         assert_eq!(Some(&Janet::integer(5)), iter.next_back());
+        assert_eq!(iter.len(), 3);
         assert_eq!(Some(&Janet::integer(2)), iter.next());
+        assert_eq!(iter.len(), 2);
         assert_eq!(Some(&Janet::integer(3)), iter.next());
+        assert_eq!(iter.len(), 1);
         assert_eq!(Some(&Janet::integer(4)), iter.next());
+        assert_eq!(iter.len(), 0);
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
 
@@ -1419,15 +1426,36 @@ mod tests {
 
         let mut iter = numbers.into_iter();
 
+        assert_eq!(iter.len(), 6);
         assert_eq!(Some(Janet::integer(1)), iter.next());
+        assert_eq!(iter.len(), 5);
         assert_eq!(Some(Janet::integer(6)), iter.next_back());
+        assert_eq!(iter.len(), 4);
         assert_eq!(Some(Janet::integer(5)), iter.next_back());
+        assert_eq!(iter.len(), 3);
         assert_eq!(Some(Janet::integer(2)), iter.next());
+        assert_eq!(iter.len(), 2);
         assert_eq!(Some(Janet::integer(3)), iter.next());
+        assert_eq!(iter.len(), 1);
         assert_eq!(Some(Janet::integer(4)), iter.next());
+        assert_eq!(iter.len(), 0);
         assert_eq!(None, iter.next());
         assert_eq!(None, iter.next_back());
 
+        Ok(())
+    }
+
+    #[test]
+    fn size_hint() -> Result<(), crate::client::Error> {
+        let _client = JanetClient::init()?;
+        let mut iter = tuple![0; 100].into_iter();
+
+        // The code for all the iterators of the array are the same
+        assert_eq!(iter.len(), 100);
+        let _ = iter.next();
+        assert_eq!(iter.len(), 99);
+        let _ = iter.next_back();
+        assert_eq!(iter.len(), 98);
         Ok(())
     }
 
