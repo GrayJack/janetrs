@@ -19,6 +19,26 @@ pub struct JanetFile {
 }
 
 impl JanetFile {
+    /// Open an anonymous temporary file that is removed on close.
+    #[cfg(feature = "std")]
+    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    pub fn temp() -> io::Result<Self> {
+        let file = unsafe { libc::tmpfile() as *mut evil_janet::FILE };
+
+        if file.is_null() {
+            return Err(io::Error::last_os_error());
+        }
+
+        Ok(Self {
+            raw: evil_janet::JanetFile {
+                file,
+                flags: (evil_janet::JANET_FILE_WRITE
+                    | evil_janet::JANET_FILE_READ
+                    | evil_janet::JANET_FILE_BINARY) as _,
+            },
+        })
+    }
+
     /// Create a new [`JanetFile`] with a `raw` pointer.
     ///
     /// # Safety
