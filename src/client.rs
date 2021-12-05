@@ -227,7 +227,7 @@ impl JanetClient {
     ///
     /// unsafe extern "C" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
     ///     Janet::nil().into()
-    /// };
+    /// }
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
