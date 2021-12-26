@@ -48,10 +48,9 @@ macro_rules! tuple {
 
     ($($val: expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
-        let tuple = $crate::JanetTuple::builder(LEN)
-            $(.put($crate::Janet::from($val)))*;
-
-        tuple.finalize()
+        $crate::JanetTuple::builder(LEN)
+            $(.put($crate::Janet::from($val)))*
+            .finalize()
     }};
 }
 
@@ -140,10 +139,9 @@ macro_rules! array {
 macro_rules! structs {
     ($($key:expr => $value:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($key),*);
-        let st = $crate::JanetStruct::builder(LEN)
-            $(.put($crate::Janet::from($key), $crate::Janet::from($value)))*;
-
-        st.finalize()
+        $crate::JanetStruct::builder(LEN)
+            $(.put($crate::Janet::from($key), $crate::Janet::from($value)))*
+            .finalize()
     }};
 }
 
