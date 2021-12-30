@@ -517,6 +517,7 @@ impl JanetBuffer<'_> {
     #[cfg(all(feature = "std", feature = "unicode"))]
     #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
     #[inline]
+    #[allow(clippy::return_self_not_must_use)]
     pub fn to_lowercase(&self) -> Self {
         self.as_bytes().to_lowercase().into()
     }
@@ -633,6 +634,7 @@ impl JanetBuffer<'_> {
     ///     &b"foo\xFFbar\xE2\x98baz"[..]
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_ascii_lowercase(&self) -> Self {
         Self::from(self.as_bytes().to_ascii_lowercase())
@@ -728,6 +730,7 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(all(feature = "std", feature = "unicode"))]
     #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_uppercase(&self) -> Self {
         self.as_bytes().to_uppercase().into()
@@ -846,6 +849,7 @@ impl JanetBuffer<'_> {
     ///     &b"FOO\xFFBAR\xE2\x98BAZ"[..]
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_ascii_uppercase(&self) -> Self {
         self.as_bytes().to_ascii_uppercase().into()
@@ -909,6 +913,7 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim(&self) -> Self {
         self.as_bytes().trim().into()
@@ -935,6 +940,7 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_start(&self) -> Self {
         self.as_bytes().trim_start().into()
@@ -961,6 +967,7 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_end(&self) -> Self {
         self.as_bytes().trim_end().into()
@@ -983,6 +990,7 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from("foo5bar").as_bytes(),
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_with(trim).into()
@@ -1005,6 +1013,7 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from("foo5bar789").as_bytes()
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_start_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_start_with(trim).into()
@@ -1027,6 +1036,7 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from("123foo5bar").as_bytes()
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_end_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_end_with(trim).into()

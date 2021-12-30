@@ -921,6 +921,7 @@ impl<'data> JanetArray<'data> {
     /// b"0123456789abcdef".repeat(usize::MAX);
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
+    #[allow(clippy::return_self_not_must_use)]
     pub fn repeat(&self, n: usize) -> Self {
         self.as_ref().repeat(n).into_iter().collect()
     }

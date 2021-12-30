@@ -202,18 +202,21 @@ impl<'a> DefOptions<'a> {
     }
 
     /// Configure the docs of the Janet definition.
+    #[must_use]
     pub fn doc(mut self, doc: &'a str) -> Self {
         self.doc = Some(doc);
         self
     }
 
     /// Configure the source file of the Janet definition.
+    #[must_use]
     pub fn source_file(mut self, source_file: impl Into<JanetString<'a>>) -> Self {
         self.source_file = Some(source_file.into());
         self
     }
 
     /// Configure the source line of the Janet definition.
+    #[must_use]
     pub fn source_line(mut self, source_line: u32) -> Self {
         self.source_line = Some(source_line);
         self
@@ -244,18 +247,21 @@ impl<'a> VarOptions<'a> {
     }
 
     /// Configure the docs of the Janet mutable variable definition.
+    #[must_use]
     pub fn doc(mut self, doc: &'a str) -> Self {
         self.doc = Some(doc);
         self
     }
 
     /// Configure the source file of the Janet mutable variable definition.
+    #[must_use]
     pub fn source_file(mut self, source_file: impl Into<JanetString<'a>>) -> Self {
         self.source_file = Some(source_file.into());
         self
     }
 
     /// Configure the source line of the Janet mutable variable definition.
+    #[must_use]
     pub fn source_line(mut self, source_line: u32) -> Self {
         self.source_line = Some(source_line);
         self
@@ -285,24 +291,28 @@ impl<'a> CFunOptions<'a> {
     }
 
     /// Configure the namescpace of the Janet C function definition.
+    #[must_use]
     pub fn namespace(mut self, namespace: &'a str) -> Self {
         self.namespace = Some(namespace);
         self
     }
 
     /// Configure the docs of the Janet C function definition.
+    #[must_use]
     pub fn doc(mut self, doc: &'a str) -> Self {
         self.doc = Some(doc);
         self
     }
 
     /// Configure the source file of the Janet C function definition.
+    #[must_use]
     pub fn source_file(mut self, source_file: &'a str) -> Self {
         self.source_file = Some(source_file);
         self
     }
 
     /// Configure the source line of the Janet C function definition.
+    #[must_use]
     pub fn source_line(mut self, source_line: u32) -> Self {
         self.source_line = Some(source_line);
         self

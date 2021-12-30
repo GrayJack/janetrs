@@ -1420,6 +1420,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// Provides in-place mutable access to an occupied entry before any potential inserts
     /// into the table.
     #[inline]
+    #[must_use]
     pub fn and_modify<F>(self, f: F) -> Self
     where F: FnOnce(&mut Janet) {
         match self {

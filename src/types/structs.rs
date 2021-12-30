@@ -27,6 +27,7 @@ impl<'data> JanetStructBuilder<'data> {
     ///
     /// [`builder`]: #method.builder
     #[inline]
+    #[must_use]
     pub fn put(self, key: impl Into<Janet>, value: impl Into<Janet>) -> Self {
         let (key, value) = (key.into(), value.into());
         unsafe { evil_janet::janet_struct_put(self.raw, key.into(), value.into()) }

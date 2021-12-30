@@ -29,6 +29,7 @@ pub struct JanetTupleBuilder<'data> {
 impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use]
     pub fn put(mut self, value: impl Into<Janet>) -> Self {
         let value = value.into();
 

@@ -145,6 +145,7 @@ impl JanetClient {
     /// The default environment of Janet constains all the Janet C code as well as the
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     #[inline]
+    #[must_use]
     pub fn load_env_default(mut self) -> Self {
         self.env_table = Some(JanetEnvironment::default());
         self
@@ -155,6 +156,7 @@ impl JanetClient {
     /// If an item in the `replacements` table has the same name as a item in the default
     /// environment table, the item is replaced by the newer.
     #[inline]
+    #[must_use]
     pub fn load_env_replacements(mut self, replacements: JanetTable<'static>) -> Self {
         self.env_table = Some(JanetEnvironment::with_replacements(replacements));
         self

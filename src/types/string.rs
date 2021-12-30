@@ -38,6 +38,7 @@ pub struct JanetStringBuilder<'data> {
 impl<'data> JanetStringBuilder<'data> {
     /// Add data to the string builder.
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use]
     pub fn put(mut self, data: impl AsRef<[u8]>) -> Self {
         let data = data.as_ref();
 
@@ -70,6 +71,7 @@ impl<'data> JanetStringBuilder<'data> {
 
     /// Add a [`char`] to the string builder.
     #[inline]
+    #[must_use]
     pub fn put_char(self, ch: char) -> Self {
         let mut buff = [0; 4];
         let s = ch.encode_utf8(&mut buff);
@@ -374,6 +376,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[cfg(all(feature = "std", feature = "unicode"))]
     #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_lowercase(&self) -> Self {
         self.as_bytes().to_lowercase().into()
@@ -489,6 +492,7 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..])
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     pub fn to_ascii_lowercase(&self) -> Self {
         Self::new(self.as_bytes().to_ascii_lowercase())
     }
@@ -547,6 +551,7 @@ impl<'data> JanetString<'data> {
     #[cfg(all(feature = "std", feature = "unicode"))]
     #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
     #[inline]
+    #[allow(clippy::return_self_not_must_use)]
     pub fn to_uppercase(&self) -> Self {
         self.as_bytes().to_uppercase().into()
     }
@@ -660,6 +665,7 @@ impl<'data> JanetString<'data> {
     ///     &b"FOO\xFFBAR\xE2\x98BAZ"[..]
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_ascii_uppercase(&self) -> Self {
         self.as_bytes().to_ascii_uppercase().into()
@@ -683,6 +689,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim(&self) -> Self {
         self.as_bytes().trim().into()
@@ -706,6 +713,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_start(&self) -> Self {
         self.as_bytes().trim_start().into()
@@ -729,6 +737,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_end(&self) -> Self {
         self.as_bytes().trim_end().into()
@@ -748,6 +757,7 @@ impl<'data> JanetString<'data> {
     /// let s = JanetString::new("123foo5bar789");
     /// assert_eq!(s.trim_with(|c| c.is_numeric()), JanetString::new("foo5bar"),);
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_with(trim).into()
@@ -770,6 +780,7 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new("foo5bar789")
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_start_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_start_with(trim).into()
@@ -792,6 +803,7 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new("123foo5bar")
     /// );
     /// ```
+    #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn trim_end_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_end_with(trim).into()
