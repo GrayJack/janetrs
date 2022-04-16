@@ -941,6 +941,15 @@ macro_rules! from_for_janet {
             }
         }
     };
+
+    (inner &mut $ty:ty, $fn_name:ident) => {
+        impl From<&mut $ty> for Janet {
+            #[inline]
+            fn from(val: &mut $ty) -> Self {
+                unsafe { Self::$fn_name(<$ty>::from_raw(val.raw)) }
+            }
+        }
+    };
 }
 
 macro_rules! try_from_janet {
@@ -969,14 +978,17 @@ try_from_janet!(JanetAbstract, TaggedJanet::Abstract);
 
 from_for_janet!(JanetTable<'_>, table);
 from_for_janet!(clone &JanetTable<'_>, table);
+from_for_janet!(inner &mut JanetTable<'_>, table);
 try_from_janet!(JanetTable<'_>, TaggedJanet::Table);
 
 from_for_janet!(JanetArray<'_>, array);
 from_for_janet!(clone &JanetArray<'_>, array);
+from_for_janet!(inner &mut JanetArray<'_>, array);
 try_from_janet!(JanetArray<'_>, TaggedJanet::Array);
 
 from_for_janet!(JanetBuffer<'_>, buffer);
 from_for_janet!(clone &JanetBuffer<'_>, buffer);
+from_for_janet!(inner &mut JanetBuffer<'_>, buffer);
 try_from_janet!(JanetBuffer<'_>, TaggedJanet::Buffer);
 
 from_for_janet!(JanetTuple<'_>, tuple);
