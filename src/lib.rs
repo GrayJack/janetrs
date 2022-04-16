@@ -71,6 +71,7 @@ pub use evil_janet as lowlevel;
 
 pub mod allocator;
 #[cfg(any(feature = "amalgation", feature = "link-system"))]
+#[cfg_attr(_doc, doc(cfg(any(feature = "amalgation", feature = "link-system"))))]
 pub mod client;
 pub mod env;
 mod gc;
