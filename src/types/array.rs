@@ -2599,7 +2599,7 @@ impl Debug for IntoIter<'_> {
     }
 }
 
-impl<'a> Iterator for IntoIter<'_> {
+impl Iterator for IntoIter<'_> {
     type Item = Janet;
 
     #[inline]

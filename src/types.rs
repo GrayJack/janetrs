@@ -1532,6 +1532,7 @@ macro_rules! impl_part {
 // as other String-like types, that is for convenience using Rust types.
 macro_rules! string_impl_partial_eq {
     ($lhs:ty, $rhs:ty) => {
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialEq<$rhs> for $lhs {
             #[inline]
             fn eq(&self, other: &$rhs) -> bool {
@@ -1540,6 +1541,7 @@ macro_rules! string_impl_partial_eq {
             }
         }
 
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialEq<$lhs> for $rhs {
             #[inline]
             fn eq(&self, other: &$lhs) -> bool {
@@ -1551,6 +1553,7 @@ macro_rules! string_impl_partial_eq {
     (#[cfg($attr:meta)]; $lhs:ty, $rhs:ty) => {
         #[cfg($attr)]
         #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialEq<$rhs> for $lhs {
             #[inline]
             fn eq(&self, other: &$rhs) -> bool {
@@ -1561,6 +1564,7 @@ macro_rules! string_impl_partial_eq {
 
         #[cfg($attr)]
         #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialEq<$lhs> for $rhs {
             #[inline]
             fn eq(&self, other: &$lhs) -> bool {
@@ -1578,6 +1582,7 @@ macro_rules! string_impl_partial_eq {
 // as other String-like types, that is for convenience using Rust types.
 macro_rules! string_impl_partial_ord {
     ($lhs:ty, $rhs:ty) => {
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialOrd<$rhs> for $lhs {
             #[inline]
             fn partial_cmp(&self, other: &$rhs) -> Option<Ordering> {
@@ -1586,6 +1591,7 @@ macro_rules! string_impl_partial_ord {
             }
         }
 
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialOrd<$lhs> for $rhs {
             #[inline]
             fn partial_cmp(&self, other: &$lhs) -> Option<Ordering> {
@@ -1597,6 +1603,7 @@ macro_rules! string_impl_partial_ord {
     (#[cfg($attr:meta)]; $lhs:ty, $rhs:ty) => {
         #[cfg($attr)]
         #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialOrd<$rhs> for $lhs {
             #[inline]
             fn partial_cmp(&self, other: &$rhs) -> Option<Ordering> {
@@ -1607,6 +1614,7 @@ macro_rules! string_impl_partial_ord {
 
         #[cfg($attr)]
         #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialOrd<$lhs> for $rhs {
             #[inline]
             fn partial_cmp(&self, other: &$lhs) -> Option<Ordering> {
