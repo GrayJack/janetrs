@@ -896,7 +896,7 @@ impl PartialEq<&CJanet> for Janet {
 impl PartialEq<&Janet> for CJanet {
     #[inline]
     fn eq(&self, other: &&Janet) -> bool {
-        self.eq(&(*other).inner)
+        self.eq(&other.inner)
     }
 }
 
@@ -910,7 +910,7 @@ impl PartialOrd<&CJanet> for Janet {
 impl PartialOrd<&Janet> for CJanet {
     #[inline]
     fn partial_cmp(&self, other: &&Janet) -> Option<Ordering> {
-        self.partial_cmp(&(*other).inner)
+        self.partial_cmp(&other.inner)
     }
 }
 
