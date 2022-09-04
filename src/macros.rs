@@ -1,8 +1,8 @@
 #[doc(hidden)]
 #[macro_export]
 macro_rules! count {
-    (@subst $($x: tt)*) => (());
-    ($($rest: expr),*) => (<[()]>::len(&[$($crate::count!(@subst $rest)),*]) as i32);
+    (@subst $($x:tt)*) => (());
+    ($($rest:expr),*) => (<[()]>::len(&[$($crate::count!(@subst $rest)),*]) as i32);
 }
 
 /// Creates a [`JanetTuple`] containing the arguments.
@@ -44,9 +44,9 @@ macro_rules! count {
 /// [`JanetTuple`]: ./types/tuple/struct.JanetTuple.html
 #[macro_export]
 macro_rules! tuple {
-    ($elem: expr; $n: expr) => {$crate::JanetTuple::with_default_elem($crate::Janet::from($elem), $n)};
+    ($elem:expr; $n:expr) => {$crate::JanetTuple::with_default_elem($crate::Janet::from($elem), $n)};
 
-    ($($val: expr),* $(,)?) => {{
+    ($($val:expr),* $(,)?) => {{
         const LEN: i32 = $crate::count!($($val),*);
         $crate::JanetTuple::builder(LEN)
             $(.put($crate::Janet::from($val)))*
