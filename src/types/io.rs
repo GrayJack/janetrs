@@ -294,7 +294,7 @@ impl fmt::Debug for JanetFile {
             .field("write", &self.flags().is_write())
             .field("append", &self.flags().is_append())
             .field("binary", &self.flags().is_binary())
-            .field("piped", &self.flags().is_piped())
+            .field("update", &self.flags().is_update())
             .field("closed", &self.flags().is_closed())
             .field("not_closeable", &self.flags().is_not_closeable())
             .field("no_nil", &self.flags().is_no_nil())
@@ -316,9 +316,11 @@ impl FileFlags {
     pub const CLOSED: Self = Self(evil_janet::JANET_FILE_CLOSED as i32);
     pub const NOT_CLOSEABLE: Self = Self(evil_janet::JANET_FILE_NOT_CLOSEABLE as i32);
     pub const NO_NIL: Self = Self(evil_janet::JANET_FILE_NONIL as i32);
+    #[janetrs_macros::cjvg("1.9.1", "1.22.0")]
     pub const PIPED: Self = Self(evil_janet::JANET_FILE_PIPED as i32);
     pub const READ: Self = Self(evil_janet::JANET_FILE_READ as i32);
     pub const SERIALIZEBLE: Self = Self(evil_janet::JANET_FILE_SERIALIZABLE as i32);
+    pub const UPDATE: Self = Self(evil_janet::JANET_FILE_UPDATE as i32);
     pub const WRITE: Self = Self(evil_janet::JANET_FILE_WRITE as i32);
 
     /// Check if the flag has the append value.
@@ -353,8 +355,14 @@ impl FileFlags {
 
     /// Check if the flag has the `piped` value.
     #[inline]
+    #[janetrs_macros::cjvg("1.9.1", "1.22.0")]
     pub const fn is_piped(self) -> bool {
         (self.0 & Self::PIPED.0) == Self::PIPED.0
+    }
+
+    /// Check if the flag has the `update` value.
+    pub const fn is_update(self) -> bool {
+        (self.0 & Self::UPDATE.0) == Self::UPDATE.0
     }
 
     /// Check if the flag has the `read` value.
