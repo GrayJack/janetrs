@@ -1,72 +1,50 @@
 name: Check and Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+    paths-ignore:
+      - "**.md"
+      - LICENSE
+      - .github/FUNDING.yml
+      - .gitignore
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - .github/FUNDING.yml
+      - .editorconfig
+      - .gitignore
 
 jobs:
-  build-linux:
-    name: Linux
-    runs-on: ubuntu-latest
+  build:
+    name: ${{ matrix.target.name }} (${{ matrix.rust }})
+    runs-on: ${{ matrix.target.os }}
     strategy:
       matrix:
-        rust: [1.56.0, stable, beta, nightly]
+        rust: [1.60.0, stable, nightly]
+        target:
+          - name: Linux
+            os: ubuntu-latest
+          - name: macOS
+            os: macos-latest
+          - name: Windows
+            os: windows-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
+    - name: Checkout sources
+      uses: actions/checkout@v3
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
-        override: true
-        profile: minimal
     - name: Cache cargo output
       uses: Swatinem/rust-cache@v1
-    - name: Check no_std
-      run: cargo check --no-default-features --features=amalgation --verbose
+    - name: Check
+      run: cargo check
     - name: Check and Run tests
-      run: cargo test --features amalgation --verbose
-
-  build-macos:
-    name: MacOS
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        rust: [1.56.0, stable, beta, nightly]
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        override: true
-        profile: minimal
-    - name: Cache cargo output
-      uses: Swatinem/rust-cache@v1
+      run: cargo test
     - name: Check no_std
-      run: cargo check --no-default-features --features=amalgation --verbose
+      run: cargo check --no-default-features --features=amalgation
     - name: Check and Run tests
-      run: cargo test --features amalgation --verbose
-
-  # build-windows:
-  #   name: Windows
-  #   runs-on: windows-latest
-  #   strategy:
-  #     matrix:
-  #       rust: [1.56.0, stable, beta, nightly]
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: ${{ matrix.rust }}
-  #       override: true
-  #       profile: minimal
-  #   - name: Cache cargo output
-  #     uses: Swatinem/rust-cache@v1
-  #   - name: Install LLVM and Clang
-  #     uses: KyleMayes/install-llvm-action@v1
-  #     with:
-  #       version: "12.0"
-  #       directory: ${{ runner.temp }}/llvm
-  #   - name: Set LIBCLANG_PATH
-  #     run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-  #     # if: matrix.os == 'windows-latest'
-  #   - name: Check no_std
-  #     run: cargo check --no-default-features --features=amalgation --verbose
-  #   - name: Check and Run tests
-  #     run: cargo test --features amalgation --verbose
+      run: cargo test --features amalgation
