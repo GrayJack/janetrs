@@ -3,6 +3,11 @@ on:
   push:
    branches:
    - dev
+   paths-ignore:
+      - "**.md"
+      - LICENSE
+      - .github/FUNDING.yml
+      - .gitignore
 
 jobs:
   rustdoc:
@@ -13,21 +18,16 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Install Rust toolchain
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@master
       with:
         toolchain: nightly
-        profile: minimal
-        override: true
         components: rust-src
 
     - name: Cache cargo output
       uses: Swatinem/rust-cache@v1
-
-    # - name: Install targets
-    #   run: rustup target install x86_64-unknown-freebsd x86_64-unknown-netbsd x86_64-apple-darwin x86_64-fuchsia
 
     - name: Build Documentation
       uses: actions-rs/cargo@v1
