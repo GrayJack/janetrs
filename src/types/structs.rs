@@ -448,9 +448,7 @@ impl Clone for JanetStruct<'_> {
         let len = self.len();
         let mut clone = JanetStruct::builder(len);
 
-        for index in 0..len {
-            let kv = unsafe { *self.raw.offset(index as isize) };
-            let (k, v): (Janet, Janet) = (kv.key.into(), kv.value.into());
+        for (k, v) in self {
             clone = clone.put(k, v);
         }
 
