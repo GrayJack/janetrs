@@ -43,8 +43,8 @@ jobs:
       - name: Generate coverage report
         run: |
           cargo llvm-cov clean
-          cargo llvm-cov --no-report --all-features -- --test-threads=1
-          cargo llvm-cov --no-report --tests --all-features -- compile_fail
+          cargo llvm-cov --no-report --features nightly,amalgation -- --test-threads=1
+          cargo llvm-cov --no-report --tests --features nightly,amalgation -- compile_fail
           cargo llvm-cov --no-run --lcov > lcov.txt
 
       - name: Upload coverage report
