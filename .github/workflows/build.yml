@@ -41,9 +41,7 @@ jobs:
     - name: Cache cargo output
       uses: Swatinem/rust-cache@v1
     - name: Check
-      run: cargo check
-    - name: Check and Run tests
-      run: cargo test
+      run: cargo check --features=amalgation
     - name: Check no_std
       run: cargo check --no-default-features --features=amalgation
     - name: Check and Run tests
