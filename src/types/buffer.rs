@@ -1533,7 +1533,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(matches, vec![0]);
     /// ```
     #[inline]
-    pub fn find_iter<'a, B: ?Sized + AsRef<[u8]>>(&'a self, needle: &'a B) -> Find<'a> {
+    pub fn find_iter<'a, 'b, B: ?Sized + AsRef<[u8]>>(&'a self, needle: &'b B) -> Find<'a, 'b> {
         self.as_bytes().find_iter(needle)
     }
 
@@ -1577,7 +1577,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(matches, vec![0]);
     /// ```
     #[inline]
-    pub fn rfind_iter<'a, B>(&'a self, needle: &'a B) -> FindReverse<'a>
+    pub fn rfind_iter<'a, 'b, B>(&'a self, needle: &'b B) -> FindReverse<'a, 'b>
     where B: ?Sized + AsRef<[u8]> {
         self.as_bytes().rfind_iter(needle)
     }
@@ -2095,7 +2095,7 @@ impl JanetBuffer<'_> {
     /// It does *not* give you `["a", "b", "c"]`. For that behavior, use
     /// [`fields`](#method.fields) instead.
     #[inline]
-    pub fn split<'a, S>(&'a self, splitter: &'a S) -> Split<'a>
+    pub fn split<'a, 'b, S>(&'a self, splitter: &'b S) -> Split<'a, 'b>
     where S: ?Sized + AsRef<[u8]> {
         self.as_bytes().split_str(splitter)
     }
@@ -2233,7 +2233,7 @@ impl JanetBuffer<'_> {
     ///
     /// It does *not* give you `["a", "b", "c"]`.
     #[inline]
-    pub fn rsplit<'a, S>(&'a self, splitter: &'a S) -> SplitReverse<'a>
+    pub fn rsplit<'a, 'b, S>(&'a self, splitter: &'b S) -> SplitReverse<'a, 'b>
     where S: ?Sized + AsRef<[u8]> {
         self.as_bytes().rsplit_str(splitter)
     }
@@ -2282,7 +2282,7 @@ impl JanetBuffer<'_> {
     /// assert!(x.is_empty());
     /// ```
     #[inline]
-    pub fn splitn<'a, S>(&'a self, limit: usize, splitter: &'a S) -> SplitN<'a>
+    pub fn splitn<'a, 'b, S>(&'a self, limit: usize, splitter: &'b S) -> SplitN<'a, 'b>
     where S: ?Sized + AsRef<[u8]> {
         self.as_bytes().splitn_str(limit, splitter)
     }
@@ -2331,7 +2331,7 @@ impl JanetBuffer<'_> {
     /// assert!(x.is_empty());
     /// ```
     #[inline]
-    pub fn rsplitn<'a, S>(&'a self, limit: usize, splitter: &'a S) -> SplitNReverse<'a>
+    pub fn rsplitn<'a, 'b, S>(&'a self, limit: usize, splitter: &'b S) -> SplitNReverse<'a, 'b>
     where S: ?Sized + AsRef<[u8]> {
         self.as_bytes().rsplitn_str(limit, splitter)
     }
