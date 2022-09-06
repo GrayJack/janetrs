@@ -3,7 +3,7 @@
     "rust-analyzer.cargo.features": [
         "amalgation", "nightly"
     ],
-    "rust-analyzer.completion.snippets": {
+    "rust-analyzer.completion.snippets.custom": {
         "JanetRS Test": {
             "prefix": ["janetrstest", "test"],
             "description": "Make a test function",
