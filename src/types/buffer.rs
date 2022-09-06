@@ -20,13 +20,13 @@ use std::{
 use evil_janet::JanetBuffer as CJanetBuffer;
 
 use bstr::{
-    BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
+    BStr, ByteSlice, Bytes, CharIndices, Chars, FieldsWith, Find, FindReverse, Lines,
     LinesWithTerminator, Split, SplitN, SplitNReverse, SplitReverse, Utf8Chunks, Utf8Error,
 };
 
 #[cfg(feature = "unicode")]
 use bstr::{
-    GraphemeIndices, Graphemes, SentenceIndices, Sentences, WordIndices, Words,
+    Fields, GraphemeIndices, Graphemes, SentenceIndices, Sentences, WordIndices, Words,
     WordsWithBreakIndices, WordsWithBreaks,
 };
 
@@ -1680,6 +1680,8 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from("  \n\t\u{2003}\n  \t").fields().count()
     /// );
     /// ```
+    #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn fields(&self) -> Fields {
         self.as_bytes().fields()

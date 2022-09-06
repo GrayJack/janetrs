@@ -14,13 +14,13 @@ use alloc::string::String;
 use std::{borrow::Cow, ffi::OsStr, path::Path};
 
 use bstr::{
-    BStr, ByteSlice, Bytes, CharIndices, Chars, Fields, FieldsWith, Find, FindReverse, Lines,
+    BStr, ByteSlice, Bytes, CharIndices, Chars, FieldsWith, Find, FindReverse, Lines,
     LinesWithTerminator, Split, SplitN, SplitNReverse, SplitReverse, Utf8Chunks, Utf8Error,
 };
 
 #[cfg(feature = "unicode")]
 use bstr::{
-    GraphemeIndices, Graphemes, SentenceIndices, Sentences, WordIndices, Words,
+    Fields, GraphemeIndices, Graphemes, SentenceIndices, Sentences, WordIndices, Words,
     WordsWithBreakIndices, WordsWithBreaks,
 };
 
@@ -1445,6 +1445,8 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new(&"  \n\t\u{2003}\n  \t").fields().count()
     /// );
     /// ```
+    #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn fields(&self) -> Fields {
         self.as_bytes().fields()
