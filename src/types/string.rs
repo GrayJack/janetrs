@@ -8,10 +8,10 @@ use core::{
     str::FromStr,
 };
 
-use alloc::string::String;
+use alloc::{borrow::Cow, string::String};
 
 #[cfg(feature = "std")]
-use std::{borrow::Cow, ffi::OsStr, path::Path};
+use std::{ffi::OsStr, path::Path};
 
 use bstr::{
     BStr, ByteSlice, Bytes, CharIndices, Chars, FieldsWith, Find, FindReverse, Lines,
@@ -374,8 +374,8 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new(&b"foo\xFFbar\xE2\x98baz"[..])
     /// );
     /// ```
-    #[cfg(all(feature = "std", feature = "unicode"))]
-    #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
+    #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_lowercase(&self) -> Self {
@@ -443,6 +443,7 @@ impl<'data> JanetString<'data> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn to_lowercase_into(&self, buf: &mut JanetBuffer) {
         buf.reserve(self.len());
@@ -548,8 +549,8 @@ impl<'data> JanetString<'data> {
     ///     JanetString::new(&b"FOO\xFFBAR\xE2\x98BAZ"[..])
     /// );
     /// ```
-    #[cfg(all(feature = "std", feature = "unicode"))]
-    #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
+    #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
     #[allow(clippy::return_self_not_must_use)]
     pub fn to_uppercase(&self) -> Self {
@@ -864,8 +865,6 @@ impl<'data> JanetString<'data> {
     ///
     /// N.B. Rust's standard library also appears to use the same strategy,
     /// but it does not appear to be an API guarantee.
-    #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
     pub fn to_str_lossy(&self) -> Cow<str> {
         self.as_bytes().to_str_lossy()
@@ -883,8 +882,6 @@ impl<'data> JanetString<'data> {
     /// `to_str_lossy`, this routine will _always_ copy the contents of this
     /// string into the destination string, even if this string is
     /// valid UTF-8.
-    #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
     pub fn to_str_lossy_into(&self, dest: &mut String) {
         self.as_bytes().to_str_lossy_into(dest)

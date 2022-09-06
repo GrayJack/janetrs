@@ -8,11 +8,11 @@ use core::{
     str::FromStr,
 };
 
-use alloc::{string::String, vec::Vec};
+use alloc::{borrow::Cow, string::String, vec::Vec};
 
 #[cfg(feature = "std")]
 use std::{
-    borrow::Cow,
+    // REMINDER: On 1.64.0, `CStr` is part of core
     ffi::{CStr, OsStr},
     path::Path,
 };
@@ -331,7 +331,7 @@ impl JanetBuffer<'_> {
 
     /// Append the given c-string slice onto the end of the buffer.
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
     pub fn push_cstr(&mut self, cstr: &CStr) {
         unsafe { evil_janet::janet_buffer_push_cstring(self.raw, cstr.as_ptr()) }
@@ -514,8 +514,8 @@ impl JanetBuffer<'_> {
     /// let s = JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]);
     /// assert_eq!(&b"foo\xFFbar\xE2\x98baz"[..], s.to_lowercase().as_bytes());
     /// ```
-    #[cfg(all(feature = "std", feature = "unicode"))]
-    #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
+    #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
     #[allow(clippy::return_self_not_must_use)]
     pub fn to_lowercase(&self) -> Self {
@@ -580,6 +580,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(&b"foo\xFFbar\xE2\x98baz"[..], buf.as_bytes());
     /// ```
     #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn to_lowercase_into(&self, buf: &mut Self) {
         // based on bstr version of the same function
@@ -728,8 +729,8 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from(&b"FOO\xFFBAR\xE2\x98BAZ"[..]).as_bytes()
     /// );
     /// ```
-    #[cfg(all(feature = "std", feature = "unicode"))]
-    #[cfg_attr(_doc, doc(cfg(all(feature = "std", feature = "unicode"))))]
+    #[cfg(feature = "unicode")]
+    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[allow(clippy::return_self_not_must_use)]
     #[inline]
     pub fn to_uppercase(&self) -> Self {
@@ -1097,8 +1098,6 @@ impl JanetBuffer<'_> {
     ///
     /// N.B. Rust's standard library also appears to use the same strategy,
     /// but it does not appear to be an API guarantee.
-    #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
     pub fn to_str_lossy(&self) -> Cow<str> {
         self.as_bytes().to_str_lossy()
@@ -1116,8 +1115,6 @@ impl JanetBuffer<'_> {
     /// `to_str_lossy`, this routine will _always_ copy the contents of this
     /// buffer into the destination buffer, even if this buffer is
     /// valid UTF-8.
-    #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
     pub fn to_str_lossy_into(&self, dest: &mut String) {
         self.as_bytes().to_str_lossy_into(dest)
