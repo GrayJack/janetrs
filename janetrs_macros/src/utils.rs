@@ -104,7 +104,7 @@ impl Parse for Arg {
                     x => {
                         return Err(Error::new(
                             paren.span,
-                            &format!(
+                            format!(
                                 "invalid number of arguments for `range`: Expected at least 1, \
                                  with max of 2 arguments, got {}",
                                 x

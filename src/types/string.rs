@@ -2468,7 +2468,7 @@ impl<'a> FromIterator<&'a u8> for JanetString<'_> {
         let mut new = Self::builder(len);
 
         for &byte in iter {
-            new = new.put(&[byte]);
+            new = new.put([byte]);
         }
 
         new.finalize()

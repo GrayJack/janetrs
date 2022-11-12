@@ -353,7 +353,7 @@ mod tests {
             )
             .unwrap();
         let mut fun = JanetFunction::try_from(fun).unwrap();
-        let mut fiber = JanetFiber::new(64, &mut fun, &[Janet::number(10.0)]).unwrap();
+        let mut fiber = JanetFiber::new(64, &mut fun, [Janet::number(10.0)]).unwrap();
         let mut iter = fiber.exec();
         assert_eq!(Some(Janet::number(10.0)), iter.next());
         assert_eq!(Some(Janet::number(11.0)), iter.next());

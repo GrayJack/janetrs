@@ -1712,7 +1712,7 @@ impl<'a, 'data> OccupiedEntry<'a, 'data> {
     pub fn remove_entry(self) -> (Janet, Janet) {
         // SAFETY: Safe to deref because `elem` is not null
         let copy = unsafe { *self.elem.as_ptr() };
-        self.table.remove(&copy.0);
+        self.table.remove(copy.0);
         copy
     }
 
