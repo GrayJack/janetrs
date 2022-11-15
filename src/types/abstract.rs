@@ -213,7 +213,7 @@ impl JanetAbstract {
     /// Return the size of the type it holds.
     #[inline]
     pub fn size(&self) -> usize {
-        unsafe { (*evil_janet::janet_abstract_head(self.raw)).size as usize }
+        unsafe { (*evil_janet::janet_abstract_head(self.raw)).size }
     }
 
     /// Return the struct that holds the type name and all possible polimorfic function

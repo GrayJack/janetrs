@@ -61,7 +61,7 @@ impl Scratch {
             if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
                 let size = layout.size();
 
-                unsafe { (evil_janet::janet_smalloc(size as u64) as *mut u8, size) }
+                unsafe { (evil_janet::janet_smalloc(size) as *mut u8, size) }
             } else {
                 // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
                 #[cfg(target_os = "macos")]
@@ -70,7 +70,7 @@ impl Scratch {
                 }
 
                 let size = layout.size() + layout.align();
-                unsafe { (evil_janet::janet_smalloc(size as u64) as *mut u8, size) }
+                unsafe { (evil_janet::janet_smalloc(size) as *mut u8, size) }
             };
         NonNull::new(ptr::slice_from_raw_parts_mut(raw_ptr, alloc_mem_size))
     }
@@ -85,7 +85,7 @@ impl Scratch {
             if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
                 let size = layout.size();
 
-                unsafe { (evil_janet::janet_scalloc(1, size as u64) as *mut u8, size) }
+                unsafe { (evil_janet::janet_scalloc(1, size) as *mut u8, size) }
             } else {
                 // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
                 #[cfg(target_os = "macos")]
@@ -94,7 +94,7 @@ impl Scratch {
                 }
 
                 let size = layout.size() + layout.align();
-                unsafe { (evil_janet::janet_scalloc(1, size as u64) as *mut u8, size) }
+                unsafe { (evil_janet::janet_scalloc(1, size) as *mut u8, size) }
             };
         NonNull::new(ptr::slice_from_raw_parts_mut(raw_ptr, alloc_mem_size))
     }
@@ -125,7 +125,7 @@ impl Scratch {
                 let size = new_layout.size();
 
                 (
-                    evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size as u64) as *mut u8,
+                    evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size) as *mut u8,
                     size,
                 )
             } else {
@@ -137,7 +137,7 @@ impl Scratch {
 
                 let size = layout.size() + layout.align();
                 (
-                    evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size as u64) as *mut u8,
+                    evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size) as *mut u8,
                     size,
                 )
             };

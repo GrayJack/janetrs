@@ -37,6 +37,4 @@ pub fn check_range_arity(args: &[Janet], min: usize, max: Option<usize>) {
 #[inline]
 pub fn _panic(msg: Janet) -> ! {
     unsafe { evil_janet::janet_panicv(msg.inner) }
-    #[allow(clippy::empty_loop)]
-    loop {}
 }
