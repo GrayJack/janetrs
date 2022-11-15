@@ -34,9 +34,7 @@ rustdoc-args = ["--cfg", "_doc"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bstr = { version = "1.0.0-pre.3", default-features = false, features = [
-    "alloc",
-] }
+bstr = { version = "1.0.0", default-features = false, features = ["alloc"] }
 evil-janet = "1"
 janetrs_macros = "0.5.0"
 janetrs_version = "0.1.0"
