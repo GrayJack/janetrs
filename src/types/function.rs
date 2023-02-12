@@ -64,24 +64,28 @@ impl<'data> CallError<'data> {
 
     /// Returns the kind of the error.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn kind(&self) -> CallErrorKind {
         self.kind
     }
 
     /// Returns the error value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn value(&self) -> Janet {
         self.value
     }
 
     /// Returns the [`JanetSignal`] that caused the error.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn signal(&self) -> JanetSignal {
         self.signal
     }
 
     /// Get a reference to the fiber that the error happened if it exists.
     #[inline]
+    #[must_use]
     pub const fn fiber(&self) -> Option<&JanetFiber> {
         self.fiber.as_ref()
     }
@@ -94,6 +98,7 @@ impl<'data> CallError<'data> {
 
     /// Consume the error and return the fiber that the error happened if it exists.
     #[inline]
+    #[must_use = "this consumes self, making it impossible to use afterwards"]
     pub const fn take_fiber(self) -> Option<JanetFiber<'data>> {
         self.fiber
     }
@@ -280,6 +285,7 @@ impl<'data> JanetFunction<'data> {
     /// The caller must ensure that the function outlives the pointer this function
     /// returns, or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const CJanetFunction {
         self.raw
     }
@@ -319,6 +325,7 @@ mod trystate {
     impl JanetTryState {
         /// Initializes the state.
         #[inline]
+        #[must_use = "function is a constructor associated function"]
         pub fn init() -> Self {
             let mut state = {
                 let mut state = MaybeUninit::uninit();
@@ -339,6 +346,7 @@ mod trystate {
 
         /// Check if the VM have a valid [`JanetFiber`](crate::JanetFiber).
         #[inline]
+        #[must_use = "this returns the result of the operation, without modifying the original"]
         pub fn is_valid_to_run(&self) -> bool {
             !self.inner.vm_fiber.is_null()
         }
@@ -369,6 +377,7 @@ mod trystate {
 
         /// Get the output of the execution.
         #[inline]
+        #[must_use = "this returns the result of the operation, without modifying the original"]
         pub fn payload(&self) -> Janet {
             self.inner.payload.into()
         }

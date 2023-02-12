@@ -11,6 +11,7 @@ pub struct JanetGc {
 impl JanetGc {
     /// Obtain the [`JanetGc`].
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn obtain() -> Self {
         Self {
             _phantom: core::marker::PhantomData,
@@ -39,6 +40,7 @@ impl JanetGc {
     /// a [`JanetGcLockGuard`] active (or any unsafe call to the Janet C API locking the
     /// GC)
     #[inline]
+    #[must_use = "JanetGcLockGuard will be dropped if the result is not used"]
     pub fn lock(&self) -> JanetGcLockGuard {
         let handle = unsafe { evil_janet::janet_gclock() };
         JanetGcLockGuard::new(handle)
@@ -74,6 +76,7 @@ impl JanetGc {
     ///
     /// The returned guard will [`unroot`](JanetGc::unroot) the `value` when dropped.
     #[inline]
+    #[must_use = "JanetGcRootGuard will be dropped if the result is not used"]
     pub fn root(&self, value: Janet) -> JanetGcRootGuard {
         JanetGcRootGuard::new(value)
     }

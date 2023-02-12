@@ -19,6 +19,7 @@ pub struct JanetEnvironment(JanetTable<'static>);
 impl JanetEnvironment {
     /// Creates a new environment with Janet default environment.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn new() -> Self {
         // SAFETY: `janet_core_env` never returns a null pointer
         Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(ptr::null_mut())) })
@@ -30,6 +31,7 @@ impl JanetEnvironment {
     /// Every item with the same name as the ones in the Janet default environment will
     /// replace the original.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn with_replacements(mut replacements: JanetTable<'static>) -> Self {
         // SAFETY: `janet_core_env` never returns a null pointer
         Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(replacements.as_mut_raw())) })
@@ -167,6 +169,7 @@ impl JanetEnvironment {
 
     /// Get a reference the underlying environment table.
     #[inline]
+    #[must_use]
     pub const fn table(&self) -> &JanetTable {
         &self.0
     }

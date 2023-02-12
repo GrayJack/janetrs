@@ -171,6 +171,7 @@ pub struct Janet {
 impl Janet {
     /// Create a nil [`Janet`].
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn nil() -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_nil() },
@@ -179,6 +180,7 @@ impl Janet {
 
     /// Create a boolean [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn boolean(value: bool) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_boolean(value.into()) },
@@ -187,6 +189,7 @@ impl Janet {
 
     /// Create a number [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn number(value: f64) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_number(value) },
@@ -195,6 +198,7 @@ impl Janet {
 
     /// Create a number [`Janet`] with a [`i32`] `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn integer(value: i32) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_integer(value) },
@@ -203,18 +207,21 @@ impl Janet {
 
     /// Create a abstract integer [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn int64(value: i64) -> Self {
         Self::j_abstract(JanetAbstract::new(value))
     }
 
     /// Create a abstract integer [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn uint64(value: u64) -> Self {
         Self::j_abstract(JanetAbstract::new(value))
     }
 
     /// Create a array [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn array(value: JanetArray<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_array(value.raw) },
@@ -223,6 +230,7 @@ impl Janet {
 
     /// Create a buffer [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn buffer(value: JanetBuffer<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_buffer(value.raw) },
@@ -231,6 +239,7 @@ impl Janet {
 
     /// Create a table [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn table(value: JanetTable<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_table(value.raw) },
@@ -239,6 +248,7 @@ impl Janet {
 
     /// Create a tuple [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn tuple(value: JanetTuple<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_tuple(value.raw) },
@@ -247,6 +257,7 @@ impl Janet {
 
     /// Create a string [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn string(value: JanetString<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_string(value.raw) },
@@ -255,6 +266,7 @@ impl Janet {
 
     /// Create a struct [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn structs(value: JanetStruct<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_struct(value.raw) },
@@ -263,6 +275,7 @@ impl Janet {
 
     /// Create a symbol [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn symbol(value: JanetSymbol<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_symbol(value.raw) },
@@ -271,6 +284,7 @@ impl Janet {
 
     /// Create a keyword [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn keyword(value: JanetKeyword<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_keyword(value.raw) },
@@ -279,6 +293,7 @@ impl Janet {
 
     /// Create a fiber [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn fiber(value: JanetFiber<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_fiber(value.raw) },
@@ -287,6 +302,7 @@ impl Janet {
 
     /// Create a function [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn function(value: JanetFunction<'_>) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_function(value.raw) },
@@ -295,6 +311,7 @@ impl Janet {
 
     /// Create a C function [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn c_function(value: JanetCFunction) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_cfunction(value) },
@@ -303,6 +320,7 @@ impl Janet {
 
     /// Create a pointer [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn pointer(value: JanetPointer) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_pointer(value.as_ptr()) },
@@ -311,6 +329,7 @@ impl Janet {
 
     /// Create as abstract [`Janet`] with `value`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn j_abstract(value: JanetAbstract) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_abstract(value.raw) },
@@ -348,6 +367,7 @@ impl Janet {
 
     /// Unwrap the [`Janet`] value into a enum that holds the type value
     #[inline]
+    #[must_use]
     pub fn unwrap<'data>(self) -> TaggedJanet<'data> {
         self.into()
     }
@@ -440,6 +460,8 @@ impl Janet {
 
     /// Return `true` if [`Janet`] is nil type.
     #[inline]
+    #[must_use = "if you intended to assert that this is `nil`, consider `matches!(value.unwrap(), \
+                  TaggedJanet::Nil)` instead"]
     pub fn is_nil(&self) -> bool {
         matches!(self.kind(), JanetType::Nil)
     }
@@ -451,6 +473,7 @@ impl Janet {
     /// If the `Janet` value is a Janet Abstract and the method to get the
     /// length (janet) panics, this function janet panics as well.
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use]
     pub fn len(&self) -> Option<i32> {
         match self.unwrap() {
             TaggedJanet::Array(x) => Some(x.len()),
@@ -499,18 +522,21 @@ impl Janet {
     /// Janet Panic:
     /// This function may panic for the same reason as [`Janet::len`]
     #[inline]
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         matches!(self.len(), Some(0))
     }
 
     /// Returns `true` if the `Janet` value are truthy.
     #[inline]
+    #[must_use]
     pub fn is_truthy(&self) -> bool {
         unsafe { evil_janet::janet_truthy(self.inner) == 0 }
     }
 
     /// Retuns a `Janet` value containing the requested method if it exists.
     #[inline]
+    #[must_use]
     pub fn get_method(&self, method_name: &str) -> Option<Self> {
         let method_name: Self = JanetKeyword::from(method_name).into();
         let method: Self = unsafe { evil_janet::janet_get(self.inner, method_name.inner) }.into();
@@ -523,18 +549,21 @@ impl Janet {
 
     /// Retuns `true` if the `Janet` has a method callled `method_name`
     #[inline]
+    #[must_use]
     pub fn has_method(&self, method_name: &str) -> bool {
         self.get_method(method_name).is_some()
     }
 
     /// Returns the type of [`Janet`] object.
     #[inline]
+    #[must_use]
     pub fn kind(&self) -> JanetType {
         unsafe { evil_janet::janet_type(self.inner) }.into()
     }
 
     /// Returns the raw data of the data
     #[inline]
+    #[must_use = "function returns a copy of the data, since CJanet is a copy type"]
     pub const fn raw_data(&self) -> CJanet {
         self.inner
     }
@@ -1230,6 +1259,7 @@ impl From<Janet> for TaggedJanet<'_> {
 
 impl TaggedJanet<'_> {
     #[inline]
+    #[must_use]
     pub const fn kind(&self) -> JanetType {
         match self {
             TaggedJanet::Abstract(_) => JanetType::Abstract,

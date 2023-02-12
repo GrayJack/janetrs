@@ -65,6 +65,7 @@ impl<'data> JanetArray<'data> {
     /// let arr = JanetArray::new();
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn new() -> Self {
         Self {
             raw:     unsafe { evil_janet::janet_array(0) },
@@ -85,6 +86,7 @@ impl<'data> JanetArray<'data> {
     /// let arr = JanetArray::with_capacity(20);
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
             raw:     unsafe { evil_janet::janet_array(capacity) },
@@ -116,6 +118,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr.capacity(), 20);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn capacity(&self) -> i32 {
         unsafe { (*self.raw).capacity }
     }
@@ -134,6 +137,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr.len(), 1);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         unsafe { (*self.raw).count }
     }
@@ -152,6 +156,7 @@ impl<'data> JanetArray<'data> {
     /// assert!(!arr.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -331,6 +336,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr.get(1), None);
     /// ```
     #[inline]
+    #[must_use]
     pub fn get(&self, index: i32) -> Option<&Janet> {
         if index < 0 || index >= self.len() {
             None
@@ -381,6 +387,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub unsafe fn get_unchecked(&self, index: i32) -> &Janet {
         let item = (*self.raw).data.offset(index as isize) as *const Janet;
         &*item
@@ -410,6 +417,7 @@ impl<'data> JanetArray<'data> {
     /// assert!(arr.contains("foo"));
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn contains(&self, value: impl Into<Janet>) -> bool {
         let value = value.into();
         self.iter().any(|&elem| elem == value)
@@ -568,6 +576,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(None, w.first());
     /// ```
     #[inline]
+    #[must_use]
     pub fn first(&self) -> Option<&Janet> {
         if let [first, ..] = self.as_ref() {
             Some(first)
@@ -618,6 +627,7 @@ impl<'data> JanetArray<'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use]
     pub fn split_first(&self) -> Option<(&Janet, &[Janet])> {
         if let [first, tail @ ..] = self.as_ref() {
             Some((first, tail))
@@ -668,6 +678,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(None, w.last());
     /// ```
     #[inline]
+    #[must_use]
     pub fn last(&self) -> Option<&Janet> {
         if let [.., last] = self.as_ref() {
             Some(last)
@@ -718,6 +729,7 @@ impl<'data> JanetArray<'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use]
     pub fn split_last(&self) -> Option<(&Janet, &[Janet])> {
         if let [init @ .., last] = self.as_ref() {
             Some((last, init))
@@ -790,6 +802,7 @@ impl<'data> JanetArray<'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn split_at(&self, mid: i32) -> (&[Janet], &[Janet]) {
         if mid < 0 {
             crate::jpanic!(
@@ -921,7 +934,7 @@ impl<'data> JanetArray<'data> {
     /// b"0123456789abcdef".repeat(usize::MAX);
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
-    #[allow(clippy::return_self_not_must_use)]
+    #[must_use = "this returns a repeated array as a new JanetArray, without modifying the original"]
     pub fn repeat(&self, n: usize) -> Self {
         self.as_ref().repeat(n).into_iter().collect()
     }
@@ -953,6 +966,7 @@ impl<'data> JanetArray<'data> {
     /// assert!(v.starts_with(&[]));
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use]
     pub fn starts_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().starts_with(needle)
     }
@@ -984,6 +998,7 @@ impl<'data> JanetArray<'data> {
     /// assert!(v.ends_with(&[]));
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use]
     pub fn ends_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().ends_with(needle)
     }
@@ -2180,6 +2195,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const CJanetArray {
         self.raw
     }
@@ -2198,6 +2214,7 @@ impl<'data> JanetArray<'data> {
     /// The caller must ensure that the array outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub fn as_ptr(&self) -> *const Janet {
         unsafe { (*self.raw).data as _ }
     }
@@ -2483,6 +2500,7 @@ impl IndexMut<i32> for JanetArray<'_> {
 
 /// An iterator over a reference to the [`JanetArray`] elements.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Iter<'a, 'data> {
     arr: &'a JanetArray<'data>,
     index_head: i32,
@@ -2534,6 +2552,7 @@ impl ExactSizeIterator for Iter<'_, '_> {}
 impl FusedIterator for Iter<'_, '_> {}
 
 /// An iterator over a mutable reference to the [`JanetArray`] elements.
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct IterMut<'a, 'data> {
     arr: &'a mut JanetArray<'data>,
     index_head: i32,
@@ -2586,6 +2605,7 @@ impl FusedIterator for IterMut<'_, '_> {}
 
 /// An iterator that moves out of a [`JanetArray`].
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct IntoIter<'data> {
     arr: JanetArray<'data>,
     index_head: i32,

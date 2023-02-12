@@ -103,6 +103,7 @@ impl JanetBuffer<'_> {
     /// let buff = JanetBuffer::new();
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn new() -> Self {
         Self {
             raw:     unsafe { evil_janet::janet_buffer(4) },
@@ -123,6 +124,7 @@ impl JanetBuffer<'_> {
     /// let buff = JanetBuffer::with_capacity(10);
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn with_capacity(capacity: i32) -> Self {
         let capacity = if capacity < 4 { 4 } else { capacity };
         Self {
@@ -146,6 +148,7 @@ impl JanetBuffer<'_> {
 
     /// Returns the number of elements the buffer can hold without reallocating.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn capacity(&self) -> i32 {
         unsafe { (*self.raw).capacity }
     }
@@ -163,6 +166,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(buff.len(), 1);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         unsafe { (*self.raw).count }
     }
@@ -180,6 +184,7 @@ impl JanetBuffer<'_> {
     /// assert!(!buff.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -349,6 +354,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(&[104, 101, 108, 108, 111], buff.as_bytes());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn as_bytes(&self) -> &[u8] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX
@@ -385,6 +391,7 @@ impl JanetBuffer<'_> {
     /// assert!(buff.contains("the"))
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn contains(&self, needle: impl AsRef<[u8]>) -> bool {
         self.as_bytes().contains_str(needle)
     }
@@ -436,6 +443,7 @@ impl JanetBuffer<'_> {
     /// assert!(!JanetBuffer::from("☃βツ").is_ascii());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_ascii(&self) -> bool {
         self.as_bytes().is_ascii()
     }
@@ -462,6 +470,7 @@ impl JanetBuffer<'_> {
     /// assert!(!JanetBuffer::from(&b"\xF0\x82\x82\xAC"[..]).is_utf8());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_utf8(&self) -> bool {
         self.as_bytes().is_utf8()
     }
@@ -517,7 +526,8 @@ impl JanetBuffer<'_> {
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
     #[inline]
-    #[allow(clippy::return_self_not_must_use)]
+    #[must_use = "this returns the lowercase string as a new JanetBuffer, without modifying the \
+                  original"]
     pub fn to_lowercase(&self) -> Self {
         self.as_bytes().to_lowercase().into()
     }
@@ -635,8 +645,8 @@ impl JanetBuffer<'_> {
     ///     &b"foo\xFFbar\xE2\x98baz"[..]
     /// );
     /// ```
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "to lowercase the value in-place, use `make_ascii_lowercase()`"]
     pub fn to_ascii_lowercase(&self) -> Self {
         Self::from(self.as_bytes().to_ascii_lowercase())
     }
@@ -731,8 +741,9 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "this returns the uppercase string as a new JanetBuffer, without modifying the \
+                  original"]
     pub fn to_uppercase(&self) -> Self {
         self.as_bytes().to_uppercase().into()
     }
@@ -850,8 +861,8 @@ impl JanetBuffer<'_> {
     ///     &b"FOO\xFFBAR\xE2\x98BAZ"[..]
     /// );
     /// ```
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "to lowercase the value in-place, use `make_ascii_uppercase()`"]
     pub fn to_ascii_uppercase(&self) -> Self {
         self.as_bytes().to_ascii_uppercase().into()
     }
@@ -914,8 +925,9 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
+                  original"]
     pub fn trim(&self) -> Self {
         self.as_bytes().trim().into()
     }
@@ -941,8 +953,9 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
+                  original"]
     pub fn trim_start(&self) -> Self {
         self.as_bytes().trim_start().into()
     }
@@ -968,8 +981,9 @@ impl JanetBuffer<'_> {
     /// ```
     #[cfg(feature = "unicode")]
     #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
+                  original"]
     pub fn trim_end(&self) -> Self {
         self.as_bytes().trim_end().into()
     }
@@ -991,8 +1005,9 @@ impl JanetBuffer<'_> {
     ///     JanetBuffer::from("foo5bar").as_bytes(),
     /// );
     /// ```
-    #[allow(clippy::return_self_not_must_use)]
     #[inline]
+    #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
+                  original"]
     pub fn trim_with<F: FnMut(char) -> bool>(&self, trim: F) -> Self {
         self.as_bytes().trim_with(trim).into()
     }
@@ -1071,6 +1086,7 @@ impl JanetBuffer<'_> {
     /// undesirable to pay the cost of an additional UTF-8 validation check
     /// that [`to_str`](#method.to_str) performs.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub unsafe fn to_str_unchecked(&self) -> &str {
         self.as_bytes().to_str_unchecked()
     }
@@ -1099,6 +1115,7 @@ impl JanetBuffer<'_> {
     /// N.B. Rust's standard library also appears to use the same strategy,
     /// but it does not appear to be an API guarantee.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn to_str_lossy(&self) -> Cow<str> {
         self.as_bytes().to_str_lossy()
     }
@@ -1147,6 +1164,7 @@ impl JanetBuffer<'_> {
     #[cfg(feature = "std")]
     #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn to_os_str_lossy(&self) -> Cow<OsStr> {
         self.as_bytes().to_os_str_lossy()
     }
@@ -1178,6 +1196,7 @@ impl JanetBuffer<'_> {
     #[cfg(feature = "std")]
     #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn to_path_lossy(&self) -> Cow<Path> {
         self.as_bytes().to_path_lossy()
     }
@@ -2525,6 +2544,7 @@ impl JanetBuffer<'_> {
     ///
     /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const CJanetBuffer {
         self.raw
     }
@@ -2543,6 +2563,7 @@ impl JanetBuffer<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub fn as_ptr(&self) -> *const u8 {
         unsafe { (*self.raw).data }
     }

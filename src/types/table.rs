@@ -58,6 +58,7 @@ impl<'data> JanetTable<'data> {
     /// let table = JanetTable::new();
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn new() -> Self {
         Self {
             raw:    unsafe { evil_janet::janet_table(0) },
@@ -75,6 +76,7 @@ impl<'data> JanetTable<'data> {
     /// let table = JanetTable::with_capacity(20);
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn with_capacity(capacity: i32) -> Self {
         Self {
             raw:    unsafe { evil_janet::janet_table(capacity) },
@@ -95,6 +97,7 @@ impl<'data> JanetTable<'data> {
     /// let table = JanetTable::with_prototype(table!(":_name" => "MyClass"));
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn with_prototype(proto: JanetTable<'data>) -> Self {
         let mut t = Self::new();
         t.set_prototype(&proto);
@@ -128,6 +131,7 @@ impl<'data> JanetTable<'data> {
     /// assert!(table.capacity() >= 20);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn capacity(&self) -> i32 {
         unsafe { (*self.raw).capacity }
     }
@@ -148,6 +152,7 @@ impl<'data> JanetTable<'data> {
     /// assert!(table.removed() == 1);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn removed(&self) -> i32 {
         unsafe { (*self.raw).deleted }
     }
@@ -218,6 +223,7 @@ impl<'data> JanetTable<'data> {
     /// assert_eq!(table.len(), 1);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         unsafe { (*self.raw).count }
     }
@@ -236,12 +242,14 @@ impl<'data> JanetTable<'data> {
     /// assert!(!table.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// Get the prototype table of the table.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn prototype(&self) -> Option<Self> {
         let proto = unsafe { (*self.raw).proto };
 
@@ -1147,6 +1155,7 @@ impl<'data> JanetTable<'data> {
     ///
     /// [`as_mut_ptr`]: ./struct.JanetTable.html#method.as_mut_raw
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const CJanetTable {
         self.raw
     }
@@ -1467,6 +1476,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// assert_eq!(table.entry("Hey").key(), Janet::from("Hey"));
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn key(&self) -> &Janet {
         match self {
             Self::Occupied(ref entry) => entry.key(),
@@ -1576,6 +1586,7 @@ impl<'a, 'data> OccupiedEntry<'a, 'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn get(&self) -> &Janet {
         // SAFETY: This is safe because `OccupiedEntry` cannot be created by a user and all
         // functions that creates then must create then with the `elem` field not NULL
@@ -1679,6 +1690,7 @@ impl<'a, 'data> OccupiedEntry<'a, 'data> {
 
     /// Gets a reference to the key in the entry.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn key(&self) -> &Janet {
         unsafe { &(*self.elem.as_ptr()).0 }
     }
@@ -1835,6 +1847,7 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     /// Gets a reference to the key that would be used when inserting a value through the
     /// [`VacantEntry`].
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn key(&self) -> &Janet {
         &self.key
     }
@@ -1881,6 +1894,7 @@ impl std::error::Error for OccupiedError<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetTable`] key-value pairs.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Iter<'a, 'data> {
     table: &'a JanetTable<'data>,
     kv:    *const JanetKV,
@@ -1936,6 +1950,7 @@ impl FusedIterator for Iter<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetTable`] keys.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Keys<'a, 'data> {
     inner: Iter<'a, 'data>,
 }
@@ -1967,6 +1982,7 @@ impl FusedIterator for Keys<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetTable`] values.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Values<'a, 'data> {
     inner: Iter<'a, 'data>,
 }
@@ -1997,6 +2013,7 @@ impl ExactSizeIterator for Values<'_, '_> {}
 impl FusedIterator for Values<'_, '_> {}
 
 /// An iterator over a mutable reference to the [`JanetTable`] key-value pairs.
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct IterMut<'a, 'data> {
     table: &'a JanetTable<'data>,
     kv:    *mut JanetKV,
@@ -2051,6 +2068,7 @@ impl ExactSizeIterator for IterMut<'_, '_> {}
 impl FusedIterator for IterMut<'_, '_> {}
 
 /// An Iterator over a mutable reference to the [`JanetTable`] values.
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct ValuesMut<'a, 'data> {
     inner: IterMut<'a, 'data>,
 }
@@ -2082,6 +2100,7 @@ impl FusedIterator for ValuesMut<'_, '_> {}
 
 /// An iterator that moves out of a [`JanetTable`].
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct IntoIter<'data> {
     table: JanetTable<'data>,
     kv:    *mut JanetKV,

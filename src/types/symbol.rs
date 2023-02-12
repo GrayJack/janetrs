@@ -32,6 +32,7 @@ impl JanetSymbol<'_> {
     /// let s = JanetSymbol::new("name");
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn new(name: impl AsRef<[u8]>) -> Self {
         let val = name.as_ref();
 
@@ -59,6 +60,7 @@ impl JanetSymbol<'_> {
     /// let s = JanetSymbol::unique();
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn unique() -> Self {
         Self {
             raw:     unsafe { evil_janet::janet_symbol_gen() },
@@ -72,6 +74,7 @@ impl JanetSymbol<'_> {
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
     #[inline]
+    #[must_use]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
         Self {
             raw,
@@ -91,6 +94,7 @@ impl JanetSymbol<'_> {
     /// assert_eq!(s.len(), 4);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         unsafe { (*evil_janet::janet_string_head(self.raw)).length }
     }
@@ -107,6 +111,7 @@ impl JanetSymbol<'_> {
     /// assert!(!s.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -123,6 +128,7 @@ impl JanetSymbol<'_> {
     /// assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
     }
@@ -132,6 +138,7 @@ impl JanetSymbol<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const u8 {
         self.raw
     }
@@ -253,6 +260,7 @@ impl JanetKeyword<'_> {
     /// let k = JanetKeyword::new("name");
     /// ```
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn new(name: impl AsRef<[u8]>) -> Self {
         let val = name.as_ref();
 
@@ -274,6 +282,7 @@ impl JanetKeyword<'_> {
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
         Self {
             raw,
@@ -293,6 +302,7 @@ impl JanetKeyword<'_> {
     /// assert_eq!(k.len(), 4);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         unsafe { (*evil_janet::janet_string_head(self.raw)).length }
     }
@@ -309,6 +319,7 @@ impl JanetKeyword<'_> {
     /// assert!(!k.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -325,6 +336,7 @@ impl JanetKeyword<'_> {
     /// assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
     }
@@ -334,6 +346,7 @@ impl JanetKeyword<'_> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const u8 {
         self.raw
     }

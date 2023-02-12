@@ -84,6 +84,7 @@ impl JanetAbstract {
     /// This function doesn't check if the underlying data of the `JanetAbstract` object
     /// and the requested type `A` are the same.
     #[inline]
+    #[must_use]
     pub unsafe fn get_unchecked<A: IsJanetAbstract>(&self) -> &A {
         &*(self.raw as *const A)
     }
@@ -100,6 +101,7 @@ impl JanetAbstract {
 
     /// Check if the `JanetAbstract` data is of the type `A`.
     #[inline]
+    #[must_use]
     pub fn is<A: IsJanetAbstract>(&self) -> bool {
         if self.size() != A::SIZE {
             return false;
@@ -192,6 +194,7 @@ impl JanetAbstract {
     // false positive lint
     #[allow(clippy::wrong_self_convention)]
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const c_void {
         self.raw
     }
@@ -212,6 +215,7 @@ impl JanetAbstract {
 
     /// Return the size of the type it holds.
     #[inline]
+    #[must_use]
     pub fn size(&self) -> usize {
         unsafe { (*evil_janet::janet_abstract_head(self.raw)).size }
     }
@@ -219,6 +223,7 @@ impl JanetAbstract {
     /// Return the struct that holds the type name and all possible polimorfic function
     /// pointer that a Abstract type can have in Janet.
     #[inline]
+    #[must_use]
     pub fn type_info(&self) -> JanetAbstractType {
         unsafe { *(*evil_janet::janet_abstract_head(self.raw)).type_ }
     }

@@ -45,6 +45,7 @@ impl JanetFile {
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub const fn from_raw(raw: evil_janet::JanetFile) -> Self {
         Self { raw }
     }
@@ -57,6 +58,7 @@ impl JanetFile {
 
     /// Return the flags of the JanetFile.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn flags(&self) -> FileFlags {
         FileFlags((self.raw).flags)
     }
@@ -325,30 +327,35 @@ impl FileFlags {
 
     /// Check if the flag has the append value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_append(self) -> bool {
         (self.0 & Self::APPEND.0) == Self::APPEND.0
     }
 
     /// Check if the flag has the binary value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_binary(self) -> bool {
         (self.0 & Self::BINARY.0) == Self::BINARY.0
     }
 
     /// Check if the flag has the closed value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_closed(self) -> bool {
         (self.0 & Self::CLOSED.0) == Self::CLOSED.0
     }
 
     /// Check if the flag has the `not_closeable` value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_not_closeable(self) -> bool {
         (self.0 & Self::NOT_CLOSEABLE.0) == Self::NOT_CLOSEABLE.0
     }
 
     /// Check if the flag has the `no_nil` value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_no_nil(self) -> bool {
         (self.0 & Self::NO_NIL.0) == Self::NO_NIL.0
     }
@@ -356,35 +363,41 @@ impl FileFlags {
     /// Check if the flag has the `piped` value.
     #[inline]
     #[janetrs_macros::cjvg("1.9.1", "1.22.0")]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_piped(self) -> bool {
         (self.0 & Self::PIPED.0) == Self::PIPED.0
     }
 
     /// Check if the flag has the `update` value.
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_update(self) -> bool {
         (self.0 & Self::UPDATE.0) == Self::UPDATE.0
     }
 
     /// Check if the flag has the `read` value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_read(self) -> bool {
         (self.0 & Self::READ.0) == Self::READ.0
     }
 
     /// Check if the flag has the `serializeble` value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_serializeble(self) -> bool {
         (self.0 & Self::SERIALIZEBLE.0) == Self::SERIALIZEBLE.0
     }
 
     /// Check if the flag has the `write` value.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn is_write(self) -> bool {
         (self.0 & Self::WRITE.0) == Self::WRITE.0
     }
 
     /// Return the inner i32 value of the flags
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn as_i32(self) -> i32 {
         self.0
     }
@@ -500,7 +513,7 @@ mod tests {
         let tmp: &mut JanetFile = atmp.get_mut().unwrap();
 
         assert_eq!(tmp.write(b"test").unwrap(), 4);
-        assert_eq!(tmp.seek(SeekFrom::Current(0)).unwrap(), 4);
+        assert_eq!(tmp.stream_position().unwrap(), 4);
 
         let mut buff = [0; 4];
         assert_eq!(tmp.read(&mut buff[..]).unwrap(), 0);

@@ -30,18 +30,21 @@ impl JanetPointer {
 
     /// Returns `true` if the pointer is null.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_null(&self) -> bool {
         self.inner.is_null()
     }
 
     /// Acquires the underlying `*mut` pointer.
     #[inline]
+    #[must_use]
     pub const fn as_ptr(self) -> *mut c_void {
         self.inner
     }
 
     /// Casts to a pointer of another type.
     #[inline]
+    #[must_use]
     pub const fn cast<U>(self) -> *mut U {
         self.inner as *mut U
     }

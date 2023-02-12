@@ -103,6 +103,7 @@ impl JanetClient {
     /// double free, if one drop and another continue to execute, it will crash with
     /// segmentation fault.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub unsafe fn init_unchecked() -> Self {
         evil_janet::janet_init();
         Self { env_table: None }
@@ -336,6 +337,7 @@ impl JanetClient {
 
     /// Return a reference of the environment table of the runtime if it exist.
     #[inline]
+    #[must_use]
     pub const fn env(&self) -> Option<&JanetEnvironment> {
         self.env_table.as_ref()
     }

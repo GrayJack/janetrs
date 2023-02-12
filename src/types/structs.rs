@@ -13,6 +13,7 @@ use super::{DeepEq, Janet, JanetTable};
 
 /// Builder for [`JanetStruct`]s.
 #[derive(Debug)]
+#[must_use = "builder cannot be utilized as a proper JanetStruct, use the `finish` method"]
 pub struct JanetStructBuilder<'data> {
     raw:     *mut JanetKV,
     phantom: PhantomData<&'data ()>,
@@ -27,7 +28,6 @@ impl<'data> JanetStructBuilder<'data> {
     ///
     /// [`builder`]: #method.builder
     #[inline]
-    #[must_use]
     pub fn put(self, key: impl Into<Janet>, value: impl Into<Janet>) -> Self {
         let (key, value) = (key.into(), value.into());
         unsafe { evil_janet::janet_struct_put(self.raw, key.into(), value.into()) }
@@ -37,6 +37,7 @@ impl<'data> JanetStructBuilder<'data> {
 
     /// Finalie the build process and create [`JanetStruct`].
     #[inline]
+    #[must_use = "function finishies building process and returns JanetStruct"]
     pub fn finalize(self) -> JanetStruct<'data> {
         JanetStruct {
             raw:     unsafe { evil_janet::janet_struct_end(self.raw) },
@@ -91,6 +92,7 @@ impl<'data> JanetStruct<'data> {
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const JanetKV) -> Self {
         Self {
             raw,
@@ -107,6 +109,7 @@ impl<'data> JanetStruct<'data> {
 
     /// Returns the number of elements the struct can hold.
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn capacity(&self) -> i32 {
         self.head().capacity
     }
@@ -125,6 +128,7 @@ impl<'data> JanetStruct<'data> {
     /// assert_eq!(st.len(), 2);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         self.head().length
     }
@@ -146,6 +150,7 @@ impl<'data> JanetStruct<'data> {
     /// assert!(st.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -430,6 +435,7 @@ impl<'data> JanetStruct<'data> {
     /// The caller must ensure that the buffer outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const JanetKV {
         self.raw
     }
@@ -659,6 +665,7 @@ where
 
 /// An iterator over a reference to the [`JanetStruct`] key-value pairs.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Iter<'a, 'data> {
     st:  &'a JanetStruct<'data>,
     kv:  *const JanetKV,
@@ -714,6 +721,7 @@ impl FusedIterator for Iter<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetStruct`] keys.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Keys<'a, 'data> {
     inner: Iter<'a, 'data>,
 }
@@ -745,6 +753,7 @@ impl FusedIterator for Keys<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetStruct`] values.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Values<'a, 'data> {
     inner: Iter<'a, 'data>,
 }
@@ -776,6 +785,7 @@ impl FusedIterator for Values<'_, '_> {}
 
 /// An iterator that moves out of a [`JanetStruct`].
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct IntoIter<'data> {
     st:  JanetStruct<'data>,
     kv:  *const JanetKV,

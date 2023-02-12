@@ -63,6 +63,7 @@ impl<'data> JanetFiber<'data> {
 
     /// Return the current [`JanetFiber`] if it exists.
     #[inline]
+    #[must_use]
     pub fn current() -> Option<Self> {
         let f = unsafe { evil_janet::janet_current_fiber() };
         if f.is_null() {
@@ -79,6 +80,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// The root fiber is the oldest ancestor that does not have a parent.
     #[inline]
+    #[must_use]
     pub fn root() -> Option<Self> {
         let f = unsafe { evil_janet::janet_root_fiber() };
         if f.is_null() {
@@ -106,6 +108,7 @@ impl<'data> JanetFiber<'data> {
 
     /// Returns the fiber status.
     #[inline]
+    #[must_use]
     pub fn status(&self) -> FiberStatus {
         let raw_status = unsafe { evil_janet::janet_fiber_status(self.raw) };
         FiberStatus::from(raw_status)
@@ -222,6 +225,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// [`as_mut_ptr`]: #method.as_mut_raw
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const CJanetFiber {
         self.raw
     }

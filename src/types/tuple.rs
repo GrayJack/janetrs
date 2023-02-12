@@ -19,6 +19,7 @@ pub type RSplitN<'a, P> = core::slice::RSplitN<'a, Janet, P>;
 
 /// Builder for [`JanetTuple`]s.
 #[derive(Debug)]
+#[must_use = "builder cannot be utilized as a proper JanetTuple, use the `finish` method"]
 pub struct JanetTupleBuilder<'data> {
     raw:     *mut CJanet,
     len:     i32,
@@ -29,7 +30,6 @@ pub struct JanetTupleBuilder<'data> {
 impl<'data> JanetTupleBuilder<'data> {
     /// Add a new value to the values in the tuple builder.
     #[cfg_attr(feature = "inline-more", inline)]
-    #[must_use]
     pub fn put(mut self, value: impl Into<Janet>) -> Self {
         let value = value.into();
 
@@ -52,6 +52,7 @@ impl<'data> JanetTupleBuilder<'data> {
     /// If the build is finalized and not all the allocated space was inserted with a
     /// item, the unnused space will all have value of Janet number zero.
     #[inline]
+    #[must_use = "function finishies building process and returns JanetStruct"]
     pub fn finalize(self) -> JanetTuple<'data> {
         JanetTuple {
             raw:     unsafe { evil_janet::janet_tuple_end(self.raw) },
@@ -101,6 +102,7 @@ impl<'data> JanetTuple<'data> {
 
     /// Creates a tuple where all of it's elements are `elem`.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub fn with_default_elem(elem: Janet, len: i32) -> Self {
         let len = if len < 0 { 0 } else { len };
 
@@ -119,6 +121,7 @@ impl<'data> JanetTuple<'data> {
     /// This function do not check if the given `raw` is `NULL` or not. Use at your
     /// own risk.
     #[inline]
+    #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const CJanet) -> Self {
         Self {
             raw,
@@ -144,6 +147,7 @@ impl<'data> JanetTuple<'data> {
     /// assert_eq!(tup.get(1), Some(&Janet::integer(11)));
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn get(&self, index: i32) -> Option<&Janet> {
         if index < 0 || index >= self.len() {
             None
@@ -164,6 +168,7 @@ impl<'data> JanetTuple<'data> {
     ///
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub unsafe fn get_unchecked(&self, index: i32) -> &Janet {
         let item = self.raw.offset(index as isize) as *const Janet;
         &*item
@@ -180,6 +185,7 @@ impl<'data> JanetTuple<'data> {
     /// assert_eq!(tup.len(), 2);
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn len(&self) -> i32 {
         self.head().length
     }
@@ -198,6 +204,7 @@ impl<'data> JanetTuple<'data> {
     /// assert!(tup.is_empty());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -213,6 +220,7 @@ impl<'data> JanetTuple<'data> {
     /// assert!(tup.contains("foo"));
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn contains(&self, value: impl Into<Janet>) -> bool {
         let value = value.into();
         self.iter().any(|&elem| elem == value)
@@ -233,6 +241,7 @@ impl<'data> JanetTuple<'data> {
     /// assert_eq!(None, w.first());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn first(&self) -> Option<&Janet> {
         if let [first, ..] = self.as_ref() {
             Some(first)
@@ -258,6 +267,7 @@ impl<'data> JanetTuple<'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn split_first(&self) -> Option<(&Janet, &[Janet])> {
         if let [first, tail @ ..] = self.as_ref() {
             Some((first, tail))
@@ -281,6 +291,7 @@ impl<'data> JanetTuple<'data> {
     /// assert_eq!(None, w.last());
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn last(&self) -> Option<&Janet> {
         if let [.., last] = self.as_ref() {
             Some(last)
@@ -306,6 +317,7 @@ impl<'data> JanetTuple<'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn split_last(&self) -> Option<(&Janet, &[Janet])> {
         if let [init @ .., last] = self.as_ref() {
             Some((last, init))
@@ -351,6 +363,7 @@ impl<'data> JanetTuple<'data> {
     /// }
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn split_at(&self, mid: i32) -> (&[Janet], &[Janet]) {
         if mid < 0 {
             crate::jpanic!(
@@ -391,6 +404,7 @@ impl<'data> JanetTuple<'data> {
     /// b"0123456789abcdef".repeat(usize::MAX);
     /// ```
     #[inline]
+    #[must_use = "this returns a new JanetArray, without modifying the original"]
     pub fn repeat(&self, n: usize) -> JanetArray {
         self.as_ref().repeat(n).into_iter().collect()
     }
@@ -422,6 +436,7 @@ impl<'data> JanetTuple<'data> {
     /// assert!(v.starts_with(&[]));
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn starts_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().starts_with(needle)
     }
@@ -453,6 +468,7 @@ impl<'data> JanetTuple<'data> {
     /// assert!(v.ends_with(&[]));
     /// ```
     #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn ends_with(&self, needle: &[Janet]) -> bool {
         self.as_ref().ends_with(needle)
     }
@@ -955,6 +971,7 @@ impl<'data> JanetTuple<'data> {
     /// The caller must ensure that the fiber outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> *const CJanet {
         self.raw
     }
@@ -964,6 +981,7 @@ impl<'data> JanetTuple<'data> {
     /// The caller must ensure that the array outlives the pointer this function returns,
     /// or else it will end up pointing to garbage.
     #[inline]
+    #[must_use]
     pub fn as_ptr(&self) -> *const Janet {
         self.raw as _
     }
@@ -1172,6 +1190,7 @@ impl Index<i32> for JanetTuple<'_> {
 
 /// An iterator over a reference to the [`JanetTuple`] elements.
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct Iter<'a, 'data> {
     tup: &'a JanetTuple<'data>,
     index_head: i32,
@@ -1224,6 +1243,7 @@ impl FusedIterator for Iter<'_, '_> {}
 
 /// An iterator that moves out of a [`JanetTuple`].
 #[derive(Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct IntoIter<'data> {
     tup: JanetTuple<'data>,
     index_head: i32,
