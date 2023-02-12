@@ -106,8 +106,7 @@ impl Parse for Arg {
                             paren.span,
                             format!(
                                 "invalid number of arguments for `range`: Expected at least 1, \
-                                 with max of 2 arguments, got {}",
-                                x
+                                 with max of 2 arguments, got {x}"
                             ),
                         ));
                     },

@@ -7,7 +7,7 @@ fn main() -> Result<(), Error> {
 
     let out = client.run("(+ 2 2)")?;
 
-    println!("{}", out);
+    println!("{out}");
 
     Ok(())
 }

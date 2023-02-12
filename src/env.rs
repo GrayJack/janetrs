@@ -117,15 +117,15 @@ impl JanetEnvironment {
     pub fn add_c_fn(&mut self, cfun_opt: CFunOptions) {
         let namespace = cfun_opt
             .namespace
-            .map_or(String::from("\0"), |namespace| format!("{}\0", namespace));
+            .map_or(String::from("\0"), |namespace| format!("{namespace}\0"));
         let name = format!("{}\0", cfun_opt.name);
         let doc = cfun_opt
             .doc
-            .map_or(String::from("\0"), |doc| format!("{}\0", doc));
+            .map_or(String::from("\0"), |doc| format!("{doc}\0"));
 
         let source_file = cfun_opt
             .source_file
-            .map_or(String::new(), |sf| format!("{}\0", sf));
+            .map_or(String::new(), |sf| format!("{sf}\0"));
 
         let reg = [
             crate::lowlevel::JanetRegExt {

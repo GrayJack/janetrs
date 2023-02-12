@@ -161,7 +161,7 @@ impl Display for JanetConversionError {
 // allow this lint here because it is complaining about manually implementing PartialOrd between
 // Janet and &Janet
 #[allow(clippy::derive_ord_xor_partial_ord)]
-#[allow(clippy::derive_hash_xor_eq)]
+#[allow(clippy::derived_hash_with_manual_eq)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct Janet {

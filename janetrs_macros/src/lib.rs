@@ -273,7 +273,7 @@ pub fn janet_version(
                         }
                     },
                     Err(err) => {
-                        let err = format!("invalid string literal: {}", err);
+                        let err = format!("invalid string literal: {err}");
                         (quote_spanned! {max_lit.span() => compile_error!(#err);}).into()
                     },
                 }
@@ -284,7 +284,7 @@ pub fn janet_version(
             }
         },
         Err(err) => {
-            let err = format!("invalid string literal: {}", err);
+            let err = format!("invalid string literal: {err}");
             (quote_spanned! {min_lit.span() => compile_error!(#err);}).into()
         },
     }
@@ -295,7 +295,7 @@ fn parse_args(arg: &str) -> Result<JanetVersion, String> {
         .split('.')
         .map(|e| e.parse::<u32>())
         .collect::<Result<Vec<_>, _>>()
-        .map_err(|err| format!("{}", err))?;
+        .map_err(|err| format!("{err}"))?;
 
     Ok(match &vec_values[..] {
         [major] => JanetVersion::custom(*major, 0, 0),
@@ -522,7 +522,7 @@ pub fn check_janet_version(args: proc_macro::TokenStream) -> proc_macro::TokenSt
                         }
                     },
                     Err(err) => {
-                        let err = format!("invalid string literal: {}", err);
+                        let err = format!("invalid string literal: {err}");
                         (quote_spanned! {max_lit.span() => compile_error!(#err);}).into()
                     },
                 }
@@ -537,7 +537,7 @@ pub fn check_janet_version(args: proc_macro::TokenStream) -> proc_macro::TokenSt
             }
         },
         Err(err) => {
-            let err = format!("invalid string literal: {}", err);
+            let err = format!("invalid string literal: {err}");
             (quote_spanned! {min_lit.span() => compile_error!(#err);}).into()
         },
     }
