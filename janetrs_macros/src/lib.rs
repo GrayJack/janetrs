@@ -61,35 +61,23 @@ pub fn janet_fn(
                 quote! {}
             },
             Arg::CheckMutRef => quote! {
-                for j1 in &args[0..args.len() - 1] {
-                    for j2 in &args[1..] {
-                        if matches!(
-                            j1.kind(),
-                            ::janetrs::JanetType::Array
-                                | ::janetrs::JanetType::Buffer
-                                | ::janetrs::JanetType::CFunction
-                                | ::janetrs::JanetType::Fiber
-                                | ::janetrs::JanetType::Function
-                                | ::janetrs::JanetType::Keyword
-                                | ::janetrs::JanetType::Pointer
-                                | ::janetrs::JanetType::Symbol
-                                | ::janetrs::JanetType::Table
-                        ) && matches!(
-                            j1.kind(),
-                            ::janetrs::JanetType::Array
-                                | ::janetrs::JanetType::Buffer
-                                | ::janetrs::JanetType::CFunction
-                                | ::janetrs::JanetType::Fiber
-                                | ::janetrs::JanetType::Function
-                                | ::janetrs::JanetType::Keyword
-                                | ::janetrs::JanetType::Pointer
-                                | ::janetrs::JanetType::Symbol
-                                | ::janetrs::JanetType::Table
-                        ) && j1 == j2
-                        {
-                            ::janetrs::jpanic!("Received two mutable references as arguments");
-                        }
-                    }
+                if (1..args.len()).any(|i| {
+                    let a = args[i - 1];
+                    matches!(
+                        a.kind(),
+                        ::janetrs::JanetType::Abstract
+                            | ::janetrs::JanetType::Array
+                            | ::janetrs::JanetType::Buffer
+                            | ::janetrs::JanetType::CFunction
+                            | ::janetrs::JanetType::Fiber
+                            | ::janetrs::JanetType::Function
+                            | ::janetrs::JanetType::Keyword
+                            | ::janetrs::JanetType::Pointer
+                            | ::janetrs::JanetType::Symbol
+                            | ::janetrs::JanetType::Table
+                    ) && args[i..].contains(&a)
+                }) {
+                    ::janetrs::jpanic!("Received two mutable references as arguments");
                 }
             },
             Arg::Arity(ArityArgs::Fix(n)) => quote! {
