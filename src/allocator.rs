@@ -12,7 +12,7 @@ use core::{
 #[cfg(feature = "nightly")]
 use core::alloc::{AllocError, Allocator};
 
-#[cfg(all(any(
+#[cfg(any(
     target_arch = "x86",
     target_arch = "arm",
     target_arch = "mips",
@@ -23,16 +23,16 @@ use core::alloc::{AllocError, Allocator};
     target_arch = "wasm32",
     target_arch = "hexagon",
     target_arch = "riscv32"
-)))]
+))]
 const MIN_ALIGN: usize = 8;
-#[cfg(all(any(
+#[cfg(any(
     target_arch = "x86_64",
     target_arch = "aarch64",
     target_arch = "mips64",
     target_arch = "s390x",
     target_arch = "sparc64",
     target_arch = "riscv64"
-)))]
+))]
 const MIN_ALIGN: usize = 16;
 
 /// Memory allocator that will certainly be cleaned up in the next Janet Garbage

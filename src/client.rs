@@ -380,7 +380,7 @@ mod tests {
     }
 
     #[test]
-    fn env_not_init() -> Result<(), crate::client::Error> {
+    fn env_not_init() -> Result<(), Error> {
         let client = JanetClient::init()?;
 
         let a = client.run("()");

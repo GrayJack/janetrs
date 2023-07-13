@@ -15,7 +15,7 @@ use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 /// which is used to differentiate different kinds of returns. When a fiber yields or
 /// throws an error, control is returned to the calling fiber. The parent fiber must then
 /// check what kind of state the fiber is in to differentiate errors from return values
-/// from user-defined signals
+/// from user-defined signals.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[repr(transparent)]
 pub struct JanetFiber<'data> {
@@ -55,7 +55,7 @@ impl<'data> JanetFiber<'data> {
     pub fn with_env(
         env: JanetTable, capacity: i32, f: &mut JanetFunction, args: impl AsRef<[Janet]>,
     ) -> Option<Self> {
-        Self::new(capacity, f, args).map(|mut f| {
+        Self::new(capacity, f, args).map(|f| {
             unsafe { (*f.raw).env = env.raw };
             f
         })
