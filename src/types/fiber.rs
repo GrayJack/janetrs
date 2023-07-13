@@ -2,6 +2,7 @@
 use core::{iter::FusedIterator, marker::PhantomData};
 
 use evil_janet::JanetFiber as CJanetFiber;
+use janetrs_macros::cjvg;
 
 use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 
@@ -112,6 +113,30 @@ impl<'data> JanetFiber<'data> {
     pub fn status(&self) -> FiberStatus {
         let raw_status = unsafe { evil_janet::janet_fiber_status(self.raw) };
         FiberStatus::from(raw_status)
+    }
+
+    /// Returns if the fiber can be resumed.
+    #[inline]
+    pub fn can_resume(&self) -> bool {
+        let status = self.status();
+        !matches!(
+            status,
+            FiberStatus::Dead
+                | FiberStatus::Error
+                | FiberStatus::User0
+                | FiberStatus::User1
+                | FiberStatus::User2
+                | FiberStatus::User3
+                | FiberStatus::User4
+        )
+    }
+
+    /// Returns if the fiber can be resumed.
+    #[cjvg("1.28.0")]
+    #[inline]
+    pub fn can_resume_native(&self) -> bool {
+        let resume = unsafe { evil_janet::janet_fiber_can_resume(self.raw) };
+        resume != 0
     }
 
     /// Creates a iterator that can execute the fiber function untill it's done.
