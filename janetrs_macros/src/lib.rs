@@ -197,7 +197,7 @@ pub fn janet_fn(
                 const #name_file_: &str = ::core::concat!(::core::file!(), "\0");
                 #[allow(non_upper_case_globals)]
                 const #name_line_: u32 = ::core::line!() + 1;
-                #(#attrs)* #[no_mangle] #vis unsafe extern "C" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
+                #(#attrs)* #[no_mangle] #vis unsafe extern "C-unwind" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
                     #[inline]
                     #fun_clone
 
@@ -425,7 +425,7 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
     let ts = quote! {
         #[no_mangle]
-        pub unsafe extern "C" fn _janet_mod_config() -> ::janetrs::lowlevel::JanetBuildConfig {
+        pub unsafe extern "C-unwind" fn _janet_mod_config() -> ::janetrs::lowlevel::JanetBuildConfig {
             ::janetrs::lowlevel::JanetBuildConfig {
                 major: ::janetrs::lowlevel::JANET_VERSION_MAJOR,
                 minor: ::janetrs::lowlevel::JANET_VERSION_MINOR,
@@ -436,7 +436,7 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
         #[::janetrs::cjvg("1.17.0")]
         #[no_mangle]
-        pub unsafe extern "C" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
+        pub unsafe extern "C-unwind" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
             ::janetrs::lowlevel::janet_cfuns_ext(env, #mod_name.as_ptr() as *const _, [
                 #(
                     #regs_ext
@@ -454,7 +454,7 @@ pub fn declare_janet_mod(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
         #[::janetrs::cjvg("1.0.0", "1.17.0")]
         #[no_mangle]
-        pub unsafe extern "C" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
+        pub unsafe extern "C-unwind" fn _janet_init(env: *mut ::janetrs::lowlevel::JanetTable) {
             ::janetrs::lowlevel::janet_cfuns(env, #mod_name.as_ptr() as *const _, [
                 #(
                     #regs
