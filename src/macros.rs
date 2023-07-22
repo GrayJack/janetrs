@@ -217,7 +217,7 @@ macro_rules! table {
 macro_rules! janet_mod {
     ($mod_name:literal; $({$fn_name:literal, $fn:expr, $fn_doc:literal}),* $(,)?) => {
         #[no_mangle]
-        pub unsafe extern "C" fn _janet_mod_config() -> $crate::lowlevel::JanetBuildConfig {
+        pub unsafe extern "C-unwind" fn _janet_mod_config() -> $crate::lowlevel::JanetBuildConfig {
             $crate::lowlevel::JanetBuildConfig {
                 major: $crate::lowlevel::JANET_VERSION_MAJOR,
                 minor: $crate::lowlevel::JANET_VERSION_MINOR,
@@ -227,7 +227,7 @@ macro_rules! janet_mod {
         }
 
         #[no_mangle]
-        pub unsafe extern "C" fn _janet_init(env: *mut $crate::lowlevel::JanetTable) {
+        pub unsafe extern "C-unwind" fn _janet_init(env: *mut $crate::lowlevel::JanetTable) {
             $crate::lowlevel::janet_cfuns(env, concat!($mod_name, "\0").as_ptr() as *const _, [
                 $(
                     $crate::lowlevel::JanetReg {

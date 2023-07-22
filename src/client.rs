@@ -228,7 +228,7 @@ impl JanetClient {
     /// ```
     /// use janetrs::{client::JanetClient, env::CFunOptions, lowlevel, Janet, JanetType};
     ///
-    /// unsafe extern "C" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
+    /// unsafe extern "C-unwield" fn test(argc: i32, argv: *mut lowlevel::Janet) -> lowlevel::Janet {
     ///     Janet::nil().into()
     /// }
     ///

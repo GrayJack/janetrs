@@ -257,7 +257,7 @@ impl IntoRawFd for JanetFile {
 impl AsRawHandle for JanetFile {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
-        extern "C" {
+        extern "C-unwind" {
             fn _fileno(file: *mut FILE) -> libc::c_int;
             fn _get_osfhandle(fd: libc::c_int) -> RawHandle;
         }
@@ -278,7 +278,7 @@ impl fmt::Debug for JanetFile {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(windows)]
-        extern "C" {
+        extern "C-unwind" {
             fn _fileno(file: *mut FILE) -> libc::c_int;
         }
         #[cfg(windows)]
