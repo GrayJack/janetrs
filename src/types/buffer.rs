@@ -2,6 +2,7 @@
 use core::{
     cmp::Ordering,
     convert::Infallible,
+    ffi::CStr,
     fmt::{self, Debug, Display, Write},
     marker::PhantomData,
     ops::{Index, IndexMut},
@@ -11,11 +12,7 @@ use core::{
 use alloc::{borrow::Cow, string::String, vec::Vec};
 
 #[cfg(feature = "std")]
-use std::{
-    // REMINDER: On 1.64.0, `CStr` is part of core
-    ffi::{CStr, OsStr},
-    path::Path,
-};
+use std::{ffi::OsStr, path::Path};
 
 use evil_janet::JanetBuffer as CJanetBuffer;
 
@@ -335,8 +332,6 @@ impl JanetBuffer<'_> {
     }
 
     /// Append the given c-string slice onto the end of the buffer.
-    #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     #[inline]
     pub fn push_cstr(&mut self, cstr: &CStr) {
         unsafe { evil_janet::janet_buffer_push_cstring(self.raw, cstr.as_ptr()) }
@@ -3045,8 +3040,6 @@ impl JanetExtend<&[u8]> for JanetBuffer<'_> {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
 impl JanetExtend<&CStr> for JanetBuffer<'_> {
     #[inline]
     fn extend(&mut self, cstr: &CStr) {
