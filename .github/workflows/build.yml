@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{ matrix.target.os }}
     strategy:
       matrix:
-        rust: [1.60.0, stable, nightly]
+        rust: [1.71.0, stable, nightly]
         target:
           - name: Linux
             os: ubuntu-latest
