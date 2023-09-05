@@ -1480,23 +1480,20 @@ macro_rules! impl_string_like {
             impl PartialOrd for $ty {
                 #[inline]
                 fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                    let cmp_res = unsafe { evil_janet::janet_string_compare(self.raw, other.raw) };
-
-                    Some(match cmp_res {
-                        0 => Ordering::Equal,
-                        _ if cmp_res < 0  => Ordering::Less,
-                        _ if cmp_res > 0 => Ordering::Greater,
-                        _ => return None,
-                    })
+                    Some(self.cmp(other))
                 }
             }
 
             impl Ord for $ty {
                 #[inline]
                 fn cmp(&self, other: &Self) -> Ordering {
-                    match self.partial_cmp(other) {
-                        Some(ord) => ord,
-                        None => {
+                    let cmp_res = unsafe { evil_janet::janet_string_compare(self.raw, other.raw) };
+
+                    match cmp_res {
+                        0 => Ordering::Equal,
+                        _ if cmp_res < 0  => Ordering::Less,
+                        _ if cmp_res > 0 => Ordering::Greater,
+                        _ => {
                             // Janet seems to ensure that the only values returned as -1, 0 and 1
                             // It could be possible to use unreachable unchecked but I don't think it's
                             // necessary, this branch will probably be optimized out by the compiler.

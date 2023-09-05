@@ -496,24 +496,7 @@ impl Eq for JanetStruct<'_> {}
 impl PartialOrd for JanetStruct<'_> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        use core::cmp::Ordering::{Equal, Greater, Less};
-
-        match self.len().cmp(&other.len()) {
-            x @ (Less | Greater) => Some(x),
-            Equal => match self.head().hash.cmp(&other.head().hash) {
-                x @ (Less | Greater) => Some(x),
-                Equal => {
-                    for (s, ref o) in self.iter().zip(other.iter()) {
-                        match s.partial_cmp(o) {
-                            x @ Some(Less | Greater) => return x,
-                            Some(Equal) => continue,
-                            None => return None,
-                        }
-                    }
-                    Some(Equal)
-                },
-            },
-        }
+        Some(self.cmp(other))
     }
 }
 

@@ -156,13 +156,7 @@ impl PartialEq<&str> for JanetVersion {
 impl PartialOrd for JanetVersion {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match self.major.cmp(&other.major) {
-            Ordering::Equal => match self.minor.cmp(&other.minor) {
-                Ordering::Equal => Some(self.patch.cmp(&other.patch)),
-                x => Some(x),
-            },
-            x => Some(x),
-        }
+        Some(self.cmp(other))
     }
 }
 

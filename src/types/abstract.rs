@@ -246,31 +246,7 @@ impl fmt::Debug for JanetAbstract {
 impl PartialOrd for JanetAbstract {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.raw == other.raw {
-            return Some(Ordering::Equal);
-        }
-        let self_ty = self.raw_type_info();
-        let other_ty = self.raw_type_info();
-
-        if self_ty != other_ty && self_ty > other_ty {
-            return Some(Ordering::Greater);
-        }
-
-        let self_ty = self.type_info();
-
-        if let Some(f) = self_ty.compare {
-            let res = unsafe { f(self.raw, other.raw) };
-            match res {
-                -1 => Some(Ordering::Less),
-                0 => Some(Ordering::Equal),
-                1 => Some(Ordering::Greater),
-                _ => None,
-            }
-        } else if self.raw > other.raw {
-            Some(Ordering::Greater)
-        } else {
-            Some(Ordering::Less)
-        }
+        Some(self.cmp(other))
     }
 }
 
@@ -408,6 +384,50 @@ mod tests {
 
         assert_eq!(u64::SIZE, test.size());
         assert_eq!(u64::SIZE, test2.size());
+
+        Ok(())
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct TestNonCopy(bool);
+    static mut TestNonCopy_Type: JanetAbstractType = JanetAbstractType {
+        name: b"TestNonCopy\0".as_ptr().cast::<i8>(),
+        gc: None,
+        gcmark: None,
+        get: None,
+        put: None,
+        marshal: None,
+        unmarshal: None,
+        tostring: None,
+        compare: None,
+        hash: None,
+        next: None,
+        call: None,
+        length: None,
+        bytes: None,
+    };
+
+    impl IsJanetAbstract for TestNonCopy {
+        const SIZE: usize = core::mem::size_of::<Self>();
+
+        #[inline]
+        fn type_info() -> &'static JanetAbstractType {
+            unsafe { &TestNonCopy_Type }
+        }
+    }
+
+    #[test]
+    fn non_copy() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
+
+        let test = JanetAbstract::new(TestNonCopy(true));
+        let test2 = JanetAbstract::new(TestNonCopy(false));
+
+        let val = test.get::<TestNonCopy>();
+        let val2 = test2.get::<TestNonCopy>();
+
+        assert_eq!(Ok(&TestNonCopy(true)), val);
+        assert_eq!(Ok(&TestNonCopy(false)), val2);
 
         Ok(())
     }

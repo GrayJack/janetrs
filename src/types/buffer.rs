@@ -2607,7 +2607,7 @@ impl Clone for JanetBuffer<'_> {
 impl PartialOrd for JanetBuffer<'_> {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.raw.partial_cmp(&other.raw)
+        Some(self.cmp(other))
     }
 }
 
