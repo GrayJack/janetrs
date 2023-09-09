@@ -2,7 +2,7 @@
 //!
 //! In this module you can find the definitions of types and traits to allow to work with
 //! [`JanetAbstract`]. Most of those are re-exported at the supermodule of this module.
-use core::{cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData};
+use core::{cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData, mem::ManuallyDrop};
 
 pub use evil_janet::JanetAbstractType;
 
@@ -52,7 +52,14 @@ pub struct JanetAbstract {
 
 impl JanetAbstract {
     /// Creates a `JanetAbstract` using information from the type that can be used as
-    /// `JanetAbstract`
+    /// `JanetAbstract`.
+    ///
+    /// This function manually wraps the `value` in a [`ManuallyDrop`] to avoid the
+    /// value being dropped when the `value` is assigned to the `JanetAbstract` internal
+    /// raw pointer.
+    ///
+    /// Note that [`IsJanetAbstract`] is implemented for [`ManuallyDrop`] of any type that
+    /// implements [`IsJanetAbstract`].
     #[inline]
     pub fn new<A: IsJanetAbstract>(value: A) -> Self {
         let mut s = Self {
@@ -61,7 +68,7 @@ impl JanetAbstract {
         };
 
         // SAFETY: The type are the same since `s` was created with `A` type data.
-        *unsafe { s.get_mut_unchecked() } = value;
+        *unsafe { s.get_mut_unchecked() } = ManuallyDrop::new(value);
 
         s
     }
@@ -191,8 +198,7 @@ impl JanetAbstract {
     }
 
     /// Acquires the underlying pointer as const pointer.
-    // false positive lint
-    #[allow(clippy::wrong_self_convention)]
+    #[allow(clippy::wrong_self_convention)] // false positive lint
     #[inline]
     #[must_use]
     pub const fn as_raw(&self) -> *const c_void {
@@ -328,6 +334,17 @@ impl IsJanetAbstract for u64 {
     }
 }
 
+impl<A> IsJanetAbstract for ManuallyDrop<A>
+where A: IsJanetAbstract
+{
+    const SIZE: usize = A::SIZE;
+
+    #[inline]
+    fn type_info() -> &'static JanetAbstractType {
+        A::type_info()
+    }
+}
+
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
@@ -390,7 +407,7 @@ mod tests {
 
     #[derive(Debug, PartialEq)]
     struct TestNonCopy(bool);
-    static mut TestNonCopy_Type: JanetAbstractType = JanetAbstractType {
+    static mut TEST_NON_COPY_TYPE: JanetAbstractType = JanetAbstractType {
         name: b"TestNonCopy\0".as_ptr().cast::<i8>(),
         gc: None,
         gcmark: None,
@@ -412,7 +429,14 @@ mod tests {
 
         #[inline]
         fn type_info() -> &'static JanetAbstractType {
-            unsafe { &TestNonCopy_Type }
+            unsafe { &TEST_NON_COPY_TYPE }
+        }
+    }
+
+    impl Drop for TestNonCopy {
+        fn drop(&mut self) {
+            self.0 = false;
+            panic!("Dropping TestNonCopy");
         }
     }
 
@@ -420,14 +444,13 @@ mod tests {
     fn non_copy() -> Result<(), crate::client::Error> {
         let _client = crate::client::JanetClient::init()?;
 
+        let test2 = JanetAbstract::new(TestNonCopy(true));
+        let val2 = test2.get::<ManuallyDrop<TestNonCopy>>();
+        assert_eq!(Ok(&ManuallyDrop::new(TestNonCopy(true))), val2);
+
         let test = JanetAbstract::new(TestNonCopy(true));
-        let test2 = JanetAbstract::new(TestNonCopy(false));
-
         let val = test.get::<TestNonCopy>();
-        let val2 = test2.get::<TestNonCopy>();
-
         assert_eq!(Ok(&TestNonCopy(true)), val);
-        assert_eq!(Ok(&TestNonCopy(false)), val2);
 
         Ok(())
     }
