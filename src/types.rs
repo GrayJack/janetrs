@@ -198,10 +198,21 @@ impl Janet {
 
     /// Create a number [`Janet`] with a [`i32`] `value`.
     #[inline]
+    #[cfg(target_arch = "x86_64")]
     #[must_use = "function is a constructor associated function"]
     pub fn integer(value: i32) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_integer(value) },
+        }
+    }
+
+    /// Create a number [`Janet`] with a [`i32`] `value`.
+    #[inline]
+    #[cfg(not(target_arch = "x86_64"))]
+    #[must_use = "function is a constructor associated function"]
+    pub fn integer(value: i32) -> Self {
+        Self {
+            inner: unsafe { evil_janet::janet_wrap_number(value as f64) },
         }
     }
 
