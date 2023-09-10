@@ -4,6 +4,8 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
+## 0.6.0
+
 - **BREAKING:** Feat: Conditionally expose `JanetFile` "piped" flag (PIPED was removed in Janet 1.22.0)
 - **BREAKING:** Refactor: Changed definition of `IsJanetAbstract` trait
 - **BREAKING:** Refactor: Changed the return type of `JanetAbstract::get{_mut, _unchecked, _unchecked_mut}`
