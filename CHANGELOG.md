@@ -9,7 +9,7 @@ All notable changes to the library should be put here
 - **BREAKING:** Feat: Conditionally expose `JanetFile` "piped" flag (PIPED was removed in Janet 1.22.0)
 - **BREAKING:** Refactor: Changed definition of `IsJanetAbstract` trait
 - **BREAKING:** Refactor: Changed the return type of `JanetAbstract::get{_mut, _unchecked, _unchecked_mut}`
-- **BREAKING:** Feat: Move averything possible to `C-unwind`
+- **BREAKING:** Feat: Move everything possible to `C-unwind`
 - **BREAKING:** Up Minimum Rust version to 1.71.0
 - Feat: Add additional implementation of `From` implementation for
     `JanetBuffer`, `JanetArray` and `JanetTable`
@@ -24,6 +24,7 @@ All notable changes to the library should be put here
 - Refactor: Modernize format strings
 - Fix: Fix compilation when `unicode` feature os off
 - Fix: Fix `check_mut_ref` on `janet_fn` attribute macro
+- Fix: Fix linking on non x86_64 targets
 - Docs: Improve documentation flags
 - Docs: Simplify links
 - CI: Many CI improvements
@@ -67,7 +68,7 @@ All notable changes to the library should be put here
     environment
 - Add `declare_janet_mod` macro to generate the machinery that Janet requires do
     create a Janet native module
-    - It satisfies the same purpose as `janet_mod`, but it can get the
+  - It satisfies the same purpose as `janet_mod`, but it can get the
         documentation string from the function doc-comments and, for Janet versions
         above 1.17.0, it also add source map information for Janet
 - Add `janet_abstract::register` function to register an abstract type.
