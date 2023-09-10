@@ -62,13 +62,18 @@ impl JanetAbstract {
     /// implements [`IsJanetAbstract`].
     #[inline]
     pub fn new<A: IsJanetAbstract>(value: A) -> Self {
-        let mut s = Self {
+        let s = Self {
             raw:     unsafe { evil_janet::janet_abstract(A::type_info(), A::SIZE as _) },
             phantom: PhantomData,
         };
 
         // SAFETY: The type are the same since `s` was created with `A` type data.
-        *unsafe { s.get_mut_unchecked() } = ManuallyDrop::new(value);
+        // SAFETY 2: It's safe to wrap the value in a `ManuallyDrop` always since it is
+        // `#[repr(transparent)]`   and if `A` doesn't implement `Drop` it's safe to
+        // interpret it as A on get family function.
+        unsafe {
+            *(s.raw as *mut ManuallyDrop<A>) = ManuallyDrop::new(value);
+        }
 
         s
     }
@@ -92,8 +97,8 @@ impl JanetAbstract {
     /// and the requested type `A` are the same.
     #[inline]
     #[must_use]
-    pub unsafe fn get_unchecked<A: IsJanetAbstract>(&self) -> &A {
-        &*(self.raw as *const A)
+    pub unsafe fn get_unchecked<A: IsJanetAbstract>(&self) -> &A::Get {
+        &*(self.raw as *const A::Get)
     }
 
     /// Returns a mutable reference to the abstract type data as `A`
@@ -102,8 +107,8 @@ impl JanetAbstract {
     /// This function doesn't check if the underlying data of the `JanetAbstract` object
     /// and the requested type `A` are the same.
     #[inline]
-    pub unsafe fn get_mut_unchecked<A: IsJanetAbstract>(&mut self) -> &mut A {
-        &mut *(self.raw as *mut A)
+    pub unsafe fn get_mut_unchecked<A: IsJanetAbstract>(&mut self) -> &mut A::Get {
+        &mut *(self.raw as *mut A::Get)
     }
 
     /// Check if the `JanetAbstract` data is of the type `A`.
@@ -166,10 +171,10 @@ impl JanetAbstract {
     /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
     /// if any of the function pointer in the [`JanetAbstractType`] are different.
     #[inline]
-    pub fn get<A: IsJanetAbstract>(&self) -> Result<&A, AbstractError> {
+    pub fn get<A: IsJanetAbstract>(&self) -> Result<&A::Get, AbstractError> {
         self.check::<A>()?;
 
-        let ptr = self.raw as *const A;
+        let ptr = self.raw as *const A::Get;
         if ptr.is_null() {
             return Err(AbstractError::NullDataPointer);
         }
@@ -185,10 +190,10 @@ impl JanetAbstract {
     /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
     /// if any of the function pointer in the [`JanetAbstractType`] are different.
     #[inline]
-    pub fn get_mut<A: IsJanetAbstract>(&mut self) -> Result<&mut A, AbstractError> {
+    pub fn get_mut<A: IsJanetAbstract>(&mut self) -> Result<&mut A::Get, AbstractError> {
         self.check::<A>()?;
 
-        let ptr = self.raw as *mut A;
+        let ptr = self.raw as *mut A::Get;
         if ptr.is_null() {
             return Err(AbstractError::NullDataPointer);
         }
@@ -290,6 +295,12 @@ impl Ord for JanetAbstract {
 /// The trait that encodes the information required to instatiate the implementer as
 /// [`JanetAbstract`]
 pub trait IsJanetAbstract {
+    /// The type that you get when you call [`JanetAbstract::get`] family of functions.
+    ///
+    /// This is usually set to `Self` when the type does not implement [`Drop`], or
+    /// `ManuallyDrop<Self>` if the type implements [`Drop`].
+    type Get: IsJanetAbstract;
+
     /// The size of the type that is being transformed as [`JanetAbstract`].
     ///
     /// Usually `mem::size_of<Self>()`
@@ -317,6 +328,8 @@ pub fn register<T: IsJanetAbstract>() {
 }
 
 impl IsJanetAbstract for i64 {
+    type Get = i64;
+
     const SIZE: usize = core::mem::size_of::<Self>();
 
     #[inline]
@@ -326,6 +339,8 @@ impl IsJanetAbstract for i64 {
 }
 
 impl IsJanetAbstract for u64 {
+    type Get = u64;
+
     const SIZE: usize = core::mem::size_of::<Self>();
 
     #[inline]
@@ -337,6 +352,8 @@ impl IsJanetAbstract for u64 {
 impl<A> IsJanetAbstract for ManuallyDrop<A>
 where A: IsJanetAbstract
 {
+    type Get = ManuallyDrop<A::Get>;
+
     const SIZE: usize = A::SIZE;
 
     #[inline]
@@ -406,9 +423,9 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq)]
-    struct TestNonCopy(bool);
-    static mut TEST_NON_COPY_TYPE: JanetAbstractType = JanetAbstractType {
-        name: b"TestNonCopy\0".as_ptr().cast::<i8>(),
+    struct TestDrop(bool);
+    static mut TEST_DROP: JanetAbstractType = JanetAbstractType {
+        name: b"TestDrop\0".as_ptr().cast::<i8>(),
         gc: None,
         gcmark: None,
         get: None,
@@ -424,16 +441,18 @@ mod tests {
         bytes: None,
     };
 
-    impl IsJanetAbstract for TestNonCopy {
+    impl IsJanetAbstract for TestDrop {
+        type Get = ManuallyDrop<Self>;
+
         const SIZE: usize = core::mem::size_of::<Self>();
 
         #[inline]
         fn type_info() -> &'static JanetAbstractType {
-            unsafe { &TEST_NON_COPY_TYPE }
+            unsafe { &TEST_DROP }
         }
     }
 
-    impl Drop for TestNonCopy {
+    impl Drop for TestDrop {
         fn drop(&mut self) {
             self.0 = false;
             panic!("Dropping TestNonCopy");
@@ -444,13 +463,9 @@ mod tests {
     fn non_copy() -> Result<(), crate::client::Error> {
         let _client = crate::client::JanetClient::init()?;
 
-        let test2 = JanetAbstract::new(TestNonCopy(true));
-        let val2 = test2.get::<ManuallyDrop<TestNonCopy>>();
-        assert_eq!(Ok(&ManuallyDrop::new(TestNonCopy(true))), val2);
-
-        let test = JanetAbstract::new(TestNonCopy(true));
-        let val = test.get::<TestNonCopy>();
-        assert_eq!(Ok(&TestNonCopy(true)), val);
+        let test = JanetAbstract::new(TestDrop(true));
+        let val = test.get::<TestDrop>();
+        assert_eq!(Ok(&ManuallyDrop::new(TestDrop(true))), val);
 
         Ok(())
     }

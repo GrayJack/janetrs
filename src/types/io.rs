@@ -101,6 +101,8 @@ impl JanetFile {
 }
 
 impl IsJanetAbstract for JanetFile {
+    type Get = Self;
+
     const SIZE: usize = mem::size_of::<evil_janet::JanetFile>();
 
     #[inline]
@@ -493,7 +495,7 @@ mod tests {
 
         let stdout: JanetAbstract = stdout_janet.try_unwrap().unwrap();
 
-        let file: &JanetFile = stdout.get().unwrap();
+        let file = stdout.get::<JanetFile>().unwrap();
         let flags = file.flags();
 
         assert!(flags.is_append());
@@ -510,7 +512,7 @@ mod tests {
 
         let jtmp = make_tmp();
         let mut atmp: JanetAbstract = jtmp.try_unwrap().unwrap();
-        let tmp: &mut JanetFile = atmp.get_mut().unwrap();
+        let tmp = atmp.get_mut::<JanetFile>().unwrap();
 
         assert_eq!(tmp.write(b"test").unwrap(), 4);
         assert_eq!(tmp.stream_position().unwrap(), 4);
