@@ -41,7 +41,7 @@ const MIN_ALIGN: usize = 16;
 /// If this crate are build with the `nightly` feature enabled, this type also implements
 /// the [`Allocator`](core::alloc::Allocator) trait. That means that with the `nightly`
 /// feature set it's possible to use this allocator with Rust types that uses allocator as
-/// parameter, like [`Box`](alloc::boxed::Box).
+/// parameter, like [`Box`].
 #[derive(Copy, Clone, Default, Debug)]
 pub struct Scratch;
 

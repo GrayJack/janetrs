@@ -49,7 +49,7 @@
 //!  `[X]: Done`
 //!
 //! Probably there is much more missing, for that you can use the
-//! [`lowlevel`](crate::lowlevel) module to access the raw C API of Janet if needed
+//! [`lowlevel`] module to access the raw C API of Janet if needed
 //!
 //! ### TODO: Lib level
 //!  - Better docs.
