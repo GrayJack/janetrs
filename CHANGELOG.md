@@ -4,9 +4,26 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
--   Add additional implementation of `From` implementation for
+-   **BREAKING:** Feat: Conditionally expose `JanetFile` "piped" flag (PIPED was removed in Janet 1.22.0)
+-   **BREAKING:** Refactor: Changed definition of `IsJanetAbstract` trait
+-   **BREAKING:** Refactor: Changed the return type of `JanetAbstract::get{_mut, _unchecked, _unchecked_mut}`
+-   **BREAKING:** Feat: Move averything possible to `C-unwind`
+-   **BREAKING:** Up Minimum Rust version to 1.71.0
+-   Feat: Add additional implementation of `From` implementation for
     `JanetBuffer`, `JanetArray` and `JanetTable`
--   Simplify the `tuple!` and `structs!` macros
+-   Feat: Expose `JanetBuffer` methods that use `CStr` on no_std environment
+-   Feat: Expose `JanetFile` "update" flag
+-   Feat: Expose more of the String-like types API on no_std environment
+-   Feat: Add method `can_resume` for `JanetFiber`
+-   Refactor: Simplify the `tuple!` and `structs!` macros
+-   Refactor: Simplify a few `PartialEq` implementations
+-   Refactor: Simplify `JanetStruct` implementation of `Clone`
+-   Refactor: Adapt lifetimes to changes on bstr crate
+-   Refactor: Modernize format strings
+-   Fix: Fix compilation when `unicode` feature os off
+-   Docs: Improve documentation flags
+-   Docs: Simplify links
+-   CI: Many CI improvements
 
 ## 0.5.0
 
