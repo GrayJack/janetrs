@@ -21,6 +21,7 @@ All notable changes to the library should be put here
 - Refactor: Adapt lifetimes to changes on bstr crate
 - Refactor: Modernize format strings
 - Fix: Fix compilation when `unicode` feature os off
+- Fix: Fix `check_mut_ref` on `janet_fn` attribute macro
 - Docs: Improve documentation flags
 - Docs: Simplify links
 - CI: Many CI improvements
