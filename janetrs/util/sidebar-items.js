@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["check_fix_arity","check_range_arity"],"struct":["JanetBuildConfig","JanetVersion"]};

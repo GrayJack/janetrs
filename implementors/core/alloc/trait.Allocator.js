@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"janetrs":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/alloc/trait.Allocator.html\" title=\"trait core::alloc::Allocator\">Allocator</a> for <a class=\"struct\" href=\"janetrs/allocator/struct.Scratch.html\" title=\"struct janetrs::allocator::Scratch\">Scratch</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

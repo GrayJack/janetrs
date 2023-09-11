@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["HalfMatchesIter","MatchesIter","Searcher","TryHalfMatchesIter","TryMatchesIter"]};

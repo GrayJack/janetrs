@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["StartKind"],"mod":["dense","regex","sparse"],"struct":["OverlappingState"],"trait":["Automaton"]};
