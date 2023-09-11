@@ -4,6 +4,8 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
+- Refactor: Simplify `JanetAbstract::new`
+
 ## 0.6.0
 
 - **BREAKING:** Feat: Conditionally expose `JanetFile` "piped" flag (PIPED was removed in Janet 1.22.0)

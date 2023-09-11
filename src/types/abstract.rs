@@ -2,7 +2,9 @@
 //!
 //! In this module you can find the definitions of types and traits to allow to work with
 //! [`JanetAbstract`]. Most of those are re-exported at the supermodule of this module.
-use core::{cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData, mem::ManuallyDrop};
+use core::{
+    cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData, mem::ManuallyDrop, ptr,
+};
 
 pub use evil_janet::JanetAbstractType;
 
@@ -68,11 +70,8 @@ impl JanetAbstract {
         };
 
         // SAFETY: The type are the same since `s` was created with `A` type data.
-        // SAFETY 2: It's safe to wrap the value in a `ManuallyDrop` always since it is
-        // `#[repr(transparent)]`   and if `A` doesn't implement `Drop` it's safe to
-        // interpret it as A on get family function.
         unsafe {
-            *(s.raw as *mut ManuallyDrop<A>) = ManuallyDrop::new(value);
+            ptr::write(s.raw as *mut _, value);
         }
 
         s
@@ -468,5 +467,52 @@ mod tests {
         assert_eq!(Ok(&ManuallyDrop::new(TestDrop(true))), val);
 
         Ok(())
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct TestDrop2(bool);
+    static mut TEST_DROP2: JanetAbstractType = JanetAbstractType {
+        name: b"TestDrop2\0".as_ptr().cast::<i8>(),
+        gc: None,
+        gcmark: None,
+        get: None,
+        put: None,
+        marshal: None,
+        unmarshal: None,
+        tostring: None,
+        compare: None,
+        hash: None,
+        next: None,
+        call: None,
+        length: None,
+        bytes: None,
+    };
+
+    impl IsJanetAbstract for TestDrop2 {
+        type Get = Self;
+
+        const SIZE: usize = core::mem::size_of::<Self>();
+
+        #[inline]
+        fn type_info() -> &'static JanetAbstractType {
+            unsafe { &TEST_DROP2 }
+        }
+    }
+
+    impl Drop for TestDrop2 {
+        fn drop(&mut self) {
+            self.0 = false;
+            panic!("Dropping TestNonCopy");
+        }
+    }
+
+    #[test]
+    #[should_panic]
+    fn non_copy_ill_implemented() {
+        let _client = crate::client::JanetClient::init().unwrap();
+
+        let test = JanetAbstract::new(TestDrop2(true));
+        let val = test.get::<TestDrop2>();
+        assert_eq!(Ok(&TestDrop2(true)), val);
     }
 }
