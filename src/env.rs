@@ -135,17 +135,17 @@ impl JanetEnvironment {
                 cfun: Some(cfun_opt.value),
                 documentation: doc.as_ptr() as _,
                 source_file: if source_file.is_empty() {
-                    core::ptr::null()
+                    ptr::null()
                 } else {
                     source_file.as_ptr() as _
                 },
                 source_line: cfun_opt.source_line.unwrap_or_default() as _,
             },
             crate::lowlevel::JanetRegExt {
-                name: core::ptr::null(),
+                name: ptr::null(),
                 cfun: None,
-                documentation: core::ptr::null(),
-                source_file: core::ptr::null(),
+                documentation: ptr::null(),
+                source_file: ptr::null(),
                 source_line: 0,
             },
         ];

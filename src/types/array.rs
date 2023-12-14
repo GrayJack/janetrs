@@ -241,7 +241,7 @@ impl<'data> JanetArray<'data> {
     ///
     /// let mut arr = array![1];
     /// arr.reserve_exact(10);
-    /// assert!(arr.capacity() == 11);
+    /// assert_eq!(arr.capacity(), 11);
     /// ```
     #[inline]
     pub fn reserve_exact(&mut self, additional: i32) {
@@ -883,7 +883,7 @@ impl<'data> JanetArray<'data> {
         // Note that accessing the elements behind `a` and `b` is checked and will
         // panic when out of bounds.
         unsafe {
-            core::ptr::swap(pa, pb);
+            ptr::swap(pa, pb);
         }
     }
 
@@ -2271,7 +2271,7 @@ impl PartialEq for JanetArray<'_> {
 
 impl Eq for JanetArray<'_> {}
 
-impl super::DeepEq for JanetArray<'_> {
+impl DeepEq for JanetArray<'_> {
     #[inline]
     fn deep_eq(&self, other: &Self) -> bool {
         if self.len() == other.len() {
@@ -2313,8 +2313,8 @@ impl AsMut<[Janet]> for JanetArray<'_> {
 }
 
 impl<'data> IntoIterator for JanetArray<'data> {
-    type IntoIter = IntoIter<'data>;
     type Item = Janet;
+    type IntoIter = IntoIter<'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -2329,8 +2329,8 @@ impl<'data> IntoIterator for JanetArray<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
-    type IntoIter = Iter<'a, 'data>;
     type Item = &'a Janet;
+    type IntoIter = Iter<'a, 'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -2345,8 +2345,8 @@ impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
-    type IntoIter = IterMut<'a, 'data>;
     type Item = &'a mut Janet;
+    type IntoIter = IterMut<'a, 'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {

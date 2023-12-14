@@ -53,20 +53,20 @@ impl JanetFile {
     /// Get the [`FILE`] pointer that the JanetFile holds.
     #[inline]
     pub fn as_file_ptr(&mut self) -> *mut FILE {
-        (self.raw).file as *mut _
+        self.raw.file as *mut _
     }
 
     /// Return the flags of the JanetFile.
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub const fn flags(&self) -> FileFlags {
-        FileFlags((self.raw).flags)
+        FileFlags(self.raw.flags)
     }
 
     /// Returns a exclusive reference to the flags of the JanetFile.
     #[inline]
     pub fn flags_mut(&mut self) -> &mut FileFlags {
-        unsafe { &mut *(&mut (self.raw).flags as *mut i32 as *mut FileFlags) }
+        unsafe { &mut *(&mut self.raw.flags as *mut i32 as *mut FileFlags) }
     }
 
     #[cfg(feature = "std")]
@@ -88,7 +88,7 @@ impl JanetFile {
     #[cfg(feature = "std")]
     #[cfg_attr(_doc, doc(cfg(feature = "std")))]
     fn position(&self) -> io::Result<u64> {
-        let offset = unsafe { libc::ftell((self.raw).file as _) };
+        let offset = unsafe { libc::ftell(self.raw.file as _) };
 
         if offset < 0 {
             if let Some(err) = self.last_error() {
@@ -184,7 +184,7 @@ impl Write for JanetFile {
         }
 
         // SAFETY: We check for the errors after the call
-        let writen_bytes = unsafe {
+        let written_bytes = unsafe {
             libc::fwrite(
                 buf.as_ptr() as _,
                 mem::size_of::<u8>(),
@@ -195,7 +195,7 @@ impl Write for JanetFile {
 
         match self.last_error() {
             Some(err) => Err(err),
-            None => Ok(writen_bytes),
+            None => Ok(written_bytes),
         }
     }
 

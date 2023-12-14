@@ -598,7 +598,7 @@ impl<'data> JanetTuple<'data> {
         self.binary_search_by(|k| f(k).cmp(b))
     }
 
-    /// Creates a iterator over the reference of the array itens.
+    /// Creates a iterator over the reference of the array items.
     #[inline]
     pub fn iter(&self) -> Iter<'_, '_> {
         Iter {
@@ -1098,8 +1098,8 @@ impl From<&JanetArray<'_>> for JanetTuple<'_> {
 }
 
 impl<'data> IntoIterator for JanetTuple<'data> {
-    type IntoIter = IntoIter<'data>;
     type Item = Janet;
+    type IntoIter = IntoIter<'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1113,8 +1113,8 @@ impl<'data> IntoIterator for JanetTuple<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
-    type IntoIter = Iter<'a, 'data>;
     type Item = &'a Janet;
+    type IntoIter = Iter<'a, 'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1130,7 +1130,7 @@ impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
 impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
-        let iter = iter.into_iter().collect::<super::JanetArray>().into_iter();
+        let iter = iter.into_iter().collect::<JanetArray>().into_iter();
         let (lower, upper) = iter.size_hint();
 
         let mut new = if let Some(upper) = upper {
@@ -1287,7 +1287,7 @@ mod tests {
     use alloc::vec;
 
     #[test]
-    fn builder() -> Result<(), crate::client::Error> {
+    fn builder() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
 
         let tuple = JanetTuple::builder(0).finalize();
@@ -1305,7 +1305,7 @@ mod tests {
     }
 
     #[test]
-    fn get() -> Result<(), crate::client::Error> {
+    fn get() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
 
         let tuple = JanetTuple::builder(3)
@@ -1324,7 +1324,7 @@ mod tests {
     }
 
     #[test]
-    fn clone() -> Result<(), crate::client::Error> {
+    fn clone() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
 
         let tuple = JanetTuple::builder(3)
@@ -1346,7 +1346,7 @@ mod tests {
     }
 
     #[test]
-    fn collect() -> Result<(), crate::client::Error> {
+    fn collect() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
         let vec = vec![Janet::nil(); 100];
 
@@ -1371,7 +1371,7 @@ mod tests {
     }
 
     #[test]
-    fn iter_iterator() -> Result<(), crate::client::Error> {
+    fn iter_iterator() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
         let array = tuple![1, "hey", true];
 
@@ -1386,7 +1386,7 @@ mod tests {
     }
 
     #[test]
-    fn iter_double_ended_iterator() -> Result<(), crate::client::Error> {
+    fn iter_double_ended_iterator() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
         let numbers = tuple![1, 2, 3, 4, 5, 6];
 
@@ -1412,7 +1412,7 @@ mod tests {
     }
 
     #[test]
-    fn intoiter_iterator() -> Result<(), crate::client::Error> {
+    fn intoiter_iterator() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
         let array = tuple![1, "hey", true];
 
@@ -1427,7 +1427,7 @@ mod tests {
     }
 
     #[test]
-    fn intoiter_double_ended_iterator() -> Result<(), crate::client::Error> {
+    fn intoiter_double_ended_iterator() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
         let numbers = tuple![1, 2, 3, 4, 5, 6];
 
@@ -1453,7 +1453,7 @@ mod tests {
     }
 
     #[test]
-    fn size_hint() -> Result<(), crate::client::Error> {
+    fn size_hint() -> Result<(), client::Error> {
         let _client = JanetClient::init()?;
         let mut iter = tuple![0; 100].into_iter();
 
@@ -1467,7 +1467,7 @@ mod tests {
     }
 
     #[test]
-    fn compare() -> Result<(), crate::client::Error> {
+    fn compare() -> Result<(), client::Error> {
         use core::cmp::Ordering::*;
         let _client = JanetClient::init()?;
 

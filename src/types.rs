@@ -1840,20 +1840,6 @@ impl JanetArgs for [Janet] {
             .unwrap_or(default)
     }
 
-    fn get_panic<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize) -> T {
-        match self.get(index) {
-            Some(&val) => T::try_from(val).unwrap_or_else(|_| {
-                crate::jpanic!(
-                    "bad slot #{}, expected {}, got {}",
-                    index,
-                    T::name(),
-                    val.kind()
-                )
-            }),
-            None => crate::jpanic!("bad slot #{}, there is no value in this slot", index),
-        }
-    }
-
     fn get_opt<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize, default: T) -> T {
         let val = self.get(index).copied().unwrap_or_else(Janet::nil);
         if val.is_nil() {
@@ -1868,6 +1854,20 @@ impl JanetArgs for [Janet] {
                 T::name(),
                 val.kind()
             ),
+        }
+    }
+
+    fn get_panic<T: TryFrom<Janet> + JanetTypeName>(&self, index: usize) -> T {
+        match self.get(index) {
+            Some(&val) => T::try_from(val).unwrap_or_else(|_| {
+                crate::jpanic!(
+                    "bad slot #{}, expected {}, got {}",
+                    index,
+                    T::name(),
+                    val.kind()
+                )
+            }),
+            None => crate::jpanic!("bad slot #{}, there is no value in this slot", index),
         }
     }
 }

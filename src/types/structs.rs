@@ -539,7 +539,7 @@ impl DeepEq for JanetStruct<'_> {
     }
 }
 
-impl super::DeepEq<JanetTable<'_>> for JanetStruct<'_> {
+impl DeepEq<JanetTable<'_>> for JanetStruct<'_> {
     #[inline]
     fn deep_eq(&self, other: &JanetTable<'_>) -> bool {
         if self.len() == other.len() {
@@ -594,8 +594,8 @@ impl<T: Into<Janet>> Index<T> for JanetStruct<'_> {
 }
 
 impl<'data> IntoIterator for JanetStruct<'data> {
-    type IntoIter = IntoIter<'data>;
     type Item = (Janet, Janet);
+    type IntoIter = IntoIter<'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -608,8 +608,8 @@ impl<'data> IntoIterator for JanetStruct<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
-    type IntoIter = Iter<'a, 'data>;
     type Item = (&'a Janet, &'a Janet);
+    type IntoIter = Iter<'a, 'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {

@@ -147,9 +147,9 @@ impl<'data> JanetTable<'data> {
     /// table.insert(10, "ten");
     /// table.insert(20, "twenty");
     ///
-    /// assert!(table.removed() == 0);
+    /// assert_eq!(table.removed(), 0);
     /// table.remove(20);
-    /// assert!(table.removed() == 1);
+    /// assert_eq!(table.removed(), 1);
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -1342,8 +1342,8 @@ impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
 }
 
 impl<'data> IntoIterator for JanetTable<'data> {
-    type IntoIter = IntoIter<'data>;
     type Item = (Janet, Janet);
+    type IntoIter = IntoIter<'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1360,8 +1360,8 @@ impl<'data> IntoIterator for JanetTable<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
-    type IntoIter = Iter<'a, 'data>;
     type Item = (&'a Janet, &'a Janet);
+    type IntoIter = Iter<'a, 'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1376,8 +1376,8 @@ impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
-    type IntoIter = IterMut<'a, 'data>;
     type Item = (&'a Janet, &'data mut Janet);
+    type IntoIter = IterMut<'a, 'data>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
