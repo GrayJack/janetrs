@@ -1761,7 +1761,7 @@ string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BString);
 /// [`janet_fn`](crate::janet_fn) args.
 pub trait JanetArgs {
     /// Get the argument at the `index` position and tries to convert to `T`.
-    fn get_unwraped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error>;
+    fn get_unwrapped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error>;
 
     /// Get the argument at the `index` position and convert to `T`, if that fails,
     /// returns the `default` value.
@@ -1830,7 +1830,7 @@ pub trait JanetArgs {
 }
 
 impl JanetArgs for [Janet] {
-    fn get_unwraped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error> {
+    fn get_unwrapped<T: TryFrom<Janet>>(&self, index: usize) -> Result<T, T::Error> {
         T::try_from(*self.get(index).unwrap_or(&Janet::nil()))
     }
 
