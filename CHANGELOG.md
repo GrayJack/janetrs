@@ -4,6 +4,8 @@ All notable changes to the library should be put here
 
 ## Unreleased
 
+- **BREAKING:** Refactor: Rename `JanetArgs::get_unwraped` to `JanetArgs::get_unwrapped`
+- **BREAKING:** Refactor: Rename `FileFlags::is_serializeble` to `FileFlags::is_serializable`
 - Refactor: Simplify `JanetAbstract::new`
 
 ## 0.6.0
