@@ -36,7 +36,7 @@ const MIN_ALIGN: usize = 8;
 const MIN_ALIGN: usize = 16;
 
 /// Memory allocator that will certainly be cleaned up in the next Janet Garbage
-/// Collection cicle.
+/// Collection cycle.
 ///
 /// If this crate are build with the `nightly` feature enabled, this type also implements
 /// the [`Allocator`](core::alloc::Allocator) trait. That means that with the `nightly`
@@ -56,7 +56,7 @@ impl Scratch {
     #[inline]
     pub fn malloc(&self, layout: Layout) -> Option<NonNull<[u8]>> {
         // Allocate size if it fits in the type size and has a alignment smaller than the
-        // minimum alignment of the archthecture. Over allocate otherwise
+        // minimum alignment of the architecture. Over allocate otherwise
         let (raw_ptr, alloc_mem_size) =
             if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
                 let size = layout.size();
@@ -80,7 +80,7 @@ impl Scratch {
     #[inline]
     pub fn calloc(&self, layout: Layout) -> Option<NonNull<[u8]>> {
         // Allocate size if it fits in the type size and has a alignment smaller than the
-        // minimum alignment of the archthecture. Over allocate otherwise
+        // minimum alignment of the architecture. Over allocate otherwise
         let (raw_ptr, alloc_mem_size) =
             if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
                 let size = layout.size();
@@ -119,7 +119,7 @@ impl Scratch {
         let new_layout = Layout::from_size_align_unchecked(new_size, layout.align());
 
         // Allocate size if it fits in the type size and has a alignment smaller than the
-        // minimum alignment of the archthecture. Over allocate otherwise
+        // minimum alignment of the architecture. Over allocate otherwise
         let (raw_ptr, alloc_mem_size) =
             if layout.align() <= MIN_ALIGN && layout.align() <= new_layout.size() {
                 let size = new_layout.size();

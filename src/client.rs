@@ -58,9 +58,9 @@ impl StdError for Error {}
 
 /// Janet client that initialize the Janet runtime.
 ///
-/// If in a `no_std` environment you can only initilize the runtime through the safe
+/// If in a `no_std` environment you can only initialize the runtime through the safe
 /// interface only once, since the static atomic global cannot be thread local in a
-/// `no_std` environment, if you're on a multithread + `no_std` environment refer to use
+/// `no_std` environment, if you're on a multi-thread + `no_std` environment refer to use
 /// [`init_unchecked`].
 ///
 /// [`init_unchecked`]: ./struct.JanetClient.html#method.init_unchecked.html
@@ -116,7 +116,7 @@ impl JanetClient {
     ///
     /// If tried to initialize the client more than once it returns a `Err` variant.
     ///
-    /// The default environment of Janet constains all the Janet C code as well as the
+    /// The default environment of Janet contains all the Janet C code as well as the
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     #[inline]
     pub fn init_with_default_env() -> Result<Self, Error> {
@@ -143,7 +143,7 @@ impl JanetClient {
 
     /// Load the default environment of Janet.
     ///
-    /// The default environment of Janet constains all the Janet C code as well as the
+    /// The default environment of Janet contains all the Janet C code as well as the
     /// code in [`boot.janet`](https://github.com/janet-lang/janet/blob/master/src/boot/boot.janet).
     #[inline]
     #[must_use]

@@ -167,7 +167,7 @@ impl<'data> JanetArray<'data> {
     /// array length, this append [`Janet`] `nil` values into the array, and if `new_len`
     /// is lesser than the current array length, the Janet garbage collector will handle
     /// the elements not used anymore, that's the reason this function is safe to call
-    /// compared to the Rust [`Vec`](alloc::vec::Vec) method with the same name.
+    /// compared to the Rust [`Vec`](Vec) method with the same name.
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
     #[inline]
@@ -833,8 +833,8 @@ impl<'data> JanetArray<'data> {
     /// // scoped to restrict the lifetime of the borrows
     /// {
     ///     let (left, right) = v.split_at_mut(2);
-    ///     assert!(left == array![1, 0].as_ref());
-    ///     assert!(right == array![3, 0, 5, 6].as_ref());
+    ///     assert_eq!(left, array![1, 0].as_ref());
+    ///     assert_eq!(right, array![3, 0, 5, 6].as_ref());
     ///     left[1] = Janet::from(2);
     ///     right[1] = Janet::from(4);
     /// }

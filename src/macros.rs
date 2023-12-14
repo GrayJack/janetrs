@@ -189,7 +189,7 @@ macro_rules! table {
 /// ## The syntax:
 /// `janet_mod!(<Janet Module Name (string literal)>; <{<Janet Function Name ((string
 /// literal))>, <function pointer>, <Janet documentation string (string literal)>},
-/// ...>);` ¹ Itens inside `<>` means mandatory
+/// ...>);` ¹ Items inside `<>` means mandatory
 /// ² `...` means one or more
 ///
 /// # Examples
@@ -247,7 +247,7 @@ macro_rules! janet_mod {
     };
 }
 
-/// Causes a panic in the Janet side (exception). Diferently of the Rust `panic!` macro,
+/// Causes a panic in the Janet side (exception). Differently of the Rust `panic!` macro,
 /// this macro does **not** terminate the current thread. Instead, it sends a error signal
 /// with the passed message where the Janet runtime takes care to properly exit.
 ///
@@ -264,7 +264,7 @@ macro_rules! janet_mod {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::_panic($crate::Janet::from("explicity panic"))
+        $crate::util::_panic($crate::Janet::from("explicit panic"))
     };
     ($msg:expr $(,)?) => {
         $crate::util::_panic($crate::Janet::from($msg))
@@ -274,7 +274,7 @@ macro_rules! jpanic {
     };
 }
 
-/// Causes a panic in the Janet side (exception). Diferently of the Rust `panic!` macro,
+/// Causes a panic in the Janet side (exception). Differently of the Rust `panic!` macro,
 /// this macro does **not** terminate the current thread. Instead, it sends a error signal
 /// with the passed message where the Janet runtime takes care to properly exit.
 ///
@@ -291,7 +291,7 @@ macro_rules! jpanic {
 #[macro_export]
 macro_rules! jpanic {
     () => {
-        $crate::util::_panic($crate::Janet::from("explicity panic"))
+        $crate::util::_panic($crate::Janet::from("explicit panic"))
     };
     ($msg:expr $(,)?) => {
         $crate::util::_panic($crate::Janet::from($msg))

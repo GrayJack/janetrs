@@ -356,7 +356,7 @@ mod trystate {
         /// set to catch Janet Panics.
         ///
         /// # Safety
-        /// If this is called with the invalid environment to chatch Janet Panics it will
+        /// If this is called with the invalid environment to catch Janet Panics it will
         /// cause undefined behaviour.
         #[inline]
         pub unsafe fn signal_unchecked(&mut self) -> JanetSignal {

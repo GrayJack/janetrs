@@ -78,10 +78,10 @@ impl<'data> JanetStringBuilder<'data> {
         self.put(s)
     }
 
-    /// Finalie the build process and create [`JanetString`].
+    /// Finalize the build process and create [`JanetString`].
     ///
     /// If the build is finalized and not all the allocated space was inserted with a
-    /// item, the unnused space will all be Null characters.
+    /// item, the unused space will all be Null characters.
     #[inline]
     pub fn finalize(self) -> JanetString<'data> {
         JanetString {
@@ -846,7 +846,7 @@ impl<'data> JanetString<'data> {
     /// UTF-8 bytes with the Unicode replacement codepoint (`U+FFFD`).
     ///
     /// If the string is already valid UTF-8, then no copying or
-    /// allocation is performed and a borrrowed string slice is returned. If
+    /// allocation is performed and a borrowed string slice is returned. If
     /// the string is not valid UTF-8, then an owned string string is
     /// returned with invalid bytes replaced by the replacement codepoint.
     ///
@@ -908,7 +908,7 @@ impl<'data> JanetString<'data> {
     /// this will perform a UTF-8 check and lossily convert this string
     /// into valid UTF-8 using the Unicode replacement codepoint.
     ///
-    /// Note that this can prevent the correct roundtripping of file paths on
+    /// Note that this can prevent the correct round-tripping of file paths on
     /// non-Unix systems such as Windows, where file paths are an arbitrary
     /// sequence of 16-bit integers.
     #[cfg(feature = "std")]
@@ -939,7 +939,7 @@ impl<'data> JanetString<'data> {
     /// this will perform a UTF-8 check and lossily convert this string
     /// into valid UTF-8 using the Unicode replacement codepoint.
     ///
-    /// Note that this can prevent the correct roundtripping of file paths on
+    /// Note that this can prevent the correct round-tripping of file paths on
     /// non-Unix systems such as Windows, where file paths are an arbitrary
     /// sequence of 16-bit integers.
     #[cfg(feature = "std")]

@@ -35,9 +35,9 @@ impl<'data> JanetStructBuilder<'data> {
         self
     }
 
-    /// Finalie the build process and create [`JanetStruct`].
+    /// Finalize the build process and create [`JanetStruct`].
     #[inline]
-    #[must_use = "function finishies building process and returns JanetStruct"]
+    #[must_use = "function finishes building process and returns JanetStruct"]
     pub fn finalize(self) -> JanetStruct<'data> {
         JanetStruct {
             raw:     unsafe { evil_janet::janet_struct_end(self.raw) },
@@ -352,7 +352,7 @@ impl<'data> JanetStruct<'data> {
         self.get(key).is_some()
     }
 
-    /// Returns `true` if the struct contais a given value.
+    /// Returns `true` if the struct contains a given value.
     ///
     /// # Examples
     /// ```
@@ -370,7 +370,7 @@ impl<'data> JanetStruct<'data> {
         self.values().any(|&v| v == value)
     }
 
-    /// Creates a iterator over the refernece of the struct keys.
+    /// Creates a iterator over the reference of the struct keys.
     ///
     /// # Examples
     /// ```
@@ -388,7 +388,7 @@ impl<'data> JanetStruct<'data> {
         Keys { inner: self.iter() }
     }
 
-    /// Creates a iterator over the refernece of the struct values.
+    /// Creates a iterator over the reference of the struct values.
     ///
     /// # Examples
     /// ```

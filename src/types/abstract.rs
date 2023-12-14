@@ -230,7 +230,7 @@ impl JanetAbstract {
         unsafe { (*evil_janet::janet_abstract_head(self.raw)).size }
     }
 
-    /// Return the struct that holds the type name and all possible polimorfic function
+    /// Return the struct that holds the type name and all possible polymorphic function
     /// pointer that a Abstract type can have in Janet.
     #[inline]
     #[must_use]
@@ -291,7 +291,7 @@ impl Ord for JanetAbstract {
     }
 }
 
-/// The trait that encodes the information required to instatiate the implementer as
+/// The trait that encodes the information required to instantiate the implementer as
 /// [`JanetAbstract`]
 pub trait IsJanetAbstract {
     /// The type that you get when you call [`JanetAbstract::get`] family of functions.
@@ -305,7 +305,7 @@ pub trait IsJanetAbstract {
     /// Usually `mem::size_of<Self>()`
     const SIZE: usize;
 
-    /// Returns the table of the name of the `Self` and all possible polimorfic function
+    /// Returns the table of the name of the `Self` and all possible polymorphic function
     /// pointer that a Abstract type can have in Janet.
     fn type_info() -> &'static JanetAbstractType;
 }

@@ -10,7 +10,7 @@ use crate::{
 /// Representation of the Janet runtime environment, like global definitions, available
 /// functions and macros, etc.
 ///
-/// The Janet environment is represented as a [`JanetTable`]. Undestanding it may prove
+/// The Janet environment is represented as a [`JanetTable`]. Understanding it may prove
 /// helpful.
 #[derive(Debug)]
 #[repr(transparent)]
@@ -47,7 +47,7 @@ impl JanetEnvironment {
             def.insert(JanetKeyword::new("doc"), doc);
         }
 
-        // insert the souce information only on 1.17.0 or latter.
+        // insert the source information only on 1.17.0 or latter.
         if crate::check_janet_version!("1.17.0") {
             if let (Some(source_file), Some(source_line)) =
                 (def_opt.source_file, def_opt.source_line)
@@ -72,7 +72,7 @@ impl JanetEnvironment {
             var.insert(JanetKeyword::new("doc"), doc);
         }
 
-        // insert the souce information only on 1.17.0 or latter.
+        // insert the source information only on 1.17.0 or latter.
         if crate::check_janet_version!("1.17.0") {
             if let (Some(source_file), Some(source_line)) =
                 (var_opt.source_file, var_opt.source_line)
@@ -181,7 +181,7 @@ impl Default for JanetEnvironment {
     }
 }
 
-/// A builder for a Janet imutable variable definition.
+/// A builder for a Janet immutable variable definition.
 ///
 /// # Example
 pub struct DefOptions<'a> {
@@ -293,7 +293,7 @@ impl<'a> CFunOptions<'a> {
         }
     }
 
-    /// Configure the namescpace of the Janet C function definition.
+    /// Configure the namespace of the Janet C function definition.
     #[must_use]
     pub fn namespace(mut self, namespace: &'a str) -> Self {
         self.namespace = Some(namespace);

@@ -22,7 +22,7 @@ impl JanetSymbol<'_> {
     /// Create a [`JanetSymbol`] with given `name`.
     ///
     /// If the given `name` is bigger than [`i32::MAX`] the generated symbol will have a
-    /// name trucated to that max size. That's unrealistic thought.
+    /// name truncated to that max size. That's unrealistic thought.
     ///
     /// # Examples
     /// ```
@@ -250,7 +250,7 @@ impl JanetKeyword<'_> {
     /// Create a [`JanetKeyword`] with given `name`.
     ///
     /// If the given `name` is bigger than i32::MAX the generated symbol will have a name
-    /// trucated to that max size. That's unrealistic thought.
+    /// truncated to that max size. That's unrealistic thought.
     ///
     /// # Examples
     /// ```

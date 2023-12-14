@@ -209,7 +209,7 @@ impl<'data> JanetTable<'data> {
         }
     }
 
-    /// Returns the number of elements of the table, also refered to as its 'length'.
+    /// Returns the number of elements of the table, also referred to as its 'length'.
     ///
     /// # Examples
     /// ```
@@ -515,7 +515,7 @@ impl<'data> JanetTable<'data> {
         self.get_key_value_proto(key).map(|(_, v)| v)
     }
 
-    /// Returns the exclusivereference to the value corresponding to the supplied `key`,
+    /// Returns the exclusive reference to the value corresponding to the supplied `key`,
     /// with prototype lookup.
     ///
     /// # Examples
@@ -1039,7 +1039,7 @@ impl<'data> JanetTable<'data> {
         self.values().any(|&v| v == value)
     }
 
-    /// Creates a iterator over the refernece of the table keys.
+    /// Creates a iterator over the reference of the table keys.
     ///
     /// # Examples
     /// ```
@@ -1057,7 +1057,7 @@ impl<'data> JanetTable<'data> {
         Keys { inner: self.iter() }
     }
 
-    /// Creates a iterator over the refernece of the table values.
+    /// Creates a iterator over the reference of the table values.
     ///
     /// # Examples
     /// ```
@@ -1075,7 +1075,7 @@ impl<'data> JanetTable<'data> {
         Values { inner: self.iter() }
     }
 
-    /// Creates a iterator over the mutable refernece of the table values.
+    /// Creates a iterator over the mutable reference of the table values.
     ///
     /// # Examples
     /// ```

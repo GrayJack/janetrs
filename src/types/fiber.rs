@@ -139,7 +139,7 @@ impl<'data> JanetFiber<'data> {
         resume != 0
     }
 
-    /// Creates a iterator that can execute the fiber function untill it's done.
+    /// Creates a iterator that can execute the fiber function until it's done.
     ///
     /// # Examples
     /// ```
@@ -169,7 +169,7 @@ impl<'data> JanetFiber<'data> {
         }
     }
 
-    /// Creates a iterator that can execute the fiber function untill it's done, modifying
+    /// Creates a iterator that can execute the fiber function until it's done, modifying
     /// the input to `input`.
     ///
     /// A `input` of value of Janet nil is the same as calling the [`exec`] method.
@@ -203,7 +203,7 @@ impl<'data> JanetFiber<'data> {
         Exec { fiber: self, input }
     }
 
-    /// Creates a iterator that can execute the fiber function untill it's done, modifying
+    /// Creates a iterator that can execute the fiber function until it's done, modifying
     /// the input with the given function.
     ///
     /// A `F` that returns the value of Janet nil is the same as calling the [`exec`]
@@ -272,7 +272,7 @@ impl JanetFiber<'_> {
     }
 }
 
-/// An iterator that executes the function related to the fiber untill it completes.
+/// An iterator that executes the function related to the fiber until it completes.
 ///
 /// **Executing this iterator may trigger a GC collection**
 #[derive(Debug)]
@@ -304,7 +304,7 @@ impl<'a, 'data> Iterator for Exec<'a, 'data> {
 
 impl FusedIterator for Exec<'_, '_> {}
 
-/// This tipe represents a the status of a [`JanetFiber`].
+/// This type represents a the status of a [`JanetFiber`].
 ///
 /// It mostly corresponds to signals.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]

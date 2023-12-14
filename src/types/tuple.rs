@@ -77,7 +77,7 @@ impl<'data> JanetTupleBuilder<'data> {
 ///     .put(Janet::boolean(true));
 /// ```
 ///
-/// [Janet arrays]: crate::JanetArray
+/// [Janet arrays]: JanetArray
 #[repr(transparent)]
 pub struct JanetTuple<'data> {
     pub(crate) raw: *const CJanet,
@@ -1044,7 +1044,7 @@ impl PartialEq for JanetTuple<'_> {
         }
 
         // If the hash is the same
-        // SAFETY: Janet tuple must always be a valid ponter
+        // SAFETY: Janet tuple must always be a valid pointer
         if self.head().hash.eq(&self.head().hash) {
             return true;
         }

@@ -15,7 +15,7 @@ use core::{cell::Cell, ffi::c_void, fmt, marker::PhantomData};
 #[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct JanetPointer {
     pub(crate) inner: *mut c_void,
-    phatom: PhantomData<Cell<()>>,
+    phantom: PhantomData<Cell<()>>,
 }
 
 impl JanetPointer {
@@ -24,7 +24,7 @@ impl JanetPointer {
     pub const fn new(ptr: *mut c_void) -> Self {
         Self {
             inner:  ptr,
-            phatom: PhantomData,
+            phantom: PhantomData,
         }
     }
 

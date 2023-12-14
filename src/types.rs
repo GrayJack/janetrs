@@ -1,7 +1,7 @@
 //! This module should have all Janet type structures.
 //!
 //! # Lifetimes
-//! There is some commom naming patterns when looking at the type definitions
+//! There is some common naming patterns when looking at the type definitions
 //!
 //!  - `'data` is the lifetime of data that is owned by the Janet GC.
 use core::{
@@ -83,7 +83,7 @@ impl Display for JanetConversionError {
 /// `Janet` is the central structure of the Janet Language.
 ///
 /// All possible Janet types are represented at some point as this structure, either to
-/// receive as argumenst ou return something to Janet VM.
+/// receive as arguments ou return something to Janet VM.
 ///
 /// ## Creating new values
 /// With exception to `Janet` [`nil`](Janet::nil) value the best way to create a `Janet`
@@ -105,7 +105,7 @@ impl Display for JanetConversionError {
 /// let from_jnt = Janet::from(true); // A boolean Janet
 /// ```
 ///
-/// ## Extracting/Unwraping Janet values
+/// ## Extracting/Unwrapping Janet values
 ///
 /// To extract/unwrap the `Janet` value you can use the [`Janet::unwrap`] method, that
 /// will return a [`TaggedJanet`] that you can pattern match to use the extracted value.
@@ -347,7 +347,7 @@ impl Janet {
         }
     }
 
-    /// Get a dynamic [keywrord](self::JanetKeyword) binding from the environment if it
+    /// Get a dynamic [keyword](JanetKeyword) binding from the environment if it
     /// exists.
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn dynamic(key: impl AsRef<[u8]>) -> Option<Self> {
@@ -545,7 +545,7 @@ impl Janet {
         unsafe { evil_janet::janet_truthy(self.inner) == 0 }
     }
 
-    /// Retuns a `Janet` value containing the requested method if it exists.
+    /// Returns a `Janet` value containing the requested method if it exists.
     #[inline]
     #[must_use]
     pub fn get_method(&self, method_name: &str) -> Option<Self> {
@@ -558,7 +558,7 @@ impl Janet {
         Some(method)
     }
 
-    /// Retuns `true` if the `Janet` has a method callled `method_name`
+    /// Returns `true` if the `Janet` has a method called `method_name`
     #[inline]
     #[must_use]
     pub fn has_method(&self, method_name: &str) -> bool {
@@ -1207,7 +1207,7 @@ impl Display for TaggedJanet<'_> {
             TaggedJanet::Symbol(sym) => Display::fmt(sym, f),
             TaggedJanet::Table(table) => {
                 // Classes in Janet are just tables with prototype with special keywords
-                // If a vailable we printo the class name
+                // If available we print the class name
                 if let Some(proto) = table.prototype() {
                     if let Some(name) = proto.get(JanetKeyword::new("_name")) {
                         match name.unwrap() {

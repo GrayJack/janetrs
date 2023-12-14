@@ -9,7 +9,7 @@
 //! This project still are in it's early stages, so breaking changes may happen, there is
 //! no minimal supported Rust version (MSRV) yet.
 //!
-//! Notice that most doc tests will fail if the feature "almagation" or "link-system"
+//! Notice that most doc tests will fail if the feature "amalgation" or "link-system"
 //! aren't set, because most of then need it for the Janet runtime to function properly.
 //!
 //! ## Cargo Features
@@ -58,7 +58,7 @@
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
 #![cfg_attr(_doc, feature(doc_cfg))]
 
-// Cause compilation error when both almagation and system is set
+// Cause compilation error when both amalgation and system is set
 #[cfg(all(feature = "amalgation", feature = "link-system"))]
 compile_error!(r#"You can only use either "amalgation" or "link-system" feature, not both."#);
 #[cfg(all(feature = "amalgation", feature = "system"))]
