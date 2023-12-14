@@ -302,7 +302,7 @@ impl fmt::Debug for JanetFile {
             .field("closed", &self.flags().is_closed())
             .field("not_closeable", &self.flags().is_not_closeable())
             .field("no_nil", &self.flags().is_no_nil())
-            .field("serialiable", &self.flags().is_serializeble())
+            .field("serializable", &self.flags().is_serializable())
             .finish()
     }
 }
@@ -383,10 +383,10 @@ impl FileFlags {
         (self.0 & Self::READ.0) == Self::READ.0
     }
 
-    /// Check if the flag has the `serializeble` value.
+    /// Check if the flag has the `serializable` value.
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub const fn is_serializeble(self) -> bool {
+    pub const fn is_serializable(self) -> bool {
         (self.0 & Self::SERIALIZEBLE.0) == Self::SERIALIZEBLE.0
     }
 
@@ -500,7 +500,7 @@ mod tests {
 
         assert!(flags.is_append());
         assert!(flags.is_not_closeable());
-        assert!(flags.is_serializeble());
+        assert!(flags.is_serializable());
 
         Ok(())
     }
