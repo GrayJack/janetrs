@@ -17,7 +17,7 @@ use crate::{
 // and for those add something else to substitute the AtomicBool.
 #[cfg(feature = "std")]
 thread_local! {
-    static INIT: AtomicBool = AtomicBool::new(false);
+    static INIT: AtomicBool = const { AtomicBool::new(false) };
 }
 
 #[cfg(not(feature = "std"))]

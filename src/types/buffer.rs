@@ -2620,6 +2620,7 @@ impl Ord for JanetBuffer<'_> {
 
 impl PartialEq for JanetBuffer<'_> {
     #[inline]
+    #[allow(clippy::unconditional_recursion)] // false positive
     fn eq(&self, other: &Self) -> bool {
         self.raw.eq(&other.raw)
     }

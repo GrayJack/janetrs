@@ -694,7 +694,7 @@ impl error::Error for Janet {}
 impl PartialEq<&Self> for Janet {
     #[inline]
     fn eq(&self, other: &&Self) -> bool {
-        self.eq(*other)
+        self.inner.eq(&other.inner)
     }
 }
 
@@ -708,7 +708,7 @@ impl PartialOrd<&Self> for Janet {
 impl PartialEq<Janet> for &Janet {
     #[inline]
     fn eq(&self, other: &Janet) -> bool {
-        (*self).eq(other)
+        self.inner.eq(&other.inner)
     }
 }
 

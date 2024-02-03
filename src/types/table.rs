@@ -1236,6 +1236,7 @@ impl Ord for JanetTable<'_> {
 
 impl PartialEq for JanetTable<'_> {
     #[inline]
+    #[allow(clippy::unconditional_recursion)] // false positive
     fn eq(&self, other: &Self) -> bool {
         self.raw.eq(&other.raw)
     }
@@ -1342,8 +1343,8 @@ impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
 }
 
 impl<'data> IntoIterator for JanetTable<'data> {
-    type Item = (Janet, Janet);
     type IntoIter = IntoIter<'data>;
+    type Item = (Janet, Janet);
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1360,8 +1361,8 @@ impl<'data> IntoIterator for JanetTable<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
-    type Item = (&'a Janet, &'a Janet);
     type IntoIter = Iter<'a, 'data>;
+    type Item = (&'a Janet, &'a Janet);
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1376,8 +1377,8 @@ impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
-    type Item = (&'a Janet, &'data mut Janet);
     type IntoIter = IterMut<'a, 'data>;
+    type Item = (&'a Janet, &'data mut Janet);
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {

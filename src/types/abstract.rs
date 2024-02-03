@@ -447,7 +447,7 @@ mod tests {
 
         #[inline]
         fn type_info() -> &'static JanetAbstractType {
-            unsafe { &TEST_DROP }
+            unsafe { &*ptr::addr_of!(TEST_DROP) }
         }
     }
 
@@ -495,7 +495,7 @@ mod tests {
 
         #[inline]
         fn type_info() -> &'static JanetAbstractType {
-            unsafe { &TEST_DROP2 }
+            unsafe { &*ptr::addr_of!(TEST_DROP2) }
         }
     }
 
