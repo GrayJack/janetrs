@@ -167,8 +167,10 @@ impl JanetAbstract {
     ///
     /// # Error
     /// This function may return [`AbstractError::MismatchedSize`] if this object size is
-    /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
-    /// if any of the function pointer in the [`JanetAbstractType`] are different.
+    /// different of requested type `A` size, [`AbstractError::MismatchedAbstractType`]
+    /// if any of the function pointer in the [`JanetAbstractType`] are different, or
+    /// [`AbstractError::NullDataPointer`] if the JanetAbstract is in a uninitialized
+    /// state.
     #[inline]
     pub fn get<A: IsJanetAbstract>(&self) -> Result<&A::Get, AbstractError> {
         self.check::<A>()?;
@@ -186,8 +188,10 @@ impl JanetAbstract {
     ///
     /// # Error
     /// This function may return [`AbstractError::MismatchedSize`] if this object size is
-    /// different of requested type `A` size, or [`AbstractError::MismatchedAbstractType`]
-    /// if any of the function pointer in the [`JanetAbstractType`] are different.
+    /// different of requested type `A` size, [`AbstractError::MismatchedAbstractType`]
+    /// if any of the function pointer in the [`JanetAbstractType`] are different, or
+    /// [`AbstractError::NullDataPointer`] if the JanetAbstract is in a uninitialized
+    /// state.
     #[inline]
     pub fn get_mut<A: IsJanetAbstract>(&mut self) -> Result<&mut A::Get, AbstractError> {
         self.check::<A>()?;
