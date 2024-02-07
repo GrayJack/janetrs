@@ -180,7 +180,7 @@ impl JanetAbstract {
             return Err(AbstractError::NullDataPointer);
         }
 
-        // SAFETY: The pointer was checked if its NULL
+        // SAFETY: The pointer was checked if it's NULL
         Ok(unsafe { &*ptr })
     }
 
@@ -201,7 +201,7 @@ impl JanetAbstract {
             return Err(AbstractError::NullDataPointer);
         }
 
-        // SAFETY: The pointer was checked if its NULL
+        // SAFETY: The pointer was checked if it's NULL
         Ok(unsafe { &mut *(ptr) })
     }
 
@@ -222,10 +222,32 @@ impl JanetAbstract {
             return Err(AbstractError::NullDataPointer);
         }
 
-        // SAFETY: The pointer was checked if its NULL
+        // SAFETY: The pointer was checked if it's NULL
         let value = unsafe { ptr::read(ptr) };
         self.raw = ptr::null_mut();
         Ok(value)
+    }
+
+    /// Extracts the value from the ManuallyDrop container.
+    ///
+    /// This allows the value to be dropped again.
+    ///
+    /// # Error
+    /// This function may return [`AbstractError::MismatchedSize`] if this object size is
+    /// different of requested type `A` size, [`AbstractError::MismatchedAbstractType`]
+    /// if any of the function pointer in the [`JanetAbstractType`] are different, or
+    /// [`AbstractError::NullDataPointer`] if the JanetAbstract is in a uninitialized
+    /// state.
+    pub fn into_inner<A: IsJanetAbstract>(self) -> Result<A, AbstractError> {
+        self.check::<A>()?;
+
+        let ptr = self.raw as *mut A;
+        if ptr.is_null() {
+            return Err(AbstractError::NullDataPointer);
+        }
+
+        // SAFETY: The pointer was checked if it's NULL
+        Ok(unsafe { ptr::read(ptr) })
     }
 
     /// Acquires the underlying pointer as const pointer.
