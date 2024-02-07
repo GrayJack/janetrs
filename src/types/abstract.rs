@@ -205,6 +205,29 @@ impl JanetAbstract {
         Ok(unsafe { &mut *(ptr) })
     }
 
+    /// Takes the value out of this JanetAbstract, moving it back to an uninitialized
+    /// state.
+    ///
+    /// # Error
+    /// This function may return [`AbstractError::MismatchedSize`] if this object size is
+    /// different of requested type `A` size, [`AbstractError::MismatchedAbstractType`]
+    /// if any of the function pointer in the [`JanetAbstractType`] are different, or
+    /// [`AbstractError::NullDataPointer`] if the JanetAbstract is in a uninitialized
+    /// state.
+    pub fn take<A: IsJanetAbstract>(&mut self) -> Result<A, AbstractError> {
+        self.check::<A>()?;
+
+        let ptr = self.raw as *mut A;
+        if ptr.is_null() {
+            return Err(AbstractError::NullDataPointer);
+        }
+
+        // SAFETY: The pointer was checked if its NULL
+        let value = unsafe { ptr::read(ptr) };
+        self.raw = ptr::null_mut();
+        Ok(value)
+    }
+
     /// Acquires the underlying pointer as const pointer.
     #[allow(clippy::wrong_self_convention)] // false positive lint
     #[inline]
