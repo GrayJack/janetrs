@@ -2,7 +2,7 @@
 use core::{
     cmp::Ordering,
     fmt::{self, Debug, Write},
-    iter::{FromIterator, FusedIterator},
+    iter::FusedIterator,
     marker::PhantomData,
     ops::Index,
     ptr::NonNull,

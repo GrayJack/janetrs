@@ -2,7 +2,7 @@
 use core::{
     cmp::Ordering,
     fmt::{self, Debug},
-    iter::{FromIterator, FusedIterator},
+    iter::FusedIterator,
     marker::PhantomData,
     ops::Index,
     slice::{Chunks, ChunksExact, RChunks, RChunksExact, Windows},
@@ -1098,8 +1098,8 @@ impl From<&JanetArray<'_>> for JanetTuple<'_> {
 }
 
 impl<'data> IntoIterator for JanetTuple<'data> {
-    type Item = Janet;
     type IntoIter = IntoIter<'data>;
+    type Item = Janet;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1113,8 +1113,8 @@ impl<'data> IntoIterator for JanetTuple<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
-    type Item = &'a Janet;
     type IntoIter = Iter<'a, 'data>;
+    type Item = &'a Janet;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {

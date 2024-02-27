@@ -1,6 +1,7 @@
 //! Module for the Janet environment structure and methods.
 use core::ptr;
 
+#[cfg(not(feature = "std"))]
 use alloc::{format, string::String};
 
 use crate::{

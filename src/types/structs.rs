@@ -2,7 +2,7 @@
 use core::{
     cmp::Ordering,
     fmt::{self, Debug},
-    iter::{FromIterator, FusedIterator},
+    iter::FusedIterator,
     marker::PhantomData,
     ops::Index,
 };
@@ -594,8 +594,8 @@ impl<T: Into<Janet>> Index<T> for JanetStruct<'_> {
 }
 
 impl<'data> IntoIterator for JanetStruct<'data> {
-    type Item = (Janet, Janet);
     type IntoIter = IntoIter<'data>;
+    type Item = (Janet, Janet);
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -608,8 +608,8 @@ impl<'data> IntoIterator for JanetStruct<'data> {
 }
 
 impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
-    type Item = (&'a Janet, &'a Janet);
     type IntoIter = Iter<'a, 'data>;
+    type Item = (&'a Janet, &'a Janet);
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -825,7 +825,7 @@ impl FusedIterator for IntoIter<'_> {}
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, structs, Janet};
+    use crate::{client::JanetClient, structs};
 
     #[test]
     fn creation_and_get() -> Result<(), crate::client::Error> {

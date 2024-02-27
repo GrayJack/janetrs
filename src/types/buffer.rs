@@ -9,7 +9,10 @@ use core::{
     str::FromStr,
 };
 
-use alloc::{borrow::Cow, string::String, vec::Vec};
+use alloc::borrow::Cow;
+
+#[cfg(not(feature = "std"))]
+use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "std")]
 use std::{ffi::OsStr, path::Path};
@@ -3051,7 +3054,7 @@ impl JanetExtend<&CStr> for JanetBuffer<'_> {
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{client::JanetClient, JanetString};
+    use crate::client::JanetClient;
 
     #[test]
     fn creation() -> Result<(), crate::client::Error> {

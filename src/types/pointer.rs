@@ -23,7 +23,7 @@ impl JanetPointer {
     #[inline]
     pub const fn new(ptr: *mut c_void) -> Self {
         Self {
-            inner:  ptr,
+            inner:   ptr,
             phantom: PhantomData,
         }
     }

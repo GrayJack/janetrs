@@ -472,7 +472,6 @@ impl core::ops::BitOrAssign<i32> for FileFlags {
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
     use super::*;
-    use crate::{Janet, JanetAbstract};
 
     fn make_tmp() -> Janet {
         unsafe {

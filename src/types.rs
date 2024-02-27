@@ -9,6 +9,7 @@ use core::{
     fmt::{self, Display, Write},
 };
 
+#[cfg(not(feature = "std"))]
 use alloc::{
     string::{String, ToString},
     vec::Vec,

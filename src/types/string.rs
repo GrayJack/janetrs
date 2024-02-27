@@ -2,13 +2,15 @@
 use core::{
     convert::Infallible,
     fmt::{self, Debug, Display},
-    iter::FromIterator,
     marker::PhantomData,
     ops::Index,
     str::FromStr,
 };
 
-use alloc::{borrow::Cow, string::String};
+use alloc::borrow::Cow;
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 #[cfg(feature = "std")]
 use std::{ffi::OsStr, path::Path};

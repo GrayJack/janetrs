@@ -104,8 +104,6 @@ impl RngCore for JanetRng {
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
-    use crate::JanetAbstract;
-
     use super::*;
 
     #[test]
