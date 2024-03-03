@@ -615,6 +615,9 @@ impl<'data> JanetTuple<'data> {
     /// # Panics
     ///
     /// Panics if `size` is 0.
+    #[cfg_attr(
+        any(feature = "amalgation", feature = "link-system"),
+        doc = r##"
     ///
     /// # Examples
     ///
@@ -640,6 +643,8 @@ impl<'data> JanetTuple<'data> {
     /// let mut iter = arr.windows(4);
     /// assert!(iter.next().is_none());
     /// ```
+    "##
+    )]
     #[inline]
     pub fn windows(&self, size: usize) -> Windows<'_, Janet> {
         self.as_ref().windows(size)
