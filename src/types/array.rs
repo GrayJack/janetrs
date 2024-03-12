@@ -2298,7 +2298,15 @@ impl AsRef<[Janet]> for JanetArray<'_> {
     fn as_ref(&self) -> &[Janet] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX
-        unsafe { core::slice::from_raw_parts((*self.raw).data as *mut Janet, self.len() as usize) }
+        // SAFETY 2: Checks for empty array, if it is, returns an empty slice and avoid trying to
+        // access null data
+        if self.is_empty() {
+            &[]
+        } else {
+            unsafe {
+                core::slice::from_raw_parts((*self.raw).data as *const Janet, self.len() as usize)
+            }
+        }
     }
 }
 
@@ -2307,8 +2315,14 @@ impl AsMut<[Janet]> for JanetArray<'_> {
     fn as_mut(&mut self) -> &mut [Janet] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX and we have exclusive access to the data
-        unsafe {
-            core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len() as usize)
+        // SAFETY 2: Checks for empty array, if it is, returns an empty slice and avoid trying to
+        // access null data
+        if self.is_empty() {
+            &mut []
+        } else {
+            unsafe {
+                core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len() as usize)
+            }
         }
     }
 }
@@ -2662,6 +2676,16 @@ mod tests {
     use super::*;
     use crate::{array, client::JanetClient};
     use alloc::vec;
+
+    #[test]
+    fn empty_as_ref_as_mut() -> Result<(), crate::client::Error> {
+        let _client = crate::client::JanetClient::init()?;
+
+        let mut v = array![];
+        assert!(v.as_ref().is_empty());
+        assert!(v.as_mut().is_empty());
+        Ok(())
+    }
 
     #[test]
     fn creation() -> Result<(), crate::client::Error> {
