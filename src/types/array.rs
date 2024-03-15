@@ -74,6 +74,29 @@ impl<'data> JanetArray<'data> {
         }
     }
 
+    /// Creates a empty [`JanetArray`] that uses weak references.
+    ///
+    /// It is initially created with capacity 0, so it will not allocate until it is
+    /// first pushed into. There is an allocation related to the space for be object in
+    /// the GC memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = JanetArray::weak();
+    /// ```
+    #[inline]
+    #[crate::cjvg("1.32.0")]
+    #[must_use = "function is a constructor associated function"]
+    pub fn weak() -> Self {
+        Self {
+            raw:     unsafe { evil_janet::janet_array_weak(0) },
+            phantom: PhantomData,
+        }
+    }
+
     /// Create a empty [`JanetArray`] given to Janet the specified `capacity`.
     ///
     /// When `capacity` is lesser than zero, it's the same as calling with `capacity`
@@ -89,6 +112,29 @@ impl<'data> JanetArray<'data> {
     #[inline]
     #[must_use = "function is a constructor associated function"]
     pub fn with_capacity(capacity: i32) -> Self {
+        Self {
+            raw:     unsafe { evil_janet::janet_array(capacity) },
+            phantom: PhantomData,
+        }
+    }
+
+    /// Create a empty [`JanetArray`] with weak references given to Janet the specified
+    /// `capacity`.
+    ///
+    /// When `capacity` is lesser than zero, it's the same as calling with `capacity`
+    /// equals to zero.
+    ///
+    /// # Examples
+    /// ```
+    /// use janetrs::JanetArray;
+    /// # let _client = janetrs::client::JanetClient::init().unwrap();
+    ///
+    /// let arr = JanetArray::weak_with_capacity(20);
+    /// ```
+    #[inline]
+    #[crate::cjvg("1.32.0")]
+    #[must_use = "function is a constructor associated function"]
+    pub fn weak_with_capacity(capacity: i32) -> Self {
         Self {
             raw:     unsafe { evil_janet::janet_array(capacity) },
             phantom: PhantomData,
