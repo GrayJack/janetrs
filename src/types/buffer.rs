@@ -334,6 +334,13 @@ impl JanetBuffer<'_> {
         unsafe { evil_janet::janet_buffer_push_u64(self.raw, elem) }
     }
 
+    /// Append the given [`JanetString`] onto the end of the buffer
+    #[inline]
+    #[crate::cjvg("1.9.1")]
+    pub fn push_janet_string(&mut self, string: &JanetString) {
+        unsafe { evil_janet::janet_buffer_push_string(self.raw, string.raw) }
+    }
+
     /// Append the given c-string slice onto the end of the buffer.
     #[inline]
     pub fn push_cstr(&mut self, cstr: &CStr) {
