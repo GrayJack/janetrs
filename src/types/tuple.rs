@@ -143,12 +143,14 @@ impl<'data> JanetTuple<'data> {
 
     /// Returns the sourcemap metadata attached to `JanetTuple`, which is a Rust tuple
     /// (line, column).
+    #[crate::cjvg("1.9.0")]
     pub fn sourcemap(&self) -> (i32, i32) {
         let head = self.head();
         (head.sm_line, head.sm_column)
     }
 
     /// Set the sourcemap metadata on the `JanetTuple`.
+    #[crate::cjvg("1.9.0")]
     pub fn set_sourcemap(&mut self, line: i32, column: i32) {
         let head = self.head_mut();
         head.sm_line = line;
