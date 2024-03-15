@@ -54,8 +54,9 @@ pub struct JanetArray<'data> {
 impl<'data> JanetArray<'data> {
     /// Creates a empty [`JanetArray`].
     ///
-    /// It is initially created with capacity 0, so it will not allocate until it is
-    /// first pushed into.
+    /// It is initially created with capacity 0, so it will not allocate data space until
+    /// it is first pushed into. There is an allocation related to the space for be
+    /// object in the GC memory.
     ///
     /// # Examples
     /// ```
