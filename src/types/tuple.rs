@@ -131,8 +131,28 @@ impl<'data> JanetTuple<'data> {
 
     // Get the [`JanetTupleHead`] from the `JanetStruct` pointer.
     fn head(&self) -> &JanetTupleHead {
-        // SAFETY: Janet tuple are always be a valid pointer
+        // SAFETY: Janet tuple are always a valid pointer
         unsafe { &*janet_tuple_head(self.raw) }
+    }
+
+    // Get the [`JanetTupleHead`] from the `JanetStruct` pointer.
+    fn head_mut(&mut self) -> &mut JanetTupleHead {
+        // SAFETY: Janet tuple are always a valid pointer
+        unsafe { &mut *janet_tuple_head(self.raw) }
+    }
+
+    /// Returns the sourcemap metadata attached to `JanetTuple`, which is a Rust tuple
+    /// (line, column).
+    pub fn sourcemap(&self) -> (i32, i32) {
+        let head = self.head();
+        (head.sm_line, head.sm_column)
+    }
+
+    /// Set the sourcemap metadata on the `JanetTuple`.
+    pub fn set_sourcemap(&mut self, line: i32, column: i32) {
+        let head = self.head_mut();
+        head.sm_line = line;
+        head.sm_column = column;
     }
 
     /// Returns a reference to an element in the tuple.
