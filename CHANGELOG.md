@@ -2,14 +2,17 @@
 
 All notable changes to the library should be put here
 
-## Unreleased
+## 0.7.0
 
 - **BREAKING:** Refactor: Rename `JanetArgs::get_unwraped` to `JanetArgs::get_unwrapped`
 - **BREAKING:** Refactor: Rename `FileFlags::is_serializeble` to `FileFlags::is_serializable`
-- feat: Add `JanetAbstract::take` method
-- feat: Add `JanetAbstract::into_inner` method
+- Feat: Add `JanetAbstract::take` method
+- Feat: Add `JanetAbstract::into_inner` method
+- Feat: Add `JanetTuple::{sourcemap, set_sourcemap}` methods
 - Refactor: Simplify `JanetAbstract::new`
+- Fix: Fix undefined behavior in `JanetArray::as_{ref,mut}` methods
 - Fix: Fix clippy lints
+- docs: Update a few documentation comments
 
 ## 0.6.0
 
