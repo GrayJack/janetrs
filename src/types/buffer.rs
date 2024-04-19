@@ -2392,7 +2392,7 @@ impl JanetBuffer<'_> {
     /// [`to_str_lossy`]: #method.to_str_lossy
     #[inline]
     pub fn utf8_chunks(&self) -> Utf8Chunks {
-        self.as_bytes().utf8_chunks()
+        ByteSlice::utf8_chunks(self.as_bytes())
     }
 
     /// Creates an iterator over the words in this buffer along with
