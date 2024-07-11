@@ -32,7 +32,7 @@ error: repeated argument kind: There must be only one argument of each kind, tha
   --> tests/08-wrong-args:30:12
    |
 30 | #[janet_fn(check_mut_ref, check_mut_ref)]
-   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |            ^^^^^^^^^^^^^
 
 error: expected a maximum of two arguments to the janet_fn proc-macro
   --> tests/08-wrong-args:35:42
