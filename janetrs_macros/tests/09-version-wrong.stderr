@@ -31,7 +31,7 @@ error: invalid string literal: invalid digit found in string
    |                      ^^^^^
 
 error: expected at max two arguments to the janet_version proc-macro
-  --> tests/09-version-wrong:28:17
+  --> tests/09-version-wrong:28:27
    |
 28 | #[janet_version("1", "2", "3")]
-   |                 ^^^^^^^^^^^^^
+   |                           ^^^
