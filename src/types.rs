@@ -109,7 +109,7 @@ impl JanetConversionError {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl error::Error for JanetConversionError {}
 
 impl Display for JanetConversionError {
@@ -760,7 +760,7 @@ impl Display for Janet {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl error::Error for Janet {}
 
 impl PartialEq<&Self> for Janet {
@@ -1724,7 +1724,7 @@ macro_rules! string_impl_partial_eq {
     };
     (#[cfg($attr:meta)]; $lhs:ty, $rhs:ty) => {
         #[cfg($attr)]
-        #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[cfg_attr(docsrs, doc(cfg($attr)))]
         #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialEq<$rhs> for $lhs {
             #[inline]
@@ -1735,7 +1735,7 @@ macro_rules! string_impl_partial_eq {
         }
 
         #[cfg($attr)]
-        #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[cfg_attr(docsrs, doc(cfg($attr)))]
         #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialEq<$lhs> for $rhs {
             #[inline]
@@ -1774,7 +1774,7 @@ macro_rules! string_impl_partial_ord {
     };
     (#[cfg($attr:meta)]; $lhs:ty, $rhs:ty) => {
         #[cfg($attr)]
-        #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[cfg_attr(docsrs, doc(cfg($attr)))]
         #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialOrd<$rhs> for $lhs {
             #[inline]
@@ -1785,7 +1785,7 @@ macro_rules! string_impl_partial_ord {
         }
 
         #[cfg($attr)]
-        #[cfg_attr(_doc, doc(cfg($attr)))]
+        #[cfg_attr(docsrs, doc(cfg($attr)))]
         #[allow(clippy::extra_unused_lifetimes)]
         impl<'a, 'b> PartialOrd<$lhs> for $rhs {
             #[inline]

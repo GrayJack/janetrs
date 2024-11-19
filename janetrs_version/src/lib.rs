@@ -147,8 +147,7 @@ impl PartialEq<&str> for JanetVersion {
                 .map(|s| s.parse::<u32>())
                 .take(3)
                 .zip([self.major, self.minor, self.patch].iter())
-                .map(|(o, s)| o.unwrap_or(u32::MAX).eq(s))
-                .all(core::convert::identity)
+                .all(|(o, s)| o.unwrap_or(u32::MAX).eq(s))
         }
     }
 }

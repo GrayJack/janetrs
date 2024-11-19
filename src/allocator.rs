@@ -19,7 +19,6 @@ use core::alloc::{AllocError, Allocator};
     target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "sparc",
-    target_arch = "asmjs",
     target_arch = "wasm32",
     target_arch = "hexagon",
     target_arch = "riscv32"
@@ -155,7 +154,7 @@ impl Scratch {
 }
 
 #[cfg(feature = "nightly")]
-#[cfg_attr(_doc, doc(cfg(feature = "nightly")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "nightly")))]
 unsafe impl Allocator for Scratch {
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         self.malloc(layout).ok_or(AllocError)

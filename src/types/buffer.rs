@@ -529,7 +529,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(&b"foo\xFFbar\xE2\x98baz"[..], s.to_lowercase().as_bytes());
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     #[must_use = "this returns the lowercase string as a new JanetBuffer, without modifying the \
                   original"]
@@ -595,7 +595,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(&b"foo\xFFbar\xE2\x98baz"[..], buf.as_bytes());
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn to_lowercase_into(&self, buf: &mut Self) {
         // based on bstr version of the same function
@@ -745,7 +745,7 @@ impl JanetBuffer<'_> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     #[must_use = "this returns the uppercase string as a new JanetBuffer, without modifying the \
                   original"]
@@ -811,7 +811,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(buf.as_bytes(), &b"FOO\xFFBAR\xE2\x98BAZ"[..]);
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn to_uppercase_into(&self, buf: &mut Self) {
         // based on bstr version of the same function
@@ -929,7 +929,7 @@ impl JanetBuffer<'_> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
                   original"]
@@ -957,7 +957,7 @@ impl JanetBuffer<'_> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
                   original"]
@@ -985,7 +985,7 @@ impl JanetBuffer<'_> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     #[must_use = "this returns a trimmed string as a new JanetBuffer, without modifying the \
                   original"]
@@ -1151,7 +1151,7 @@ impl JanetBuffer<'_> {
     /// an arbitrary sequence of 8-bit integers to an arbitrary sequence of
     /// 16-bit integers.)
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[inline]
     pub fn to_os_str(&self) -> Result<&OsStr, Utf8Error> {
         self.as_bytes().to_os_str()
@@ -1167,7 +1167,7 @@ impl JanetBuffer<'_> {
     /// non-Unix systems such as Windows, where file paths are an arbitrary
     /// sequence of 16-bit integers.
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn to_os_str_lossy(&self) -> Cow<OsStr> {
@@ -1183,7 +1183,7 @@ impl JanetBuffer<'_> {
     /// an arbitrary sequence of 8-bit integers to an arbitrary sequence of
     /// 16-bit integers.)
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[inline]
     pub fn to_path(&self) -> Result<&Path, Utf8Error> {
         self.as_bytes().to_path()
@@ -1199,7 +1199,7 @@ impl JanetBuffer<'_> {
     /// non-Unix systems such as Windows, where file paths are an arbitrary
     /// sequence of 16-bit integers.
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn to_path_lossy(&self) -> Cow<Path> {
@@ -1704,7 +1704,7 @@ impl JanetBuffer<'_> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn fields(&self) -> Fields {
         self.as_bytes().fields()
@@ -1795,7 +1795,7 @@ impl JanetBuffer<'_> {
     /// ]);
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn grapheme_indices(&self) -> GraphemeIndices {
         self.as_bytes().grapheme_indices()
@@ -1830,7 +1830,7 @@ impl JanetBuffer<'_> {
     /// assert_eq!(vec!["🇺🇸", "à̖"], graphemes);
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn graphemes(&self) -> Graphemes {
         self.as_bytes().graphemes()
@@ -1948,7 +1948,7 @@ impl JanetBuffer<'_> {
     /// ]);
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn sentence_indices(&self) -> SentenceIndices {
         self.as_bytes().sentence_indices()
@@ -1981,7 +1981,7 @@ impl JanetBuffer<'_> {
     /// );
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn sentences(&self) -> Sentences {
         self.as_bytes().sentences()
@@ -2441,7 +2441,7 @@ impl JanetBuffer<'_> {
     ///
     /// [`words_with_break_indices`]: #method.words_with_break_indices
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn word_indices(&self) -> WordIndices {
         self.as_bytes().word_indices()
@@ -2477,7 +2477,7 @@ impl JanetBuffer<'_> {
     /// ```
     /// [`words_with_breaks`]: #method.words_with_breaks
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn words(&self) -> Words {
         self.as_bytes().words()
@@ -2515,7 +2515,7 @@ impl JanetBuffer<'_> {
     /// ]);
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn words_with_break_indices(&self) -> WordsWithBreakIndices {
         self.as_bytes().words_with_break_indices()
@@ -2546,7 +2546,7 @@ impl JanetBuffer<'_> {
     /// ]);
     /// ```
     #[cfg(feature = "unicode")]
-    #[cfg_attr(_doc, doc(cfg(feature = "unicode")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
     pub fn words_with_breaks(&self) -> WordsWithBreaks {
         self.as_bytes().words_with_breaks()

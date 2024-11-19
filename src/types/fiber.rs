@@ -56,9 +56,8 @@ impl<'data> JanetFiber<'data> {
     pub fn with_env(
         env: JanetTable, capacity: i32, f: &mut JanetFunction, args: impl AsRef<[Janet]>,
     ) -> Option<Self> {
-        Self::new(capacity, f, args).map(|f| {
+        Self::new(capacity, f, args).inspect(|f| {
             unsafe { (*f.raw).env = env.raw };
-            f
         })
     }
 
@@ -143,7 +142,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, JanetFiber, JanetFunction};
+    /// use janetrs::{JanetFiber, JanetFunction, client::JanetClient};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let _client = JanetClient::init_with_default_env()?;
     ///
@@ -176,7 +175,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, Janet, JanetFiber, JanetFunction};
+    /// use janetrs::{Janet, JanetFiber, JanetFunction, client::JanetClient};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let _client = JanetClient::init_with_default_env()?;
     ///
@@ -211,7 +210,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, Janet, JanetFiber, JanetFunction};
+    /// use janetrs::{Janet, JanetFiber, JanetFunction, client::JanetClient};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let _client = JanetClient::init_with_default_env()?;
     ///
@@ -283,7 +282,7 @@ pub struct Exec<'a, 'data> {
     input: Janet,
 }
 
-impl<'a, 'data> Iterator for Exec<'a, 'data> {
+impl Iterator for Exec<'_, '_> {
     type Item = Janet;
 
     #[inline]

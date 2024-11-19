@@ -11,7 +11,7 @@ macro_rules! count {
 /// expressions. There are 2 forms of this macro:
 ///  * Create a [`JanetTuple`] containing a given list of elements
 /// ```
-/// use janetrs::{tuple, Janet};
+/// use janetrs::{Janet, tuple};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let t = tuple![3, true, "hey"];
@@ -60,7 +60,7 @@ macro_rules! tuple {
 /// expressions. There are 2 forms of this macro:
 ///  * Create a [`JanetArray`] containing a given list of elements
 /// ```
-/// use janetrs::{array, Janet};
+/// use janetrs::{Janet, array};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let arr = array![3, true, "hey"];
@@ -115,7 +115,7 @@ macro_rules! array {
 /// pairs as the items of the struct.
 ///
 /// ```
-/// use janetrs::{structs, Janet};
+/// use janetrs::{Janet, structs};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let st = structs! {
@@ -151,7 +151,7 @@ macro_rules! structs {
 /// pairs as the items of the struct.
 ///
 /// ```
-/// use janetrs::{table, Janet};
+/// use janetrs::{Janet, table};
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let table = table! {
@@ -302,7 +302,7 @@ macro_rules! jpanic {
 /// # Examples
 ///
 /// ```
-/// use janetrs::{bad_slot, janet_fn, Janet, TaggedJanet};
+/// use janetrs::{Janet, TaggedJanet, bad_slot, janet_fn};
 ///
 /// #[janet_fn(arity(fix(1)))]
 /// fn hi(args: &mut [Janet]) -> Janet {
@@ -385,7 +385,7 @@ macro_rules! jcatch {
 ///
 /// [`catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
 #[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 #[macro_export]
 macro_rules! jtry {
     ($e:expr) => {{

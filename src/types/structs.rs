@@ -339,7 +339,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{structs, Janet};
+    /// use janetrs::{Janet, structs};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = structs! {10 => "ten"};
@@ -356,7 +356,7 @@ impl<'data> JanetStruct<'data> {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{structs, Janet};
+    /// use janetrs::{Janet, structs};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let st = structs! {10 => "ten"};
@@ -662,7 +662,7 @@ impl Debug for Iter<'_, '_> {
     }
 }
 
-impl<'a, 'data> Iterator for Iter<'a, 'data> {
+impl<'a> Iterator for Iter<'a, '_> {
     type Item = (&'a Janet, &'a Janet);
 
     #[inline]

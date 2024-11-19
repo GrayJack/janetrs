@@ -21,7 +21,7 @@ pub struct JanetFile {
 impl JanetFile {
     /// Open an anonymous temporary file that is removed on close.
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     pub fn temp() -> io::Result<Self> {
         let file = unsafe { libc::tmpfile() as *mut evil_janet::FILE };
 
@@ -70,7 +70,7 @@ impl JanetFile {
     }
 
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     fn last_error(&self) -> Option<io::Error> {
         let errno = unsafe { libc::ferror(self.raw.file as _) };
 
@@ -86,7 +86,7 @@ impl JanetFile {
     }
 
     #[cfg(feature = "std")]
-    #[cfg_attr(_doc, doc(cfg(feature = "std")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     fn position(&self) -> io::Result<u64> {
         let offset = unsafe { libc::ftell(self.raw.file as _) };
 
@@ -151,7 +151,7 @@ impl fmt::Write for JanetFile {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl Read for JanetFile {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         if buf.is_empty() {
@@ -176,7 +176,7 @@ impl Read for JanetFile {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl Write for JanetFile {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         if buf.is_empty() {
@@ -211,7 +211,7 @@ impl Write for JanetFile {
 }
 
 #[cfg(feature = "std")]
-#[cfg_attr(_doc, doc(cfg(feature = "std")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl Seek for JanetFile {
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         // SAFETY: We check for the errors after the call
@@ -237,7 +237,7 @@ impl Seek for JanetFile {
 }
 
 #[cfg(all(unix, feature = "std"))]
-#[cfg_attr(_doc, doc(cfg(all(unix, feature = "std"))))]
+#[cfg_attr(docsrs, doc(cfg(all(unix, feature = "std"))))]
 impl AsRawFd for JanetFile {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -246,7 +246,7 @@ impl AsRawFd for JanetFile {
 }
 
 #[cfg(all(unix, feature = "std"))]
-#[cfg_attr(_doc, doc(cfg(all(unix, feature = "std"))))]
+#[cfg_attr(docsrs, doc(cfg(all(unix, feature = "std"))))]
 impl IntoRawFd for JanetFile {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -255,7 +255,7 @@ impl IntoRawFd for JanetFile {
 }
 
 #[cfg(all(windows, feature = "std"))]
-#[cfg_attr(_doc, doc(cfg(all(windows, feature = "std"))))]
+#[cfg_attr(docsrs, doc(cfg(all(windows, feature = "std"))))]
 impl AsRawHandle for JanetFile {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
@@ -268,7 +268,7 @@ impl AsRawHandle for JanetFile {
 }
 
 #[cfg(all(windows, feature = "std"))]
-#[cfg_attr(_doc, doc(cfg(all(windows, feature = "std"))))]
+#[cfg_attr(docsrs, doc(cfg(all(windows, feature = "std"))))]
 impl IntoRawHandle for JanetFile {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {

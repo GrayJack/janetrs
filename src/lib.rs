@@ -15,7 +15,7 @@
 //! ## Cargo Features
 //!
 //! - `std`: Enable some trait impl for types that only exist on the `std` and the Error
-//! trait
+//!   trait
 //! - `unicode`: Enable more methods for JanetString and JanetBuffer
 //! - `inline-more`: More aggressive inlining
 //! - `amalgation`: Link the Janet runtime to the package, enabling to use the client
@@ -56,7 +56,7 @@
 //!  - Marshalling mechanism
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
-#![cfg_attr(_doc, feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 // Cause compilation error when both amalgation and system is set
 #[cfg(all(feature = "amalgation", feature = "link-system"))]
@@ -77,7 +77,7 @@ pub mod lowlevel {
 
 pub mod allocator;
 #[cfg(any(feature = "amalgation", feature = "link-system"))]
-#[cfg_attr(_doc, doc(cfg(any(feature = "amalgation", feature = "link-system"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "amalgation", feature = "link-system"))))]
 pub mod client;
 pub mod env;
 mod gc;
