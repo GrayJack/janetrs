@@ -52,7 +52,7 @@ std = ["bstr/std", "janetrs_macros/std", "libc/std"]
 # Use to statically link to janet runtime and have Janet client
 amalgation = ["evil-janet/link-amalg"]
 # Inline more functions
-inline-more = []
+inline-more = ["janetrs_version/inline-more"]
 # Unicode conveniences
 unicode = ["bstr/unicode"]
 # Use system janet.h

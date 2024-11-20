@@ -20,3 +20,4 @@ evil-janet = "1"
 [features]
 default = []
 system = ["evil-janet/system"]
+inline-more = []
