@@ -8,7 +8,7 @@ use core::{
     slice::{Chunks, ChunksExact, RChunks, RChunksExact, Windows},
 };
 
-use evil_janet::{janet_tuple_head, Janet as CJanet, JanetTupleHead};
+use evil_janet::{Janet as CJanet, JanetTupleHead, janet_tuple_head};
 
 use super::{Janet, JanetArray};
 
@@ -253,7 +253,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30];
@@ -278,7 +278,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let x = tuple![0, 1, 2];
@@ -303,7 +303,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30];
@@ -328,7 +328,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{array, Janet};
+    /// use janetrs::{Janet, array};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let x = array![0, 1, 2];
@@ -361,7 +361,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![1, 2, 3, 4, 5, 6];
@@ -407,7 +407,7 @@ impl<'data> JanetTuple<'data> {
     /// Basic usage:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// assert_eq!(
@@ -419,7 +419,7 @@ impl<'data> JanetTuple<'data> {
     /// A panic upon overflow:
     ///
     /// ```should_panic
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// // this will panic at runtime
@@ -436,7 +436,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30];
@@ -449,7 +449,7 @@ impl<'data> JanetTuple<'data> {
     /// Always returns `true` if `needle` is an empty slice:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30];
@@ -468,7 +468,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30];
@@ -481,7 +481,7 @@ impl<'data> JanetTuple<'data> {
     /// Always returns `true` if `needle` is an empty slice:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30];
@@ -510,7 +510,7 @@ impl<'data> JanetTuple<'data> {
     /// found; the fourth could match any position in `[1, 4]`.
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -529,7 +529,7 @@ impl<'data> JanetTuple<'data> {
     /// sort order:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, JanetArray};
+    /// use janetrs::{Janet, JanetArray, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let mut s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -567,7 +567,7 @@ impl<'data> JanetTuple<'data> {
     /// found; the fourth could match any position in `[1, 4]`.
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let s = tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -610,7 +610,7 @@ impl<'data> JanetTuple<'data> {
     /// TODO: Find a good example
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     /// ```
     #[inline]
@@ -643,7 +643,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple!['r', 'u', 's', 't'];
@@ -657,7 +657,7 @@ impl<'data> JanetTuple<'data> {
     /// If the tuple is shorter than `size`:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple!['f', 'o', 'o'];
@@ -686,7 +686,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
@@ -725,7 +725,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
@@ -760,7 +760,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
@@ -799,7 +799,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet};
+    /// use janetrs::{Janet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple!['l', 'o', 'r', 'e', 'm'];
@@ -824,7 +824,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple![10, 40, 33, 20];
@@ -844,7 +844,7 @@ impl<'data> JanetTuple<'data> {
     /// iterator:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple![10, 40, 33];
@@ -862,7 +862,7 @@ impl<'data> JanetTuple<'data> {
     /// present between them:
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple![10, 6, 33, 20];
@@ -891,7 +891,7 @@ impl<'data> JanetTuple<'data> {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let arr = tuple![11, 22, 33, 0, 44, 55];
@@ -909,7 +909,7 @@ impl<'data> JanetTuple<'data> {
     /// slice will be the first (or last) item returned by the iterator.
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![0, 1, 1, 2, 3, 5, 8];
@@ -944,7 +944,7 @@ impl<'data> JanetTuple<'data> {
     /// `[20, 60, 50]`):
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30, 20, 60, 50];
@@ -978,7 +978,7 @@ impl<'data> JanetTuple<'data> {
     /// by 3 (i.e., `[50]`, `[10, 40, 30, 20]`):
     ///
     /// ```
-    /// use janetrs::{tuple, Janet, TaggedJanet};
+    /// use janetrs::{Janet, TaggedJanet, tuple};
     /// # let _client = janetrs::client::JanetClient::init().unwrap();
     ///
     /// let v = tuple![10, 40, 30, 20, 60, 50];

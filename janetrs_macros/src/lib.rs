@@ -1,13 +1,13 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{ToTokens, quote, quote_spanned};
 use syn::{parse_macro_input, spanned::Spanned};
 
 use janetrs_version::JanetVersion;
 
 mod utils;
-use utils::{janet_path_checker, Arg, Args, ArityArgs, JanetVersionArgs};
+use utils::{Arg, Args, ArityArgs, JanetVersionArgs, janet_path_checker};
 
 use crate::utils::ModArgs;
 

@@ -14,9 +14,9 @@ use std::{
     io::{self, Write},
 };
 
-use evil_janet::{janet_pcall, JanetFunction as CJanetFunction};
+use evil_janet::{JanetFunction as CJanetFunction, janet_pcall};
 
-use crate::{cjvg, Janet, JanetFiber, JanetSignal};
+use crate::{Janet, JanetFiber, JanetSignal, cjvg};
 
 #[cjvg("1.12.2")]
 pub use trystate::JanetTryState;

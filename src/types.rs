@@ -6,7 +6,7 @@
 //!  - `'data` is the lifetime of data that is owned by the Janet GC.
 use core::{
     cmp::Ordering,
-    ffi::{c_char, CStr},
+    ffi::{CStr, c_char},
     fmt::{self, Display, Write},
 };
 
@@ -1956,7 +1956,7 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{janet_fn, Janet, JanetArgs};
+    /// use janetrs::{Janet, JanetArgs, janet_fn};
     ///
     /// // Lets say it's a function that if receives an argument, if is not the wanted type, it
     /// // defaults to the given value.
@@ -1981,7 +1981,7 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{janet_fn, Janet, JanetArgs};
+    /// use janetrs::{Janet, JanetArgs, janet_fn};
     ///
     /// // Lets say it's a function that if receives an argument, if is not the wanted type, it
     /// // defaults to the given value.
@@ -2008,7 +2008,7 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{janet_fn, Janet, JanetArgs};
+    /// use janetrs::{Janet, JanetArgs, janet_fn};
     ///
     /// // Lets say it's a function that if receives an argument, if is not the wanted type, it
     /// // defaults to the given value.
@@ -2035,7 +2035,7 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{janet_fn, Janet, JanetArgs};
+    /// use janetrs::{Janet, JanetArgs, janet_fn};
     ///
     /// // Lets say it's a function that if receives an argument, if is not the wanted type, it
     /// // defaults to the given value.
@@ -2065,7 +2065,7 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{janet_fn, Janet, JanetArgs};
+    /// use janetrs::{Janet, JanetArgs, janet_fn};
     ///
     /// // Lets say it's a function that receives a second argument that change de behavior of
     /// // the function
@@ -2106,7 +2106,7 @@ pub trait JanetArgs {
     /// # Examples
     ///
     /// ```
-    /// use janetrs::{janet_fn, Janet, JanetArgs, JanetString};
+    /// use janetrs::{Janet, JanetArgs, JanetString, janet_fn};
     ///
     /// #[janet_fn(arity(fix(1)))]
     /// fn my_func(args: &mut [Janet]) -> Janet {

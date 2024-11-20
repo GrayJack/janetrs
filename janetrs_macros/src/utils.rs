@@ -1,6 +1,6 @@
 use proc_macro2::Span;
 use quote::ToTokens;
-use syn::{parse::Parse, punctuated::Punctuated, spanned::Spanned, LitStr, Token};
+use syn::{LitStr, Token, parse::Parse, punctuated::Punctuated, spanned::Spanned};
 
 /// Macro inspired by `anyhow::anyhow!` to create a compiler error with the given span.
 macro_rules! err_spanned {

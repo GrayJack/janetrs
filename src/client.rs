@@ -8,8 +8,8 @@ use core::{
 use std::{error::Error as StdError, thread_local};
 
 use crate::{
-    env::{CFunOptions, DefOptions, JanetEnvironment, VarOptions},
     Janet, JanetTable,
+    env::{CFunOptions, DefOptions, JanetEnvironment, VarOptions},
 };
 
 // There are platforms where AtomicBool doesn't exist
@@ -168,7 +168,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, env::DefOptions, Janet};
+    /// use janetrs::{Janet, client::JanetClient, env::DefOptions};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
@@ -197,7 +197,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, env::VarOptions, Janet};
+    /// use janetrs::{Janet, client::JanetClient, env::VarOptions};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
@@ -226,7 +226,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, env::CFunOptions, janet_fn, Janet, JanetType};
+    /// use janetrs::{Janet, JanetType, client::JanetClient, env::CFunOptions, janet_fn};
     ///
     /// #[janet_fn]
     /// fn test(_args: &mut [Janet]) -> Janet {
@@ -263,7 +263,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, Janet};
+    /// use janetrs::{Janet, client::JanetClient};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = JanetClient::init_with_default_env()?;
     ///
@@ -314,7 +314,7 @@ impl JanetClient {
     ///
     /// # Examples
     /// ```
-    /// use janetrs::{client::JanetClient, Janet};
+    /// use janetrs::{Janet, client::JanetClient};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = JanetClient::init_with_default_env()?;
     ///

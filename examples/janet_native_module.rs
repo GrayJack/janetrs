@@ -1,7 +1,7 @@
 //! For a more complete example to create a Janet package with jpm, check out [this
 //! template repository](https://github.com/GrayJack/rust-janet-module-template)
 
-use janetrs::{declare_janet_mod, janet_fn, Janet, JanetArgs, JanetTuple, TaggedJanet};
+use janetrs::{Janet, JanetArgs, JanetTuple, TaggedJanet, declare_janet_mod, janet_fn};
 
 /// (template/hello)
 ///

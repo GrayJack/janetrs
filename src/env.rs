@@ -5,8 +5,8 @@ use core::{ffi::CStr, ptr};
 use alloc::{format, string::String};
 
 use crate::{
-    function::JanetRawCFunction, Janet, JanetBuffer, JanetKeyword, JanetString, JanetSymbol,
-    JanetTable,
+    Janet, JanetBuffer, JanetKeyword, JanetString, JanetSymbol, JanetTable,
+    function::JanetRawCFunction,
 };
 
 /// Representation of the Janet runtime environment, like global definitions, available
