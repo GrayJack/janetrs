@@ -669,7 +669,7 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn insert(&mut self, index: i32, element: impl Into<Janet>) {
-        if index < 0 || index > self.len() + 1 {
+        if index < 0 || index > self.len() {
             crate::jpanic!(
                 "insertion index (is {}) should be >= 0 and <= {})",
                 index,
@@ -3704,6 +3704,7 @@ mod tests {
         assert_eq!(array.len(), 4);
         assert_eq!(array[1], &Janet::integer(2));
         assert_eq!(array[2], &Janet::integer(3));
+        assert_eq!(array[3], &Janet::integer(4));
 
         array.insert(1, 10);
 
@@ -3711,6 +3712,8 @@ mod tests {
         assert_eq!(array[1], &Janet::integer(10));
         assert_eq!(array[2], &Janet::integer(2));
         assert_eq!(array[3], &Janet::integer(3));
+        assert_eq!(array[4], &Janet::integer(4));
+
         Ok(())
     }
 

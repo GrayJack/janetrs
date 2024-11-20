@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 #[doc(hidden)]
 #[macro_export]
 macro_rules! count {
@@ -478,6 +480,19 @@ macro_rules! assert_deep_ne {
         }
     }};
 }
+
+pub(crate) use array;
+pub(crate) use assert_deep_eq;
+pub(crate) use assert_deep_ne;
+pub(crate) use bad_slot;
+pub(crate) use count;
+pub(crate) use jcatch;
+pub(crate) use jpanic;
+#[cfg(feature = "std")]
+pub(crate) use jtry;
+pub(crate) use structs;
+pub(crate) use table;
+pub(crate) use tuple;
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
