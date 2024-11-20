@@ -32,7 +32,7 @@ jobs:
     - name: Build Documentation
       run: cargo doc --features amalgation,nightly -Zrustdoc-map
       env:
-        RUSTDOCFLAGS: --cfg _doc
+        RUSTDOCFLAGS: --cfg docsrs
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3
