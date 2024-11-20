@@ -8,6 +8,7 @@ All notable changes to the library should be put here
 - **Breaking** Refactor: Rename `JanetArgs::get_panic` to `JanetArgs::get_or_panic`
 - **Breaking** Refactor: Turn `JanetConversionError` into a enum
 - **Breaking** Refactor: Refactor `CFunOptions` to use `CStr` instead of `str`
+- **Breaking** Feat: Make `amalgation` feature enabled by default
 - Feat: Add `Janet::dynamic_from_cstr` constructor
 - Feat: Add `JanetArgs::get_value` and `JanetArgs::get_tagged` trait methods
 - Feat: Add `JanetArgs::get_or_default` trait method
@@ -26,11 +27,15 @@ All notable changes to the library should be put here
 - Feat: Add `assert_deep_ne!` macro
 - Feat: Add `env::set_dynamic` function
 - Feat: Implement `JanetArgs` for `[Janet; N]`
+- Feat: Add conversion from `Janet` to `isize` and `usize`
 - Perf: Avoid allocation in `Janet::dynamic` if the passed argument is already null terminated
 - Refactor: Use default implementation on `JanetArgs` trait for most methods
 - Refactor: Simplify `jpanic!` macro
 - Refactor: janetrs_macros 0.7.0 — Update `syn` crate to 2.0
 - Fix: janetrs_macros 0.7.1 — Fix `janet_fn` attribute macro not generating Janet docstring correctly
+- Fix: janetrs_version — Add missed feature flag `inline-more`
+- Fix: Fix conversion from `Janet` to 32 bit integers
+- Fix: Fix bounds checking for `JanetArray::insert`
 
 ## 0.7.0
 
