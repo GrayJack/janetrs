@@ -46,7 +46,7 @@ rand_core = "0.6"
 [dev-dependencies]
 
 [features]
-default = ["std", "unicode"]
+default = ["std", "unicode", "amalgation"]
 # To use Error trait and allocations
 std = ["bstr/std", "janetrs_macros/std", "libc/std"]
 # Use to statically link to janet runtime and have Janet client

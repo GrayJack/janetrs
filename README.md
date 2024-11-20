@@ -17,9 +17,6 @@ clients and Janet modules/libraries using Rust.
 This project still are in it's early stages, so breaking changes may happen,
 there is no minimal supported Rust version (MSRV) yet.
 
-Notice that most doc tests will fail if the feature "almagation" or
-"link-system" aren't set, because most of then need the Janet runtime to
-function properly.
 
 ## Cargo Features
 
@@ -35,6 +32,14 @@ function properly.
   to use the client module
 - `nightly`: Enable some parts of the crate that uses nightly features, to use
   this feature you must compile the crate using a nightly rust version
+
+By default, the following features are enabled: `std`, `unicode`, `amalgation`.
+
+**Note:** If you don't need the Janet runtime (eg. making a Janet Library), you can use disable the default features
+
+```toml
+janetrs = { version = "0.7.0", default-features = false, features = ["std", "unicode"] }
+```
 
 ## Environment variables
 
