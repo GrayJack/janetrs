@@ -160,6 +160,7 @@ impl<'data> JanetString<'data> {
     /// own risk.
     #[inline]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
+        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,
@@ -170,8 +171,8 @@ impl<'data> JanetString<'data> {
     ///
     /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
     #[inline]
-    pub fn builder(len: i32) -> JanetStringBuilder<'data> {
-        let len = if len < 0 { 0 } else { len };
+    pub fn builder(len: usize) -> JanetStringBuilder<'data> {
+        let len = i32::try_from(len).unwrap_or(i32::MAX);
 
         JanetStringBuilder {
             raw: unsafe { evil_janet::janet_string_begin(len) },
@@ -193,8 +194,8 @@ impl<'data> JanetString<'data> {
     /// assert_eq!(s.len(), 10);
     /// ```
     #[inline]
-    pub fn len(&self) -> i32 {
-        unsafe { (*evil_janet::janet_string_head(self.raw)).length }
+    pub fn len(&self) -> usize {
+        unsafe { (*evil_janet::janet_string_head(self.raw)).length as usize }
     }
 
     /// Returns `true` if this [`JanetString`] has a length of zero, and `false`
@@ -229,7 +230,7 @@ impl<'data> JanetString<'data> {
     /// ```
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+        unsafe { core::slice::from_raw_parts(self.raw, self.len()) }
     }
 
     /// Returns `true` if and only if this string contains the given `needle`.
@@ -2317,7 +2318,7 @@ impl Clone for JanetString<'_> {
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            raw:     unsafe { evil_janet::janet_string(self.raw, self.len()) },
+            raw:     unsafe { evil_janet::janet_string(self.raw, self.len() as i32) },
             phantom: PhantomData,
         }
     }
@@ -2456,11 +2457,7 @@ impl FromIterator<char> for JanetString<'_> {
     fn from_iter<T: IntoIterator<Item = char>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut s = Self::builder(len);
 
         for ch in iter {
@@ -2476,11 +2473,7 @@ impl<'a> FromIterator<&'a u8> for JanetString<'_> {
     fn from_iter<T: IntoIterator<Item = &'a u8>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut new = Self::builder(len);
 
         for &byte in iter {
@@ -2496,11 +2489,7 @@ impl<'a> FromIterator<&'a char> for JanetString<'_> {
     fn from_iter<T: IntoIterator<Item = &'a char>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut new = Self::builder(len);
 
         for &ch in iter {
@@ -2516,11 +2505,7 @@ impl<'a> FromIterator<&'a str> for JanetString<'_> {
     fn from_iter<T: IntoIterator<Item = &'a str>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut new = Self::builder(len);
 
         for s in iter {
@@ -2536,11 +2521,7 @@ impl FromIterator<String> for JanetString<'_> {
     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut new = Self::builder(len);
 
         for s in iter {

@@ -125,8 +125,12 @@ impl JanetBuffer<'_> {
     /// ```
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn with_capacity(capacity: i32) -> Self {
-        let capacity = if capacity < 4 { 4 } else { capacity };
+    pub fn with_capacity(capacity: usize) -> Self {
+        let capacity = if capacity < 4 {
+            4
+        } else {
+            i32::try_from(capacity).unwrap_or(i32::MAX)
+        };
         Self {
             raw:     unsafe { evil_janet::janet_buffer(capacity) },
             phantom: PhantomData,
@@ -140,6 +144,7 @@ impl JanetBuffer<'_> {
     /// own risk.
     #[inline]
     pub const unsafe fn from_raw(raw: *mut CJanetBuffer) -> Self {
+        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,
@@ -149,8 +154,8 @@ impl JanetBuffer<'_> {
     /// Returns the number of elements the buffer can hold without reallocating.
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn capacity(&self) -> i32 {
-        unsafe { (*self.raw).capacity }
+    pub fn capacity(&self) -> usize {
+        unsafe { (*self.raw).capacity as usize }
     }
 
     /// Returns the number of elements in the buffer, also referred to as its 'length'.
@@ -167,8 +172,8 @@ impl JanetBuffer<'_> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        unsafe { (*self.raw).count }
+    pub fn len(&self) -> usize {
+        unsafe { (*self.raw).count as usize }
     }
 
     /// Returns `true` if the buffer contains no elements.
@@ -202,7 +207,8 @@ impl JanetBuffer<'_> {
     ///
     /// Note that this method has no effect on the allocated capacity of the buffer.
     #[inline]
-    pub fn set_len(&mut self, new_len: i32) {
+    pub fn set_len(&mut self, new_len: usize) {
+        let new_len = i32::try_from(new_len).unwrap_or(i32::MAX);
         unsafe { evil_janet::janet_buffer_setcount(self.raw, new_len) };
     }
 
@@ -210,7 +216,8 @@ impl JanetBuffer<'_> {
     /// resize the backing memory to `capacity` * `growth` slots. In most cases, `growth`
     /// should be `1` or `2`.
     #[inline]
-    pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
+    pub fn ensure(&mut self, check_capacity: usize, growth: i32) {
+        let check_capacity = i32::try_from(check_capacity).unwrap_or(i32::MAX);
         unsafe { evil_janet::janet_buffer_ensure(self.raw, check_capacity, growth) };
     }
 
@@ -229,7 +236,8 @@ impl JanetBuffer<'_> {
     ///
     /// [`reserve_exact`]: #method.reserve_exact
     #[inline]
-    pub fn reserve(&mut self, additional: i32) {
+    pub fn reserve(&mut self, additional: usize) {
+        let additional = i32::try_from(additional).unwrap_or(i32::MAX);
         unsafe { evil_janet::janet_buffer_extra(self.raw, additional) };
     }
 
@@ -245,7 +253,7 @@ impl JanetBuffer<'_> {
     ///
     /// Panics if the new capacity overflows `usize`.
     #[inline]
-    pub fn reserve_exact(&mut self, additional: i32) {
+    pub fn reserve_exact(&mut self, additional: usize) {
         self.ensure(self.len() + additional, 1);
     }
 
@@ -363,7 +371,7 @@ impl JanetBuffer<'_> {
     pub fn as_bytes(&self) -> &[u8] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX
-        unsafe { core::slice::from_raw_parts((*self.raw).data, self.len() as usize) }
+        unsafe { core::slice::from_raw_parts((*self.raw).data, self.len()) }
     }
 
     /// Returns a mutable byte slice of the [`JanetBuffer`] contents.
@@ -381,7 +389,7 @@ impl JanetBuffer<'_> {
     pub fn as_bytes_mut(&mut self) -> &mut [u8] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX and we have exclusive access
-        unsafe { core::slice::from_raw_parts_mut((*self.raw).data, self.len() as usize) }
+        unsafe { core::slice::from_raw_parts_mut((*self.raw).data, self.len()) }
     }
 
     /// Returns `true` if and only if this buffer contains the given `needle`.
@@ -2677,12 +2685,7 @@ impl Default for JanetBuffer<'_> {
 impl From<&[u8]> for JanetBuffer<'_> {
     #[inline]
     fn from(bytes: &[u8]) -> Self {
-        let len = if bytes.len() >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            bytes.len() as i32
-        };
-        let mut buff = Self::with_capacity(len);
+        let mut buff = Self::with_capacity(bytes.len());
         buff.push_bytes(bytes);
         buff
     }
@@ -2691,12 +2694,7 @@ impl From<&[u8]> for JanetBuffer<'_> {
 impl From<&str> for JanetBuffer<'_> {
     #[inline]
     fn from(string: &str) -> Self {
-        let cap = if string.len() >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            string.len() as i32
-        };
-        let mut buff = JanetBuffer::with_capacity(cap);
+        let mut buff = JanetBuffer::with_capacity(string.len());
         buff.push_str(string);
         buff
     }
@@ -2863,11 +2861,7 @@ impl FromIterator<char> for JanetBuffer<'_> {
     fn from_iter<T: IntoIterator<Item = char>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut buffer = JanetBuffer::with_capacity(len);
 
         for ch in iter {
@@ -2883,11 +2877,7 @@ impl<'a> FromIterator<&'a u8> for JanetBuffer<'_> {
     fn from_iter<T: IntoIterator<Item = &'a u8>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut buffer = JanetBuffer::with_capacity(len);
 
         for &byte in iter {
@@ -2903,11 +2893,7 @@ impl<'a> FromIterator<&'a char> for JanetBuffer<'_> {
     fn from_iter<T: IntoIterator<Item = &'a char>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut buffer = JanetBuffer::with_capacity(len);
 
         for &ch in iter {
@@ -2923,11 +2909,7 @@ impl<'a> FromIterator<&'a str> for JanetBuffer<'_> {
     fn from_iter<T: IntoIterator<Item = &'a str>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut buffer = JanetBuffer::with_capacity(len);
 
         for s in iter {
@@ -2943,11 +2925,7 @@ impl FromIterator<String> for JanetBuffer<'_> {
     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (len, _) = iter.size_hint();
-        let len = if len >= i32::MAX as usize {
-            i32::MAX
-        } else {
-            len as i32
-        };
+
         let mut buffer = JanetBuffer::with_capacity(len);
 
         for s in iter {
@@ -2962,7 +2940,7 @@ impl Extend<u8> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = u8>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve_exact(iter.size_hint().0 as i32);
+        self.reserve_exact(iter.size_hint().0);
         iter.for_each(|byte| self.push_u8(byte));
     }
 }
@@ -2971,7 +2949,7 @@ impl<'a> Extend<&'a u8> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = &'a u8>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve_exact(iter.size_hint().0 as i32);
+        self.reserve_exact(iter.size_hint().0);
         iter.for_each(|&byte| self.push_u8(byte));
     }
 }
@@ -2980,7 +2958,7 @@ impl Extend<char> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = char>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve_exact(iter.size_hint().0 as i32);
+        self.reserve_exact(iter.size_hint().0);
         iter.for_each(|ch| self.push(ch));
     }
 }
@@ -2989,7 +2967,7 @@ impl<'a> Extend<&'a char> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = &'a char>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve_exact(iter.size_hint().0 as i32);
+        self.reserve_exact(iter.size_hint().0);
         iter.for_each(|&ch| self.push(ch));
     }
 }
@@ -2998,7 +2976,7 @@ impl<'a> Extend<&'a [u8]> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = &'a [u8]>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve(iter.size_hint().0 as i32);
+        self.reserve(iter.size_hint().0);
         iter.for_each(|bs| self.push_bytes(bs));
     }
 }
@@ -3007,7 +2985,7 @@ impl<'a> Extend<&'a str> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = &'a str>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve(iter.size_hint().0 as i32);
+        self.reserve(iter.size_hint().0);
         iter.for_each(|s| self.push_str(s));
     }
 }
@@ -3016,7 +2994,7 @@ impl Extend<String> for JanetBuffer<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = String>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve(iter.size_hint().0 as i32);
+        self.reserve(iter.size_hint().0);
         iter.for_each(|s| self.push_str(&s));
     }
 }
@@ -3121,8 +3099,7 @@ mod tests {
         assert_eq!(0, buffer.len());
         buffer.set_len(19);
         assert_eq!(19, buffer.len());
-        buffer.set_len(-10);
-        assert_eq!(19, buffer.len());
+
         Ok(())
     }
 

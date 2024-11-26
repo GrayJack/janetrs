@@ -113,7 +113,8 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn with_capacity(capacity: i32) -> Self {
+    pub fn with_capacity(capacity: usize) -> Self {
+        let capacity = i32::try_from(capacity).unwrap_or(i32::MAX);
         Self {
             raw:     unsafe { evil_janet::janet_array(capacity) },
             phantom: PhantomData,
@@ -136,7 +137,8 @@ impl<'data> JanetArray<'data> {
     #[inline]
     #[crate::cjvg("1.32.0")]
     #[must_use = "function is a constructor associated function"]
-    pub fn weak_with_capacity(capacity: i32) -> Self {
+    pub fn weak_with_capacity(capacity: usize) -> Self {
+        let capacity = i32::try_from(capacity).unwrap_or(i32::MAX);
         Self {
             raw:     unsafe { evil_janet::janet_array(capacity) },
             phantom: PhantomData,
@@ -168,8 +170,8 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn capacity(&self) -> i32 {
-        unsafe { (*self.raw).capacity }
+    pub fn capacity(&self) -> usize {
+        unsafe { (*self.raw).capacity as usize }
     }
 
     /// Returns the number of elements in the array, also referred to as its 'length'.
@@ -187,8 +189,8 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        unsafe { (*self.raw).count }
+    pub fn len(&self) -> usize {
+        unsafe { (*self.raw).count as usize }
     }
 
     /// Returns `true` if the array contains no elements.
@@ -239,10 +241,10 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     #[must_use = "use `.truncate()` if you don't need the other half"]
-    pub fn split_off(&mut self, at: i32) -> Self {
+    pub fn split_off(&mut self, at: usize) -> Self {
         #[cold]
         #[track_caller]
-        fn assert_failed(at: i32, len: i32) -> ! {
+        fn assert_failed(at: usize, len: usize) -> ! {
             crate::jpanic!("`at` split index (is {at}) should be <= len (is {len})")
         }
 
@@ -258,11 +260,7 @@ impl<'data> JanetArray<'data> {
         other.set_len(other_len);
 
         unsafe {
-            ptr::copy_nonoverlapping(
-                self.as_ptr().add(at as usize),
-                other.as_mut_ptr(),
-                other.len() as usize,
-            );
+            ptr::copy_nonoverlapping(self.as_ptr().add(at), other.as_mut_ptr(), other.len());
         }
 
         other
@@ -278,7 +276,8 @@ impl<'data> JanetArray<'data> {
     ///
     /// This functions does nothing if `new_len` is lesser than zero.
     #[inline]
-    pub fn set_len(&mut self, new_len: i32) {
+    pub fn set_len(&mut self, new_len: usize) {
+        let new_len = i32::try_from(new_len).unwrap_or(i32::MAX);
         unsafe { evil_janet::janet_array_setcount(self.raw, new_len) };
     }
 
@@ -298,7 +297,8 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr.capacity(), 4);
     /// ```
     #[inline]
-    pub fn ensure(&mut self, check_capacity: i32, growth: i32) {
+    pub fn ensure(&mut self, check_capacity: usize, growth: i32) {
+        let check_capacity = i32::try_from(check_capacity).unwrap_or(i32::MAX);
         unsafe { evil_janet::janet_array_ensure(self.raw, check_capacity, growth) };
     }
 
@@ -322,7 +322,7 @@ impl<'data> JanetArray<'data> {
     /// assert!(arr.capacity() >= 11);
     /// ```
     #[inline]
-    pub fn reserve(&mut self, additional: i32) {
+    pub fn reserve(&mut self, additional: usize) {
         if self.len() + additional > self.capacity() {
             self.ensure(self.len() + additional, 2);
         }
@@ -351,7 +351,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr.capacity(), 11);
     /// ```
     #[inline]
-    pub fn reserve_exact(&mut self, additional: i32) {
+    pub fn reserve_exact(&mut self, additional: usize) {
         if self.len() + additional > self.capacity() {
             self.ensure(self.len() + additional, 1);
         }
@@ -498,13 +498,13 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn get(&self, index: i32) -> Option<&Janet> {
-        if index < 0 || index >= self.len() {
+    pub fn get(&self, index: usize) -> Option<&Janet> {
+        if index >= self.len() {
             None
         } else {
             // SAFETY: it's safe because we just checked that it is in bounds
             unsafe {
-                let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
+                let ptr = (*self.raw).data.add(index) as *mut Janet;
                 Some(&(*ptr))
             }
         }
@@ -528,13 +528,13 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr[0], &Janet::boolean(true));
     /// ```
     #[inline]
-    pub fn get_mut(&mut self, index: i32) -> Option<&'data mut Janet> {
-        if index < 0 || index >= self.len() {
+    pub fn get_mut(&mut self, index: usize) -> Option<&'data mut Janet> {
+        if index >= self.len() {
             None
         } else {
             // SAFETY: it's safe because we just checked that it is in bounds
             unsafe {
-                let ptr = (*self.raw).data.offset(index as isize) as *mut Janet;
+                let ptr = (*self.raw).data.add(index) as *mut Janet;
                 Some(&mut (*ptr))
             }
         }
@@ -549,8 +549,9 @@ impl<'data> JanetArray<'data> {
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub unsafe fn get_unchecked(&self, index: i32) -> &Janet {
-        let item = (*self.raw).data.offset(index as isize) as *const Janet;
+    pub unsafe fn get_unchecked(&self, index: usize) -> &Janet {
+        debug_assert!(index <= i32::MAX as usize);
+        let item = (*self.raw).data.add(index) as *const Janet;
         &*item
     }
 
@@ -562,8 +563,9 @@ impl<'data> JanetArray<'data> {
     ///
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[inline]
-    pub unsafe fn get_unchecked_mut(&mut self, index: i32) -> &Janet {
-        let item = (*self.raw).data.offset(index as isize) as *mut Janet;
+    pub unsafe fn get_unchecked_mut(&mut self, index: usize) -> &Janet {
+        debug_assert!(index <= i32::MAX as usize);
+        let item = (*self.raw).data.add(index) as *mut Janet;
         &mut *item
     }
 
@@ -571,7 +573,7 @@ impl<'data> JanetArray<'data> {
     #[must_use]
     pub fn get_range<R>(&self, range: R) -> Option<&[Janet]>
     where
-        R: RangeBounds<i32>,
+        R: RangeBounds<usize>,
     {
         into_range(self.len(), (range.start_bound(), range.end_bound()))
             .and_then(|range| self.get_r(range))
@@ -581,7 +583,7 @@ impl<'data> JanetArray<'data> {
     #[must_use]
     pub fn get_range_mut<R>(&mut self, range: R) -> Option<&mut [Janet]>
     where
-        R: RangeBounds<i32>,
+        R: RangeBounds<usize>,
     {
         into_range(self.len(), (range.start_bound(), range.end_bound()))
             .and_then(|range| self.get_r_mut(range))
@@ -591,7 +593,7 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub unsafe fn get_range_unchecked<R>(&self, range: R) -> &[Janet]
     where
-        R: RangeBounds<i32>,
+        R: RangeBounds<usize>,
     {
         self.get_r_unchecked(into_range_unchecked(
             self.len(),
@@ -603,7 +605,7 @@ impl<'data> JanetArray<'data> {
     #[inline]
     pub unsafe fn get_range_unchecked_mut<R>(&mut self, range: R) -> &mut [Janet]
     where
-        R: RangeBounds<i32>,
+        R: RangeBounds<usize>,
     {
         self.get_r_unchecked_mut(into_range_unchecked(
             self.len(),
@@ -668,8 +670,8 @@ impl<'data> JanetArray<'data> {
     /// array.insert(1, 3) // now it's `[1, 3, 2]`
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn insert(&mut self, index: i32, element: impl Into<Janet>) {
-        if index < 0 || index > self.len() {
+    pub fn insert(&mut self, index: usize, element: impl Into<Janet>) {
+        if index > self.len() {
             crate::jpanic!(
                 "insertion index (is {}) should be >= 0 and <= {})",
                 index,
@@ -703,7 +705,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr.len(), 2);
     /// ```
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn remove(&mut self, index: i32) -> Janet {
+    pub fn remove(&mut self, index: usize) -> Janet {
         let ret = self[index];
 
         // Shift all elements to the right
@@ -813,8 +815,7 @@ impl<'data> JanetArray<'data> {
                         );
                     }
                 }
-                self.v
-                    .set_len((self.original_len - self.deleted_cnt) as i32);
+                self.v.set_len(self.original_len - self.deleted_cnt);
             }
         }
 
@@ -853,7 +854,7 @@ impl<'data> JanetArray<'data> {
             }
         }
 
-        let original_len = self.len() as usize;
+        let original_len = self.len();
         let mut g = BackshiftOnDrop {
             v: self,
             processed_len: 0,
@@ -915,8 +916,8 @@ impl<'data> JanetArray<'data> {
     ///
     /// [`clear`]: #method.clear
     #[inline]
-    pub fn truncate(&mut self, len: i32) {
-        if len <= self.len() && len >= 0 {
+    pub fn truncate(&mut self, len: usize) {
+        if len <= self.len() {
             self.set_len(len);
         }
     }
@@ -1163,14 +1164,8 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn split_at(&self, mid: i32) -> (&[Janet], &[Janet]) {
-        if mid < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                mid
-            )
-        }
-        self.as_ref().split_at(mid as usize)
+    pub fn split_at(&self, mid: usize) -> (&[Janet], &[Janet]) {
+        self.as_ref().split_at(mid)
     }
 
     /// Divides one mutable slice into two at an index.
@@ -1201,14 +1196,8 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(v.as_ref(), array![1, 2, 3, 4, 5, 6].as_ref());
     /// ```
     #[inline]
-    pub fn split_at_mut(&mut self, mid: i32) -> (&mut [Janet], &mut [Janet]) {
-        if mid < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                mid
-            )
-        }
-        self.as_mut().split_at_mut(mid as usize)
+    pub fn split_at_mut(&mut self, mid: usize) -> (&mut [Janet], &mut [Janet]) {
+        self.as_mut().split_at_mut(mid)
     }
 
     /// Swaps two elements in the array.
@@ -1233,7 +1222,7 @@ impl<'data> JanetArray<'data> {
     /// assert_deep_eq!(v, array!["a", "d", "c", "b"]);
     /// ```
     #[inline]
-    pub fn swap(&mut self, a: i32, b: i32) {
+    pub fn swap(&mut self, a: usize, b: usize) {
         // Can't take two mutable loans from one vector, so instead just cast
         // them to their raw pointers to do the swap.
         let pa: *mut Janet = &mut self[a];
@@ -1275,16 +1264,16 @@ impl<'data> JanetArray<'data> {
     ///
     /// [`swap`]: Self::swap
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-    pub unsafe fn swap_unchecked(&mut self, a: i32, b: i32) {
+    pub unsafe fn swap_unchecked(&mut self, a: usize, b: usize) {
         debug_assert!(
-            a >= 0 && a < self.len() && b >= 0 && b < self.len(),
+            a < self.len() && b < self.len(),
             "JanetArray::swap_unchecked requires that the indices are within the slice",
         );
 
         let ptr = self.as_mut_ptr();
         // SAFETY: caller has to guarantee that `a < self.len()` and `b < self.len()`
         unsafe {
-            ptr::swap(ptr.add(a as usize), ptr.add(b as usize));
+            ptr::swap(ptr.add(a), ptr.add(b));
         }
     }
 
@@ -1347,7 +1336,7 @@ impl<'data> JanetArray<'data> {
         // `2^expn` is the number represented by the leftmost '1' bit of `n`,
         // and `rem` is the remaining part of `n`.
 
-        let capacity = match self.len().checked_mul(n as i32) {
+        let capacity = match self.len().checked_mul(n) {
             Some(cap) => cap,
             None => jpanic!("capacity overflow"),
         };
@@ -1626,7 +1615,7 @@ impl<'data> JanetArray<'data> {
     where
         F: FnMut(&mut Janet, &mut Janet) -> bool,
     {
-        let len = self.len() as usize;
+        let len = self.len();
         if len <= 1 {
             return;
         }
@@ -1671,7 +1660,7 @@ impl<'data> JanetArray<'data> {
             // Basically array[read..write].len()
             let dropped = read.wrapping_sub(write);
 
-            self.set_len((len - dropped) as i32);
+            self.set_len(len - dropped);
         }
     }
 
@@ -1951,7 +1940,7 @@ impl<'data> JanetArray<'data> {
         Iter {
             arr: self,
             index_head: 0,
-            index_tail: self.len(),
+            index_tail: self.len() as i32,
         }
     }
 
@@ -1970,7 +1959,7 @@ impl<'data> JanetArray<'data> {
     /// ```
     #[inline]
     pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, 'data> {
-        let len = self.len();
+        let len = self.len() as i32;
         IterMut {
             arr: self,
             index_head: 0,
@@ -2696,7 +2685,7 @@ impl<'data> JanetArray<'data> {
     where
         F: FnMut(&mut Janet) -> bool,
     {
-        let old_len = self.len() as usize;
+        let old_len = self.len();
         ExtractIf {
             arr: self,
             idx: 0,
@@ -2751,8 +2740,8 @@ impl<'data> JanetArray<'data> {
 
 // Private methods
 impl JanetArray<'_> {
-    fn get_r(&self, range: Range<i32>) -> Option<&[Janet]> {
-        if range.start < 0 || range.start > range.end || range.end > self.len() {
+    fn get_r(&self, range: Range<usize>) -> Option<&[Janet]> {
+        if range.start > range.end || range.end > self.len() {
             None
         } else {
             // SAFETY: `self` is checked to be valid and in bounds above.
@@ -2760,21 +2749,20 @@ impl JanetArray<'_> {
         }
     }
 
-    unsafe fn get_r_unchecked(&self, range: Range<i32>) -> &[Janet] {
+    unsafe fn get_r_unchecked(&self, range: Range<usize>) -> &[Janet] {
         // SAFETY: the caller guarantees that `slice` is not dangling, so it
         // cannot be longer than `isize::MAX`. They also guarantee that
         // `self` is in bounds of `slice` so `self` cannot overflow an `isize`,
         // so the call to `add` is safe and the length calculation cannot overflow.
         unsafe {
             // FIXME: use usize::unchecked_sub after 1.79.0 release
-            let new_len =
-                usize::checked_sub(range.end as usize, range.start as usize).unwrap_unchecked();
-            &*ptr::slice_from_raw_parts(self.as_ptr().add(range.start as usize), new_len)
+            let new_len = usize::checked_sub(range.end, range.start).unwrap_unchecked();
+            &*ptr::slice_from_raw_parts(self.as_ptr().add(range.start), new_len)
         }
     }
 
-    fn get_r_mut(&mut self, range: Range<i32>) -> Option<&mut [Janet]> {
-        if range.start < 0 || range.start > range.end || range.end > self.len() {
+    fn get_r_mut(&mut self, range: Range<usize>) -> Option<&mut [Janet]> {
+        if range.start > range.end || range.end > self.len() {
             None
         } else {
             // SAFETY: `self` is checked to be valid and in bounds above.
@@ -2782,19 +2770,15 @@ impl JanetArray<'_> {
         }
     }
 
-    unsafe fn get_r_unchecked_mut(&mut self, range: Range<i32>) -> &mut [Janet] {
+    unsafe fn get_r_unchecked_mut(&mut self, range: Range<usize>) -> &mut [Janet] {
         // SAFETY: the caller guarantees that `slice` is not dangling, so it
         // cannot be longer than `isize::MAX`. They also guarantee that
         // `self` is in bounds of `slice` so `self` cannot overflow an `isize`,
         // so the call to `add` is safe and the length calculation cannot overflow.
         unsafe {
             // FIXME: use usize::unchecked_sub after 1.79.0 release
-            let new_len =
-                usize::checked_sub(range.end as usize, range.start as usize).unwrap_unchecked();
-            &mut *ptr::slice_from_raw_parts_mut(
-                self.as_mut_ptr().add(range.start as usize),
-                new_len,
-            )
+            let new_len = usize::checked_sub(range.end, range.start).unwrap_unchecked();
+            &mut *ptr::slice_from_raw_parts_mut(self.as_mut_ptr().add(range.start), new_len)
         }
     }
 }
@@ -2873,9 +2857,7 @@ impl AsRef<[Janet]> for JanetArray<'_> {
         if self.is_empty() {
             &[]
         } else {
-            unsafe {
-                core::slice::from_raw_parts((*self.raw).data as *const Janet, self.len() as usize)
-            }
+            unsafe { core::slice::from_raw_parts((*self.raw).data as *const Janet, self.len()) }
         }
     }
 }
@@ -2890,9 +2872,7 @@ impl AsMut<[Janet]> for JanetArray<'_> {
         if self.is_empty() {
             &mut []
         } else {
-            unsafe {
-                core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len() as usize)
-            }
+            unsafe { core::slice::from_raw_parts_mut((*self.raw).data as *mut Janet, self.len()) }
         }
     }
 }
@@ -2903,7 +2883,7 @@ impl<'data> IntoIterator for JanetArray<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len();
+        let len = self.len() as i32;
 
         IntoIter {
             arr: self,
@@ -2919,7 +2899,7 @@ impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len();
+        let len = self.len() as i32;
 
         Iter {
             arr: self,
@@ -2935,7 +2915,7 @@ impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len();
+        let len = self.len() as i32;
 
         IterMut {
             arr: self,
@@ -2952,9 +2932,9 @@ impl<U: Into<Janet>> FromIterator<U> for JanetArray<'_> {
         let (lower, upper) = iter.size_hint();
 
         let mut new = if let Some(upper) = upper {
-            Self::with_capacity(upper as i32)
+            Self::with_capacity(upper)
         } else {
-            Self::with_capacity(lower as i32)
+            Self::with_capacity(lower)
         };
 
         for item in iter {
@@ -2976,8 +2956,8 @@ impl TryFrom<&[Janet]> for JanetArray<'_> {
 
     #[cfg_attr(feature = "inline-more", inline)]
     fn try_from(slice: &[Janet]) -> Result<Self, Self::Error> {
-        let len = slice.len().try_into()?;
-        let mut j_array = Self::with_capacity(len);
+        let len: i32 = slice.len().try_into()?;
+        let mut j_array = Self::with_capacity(len as usize);
 
         slice.iter().for_each(|&e| j_array.push(e));
 
@@ -3010,7 +2990,7 @@ impl Extend<Janet> for JanetArray<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = Janet>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve_exact(iter.size_hint().0 as i32);
+        self.reserve_exact(iter.size_hint().0);
         iter.for_each(|val| self.push(val));
     }
 }
@@ -3019,7 +2999,7 @@ impl<'a> Extend<&'a Janet> for JanetArray<'_> {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = &'a Janet>>(&mut self, iter: T) {
         let iter = iter.into_iter();
-        self.reserve_exact(iter.size_hint().0 as i32);
+        self.reserve_exact(iter.size_hint().0);
         iter.for_each(|&val| self.push(val));
     }
 }
@@ -3031,7 +3011,7 @@ impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {
     }
 }
 
-impl Index<i32> for JanetArray<'_> {
+impl Index<usize> for JanetArray<'_> {
     type Output = Janet;
 
     /// Get a immutable reference of the [`Janet`] hold by [`JanetArray`] at `index`.
@@ -3039,14 +3019,7 @@ impl Index<i32> for JanetArray<'_> {
     /// # Janet Panics
     /// Janet panic if try to access `index` out of the bounds.
     #[inline]
-    fn index(&self, index: i32) -> &Self::Output {
-        if index < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                index
-            )
-        }
-
+    fn index(&self, index: usize) -> &Self::Output {
         self.get(index).unwrap_or_else(|| {
             crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
@@ -3057,21 +3030,14 @@ impl Index<i32> for JanetArray<'_> {
     }
 }
 
-impl IndexMut<i32> for JanetArray<'_> {
+impl IndexMut<usize> for JanetArray<'_> {
     /// Get a exclusive reference of the [`Janet`] hold by [`JanetArray`] at `index`.
     ///
     /// # Janet Panics
     /// Janet panic if try to access `index` out of the bounds.
     #[inline]
-    fn index_mut(&mut self, index: i32) -> &mut Self::Output {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         let len = self.len();
-
-        if index < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                index
-            )
-        }
 
         self.get_mut(index).unwrap_or_else(|| {
             crate::jpanic!(
@@ -3107,7 +3073,7 @@ impl<'a> Iterator for Iter<'a, '_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.arr.get(self.index_head);
+            let ret = self.arr.get(self.index_head as usize);
             self.index_head += 1;
             ret
         }
@@ -3127,7 +3093,7 @@ impl DoubleEndedIterator for Iter<'_, '_> {
             None
         } else {
             self.index_tail -= 1;
-            self.arr.get(self.index_tail)
+            self.arr.get(self.index_tail as usize)
         }
     }
 }
@@ -3152,7 +3118,7 @@ impl<'a> Iterator for IterMut<'a, '_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.arr.get_mut(self.index_head);
+            let ret = self.arr.get_mut(self.index_head as usize);
             self.index_head += 1;
             ret
         }
@@ -3179,7 +3145,7 @@ impl DoubleEndedIterator for IterMut<'_, '_> {
             None
         } else {
             self.index_tail -= 1;
-            self.arr.get_mut(self.index_tail)
+            self.arr.get_mut(self.index_tail as usize)
         }
     }
 }
@@ -3212,7 +3178,7 @@ impl Iterator for IntoIter<'_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.arr.get(self.index_head).cloned();
+            let ret = self.arr.get(self.index_head as usize).cloned();
             self.index_head += 1;
             ret
         }
@@ -3232,7 +3198,7 @@ impl DoubleEndedIterator for IntoIter<'_> {
             None
         } else {
             self.index_tail -= 1;
-            self.arr.get(self.index_tail).cloned()
+            self.arr.get(self.index_tail as usize).cloned()
         }
     }
 }
@@ -3325,14 +3291,16 @@ where
                 let tail_len = self.old_len - self.idx;
                 src.copy_to(dst, tail_len);
             }
-            self.arr.set_len((self.old_len - self.del) as i32);
+            self.arr.set_len(self.old_len - self.del);
         }
     }
 }
 
 /// Convert pair of `ops::Bound`s into `ops::Range`.
 /// Returns `None` on overflowing indices.
-pub(crate) fn into_range(len: i32, (start, end): (Bound<&i32>, Bound<&i32>)) -> Option<Range<i32>> {
+pub(crate) fn into_range(
+    len: usize, (start, end): (Bound<&usize>, Bound<&usize>),
+) -> Option<Range<usize>> {
     let start = match start {
         Bound::Included(&start) => start,
         Bound::Excluded(&start) => start.checked_add(1)?,
@@ -3354,8 +3322,8 @@ pub(crate) fn into_range(len: i32, (start, end): (Bound<&i32>, Bound<&i32>)) -> 
 /// Convert pair of `ops::Bound`s into `ops::Range` without performing any bounds checking
 /// and (in debug) overflow checking
 pub(crate) fn into_range_unchecked(
-    len: i32, (start, end): (Bound<&i32>, Bound<&i32>),
-) -> Range<i32> {
+    len: usize, (start, end): (Bound<&usize>, Bound<&usize>),
+) -> Range<usize> {
     let start = match start {
         Bound::Included(&i) => i,
         Bound::Excluded(&i) => i + 1,
@@ -3476,8 +3444,6 @@ mod tests {
         array.set_len(19);
         assert_eq!(19, array.len());
         assert_eq!(Janet::nil(), array.peek());
-        array.set_len(-10);
-        assert_eq!(19, array.len());
         Ok(())
     }
 
@@ -3487,7 +3453,6 @@ mod tests {
         let mut array = JanetArray::new();
         array.push(10);
 
-        assert_eq!(None, array.get(-1));
         assert_eq!(Some(&Janet::integer(10)), array.get(0));
         assert_eq!(None, array.get(1));
         Ok(())
@@ -3499,7 +3464,6 @@ mod tests {
         let mut array = JanetArray::new();
         array.push(10);
 
-        assert_eq!(None, array.get_mut(-1));
         assert_eq!(Some(&mut Janet::integer(10)), array.get_mut(0));
         assert_eq!(None, array.get_mut(1));
 
@@ -3516,10 +3480,6 @@ mod tests {
 
         assert_eq!(array.len(), 5);
 
-        assert_eq!(None, array.get_range(-1..));
-        assert_eq!(None, array.get_range(-1..3));
-        assert_eq!(None, array.get_range(-1..-2));
-        assert_eq!(None, array.get_range(-2..-1));
         assert_eq!(None, array.get_range(..=5));
 
         assert_eq!(Some(array![1, 2].as_ref()), array.get_range(0..2));
@@ -3539,10 +3499,6 @@ mod tests {
 
         assert_eq!(array.len(), 5);
 
-        assert_eq!(None, array.get_range_mut(-1..));
-        assert_eq!(None, array.get_range_mut(-1..3));
-        assert_eq!(None, array.get_range_mut(-2..-1));
-        assert_eq!(None, array.get_range_mut(-2..-1));
         assert_eq!(None, array.get_range_mut(..=5));
 
         assert_eq!(Some(array![1, 2].as_mut()), array.get_range_mut(0..2));

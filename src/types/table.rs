@@ -77,7 +77,8 @@ impl<'data> JanetTable<'data> {
     /// ```
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn with_capacity(capacity: i32) -> Self {
+    pub fn with_capacity(capacity: usize) -> Self {
+        let capacity = i32::try_from(capacity).unwrap_or(i32::MAX);
         Self {
             raw:    unsafe { evil_janet::janet_table(capacity) },
             phatom: PhantomData,
@@ -132,8 +133,8 @@ impl<'data> JanetTable<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn capacity(&self) -> i32 {
-        unsafe { (*self.raw).capacity }
+    pub fn capacity(&self) -> usize {
+        unsafe { (*self.raw).capacity as usize }
     }
 
     /// Returns the number of elements that was removed from the table.
@@ -153,8 +154,8 @@ impl<'data> JanetTable<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn removed(&self) -> i32 {
-        unsafe { (*self.raw).deleted }
+    pub fn removed(&self) -> usize {
+        unsafe { (*self.raw).deleted as usize }
     }
 
     /// Clears the table, removing all key-value pairs. Keeps the allocated memory for
@@ -224,8 +225,8 @@ impl<'data> JanetTable<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        unsafe { (*self.raw).count }
+    pub fn len(&self) -> usize {
+        unsafe { (*self.raw).count as usize }
     }
 
     /// Returns `true` if the table contains no elements.
@@ -1115,7 +1116,7 @@ impl<'data> JanetTable<'data> {
         Iter {
             table: self,
             kv:    unsafe { (*self.raw).data },
-            end:   unsafe { (*self.raw).data.offset(self.capacity() as isize) },
+            end:   unsafe { (*self.raw).data.add(self.capacity()) },
         }
     }
 
@@ -1403,9 +1404,9 @@ where
         let (lower, upper) = iter.size_hint();
 
         let mut new = if let Some(upper) = upper {
-            Self::with_capacity(upper as i32)
+            Self::with_capacity(upper)
         } else {
-            Self::with_capacity(lower as i32)
+            Self::with_capacity(lower)
         };
 
         for (k, v) in iter {

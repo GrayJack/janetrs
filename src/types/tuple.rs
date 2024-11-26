@@ -47,12 +47,12 @@ impl<'data> JanetTupleBuilder<'data> {
         self
     }
 
-    /// Finalie the build process and create [`JanetTuple`].
+    /// Finalize the build process and create [`JanetTuple`].
     ///
     /// If the build is finalized and not all the allocated space was inserted with a
-    /// item, the unnused space will all have value of Janet number zero.
+    /// item, the unused space will all have value of Janet number zero.
     #[inline]
-    #[must_use = "function finishies building process and returns JanetStruct"]
+    #[must_use = "function finishes building process and returns JanetStruct"]
     pub fn finalize(self) -> JanetTuple<'data> {
         JanetTuple {
             raw:     unsafe { evil_janet::janet_tuple_end(self.raw) },
@@ -89,8 +89,8 @@ impl<'data> JanetTuple<'data> {
     ///
     /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
     #[inline]
-    pub fn builder(len: i32) -> JanetTupleBuilder<'data> {
-        let len = if len < 0 { 0 } else { len };
+    pub fn builder(len: usize) -> JanetTupleBuilder<'data> {
+        let len = i32::try_from(len).unwrap_or(i32::MAX);
 
         JanetTupleBuilder {
             raw: unsafe { evil_janet::janet_tuple_begin(len) },
@@ -103,9 +103,7 @@ impl<'data> JanetTuple<'data> {
     /// Creates a tuple where all of it's elements are `elem`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn with_default_elem(elem: Janet, len: i32) -> Self {
-        let len = if len < 0 { 0 } else { len };
-
+    pub fn with_default_elem(elem: Janet, len: usize) -> Self {
         let mut tuple = Self::builder(len);
 
         for _ in 0..len {
@@ -123,6 +121,8 @@ impl<'data> JanetTuple<'data> {
     #[inline]
     #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const CJanet) -> Self {
+        debug_assert!(!raw.is_null());
+
         Self {
             raw,
             phantom: PhantomData,
@@ -170,13 +170,13 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn get(&self, index: i32) -> Option<&Janet> {
-        if index < 0 || index >= self.len() {
+    pub fn get(&self, index: usize) -> Option<&Janet> {
+        if index >= self.len() {
             None
         } else {
             // SAFETY: it's safe because we just checked that it is in bounds
             unsafe {
-                let item = self.raw.offset(index as isize) as *const Janet;
+                let item = self.raw.add(index) as *const Janet;
                 Some(&*item)
             }
         }
@@ -191,8 +191,8 @@ impl<'data> JanetTuple<'data> {
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub unsafe fn get_unchecked(&self, index: i32) -> &Janet {
-        let item = self.raw.offset(index as isize) as *const Janet;
+    pub unsafe fn get_unchecked(&self, index: usize) -> &Janet {
+        let item = self.raw.add(index) as *const Janet;
         &*item
     }
 
@@ -208,8 +208,8 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        self.head().length
+    pub fn len(&self) -> usize {
+        self.head().length as usize
     }
 
     /// Returns `true` if the tuple contains no elements.
@@ -386,14 +386,8 @@ impl<'data> JanetTuple<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn split_at(&self, mid: i32) -> (&[Janet], &[Janet]) {
-        if mid < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                mid
-            )
-        }
-        self.as_ref().split_at(mid as usize)
+    pub fn split_at(&self, mid: usize) -> (&[Janet], &[Janet]) {
+        self.as_ref().split_at(mid)
     }
 
     /// Creates a tuple by repeating a tuple `n` times.
@@ -628,7 +622,7 @@ impl<'data> JanetTuple<'data> {
         Iter {
             tup: self,
             index_head: 0,
-            index_tail: self.len(),
+            index_tail: self.len() as i32,
         }
     }
 
@@ -1111,7 +1105,7 @@ impl AsRef<[Janet]> for JanetTuple<'_> {
     fn as_ref(&self) -> &[Janet] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
         // len lesser than isize::MAX
-        unsafe { core::slice::from_raw_parts(self.raw as *const _, self.len() as usize) }
+        unsafe { core::slice::from_raw_parts(self.raw as *const _, self.len()) }
     }
 }
 
@@ -1135,7 +1129,7 @@ impl<'data> IntoIterator for JanetTuple<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len();
+        let len = self.len() as i32;
         IntoIter {
             tup: self,
             index_head: 0,
@@ -1150,7 +1144,7 @@ impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let len = self.len();
+        let len = self.len() as i32;
         Iter {
             tup: self,
             index_head: 0,
@@ -1166,9 +1160,9 @@ impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
         let (lower, upper) = iter.size_hint();
 
         let mut new = if let Some(upper) = upper {
-            Self::builder(upper as i32)
+            Self::builder(upper)
         } else if lower > 0 {
-            Self::builder(lower as i32)
+            Self::builder(lower)
         } else {
             Self::builder(20)
         };
@@ -1180,7 +1174,7 @@ impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
     }
 }
 
-impl Index<i32> for JanetTuple<'_> {
+impl Index<usize> for JanetTuple<'_> {
     type Output = Janet;
 
     /// Get a reference of the [`Janet`] hold by [`JanetTuple`] at `index`.
@@ -1188,14 +1182,7 @@ impl Index<i32> for JanetTuple<'_> {
     /// # Janet Panics
     /// This function may Janet panic if try to access `index` out of the bounds
     #[inline]
-    fn index(&self, index: i32) -> &Self::Output {
-        if index < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                index
-            )
-        }
-
+    fn index(&self, index: usize) -> &Self::Output {
         self.get(index).unwrap_or_else(|| {
             crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
@@ -1230,7 +1217,7 @@ impl<'a> Iterator for Iter<'a, '_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.tup.get(self.index_head);
+            let ret = self.tup.get(self.index_head as usize);
             self.index_head += 1;
             ret
         }
@@ -1250,7 +1237,7 @@ impl DoubleEndedIterator for Iter<'_, '_> {
             None
         } else {
             self.index_tail -= 1;
-            self.tup.get(self.index_tail)
+            self.tup.get(self.index_tail as usize)
         }
     }
 }
@@ -1283,7 +1270,7 @@ impl Iterator for IntoIter<'_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.tup.get(self.index_head).copied();
+            let ret = self.tup.get(self.index_head as usize).copied();
             self.index_head += 1;
             ret
         }
@@ -1303,7 +1290,7 @@ impl DoubleEndedIterator for IntoIter<'_> {
             None
         } else {
             self.index_tail -= 1;
-            self.tup.get(self.index_tail).copied()
+            self.tup.get(self.index_tail as usize).copied()
         }
     }
 }
@@ -1346,7 +1333,6 @@ mod tests {
             .put(Janet::boolean(true))
             .finalize();
 
-        assert_eq!(None, tuple.get(-1));
         assert_eq!(Some(&Janet::number(10.0)), tuple.get(0));
         assert_eq!(Some(&Janet::nil()), tuple.get(1));
         assert_eq!(Some(&Janet::boolean(true)), tuple.get(2));
@@ -1368,7 +1354,6 @@ mod tests {
         let clone = tuple.clone();
 
         assert_ne!(tuple.raw, clone.raw);
-        assert_eq!(tuple.get(-1), clone.get(-1));
         assert_eq!(tuple.get(0), clone.get(0));
         assert_eq!(tuple.get(1), clone.get(1));
         assert_eq!(tuple.get(2), clone.get(2));

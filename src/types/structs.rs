@@ -77,8 +77,8 @@ impl<'data> JanetStruct<'data> {
     ///
     /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
     #[inline]
-    pub fn builder(len: i32) -> JanetStructBuilder<'data> {
-        let len = if len < 0 { 0 } else { len };
+    pub fn builder(len: usize) -> JanetStructBuilder<'data> {
+        let len = i32::try_from(len).unwrap_or(i32::MAX);
 
         JanetStructBuilder {
             raw:     unsafe { evil_janet::janet_struct_begin(len) },
@@ -110,8 +110,8 @@ impl<'data> JanetStruct<'data> {
     /// Returns the number of elements the struct can hold.
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn capacity(&self) -> i32 {
-        self.head().capacity
+    pub fn capacity(&self) -> usize {
+        self.head().capacity as usize
     }
 
     /// Returns the number of elements in the struct, also referred to as its 'length'.
@@ -129,8 +129,8 @@ impl<'data> JanetStruct<'data> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        self.head().length
+    pub fn len(&self) -> usize {
+        self.head().length as usize
     }
 
     /// Returns `true` if the struct contains no elements.
@@ -634,9 +634,9 @@ where
         let (lower, upper) = iter.size_hint();
 
         let mut new = if let Some(upper) = upper {
-            Self::builder(upper as i32)
+            Self::builder(upper)
         } else {
-            Self::builder(lower as i32)
+            Self::builder(lower)
         };
 
         for (k, v) in iter {

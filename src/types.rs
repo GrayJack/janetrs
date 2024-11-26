@@ -557,7 +557,7 @@ impl Janet {
     /// length (janet) panics, this function janet panics as well.
     #[cfg_attr(feature = "inline-more", inline)]
     #[must_use]
-    pub fn len(&self) -> Option<i32> {
+    pub fn len(&self) -> Option<usize> {
         match self.unwrap() {
             TaggedJanet::Array(x) => Some(x.len()),
             TaggedJanet::Buffer(x) => Some(x.len()),
@@ -587,7 +587,7 @@ impl Janet {
                                 && x <= i32::MAX as f64
                                 && (x - x as i32 as f64).abs() < f64::EPSILON
                             {
-                                Some(x as i32)
+                                Some(x as usize)
                             } else {
                                 None
                             }

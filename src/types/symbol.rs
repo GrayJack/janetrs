@@ -76,6 +76,7 @@ impl JanetSymbol<'_> {
     #[inline]
     #[must_use]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
+        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,
@@ -95,8 +96,8 @@ impl JanetSymbol<'_> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        unsafe { (*evil_janet::janet_string_head(self.raw)).length }
+    pub fn len(&self) -> usize {
+        unsafe { (*evil_janet::janet_string_head(self.raw)).length as usize }
     }
 
     /// Returns `true` if this [`JanetSymbol`] has a length of zero, and `false`
@@ -130,7 +131,7 @@ impl JanetSymbol<'_> {
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+        unsafe { core::slice::from_raw_parts(self.raw, self.len()) }
     }
 
     /// Return a raw pointer to the symbol raw structure.
@@ -166,7 +167,7 @@ impl Clone for JanetSymbol<'_> {
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            raw:     unsafe { evil_janet::janet_symbol(self.raw, self.len()) },
+            raw:     unsafe { evil_janet::janet_symbol(self.raw, self.len() as i32) },
             phantom: PhantomData,
         }
     }
@@ -284,6 +285,7 @@ impl JanetKeyword<'_> {
     #[inline]
     #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
+        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,
@@ -303,8 +305,8 @@ impl JanetKeyword<'_> {
     /// ```
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn len(&self) -> i32 {
-        unsafe { (*evil_janet::janet_string_head(self.raw)).length }
+    pub fn len(&self) -> usize {
+        unsafe { (*evil_janet::janet_string_head(self.raw)).length as usize }
     }
 
     /// Returns `true` if this [`JanetKeyword`] has a length of zero, and `false`
@@ -338,7 +340,7 @@ impl JanetKeyword<'_> {
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe { core::slice::from_raw_parts(self.raw, self.len() as usize) }
+        unsafe { core::slice::from_raw_parts(self.raw, self.len()) }
     }
 
     /// Return a raw pointer to the keyword raw structure.
@@ -374,7 +376,7 @@ impl Clone for JanetKeyword<'_> {
     #[inline]
     fn clone(&self) -> Self {
         Self {
-            raw:     unsafe { evil_janet::janet_symbol(self.raw, self.len()) },
+            raw:     unsafe { evil_janet::janet_symbol(self.raw, self.len() as i32) },
             phantom: PhantomData,
         }
     }

@@ -4,7 +4,7 @@
 #[macro_export]
 macro_rules! count {
     (@subst $($x:tt)*) => (());
-    ($($rest:expr),*) => (<[()]>::len(&[$($crate::count!(@subst $rest)),*]) as i32);
+    ($($rest:expr),*) => (<[()]>::len(&[$($crate::count!(@subst $rest)),*]));
 }
 
 /// Creates a [`JanetTuple`] containing the arguments.
@@ -49,7 +49,7 @@ macro_rules! tuple {
     ($elem:expr; $n:expr) => {$crate::JanetTuple::with_default_elem($crate::Janet::from($elem), $n)};
 
     ($($val:expr),* $(,)?) => {{
-        const LEN: i32 = $crate::count!($($val),*);
+        const LEN: usize = $crate::count!($($val),*);
         $crate::JanetTuple::builder(LEN)
             $(.put($crate::Janet::from($val)))*
             .finalize()
@@ -104,7 +104,7 @@ macro_rules! array {
     }};
 
     ($($val:expr),* $(,)?) => {{
-        const LEN: i32 = $crate::count!($($val),*);
+        const LEN: usize = $crate::count!($($val),*);
         let mut arr = $crate::JanetArray::with_capacity(LEN);
         $(arr.push($crate::Janet::from($val));)*
         arr
@@ -140,7 +140,7 @@ macro_rules! array {
 #[macro_export]
 macro_rules! structs {
     ($($key:expr => $value:expr),* $(,)?) => {{
-        const LEN: i32 = $crate::count!($($key),*);
+        const LEN: usize = $crate::count!($($key),*);
         $crate::JanetStruct::builder(LEN)
             $(.put($crate::Janet::from($key), $crate::Janet::from($value)))*
             .finalize()
@@ -178,7 +178,7 @@ macro_rules! table {
     () => ($crate::JanetTable::new());
 
     ($($key:expr => $value:expr),* $(,)?) => {{
-        const LEN: i32 = $crate::count!($($key),*);
+        const LEN: usize = $crate::count!($($key),*);
         let mut table = $crate::JanetTable::with_capacity(LEN);
         $(let _ = table.insert($crate::Janet::from($key), $crate::Janet::from($value));)*
 
