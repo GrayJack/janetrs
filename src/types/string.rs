@@ -2422,7 +2422,7 @@ impl FromStr for JanetString<'_> {
     }
 }
 
-impl Index<i32> for JanetString<'_> {
+impl Index<usize> for JanetString<'_> {
     type Output = u8;
 
     /// Get a reference to the byte of the string at the `index`.
@@ -2434,15 +2434,8 @@ impl Index<i32> for JanetString<'_> {
     ///
     /// [`bytes`]: #method.bytes.html
     #[inline]
-    fn index(&self, index: i32) -> &Self::Output {
-        if index < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                index
-            )
-        }
-
-        self.as_bytes().get(index as usize).unwrap_or_else(|| {
+    fn index(&self, index: usize) -> &Self::Output {
+        self.as_bytes().get(index).unwrap_or_else(|| {
             crate::jpanic!(
                 "index out of bounds: the len is {} but the index is {}",
                 self.len(),

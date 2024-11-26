@@ -2794,7 +2794,7 @@ impl FromStr for JanetBuffer<'_> {
     }
 }
 
-impl Index<i32> for JanetBuffer<'_> {
+impl Index<usize> for JanetBuffer<'_> {
     type Output = u8;
 
     /// Get a reference to the byte of the buffer at the `index`.
@@ -2806,26 +2806,17 @@ impl Index<i32> for JanetBuffer<'_> {
     ///
     /// [`bytes`]: #method.bytes.html
     #[inline]
-    fn index(&self, index: i32) -> &Self::Output {
-        if index < 0 {
+    fn index(&self, index: usize) -> &Self::Output {
+        self.as_bytes().get(index).unwrap_or_else(|| {
             crate::jpanic!(
-                "index out of bounds: the len is {} but the index is {}",
+                "index out of bounds: the len is {} but the index is {index}",
                 self.len(),
-                index
-            )
-        }
-
-        self.as_bytes().get(index as usize).unwrap_or_else(|| {
-            crate::jpanic!(
-                "index out of bounds: the len is {} but the index is {}",
-                self.len(),
-                index
             )
         })
     }
 }
 
-impl IndexMut<i32> for JanetBuffer<'_> {
+impl IndexMut<usize> for JanetBuffer<'_> {
     /// Get a exclusive reference to the byte of the string at the `index`.
     ///
     /// It is more idiomatic to use [`bytes_mut`] method.
@@ -2835,24 +2826,12 @@ impl IndexMut<i32> for JanetBuffer<'_> {
     ///
     /// [`bytes_mut`]: #method.bytes_mut.html
     #[inline]
-    fn index_mut(&mut self, index: i32) -> &mut Self::Output {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         let len = self.len();
-        if index < 0 {
-            crate::jpanic!(
-                "index out of bounds: the index ({}) is negative and must be positive",
-                index
-            )
-        }
 
-        self.as_bytes_mut()
-            .get_mut(index as usize)
-            .unwrap_or_else(|| {
-                crate::jpanic!(
-                    "index out of bounds: the len is {} but the index is {}",
-                    len,
-                    index
-                )
-            })
+        self.as_bytes_mut().get_mut(index).unwrap_or_else(|| {
+            crate::jpanic!("index out of bounds: the len is {len} but the index is {index}",)
+        })
     }
 }
 
