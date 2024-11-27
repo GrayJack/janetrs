@@ -528,7 +528,7 @@ impl<'data> JanetTuple<'data> {
     /// let num = Janet::from(42);
     /// let idx = s.binary_search(&num).unwrap_or_else(|x| x);
     /// let mut s = JanetArray::from(s);
-    /// s.insert(idx as i32, num);
+    /// s.insert(idx, num);
     /// assert_eq!(
     ///     s.as_ref(),
     ///     tuple![0, 1, 1, 1, 1, 2, 3, 5, 8, 13, 21, 34, 42, 55].as_ref()
