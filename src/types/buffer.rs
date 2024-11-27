@@ -144,7 +144,6 @@ impl JanetBuffer<'_> {
     /// own risk.
     #[inline]
     pub const unsafe fn from_raw(raw: *mut CJanetBuffer) -> Self {
-        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,

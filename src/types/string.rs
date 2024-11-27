@@ -160,7 +160,6 @@ impl<'data> JanetString<'data> {
     /// own risk.
     #[inline]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
-        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,

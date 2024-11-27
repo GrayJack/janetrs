@@ -76,7 +76,6 @@ impl JanetSymbol<'_> {
     #[inline]
     #[must_use]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
-        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,
@@ -285,7 +284,6 @@ impl JanetKeyword<'_> {
     #[inline]
     #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const u8) -> Self {
-        debug_assert!(!raw.is_null());
         Self {
             raw,
             phantom: PhantomData,

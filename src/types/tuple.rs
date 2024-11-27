@@ -121,8 +121,6 @@ impl<'data> JanetTuple<'data> {
     #[inline]
     #[must_use = "function is a constructor associated function"]
     pub const unsafe fn from_raw(raw: *const CJanet) -> Self {
-        debug_assert!(!raw.is_null());
-
         Self {
             raw,
             phantom: PhantomData,
