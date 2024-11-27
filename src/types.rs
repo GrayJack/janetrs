@@ -93,6 +93,7 @@ pub enum JanetConversionError {
     ///
     /// (expected, got)
     WrongKind(JanetType, JanetType),
+    MultiWrongKind(Vec<JanetType>, JanetType),
     InvalidAbstract(AbstractError),
     InvalidInt32(f64),
     InvalidUInt32(f64),
@@ -106,6 +107,10 @@ impl JanetConversionError {
     pub const fn wrong_kind(expected: JanetType, got: JanetType) -> Self {
         Self::WrongKind(expected, got)
     }
+
+    pub const fn multi_wrong_kind(expected: Vec<JanetType>, got: JanetType) -> Self {
+        Self::MultiWrongKind(expected, got)
+    }
 }
 
 #[cfg(feature = "std")]
@@ -116,6 +121,20 @@ impl Display for JanetConversionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::WrongKind(expected, got) => write!(f, "Expected {expected}, got {got}"),
+            Self::MultiWrongKind(expected, got) => {
+                write!(f, "Expected any of ")?;
+                let mut first = true;
+                for t in expected {
+                    if !first {
+                        write!(f, " | ")?;
+                    } else {
+                        first = false;
+                    }
+
+                    write!(f, "{t}")?;
+                }
+                write!(f, ", got {got}")
+            },
             Self::InvalidAbstract(err) => write!(f, "{err}"),
             Self::InvalidInt32(bad_value) => {
                 write!(f, "Expected 32 bit signed integer, got {bad_value}")
@@ -883,22 +902,62 @@ impl TryFrom<Janet> for u32 {
     }
 }
 
+impl From<isize> for Janet {
+    #[inline]
+    fn from(value: isize) -> Self {
+        // In theory, there could be isize of 128 bits, but in practice, it doesn't exist as Rust
+        // target as of today
+        if value >= i32::MIN as isize && value <= i32::MAX as isize {
+            Self::integer(value as i32)
+        } else {
+            Self::int64(value as i64)
+        }
+    }
+}
+
+impl From<&isize> for Janet {
+    fn from(value: &isize) -> Self {
+        Self::from(*value)
+    }
+}
+
 impl TryFrom<Janet> for isize {
     type Error = JanetConversionError;
 
-    #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        match value.kind() {
-            JanetType::Number => {
-                let val = unsafe { evil_janet::janet_unwrap_number(value.inner) };
-                if val >= JANET_SIZEMIN as f64 && val <= JANET_SIZEMAX as f64 {
-                    Ok(val.trunc() as isize)
+        match value.unwrap() {
+            TaggedJanet::Abstract(x) => Ok(x.into_inner::<i64>()? as isize),
+            TaggedJanet::Number(x) => {
+                if x >= i32::MIN as f64 && x <= i32::MAX as f64 {
+                    Ok(x.trunc() as isize)
                 } else {
-                    Err(JanetConversionError::InvalidSSize(val))
+                    Err(JanetConversionError::InvalidSSize(x))
                 }
             },
-            got => Err(JanetConversionError::wrong_kind(JanetType::Number, got)),
+            got => Err(JanetConversionError::multi_wrong_kind(
+                vec![JanetType::Abstract, JanetType::Number],
+                got.kind(),
+            )),
         }
+    }
+}
+
+impl From<usize> for Janet {
+    #[inline]
+    fn from(value: usize) -> Self {
+        // In theory, there could be usize of 128 bits, but in practice, it doesn't exist as Rust
+        // target as of today
+        if value <= i32::MAX as usize {
+            Self::integer(value as i32)
+        } else {
+            Self::uint64(value as u64)
+        }
+    }
+}
+
+impl From<&usize> for Janet {
+    fn from(value: &usize) -> Self {
+        Self::from(*value)
     }
 }
 
@@ -907,16 +966,19 @@ impl TryFrom<Janet> for usize {
 
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        match value.kind() {
-            JanetType::Number => {
-                let val = unsafe { evil_janet::janet_unwrap_number(value.inner) };
-                if val >= 0.0 && val <= JANET_SIZEMAX as f64 {
-                    Ok(val.trunc() as usize)
+        match value.unwrap() {
+            TaggedJanet::Abstract(x) => Ok(x.into_inner::<u64>()? as usize),
+            TaggedJanet::Number(x) => {
+                if x >= i32::MIN as f64 && x <= i32::MAX as f64 {
+                    Ok(x.trunc() as usize)
                 } else {
-                    Err(JanetConversionError::InvalidUSize(val))
+                    Err(JanetConversionError::InvalidUSize(x))
                 }
             },
-            got => Err(JanetConversionError::wrong_kind(JanetType::Number, got)),
+            got => Err(JanetConversionError::multi_wrong_kind(
+                vec![JanetType::Abstract, JanetType::Number],
+                got.kind(),
+            )),
         }
     }
 }
