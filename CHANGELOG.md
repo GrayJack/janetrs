@@ -30,6 +30,8 @@ All notable changes to the library should be put here
 - Feat: Add `env::set_dynamic` function
 - Feat: Implement `JanetArgs` for `[Janet; N]`
 - Feat: Add conversion from `Janet` to `isize` and `usize`
+- Feat: Add conversion from `isize`/`usize` to `Janet`
+- Feat: Make conversion from `Janet` to `i64` and `u64` accept when Janet is Number
 - Perf: Avoid allocation in `Janet::dynamic` if the passed argument is already null terminated
 - Refactor: Use default implementation on `JanetArgs` trait for most methods
 - Refactor: Simplify `jpanic!` macro

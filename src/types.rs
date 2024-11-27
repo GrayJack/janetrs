@@ -19,7 +19,9 @@ use alloc::{
 #[cfg(feature = "std")]
 use std::error;
 
-use evil_janet::{Janet as CJanet, JanetType as CJanetType};
+use evil_janet::{
+    JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet, JanetType as CJanetType,
+};
 
 pub mod array;
 pub mod buffer;
@@ -928,7 +930,7 @@ impl TryFrom<Janet> for isize {
         match value.unwrap() {
             TaggedJanet::Abstract(x) => Ok(x.into_inner::<i64>()? as isize),
             TaggedJanet::Number(x) => {
-                if x >= i32::MIN as f64 && x <= i32::MAX as f64 {
+                if (JANET_INTMIN_DOUBLE..=JANET_INTMAX_DOUBLE).contains(&x) {
                     Ok(x.trunc() as isize)
                 } else {
                     Err(JanetConversionError::InvalidSSize(x))
@@ -969,7 +971,7 @@ impl TryFrom<Janet> for usize {
         match value.unwrap() {
             TaggedJanet::Abstract(x) => Ok(x.into_inner::<u64>()? as usize),
             TaggedJanet::Number(x) => {
-                if x >= i32::MIN as f64 && x <= i32::MAX as f64 {
+                if (0.0..=JANET_INTMAX_DOUBLE).contains(&x) {
                     Ok(x.trunc() as usize)
                 } else {
                     Err(JanetConversionError::InvalidUSize(x))
@@ -1002,10 +1004,18 @@ impl TryFrom<Janet> for i64 {
 
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        // FIXME: To have parity with C janet semantics, we have to accept JanetString as well
         match value.unwrap() {
             TaggedJanet::Abstract(x) => Ok(x.into_inner()?),
-            got => Err(JanetConversionError::wrong_kind(
-                JanetType::Abstract,
+            TaggedJanet::Number(x) => {
+                if (JANET_INTMIN_DOUBLE..=JANET_INTMAX_DOUBLE).contains(&x) {
+                    Ok(x.trunc() as i64)
+                } else {
+                    Err(JanetConversionError::InvalidInt32(x))
+                }
+            },
+            got => Err(JanetConversionError::multi_wrong_kind(
+                vec![JanetType::Abstract, JanetType::Number],
                 got.kind(),
             )),
         }
@@ -1031,10 +1041,18 @@ impl TryFrom<Janet> for u64 {
 
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
+        // FIXME: To have parity with C janet semantics, we have to accept JanetString as well
         match value.unwrap() {
             TaggedJanet::Abstract(x) => Ok(x.into_inner()?),
-            got => Err(JanetConversionError::wrong_kind(
-                JanetType::Abstract,
+            TaggedJanet::Number(x) => {
+                if (0.0..=JANET_INTMAX_DOUBLE).contains(&x) {
+                    Ok(x.trunc() as u64)
+                } else {
+                    Err(JanetConversionError::InvalidUInt32(x))
+                }
+            },
+            got => Err(JanetConversionError::multi_wrong_kind(
+                vec![JanetType::Abstract, JanetType::Number],
                 got.kind(),
             )),
         }
