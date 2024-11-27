@@ -9,6 +9,7 @@ All notable changes to the library should be put here
 - **Breaking** Refactor: Turn `JanetConversionError` into a enum
 - **Breaking** Refactor: Refactor `CFunOptions` to use `CStr` instead of `str`
 - **Breaking** Refactor: Use `usize` for length/index/capacity in collections
+- **Breaking** Refactor: Make `IsJanetAbstract` an unsafe trait
 - **Breaking** Feat: Make `amalgation` feature enabled by default
 - Feat: Add `Janet::dynamic_from_cstr` constructor
 - Feat: Add `JanetArgs::get_value` and `JanetArgs::get_tagged` trait methods

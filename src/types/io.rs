@@ -100,7 +100,7 @@ impl JanetFile {
     }
 }
 
-impl IsJanetAbstract for JanetFile {
+unsafe impl IsJanetAbstract for JanetFile {
     type Get = Self;
 
     const SIZE: usize = mem::size_of::<evil_janet::JanetFile>();

@@ -341,8 +341,17 @@ impl Ord for JanetAbstract {
 }
 
 /// The trait that encodes the information required to instantiate the implementer as
-/// [`JanetAbstract`]
-pub trait IsJanetAbstract {
+/// [`JanetAbstract`].
+///
+/// # Safety
+/// Implementing this trait is not trivial if the type implements [`Drop`] and can cause
+/// undefined behavior if not implemented carefully.
+///
+/// Usually that can be solved by defining [`Get`](IsJanetAbstract::Get) as a
+/// [`ManuallyDrop<Self>`]. But in that case, you also become responsible to define
+/// [`JanetAbstractType::gc`] function to properly handle the dropping of the type for the
+/// Janet-side.
+pub unsafe trait IsJanetAbstract {
     /// The type that you get when you call [`JanetAbstract::get`] family of functions.
     ///
     /// This is usually set to `Self` when the type does not implement [`Drop`], or
@@ -375,7 +384,7 @@ pub fn register<T: IsJanetAbstract>() {
     }
 }
 
-impl IsJanetAbstract for i64 {
+unsafe impl IsJanetAbstract for i64 {
     type Get = i64;
 
     const SIZE: usize = core::mem::size_of::<Self>();
@@ -386,7 +395,7 @@ impl IsJanetAbstract for i64 {
     }
 }
 
-impl IsJanetAbstract for u64 {
+unsafe impl IsJanetAbstract for u64 {
     type Get = u64;
 
     const SIZE: usize = core::mem::size_of::<Self>();
@@ -397,7 +406,7 @@ impl IsJanetAbstract for u64 {
     }
 }
 
-impl<A> IsJanetAbstract for ManuallyDrop<A>
+unsafe impl<A> IsJanetAbstract for ManuallyDrop<A>
 where
     A: IsJanetAbstract,
 {
@@ -490,7 +499,7 @@ mod tests {
         bytes: None,
     };
 
-    impl IsJanetAbstract for TestDrop {
+    unsafe impl IsJanetAbstract for TestDrop {
         type Get = ManuallyDrop<Self>;
 
         const SIZE: usize = core::mem::size_of::<Self>();
@@ -538,7 +547,7 @@ mod tests {
         bytes: None,
     };
 
-    impl IsJanetAbstract for TestDrop2 {
+    unsafe impl IsJanetAbstract for TestDrop2 {
         type Get = Self;
 
         const SIZE: usize = core::mem::size_of::<Self>();
