@@ -57,7 +57,7 @@ impl Parse for Args {
 
         if content.len() == 2 && content[0] == content[1] {
             return Err(syn::parse::Error::new(
-                args_span,
+                content[0].span(),
                 "repeated argument kind: There must be only one argument of each kind, that is, \
                  only one of `arity` or `check_mut_ref`",
             ));
@@ -397,6 +397,7 @@ impl Parse for JanetVersionArgs {
         if args.len() > 2 {
             let span = args
                 .iter()
+                .skip(2)
                 .map(|a| a.span())
                 .reduce(|a, other| a.join(other).unwrap_or(other))
                 .unwrap();

@@ -20,7 +20,7 @@ fn main() -> Result<(), Error> {
 
     client.run("(print `Hello from Janet!`)")?;
 
-    client.add_c_fn(CFunOptions::new(c"testing", testing));
+    client.add_c_fn(CFunOptions::new(c"testing", testing_c));
 
     // let out = client.run("(+ 2 2)")?;
 

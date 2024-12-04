@@ -2,4 +2,4 @@ error: expected fn item
  --> tests/02-not-function:4:1
   |
 4 | struct A(i32);
-  | ^^^^^^
+  | ^^^^^^^^^^^^^^

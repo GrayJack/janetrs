@@ -11,9 +11,10 @@ use utils::{Arg, Args, ArityArgs, JanetVersionArgs, janet_path_checker};
 
 use crate::utils::ModArgs;
 
-/// Macro that tranforms a high-level Janet function (`fn(&mut [Janet]) -> Janet`)
-/// to the thing the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) ->
-/// janetrs::lowlevel::Janet`)
+/// Macro that creates from a high-level Janet function (`fn(&mut [Janet]) -> Janet`)
+/// to the kind of function the Janet C API is expecting (`fn(i32, *mut
+/// janetrs::lowlevel::Janet) -> janetrs::lowlevel::Janet`) with a modified name with `_c`
+/// postfix.
 ///
 /// The optional argument `catch` adds code to catch Rust panics and transform them to
 /// Janet panics. This argument is ignored if the `std` feature is deactivated.
@@ -113,6 +114,11 @@ pub fn janet_fn(args: TokenStream, input: TokenStream) -> TokenStream {
         let doc_str = utils::get_doc(attrs.as_ref());
         let vis = f.vis;
         let name = f.sig.ident;
+        let name_c_fn = {
+            let mut name_c_fn = name.to_string();
+            name_c_fn.push_str("_c");
+            syn::Ident::new(&name_c_fn, name.span())
+        };
         let name_docstring_ = {
             let mut docstring = name.to_string();
             docstring.push_str("_docstring_");
@@ -135,24 +141,25 @@ pub fn janet_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                 if let syn::Type::Reference(syn::TypeReference {
                     mutability,
                     ref elem,
+                    ref and_token,
                     ..
                 }) = **ty
                 {
                     if mutability.is_none() {
-                        return quote_spanned! {ty.span() => compile_error!("expected argument to be a mutable reference and found a immutable reference");}.into();
+                        return quote_spanned! {and_token.span() => compile_error!("expected argument to be a mutable reference and found a immutable reference");}.into();
                     } else if let syn::Type::Slice(syn::TypeSlice {
                         elem: ref slice, ..
                     }) = **elem
                     {
                         if let syn::Type::Path(syn::TypePath { ref path, .. }) = **slice {
                             if !janet_path_checker(path) {
-                                return quote_spanned! {path.span() => compile_error!("expected to be a `janetrs::Janet`");}.into();
+                                return quote_spanned! {path.span() => compile_error!("expected argument to be a `janetrs::Janet`");}.into();
                             }
                         } else {
-                            return quote_spanned! {slice.span() => compile_error!("expected to be a `janetrs::Janet`");}.into();
+                            return quote_spanned! {slice.span() => compile_error!("expected argument to be a `janetrs::Janet`");}.into();
                         }
                     } else {
-                        return quote_spanned! {elem.span() => compile_error!("expected to be a slice of `janetrs::Janet`");}.into();
+                        return quote_spanned! {elem.span() => compile_error!("expected argument to be a slice of `janetrs::Janet`");}.into();
                     }
                 } else {
                     return quote_spanned! {ty.span() => compile_error!("expected argument to be a mutable reference and found something that is not a reference at all");}.into();
@@ -167,10 +174,10 @@ pub fn janet_fn(args: TokenStream, input: TokenStream) -> TokenStream {
             if let syn::ReturnType::Type(_, ty) = f.sig.output {
                 if let syn::Type::Path(syn::TypePath { ref path, .. }) = *ty {
                     if !janet_path_checker(path) {
-                        return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::Janet`");}.into();
+                        return quote_spanned! {path.span() => compile_error!("expected return type to be `janetrs::Janet`");}.into();
                     }
                 } else {
-                    return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::Janet`");}.into();
+                    return quote_spanned! {ty.span() => compile_error!("expected return type to be `janetrs::Janet`");}.into();
                 }
             } else {
                 return quote_spanned! {output_span => compile_error!("expected return type to be `janetrs::Janet`");}.into();
@@ -183,10 +190,7 @@ pub fn janet_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                 const #name_file_: &str = ::core::concat!(::core::file!(), "\0");
                 #[allow(non_upper_case_globals)]
                 const #name_line_: u32 = ::core::line!() + 1;
-                #(#attrs)* #[no_mangle] #vis unsafe extern "C-unwind" fn #name(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
-                    #[inline]
-                    #fun_clone
-
+                #(#attrs)* #[no_mangle] #vis unsafe extern "C-unwind" fn #name_c_fn(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
                     let args = unsafe { core::slice::from_raw_parts_mut(argv, argc as usize) };
                     let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::Janet])};
 
@@ -194,9 +198,18 @@ pub fn janet_fn(args: TokenStream, input: TokenStream) -> TokenStream {
 
                     #name(args).into()
                 }
+                #[inline]
+                #fun_clone
             }
         } else {
-            quote_spanned! {f_clone.sig.inputs.span() => compile_error!("expected exactly one argument of type `&mut [janetrs::Janet]`");}
+            let s = {
+                let syn::FnArg::Typed(arg) = f_clone.sig.inputs.get(0).unwrap().clone() else {
+                    panic!("`self` not valid here")
+                };
+
+                arg.pat.span()
+            };
+            quote_spanned! {s => compile_error!("expected exactly one argument of type `&mut [janetrs::Janet]`");}
         }
     } else {
         quote_spanned! {func.span() => compile_error!("expected fn item");}
@@ -330,7 +343,11 @@ pub fn declare_janet_mod(input: TokenStream) -> TokenStream {
 
     let regs_ext = fn_doc_lits.iter().enumerate().map(|(i, doc_lit)| {
         let fn_name = &fn_names[i];
-        let fn_ptr_ident = &fn_ptr_idents[i];
+        let fn_ptr_ident = {
+            let mut name = fn_ptr_idents[i].to_string();
+            name.push_str("_c");
+            syn::Ident::new(&name, name.span())
+        };
         let fn_doc_ident = &fn_doc_idents[i];
         let fn_line_ident = &fn_line_idents[i];
         let fn_file_ident = &fn_file_idents[i];

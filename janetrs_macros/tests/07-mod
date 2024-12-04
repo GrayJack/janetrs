@@ -15,8 +15,8 @@ pub fn string(_args: &mut [Janet]) -> Janet {
 }
 
 janet_mod!("rust";
-    {"hello", rust_hello, "(rust/hello)\n\nRust say hello"},
-    {"string", string, "(rust/string\n\nReturn a string"},
+    {"hello", rust_hello_c, "(rust/hello)\n\nRust say hello"},
+    {"string", string_c, "(rust/string\n\nReturn a string"},
 );
 
 fn main() {}
