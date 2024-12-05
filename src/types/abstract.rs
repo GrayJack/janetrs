@@ -34,9 +34,7 @@ impl fmt::Display for AbstractError {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
-impl std::error::Error for AbstractError {}
+impl core::error::Error for AbstractError {}
 
 /// Type that represents the Janet Abstract type.
 ///

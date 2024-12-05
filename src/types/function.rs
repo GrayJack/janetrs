@@ -1,5 +1,6 @@
 //! Janet function types.
 use core::{
+    error,
     fmt::{self, Display},
     marker::PhantomData,
     ptr,
@@ -9,10 +10,7 @@ use core::{
 use core::fmt::Write;
 
 #[cfg(feature = "std")]
-use std::{
-    error,
-    io::{self, Write},
-};
+use std::io::{self, Write};
 
 use evil_janet::{JanetFunction as CJanetFunction, janet_pcall};
 
@@ -157,8 +155,6 @@ impl Display for CallError<'_> {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl error::Error for CallError<'_> {}
 
 /// A representation of a Janet function defined at the Janet side.

@@ -1896,9 +1896,7 @@ impl fmt::Display for OccupiedError<'_, '_> {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
-impl std::error::Error for OccupiedError<'_, '_> {}
+impl core::error::Error for OccupiedError<'_, '_> {}
 
 /// An iterator over a reference to the [`JanetTable`] key-value pairs.
 #[derive(Clone)]

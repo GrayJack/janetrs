@@ -38,6 +38,7 @@ All notable changes to the library should be put here
 - Refactor: Use default implementation on `JanetArgs` trait for most methods
 - Refactor: Simplify `jpanic!` macro
 - Refactor: janetrs_macros 0.7.0 — Update `syn` crate to 2.0
+- Refactor: Use `core::error`
 - Fix: janetrs_macros 0.7.1 — Fix `janet_fn` attribute macro not generating Janet docstring correctly
 - Fix: janetrs_version — Add missed feature flag `inline-more`
 - Fix: Fix conversion from `Janet` to 32 bit integers

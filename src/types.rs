@@ -6,6 +6,7 @@
 //!  - `'data` is the lifetime of data that is owned by the Janet GC.
 use core::{
     cmp::Ordering,
+    error,
     ffi::{CStr, c_char},
     fmt::{self, Display, Write},
     num::ParseIntError,
@@ -17,9 +18,6 @@ use alloc::{
     vec,
     vec::Vec,
 };
-
-#[cfg(feature = "std")]
-use std::error;
 
 use evil_janet::{
     JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet, JanetType as CJanetType,
@@ -124,8 +122,6 @@ impl From<ParseIntError> for JanetConversionError {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl error::Error for JanetConversionError {}
 
 impl Display for JanetConversionError {
@@ -792,8 +788,6 @@ impl Display for Janet {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 impl error::Error for Janet {}
 
 impl PartialEq<&Self> for Janet {

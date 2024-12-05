@@ -1,11 +1,12 @@
 //! This module implements anything required to run a Janet client.
 use core::{
+    error::Error as StdError,
     fmt::{self, Display},
     sync::atomic::{AtomicBool, Ordering},
 };
 
 #[cfg(feature = "std")]
-use std::{error::Error as StdError, thread_local};
+use std::thread_local;
 
 use crate::{
     Janet, JanetTable,
