@@ -1,9 +1,6 @@
 //! Module for the Janet VM environment structure, methods and functions.
 use core::{ffi::CStr, ptr};
 
-#[cfg(not(feature = "std"))]
-use alloc::{format, string::String};
-
 use crate::{
     Janet, JanetBuffer, JanetKeyword, JanetString, JanetSymbol, JanetTable,
     function::JanetRawCFunction,
