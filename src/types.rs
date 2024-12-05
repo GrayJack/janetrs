@@ -8,6 +8,7 @@ use core::{
     cmp::Ordering,
     ffi::{CStr, c_char},
     fmt::{self, Display, Write},
+    num::ParseIntError,
 };
 
 #[cfg(not(feature = "std"))]
@@ -88,7 +89,7 @@ pub trait DeepEq<Rhs = Self> {
 ///
 /// This error only occurs when the [`Janet`] and the type it was being converted doesn't
 /// match.
-#[derive(Debug, PartialEq, PartialOrd, Default)]
+#[derive(Debug, PartialEq, Default)]
 #[non_exhaustive]
 pub enum JanetConversionError {
     /// Mismatched types.
@@ -101,6 +102,7 @@ pub enum JanetConversionError {
     InvalidUInt32(f64),
     InvalidSSize(f64),
     InvalidUSize(f64),
+    IntFromStr(ParseIntError),
     #[default]
     Other,
 }
@@ -112,6 +114,12 @@ impl JanetConversionError {
 
     pub const fn multi_wrong_kind(expected: Vec<JanetType>, got: JanetType) -> Self {
         Self::MultiWrongKind(expected, got)
+    }
+}
+
+impl From<ParseIntError> for JanetConversionError {
+    fn from(value: ParseIntError) -> Self {
+        Self::IntFromStr(value)
     }
 }
 
@@ -146,6 +154,9 @@ impl Display for JanetConversionError {
             },
             Self::InvalidSSize(bad_value) => write!(f, "Expected signed size, got {bad_value}"),
             Self::InvalidUSize(bad_value) => write!(f, "Expected unsigned size, got {bad_value}"),
+            Self::IntFromStr(err) => {
+                write!(f, "Error while converting integer from string: {err}")
+            },
             Self::Other => f.pad("Error converting Janet to concrete type"),
         }
     }
@@ -936,8 +947,9 @@ impl TryFrom<Janet> for isize {
                     Err(JanetConversionError::InvalidSSize(x))
                 }
             },
+            TaggedJanet::String(s) => Ok(s.to_str_lossy().parse::<isize>()?),
             got => Err(JanetConversionError::multi_wrong_kind(
-                vec![JanetType::Abstract, JanetType::Number],
+                vec![JanetType::Abstract, JanetType::String, JanetType::Number],
                 got.kind(),
             )),
         }
@@ -977,8 +989,9 @@ impl TryFrom<Janet> for usize {
                     Err(JanetConversionError::InvalidUSize(x))
                 }
             },
+            TaggedJanet::String(s) => Ok(s.to_str_lossy().parse::<usize>()?),
             got => Err(JanetConversionError::multi_wrong_kind(
-                vec![JanetType::Abstract, JanetType::Number],
+                vec![JanetType::Abstract, JanetType::String, JanetType::Number],
                 got.kind(),
             )),
         }
@@ -1004,7 +1017,6 @@ impl TryFrom<Janet> for i64 {
 
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        // FIXME: To have parity with C janet semantics, we have to accept JanetString as well
         match value.unwrap() {
             TaggedJanet::Abstract(x) => Ok(x.into_inner()?),
             TaggedJanet::Number(x) => {
@@ -1014,8 +1026,9 @@ impl TryFrom<Janet> for i64 {
                     Err(JanetConversionError::InvalidInt32(x))
                 }
             },
+            TaggedJanet::String(s) => Ok(s.to_str_lossy().parse::<i64>()?),
             got => Err(JanetConversionError::multi_wrong_kind(
-                vec![JanetType::Abstract, JanetType::Number],
+                vec![JanetType::Abstract, JanetType::String, JanetType::Number],
                 got.kind(),
             )),
         }
@@ -1041,7 +1054,6 @@ impl TryFrom<Janet> for u64 {
 
     #[inline]
     fn try_from(value: Janet) -> Result<Self, Self::Error> {
-        // FIXME: To have parity with C janet semantics, we have to accept JanetString as well
         match value.unwrap() {
             TaggedJanet::Abstract(x) => Ok(x.into_inner()?),
             TaggedJanet::Number(x) => {
@@ -1051,8 +1063,9 @@ impl TryFrom<Janet> for u64 {
                     Err(JanetConversionError::InvalidUInt32(x))
                 }
             },
+            TaggedJanet::String(s) => Ok(s.to_str_lossy().parse::<u64>()?),
             got => Err(JanetConversionError::multi_wrong_kind(
-                vec![JanetType::Abstract, JanetType::Number],
+                vec![JanetType::Abstract, JanetType::String, JanetType::Number],
                 got.kind(),
             )),
         }

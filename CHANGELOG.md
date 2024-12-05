@@ -11,6 +11,7 @@ All notable changes to the library should be put here
 - **Breaking** Refactor: Use `usize` for length/index/capacity in collections
 - **Breaking** Refactor: Make `IsJanetAbstract` an unsafe trait
 - **Breaking** Feat: Make `amalgation` feature enabled by default
+- **Breaking** Feat: Make `#[janet_fn]` maintain the high-level function in scope
 - Feat: Add `Janet::dynamic_from_cstr` constructor
 - Feat: Add `JanetArgs::get_value` and `JanetArgs::get_tagged` trait methods
 - Feat: Add `JanetArgs::get_or_default` trait method
@@ -32,6 +33,7 @@ All notable changes to the library should be put here
 - Feat: Add conversion from `Janet` to `isize` and `usize`
 - Feat: Add conversion from `isize`/`usize` to `Janet`
 - Feat: Make conversion from `Janet` to `i64` and `u64` accept when Janet is Number
+- Feat: Make conversion from `Janet` to `i64`, `u64`, `usize`, `isize` accept when Janet is String
 - Perf: Avoid allocation in `Janet::dynamic` if the passed argument is already null terminated
 - Refactor: Use default implementation on `JanetArgs` trait for most methods
 - Refactor: Simplify `jpanic!` macro
