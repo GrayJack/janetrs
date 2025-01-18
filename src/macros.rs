@@ -210,8 +210,8 @@ macro_rules! table {
 /// }
 ///
 /// janet_mod!("rust";
-///     {"hello", rust_hello, "(rust/hello)\n\nRust say hello"},
-///     {"hi", hi, "(rust/hi)\n\nHi! My name is..."}
+///     {"hello", rust_hello_c, "(rust/hello)\n\nRust say hello"},
+///     {"hi", hi_c, "(rust/hi)\n\nHi! My name is..."}
 /// );
 /// ```
 #[deprecated(since = "0.4.0", note = "use `declare_janet_mod` instead")]

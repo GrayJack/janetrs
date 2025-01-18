@@ -238,7 +238,7 @@ impl JanetClient {
     /// let mut client = JanetClient::init()?;
     /// assert!(client.env().is_none());
     ///
-    /// client.add_c_fn(CFunOptions::new(c"test", test));
+    /// client.add_c_fn(CFunOptions::new(c"test", test_c));
     /// assert!(client.env().is_some());
     ///
     /// let c = client.run("test")?;
