@@ -54,17 +54,17 @@ pub use tuple::JanetTuple;
 
 use crate::{env::JanetEnvironment, janet_abstract::AbstractError};
 
-const JANET_SIZEMAX: isize = if cfg!(target_pointer_width = "32") {
-    i32::MAX as isize
-} else {
-    evil_janet::JANET_INTMAX_INT64 as isize
-};
+// const JANET_SIZEMAX: isize = if cfg!(target_pointer_width = "32") {
+//     i32::MAX as isize
+// } else {
+//     evil_janet::JANET_INTMAX_INT64 as isize
+// };
 
-const JANET_SIZEMIN: isize = if cfg!(target_pointer_width = "32") {
-    i32::MIN as isize
-} else {
-    evil_janet::JANET_INTMIN_INT64 as isize
-};
+// const JANET_SIZEMIN: isize = if cfg!(target_pointer_width = "32") {
+//     i32::MIN as isize
+// } else {
+//     evil_janet::JANET_INTMIN_INT64 as isize
+// };
 
 /// A trait to express a deep equality.
 ///

@@ -112,7 +112,11 @@ impl JanetEnvironment {
             },
         ];
 
-        unsafe { evil_janet::janet_cfuns(self.0.raw, namespace, reg.as_ptr()) }
+        if cfun_opt.namespace.is_some() {
+            unsafe { evil_janet::janet_cfuns_prefix(self.0.raw, namespace, reg.as_ptr()) }
+        } else {
+            unsafe { evil_janet::janet_cfuns(self.0.raw, namespace, reg.as_ptr()) }
+        }
     }
 
     /// Add a C function in the environment and register it on the VM.
@@ -152,7 +156,11 @@ impl JanetEnvironment {
             },
         ];
 
-        unsafe { evil_janet::janet_cfuns_ext(self.0.raw, namespace, reg.as_ptr()) }
+        if cfun_opt.namespace.is_some() {
+            unsafe { evil_janet::janet_cfuns_ext_prefix(self.0.raw, namespace, reg.as_ptr()) }
+        } else {
+            unsafe { evil_janet::janet_cfuns_ext(self.0.raw, namespace, reg.as_ptr()) }
+        }
     }
 
     /// Search the given `symbol` in the environment and returns the value if found.
