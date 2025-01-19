@@ -34,6 +34,7 @@ All notable changes to the library should be put here
 - Feat: Add conversion from `isize`/`usize` to `Janet`
 - Feat: Make conversion from `Janet` to `i64` and `u64` accept when Janet is Number
 - Feat: Make conversion from `Janet` to `i64`, `u64`, `usize`, `isize` accept when Janet is String
+- Feat: Always have `#[no_std]` and import std when `std` feature is activated
 - Perf: Avoid allocation in `Janet::dynamic` if the passed argument is already null terminated
 - Refactor: Use default implementation on `JanetArgs` trait for most methods
 - Refactor: Simplify `jpanic!` macro
@@ -43,6 +44,7 @@ All notable changes to the library should be put here
 - Fix: janetrs_version — Add missed feature flag `inline-more`
 - Fix: Fix conversion from `Janet` to 32 bit integers
 - Fix: Fix bounds checking for `JanetArray::insert`
+- Fix: Fix adding C functions to environment/client with namespace
 
 ## 0.7.0
 
