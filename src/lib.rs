@@ -14,12 +14,11 @@
 //!
 //! ## Cargo Features
 //!
-//! - `std`: Enable some trait impl for types that only exist on the `std`
-//! - `unicode`: Enable more methods for JanetString and JanetBuffer
+//! - `std` (default): Enable some trait impl for types that only exist on the `std`
+//! - `unicode` (default): Enable more methods for JanetString and JanetBuffer
 //! - `inline-more`: More aggressive inlining
-//! - `amalgation`: Link the Janet runtime to the package, enabling to use the client
-//!   module
-//! - `unicode`: Enable some unicode methods for JanetString and JanetBuffer
+//! - `amalgation` (default): Link the Janet runtime to the package, enabling to use the
+//!   client module
 //! - `system`: Use system header to get Janet functions
 //! - `link-system`: Link the Janet runtime to the package from the system, enabling to
 //!   use the client module
