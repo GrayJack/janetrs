@@ -2,7 +2,7 @@
 
 All notable changes to the library should be put here
 
-## Unreleased
+## 0.8.0
 
 - **Breaking** Refactor: Rename `JanetArgs::get_unwrapped` to `JanetArgs::try_get`
 - **Breaking** Refactor: Rename `JanetArgs::get_panic` to `JanetArgs::get_or_panic`
