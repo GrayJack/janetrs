@@ -9,7 +9,6 @@ use core::{
 
 use alloc::borrow::Cow;
 
-#[cfg(not(feature = "std"))]
 use alloc::string::String;
 
 #[cfg(feature = "std")]

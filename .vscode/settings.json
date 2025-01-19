@@ -1,8 +1,13 @@
 {
+    "rust-analyzer.cargo.extraEnv": {
+        "CFLAGS": "",
+        "CXXFLAGS": ""
+    },
     "rust-analyzer.checkOnSave.features": ["amalgation", "nightly"],
     "rust-analyzer.cargo.features": [
         "amalgation", "nightly"
     ],
+    "rust-analyzer.imports.preferNoStd": true,
     "rust-analyzer.completion.snippets.custom": {
         "JanetRS Test": {
             "prefix": ["janetrstest", "test"],

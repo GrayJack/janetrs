@@ -54,7 +54,7 @@
 //! ### TODO: Lib level
 //!  - Better docs.
 //!  - Marshalling mechanism
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
@@ -66,6 +66,9 @@ compile_error!(r#"You can only use either "amalgation" or "system" feature, not 
 
 // Janet requires allocation
 extern crate alloc;
+
+#[cfg(any(test, feature = "std"))]
+extern crate std;
 
 /// This module has a expose the entire Janet C-API structures, constants and functions.
 ///

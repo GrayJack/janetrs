@@ -12,7 +12,6 @@ use core::{
     num::ParseIntError,
 };
 
-#[cfg(not(feature = "std"))]
 use alloc::{
     string::{String, ToString},
     vec,
