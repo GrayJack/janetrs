@@ -14,8 +14,7 @@
 //!
 //! ## Cargo Features
 //!
-//! - `std`: Enable some trait impl for types that only exist on the `std` and the Error
-//!   trait
+//! - `std`: Enable some trait impl for types that only exist on the `std`
 //! - `unicode`: Enable more methods for JanetString and JanetBuffer
 //! - `inline-more`: More aggressive inlining
 //! - `amalgation`: Link the Janet runtime to the package, enabling to use the client
