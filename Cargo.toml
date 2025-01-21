@@ -36,7 +36,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 bstr = { version = "1.0.0", default-features = false, features = ["alloc"] }
 evil-janet = "1"
-janetrs_macros = { version = "0.7.2", path = "janetrs_macros" }
+janetrs_macros = { version = "0.7.3", path = "janetrs_macros" }
 janetrs_version = { version = "0.1.0", path = "janetrs_version" }
 libc = { version = "0.2", default-features = false, features = [
     "extra_traits",
