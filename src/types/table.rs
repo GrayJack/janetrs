@@ -39,12 +39,12 @@ use crate::cjvg;
 ///
 /// [table]: https://janet-lang.org/docs/data_structures/tables.html
 #[repr(transparent)]
-pub struct JanetTable<'data> {
+pub struct JanetTable {
     pub(crate) raw: *mut CJanetTable,
-    phatom: PhantomData<&'data ()>,
+    phatom: PhantomData<alloc::rc::Rc<[(Janet, Janet)]>>,
 }
 
-impl<'data> JanetTable<'data> {
+impl JanetTable {
     /// Create a empty [`JanetTable`].
     ///
     /// It is initially created with capacity 1, so it will not allocate until it is
@@ -99,7 +99,7 @@ impl<'data> JanetTable<'data> {
     /// ```
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn with_prototype(proto: JanetTable<'data>) -> Self {
+    pub fn with_prototype(proto: JanetTable) -> Self {
         let mut t = Self::new();
         t.set_prototype(&proto);
         t
@@ -367,7 +367,7 @@ impl<'data> JanetTable<'data> {
     /// assert_eq!(table.get(10), Some(&Janet::boolean(true)));
     /// ```
     #[inline]
-    pub fn get_mut(&mut self, key: impl Into<Janet>) -> Option<&'data mut Janet> {
+    pub fn get_mut(&mut self, key: impl Into<Janet>) -> Option<&mut Janet> {
         self.get_key_value_mut(key).map(|(_, v)| v)
     }
 
@@ -396,9 +396,7 @@ impl<'data> JanetTable<'data> {
     /// assert_eq!(table.get_key_value_mut(11), None);
     /// ```
     #[inline]
-    pub fn get_key_value_mut(
-        &mut self, key: impl Into<Janet>,
-    ) -> Option<(&Janet, &'data mut Janet)> {
+    pub fn get_key_value_mut(&mut self, key: impl Into<Janet>) -> Option<(&Janet, &mut Janet)> {
         let key = key.into();
 
         if key.is_nil() {
@@ -435,7 +433,7 @@ impl<'data> JanetTable<'data> {
     /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
-    pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
+    pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &Janet {
         self.get_key_value_unchecked(key).1
     }
 
@@ -445,7 +443,7 @@ impl<'data> JanetTable<'data> {
     /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
-    pub(crate) unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &'data mut Janet {
+    pub(crate) unsafe fn get_mut_unchecked(&mut self, key: impl Into<Janet>) -> &mut Janet {
         self.get_key_value_mut_unchecked(key).1
     }
 
@@ -457,7 +455,7 @@ impl<'data> JanetTable<'data> {
     #[inline]
     pub(crate) unsafe fn get_key_value_mut_unchecked(
         &mut self, key: impl Into<Janet>,
-    ) -> (&Janet, &'data mut Janet) {
+    ) -> (&Janet, &mut Janet) {
         let key = key.into();
 
         // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
@@ -478,9 +476,7 @@ impl<'data> JanetTable<'data> {
     /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
-    pub(crate) unsafe fn get_key_value_unchecked(
-        &self, key: impl Into<Janet>,
-    ) -> (&Janet, &'data Janet) {
+    pub(crate) unsafe fn get_key_value_unchecked(&self, key: impl Into<Janet>) -> (&Janet, &Janet) {
         let key = key.into();
 
         // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
@@ -993,7 +989,7 @@ impl<'data> JanetTable<'data> {
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn try_insert(
         &mut self, key: impl Into<Janet>, value: impl Into<Janet>,
-    ) -> Result<&mut Janet, OccupiedError<'_, 'data>> {
+    ) -> Result<&mut Janet, OccupiedError<'_>> {
         match self.entry(key) {
             Entry::Occupied(entry) => Err(OccupiedError {
                 entry,
@@ -1054,7 +1050,7 @@ impl<'data> JanetTable<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn keys(&self) -> Keys<'_, '_> {
+    pub fn keys(&self) -> Keys<'_> {
         Keys { inner: self.iter() }
     }
 
@@ -1072,7 +1068,7 @@ impl<'data> JanetTable<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn values(&self) -> Values<'_, '_> {
+    pub fn values(&self) -> Values<'_> {
         Values { inner: self.iter() }
     }
 
@@ -1092,7 +1088,7 @@ impl<'data> JanetTable<'data> {
     /// assert!(table.values().all(|v| *v == Janet::number(100.0)));
     /// ```
     #[inline]
-    pub fn values_mut(&mut self) -> ValuesMut<'_, '_> {
+    pub fn values_mut(&mut self) -> ValuesMut<'_> {
         ValuesMut {
             inner: self.iter_mut(),
         }
@@ -1112,7 +1108,7 @@ impl<'data> JanetTable<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn iter(&self) -> Iter<'_, '_> {
+    pub fn iter(&self) -> Iter<'_> {
         Iter {
             table: self,
             kv:    unsafe { (*self.raw).data },
@@ -1137,7 +1133,7 @@ impl<'data> JanetTable<'data> {
     /// assert!(table.values().all(|v| *v == Janet::number(100.0)));
     /// ```
     #[inline]
-    pub fn iter_mut(&mut self) -> IterMut<'_, '_> {
+    pub fn iter_mut(&mut self) -> IterMut<'_> {
         let cap = self.capacity() as isize;
 
         IterMut {
@@ -1171,10 +1167,10 @@ impl<'data> JanetTable<'data> {
     }
 }
 
-impl<'data> JanetTable<'data> {
+impl JanetTable {
     /// Gets the given `key`'s corresponding entry in the table for in-place manipulation.
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn entry(&mut self, key: impl Into<Janet>) -> Entry<'_, 'data> {
+    pub fn entry(&mut self, key: impl Into<Janet>) -> Entry<'_> {
         let key = key.into();
 
         if self.get(key).is_some() {
@@ -1203,7 +1199,7 @@ impl<'data> JanetTable<'data> {
     }
 }
 
-impl Debug for JanetTable<'_> {
+impl Debug for JanetTable {
     #[cfg_attr(feature = "inline-more", inline)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_char('@')?;
@@ -1211,7 +1207,7 @@ impl Debug for JanetTable<'_> {
     }
 }
 
-impl Clone for JanetTable<'_> {
+impl Clone for JanetTable {
     #[inline]
     fn clone(&self) -> Self {
         JanetTable {
@@ -1221,21 +1217,21 @@ impl Clone for JanetTable<'_> {
     }
 }
 
-impl PartialOrd for JanetTable<'_> {
+impl PartialOrd for JanetTable {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for JanetTable<'_> {
+impl Ord for JanetTable {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         self.raw.cmp(&other.raw)
     }
 }
 
-impl PartialEq for JanetTable<'_> {
+impl PartialEq for JanetTable {
     #[inline]
     #[allow(clippy::unconditional_recursion)] // false positive
     fn eq(&self, other: &Self) -> bool {
@@ -1243,9 +1239,9 @@ impl PartialEq for JanetTable<'_> {
     }
 }
 
-impl Eq for JanetTable<'_> {}
+impl Eq for JanetTable {}
 
-impl super::DeepEq for JanetTable<'_> {
+impl super::DeepEq for JanetTable {
     #[inline]
     fn deep_eq(&self, other: &Self) -> bool {
         if self.len() == other.len() {
@@ -1261,9 +1257,9 @@ impl super::DeepEq for JanetTable<'_> {
     }
 }
 
-impl super::DeepEq<JanetStruct<'_>> for JanetTable<'_> {
+impl super::DeepEq<JanetStruct> for JanetTable {
     #[inline]
-    fn deep_eq(&self, other: &JanetStruct<'_>) -> bool {
+    fn deep_eq(&self, other: &JanetStruct) -> bool {
         if self.len() == other.len() {
             return self.iter().all(|(s_key, s_val)| {
                 if let Some(o_val) = other.get(s_key) {
@@ -1277,7 +1273,7 @@ impl super::DeepEq<JanetStruct<'_>> for JanetTable<'_> {
     }
 }
 
-impl Extend<(Janet, Janet)> for JanetTable<'_> {
+impl Extend<(Janet, Janet)> for JanetTable {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = (Janet, Janet)>>(&mut self, iter: T) {
         iter.into_iter().for_each(|(k, v)| {
@@ -1286,7 +1282,7 @@ impl Extend<(Janet, Janet)> for JanetTable<'_> {
     }
 }
 
-impl<'a> Extend<(&'a Janet, &'a Janet)> for JanetTable<'_> {
+impl<'a> Extend<(&'a Janet, &'a Janet)> for JanetTable {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = (&'a Janet, &'a Janet)>>(&mut self, iter: T) {
         iter.into_iter().for_each(|(&k, &v)| {
@@ -1295,36 +1291,36 @@ impl<'a> Extend<(&'a Janet, &'a Janet)> for JanetTable<'_> {
     }
 }
 
-impl JanetExtend<JanetTable<'_>> for JanetTable<'_> {
+impl JanetExtend<JanetTable> for JanetTable {
     /// Extend the table with all key-value pairs of the `other` table.
     #[inline]
-    fn extend(&mut self, other: JanetTable<'_>) {
+    fn extend(&mut self, other: JanetTable) {
         unsafe { evil_janet::janet_table_merge_table(self.raw, other.raw) }
     }
 }
 
-impl Default for JanetTable<'_> {
+impl Default for JanetTable {
     #[inline]
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl From<JanetStruct<'_>> for JanetTable<'_> {
+impl From<JanetStruct> for JanetTable {
     #[inline]
-    fn from(val: JanetStruct<'_>) -> Self {
+    fn from(val: JanetStruct) -> Self {
         val.into_iter().collect()
     }
 }
 
-impl From<&JanetStruct<'_>> for JanetTable<'_> {
+impl From<&JanetStruct> for JanetTable {
     #[inline]
-    fn from(val: &JanetStruct<'_>) -> Self {
+    fn from(val: &JanetStruct) -> Self {
         val.into_iter().collect()
     }
 }
 
-impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
+impl<T: Into<Janet>> Index<T> for JanetTable {
     type Output = Janet;
 
     /// Get a reference to the value of a given `key`.
@@ -1343,8 +1339,8 @@ impl<T: Into<Janet>> Index<T> for JanetTable<'_> {
     }
 }
 
-impl<'data> IntoIterator for JanetTable<'data> {
-    type IntoIter = IntoIter<'data>;
+impl IntoIterator for JanetTable {
+    type IntoIter = IntoIter;
     type Item = (Janet, Janet);
 
     #[inline]
@@ -1361,8 +1357,8 @@ impl<'data> IntoIterator for JanetTable<'data> {
     }
 }
 
-impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
-    type IntoIter = Iter<'a, 'data>;
+impl<'a> IntoIterator for &'a JanetTable {
+    type IntoIter = Iter<'a>;
     type Item = (&'a Janet, &'a Janet);
 
     #[inline]
@@ -1377,9 +1373,9 @@ impl<'a, 'data> IntoIterator for &'a JanetTable<'data> {
     }
 }
 
-impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
-    type IntoIter = IterMut<'a, 'data>;
-    type Item = (&'a Janet, &'data mut Janet);
+impl<'a> IntoIterator for &'a mut JanetTable {
+    type IntoIter = IterMut<'a>;
+    type Item = (&'a Janet, &'a mut Janet);
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
@@ -1393,7 +1389,7 @@ impl<'a, 'data> IntoIterator for &'a mut JanetTable<'data> {
     }
 }
 
-impl<U, J> FromIterator<(U, J)> for JanetTable<'_>
+impl<U, J> FromIterator<(U, J)> for JanetTable
 where
     U: Into<Janet>,
     J: Into<Janet>,
@@ -1422,12 +1418,12 @@ where
 ///
 /// [`entry`]: ./struct.JanetTable.html#method.entry
 #[derive(Debug)]
-pub enum Entry<'a, 'data> {
-    Occupied(OccupiedEntry<'a, 'data>),
-    Vacant(VacantEntry<'a, 'data>),
+pub enum Entry<'a> {
+    Occupied(OccupiedEntry<'a>),
+    Vacant(VacantEntry<'a>),
 }
 
-impl<'a, 'data> Entry<'a, 'data> {
+impl<'a> Entry<'a> {
     /// Provides in-place mutable access to an occupied entry before any potential inserts
     /// into the table.
     #[inline]
@@ -1458,7 +1454,7 @@ impl<'a, 'data> Entry<'a, 'data> {
     /// assert_eq!(entry.key(), Janet::from("Hey"));
     /// ```
     #[inline]
-    pub fn insert(self, value: impl Into<Janet>) -> OccupiedEntry<'a, 'data> {
+    pub fn insert(self, value: impl Into<Janet>) -> OccupiedEntry<'a> {
         match self {
             Self::Occupied(mut entry) => {
                 entry.insert(value);
@@ -1569,13 +1565,13 @@ impl<'a, 'data> Entry<'a, 'data> {
 
 /// A view into an occupied entry in a [`JanetTable`]. It is part of the [`Entry`] enum.
 #[derive(Debug)]
-pub struct OccupiedEntry<'a, 'data> {
+pub struct OccupiedEntry<'a> {
     key:   Option<Janet>,
     elem:  NonNull<(Janet, Janet)>,
-    table: &'a mut JanetTable<'data>,
+    table: &'a mut JanetTable,
 }
 
-impl<'a> OccupiedEntry<'a, '_> {
+impl<'a> OccupiedEntry<'a> {
     /// Gets a reference to the value in the entry.
     ///
     /// # Examples
@@ -1762,12 +1758,12 @@ impl<'a> OccupiedEntry<'a, '_> {
 
 /// A view into a vacant entry in a [`JanetTable`]. It is part of the [`Entry`] enum.
 #[derive(Debug)]
-pub struct VacantEntry<'a, 'data> {
+pub struct VacantEntry<'a> {
     key:   Janet,
-    table: &'a mut JanetTable<'data>,
+    table: &'a mut JanetTable,
 }
 
-impl<'a, 'data> VacantEntry<'a, 'data> {
+impl<'a> VacantEntry<'a> {
     /// Sets the `value` of the entry with the [`VacantEntry`]'s key, and returns a
     /// mutable reference to it.
     ///
@@ -1799,7 +1795,7 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
     /// Sets the `value` of the entry with the [`VacantEntry`]'s key, and return a
     /// [`OccupiedEntry`].
     #[cfg_attr(feature = "inline-more", inline)]
-    fn insert_entry(self, value: impl Into<Janet>) -> OccupiedEntry<'a, 'data> {
+    fn insert_entry(self, value: impl Into<Janet>) -> OccupiedEntry<'a> {
         let value = value.into();
 
         self.table.insert(self.key, value);
@@ -1866,14 +1862,14 @@ impl<'a, 'data> VacantEntry<'a, 'data> {
 /// exists.
 ///
 /// Contains the occupied entry, and the value that was not inserted.
-pub struct OccupiedError<'a, 'data> {
+pub struct OccupiedError<'a> {
     /// The entry in the map that was already occupied.
-    pub entry: OccupiedEntry<'a, 'data>,
+    pub entry: OccupiedEntry<'a>,
     /// The value which was not inserted, because the entry was already occupied.
     pub value: Janet,
 }
 
-impl Debug for OccupiedError<'_, '_> {
+impl Debug for OccupiedError<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("OccupiedError")
@@ -1884,7 +1880,7 @@ impl Debug for OccupiedError<'_, '_> {
     }
 }
 
-impl fmt::Display for OccupiedError<'_, '_> {
+impl fmt::Display for OccupiedError<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!(
@@ -1896,25 +1892,25 @@ impl fmt::Display for OccupiedError<'_, '_> {
     }
 }
 
-impl core::error::Error for OccupiedError<'_, '_> {}
+impl core::error::Error for OccupiedError<'_> {}
 
 /// An iterator over a reference to the [`JanetTable`] key-value pairs.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Iter<'a, 'data> {
-    table: &'a JanetTable<'data>,
+pub struct Iter<'a> {
+    table: &'a JanetTable,
     kv:    *const JanetKV,
     end:   *const JanetKV,
 }
 
-impl Debug for Iter<'_, '_> {
+impl Debug for Iter<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
     }
 }
 
-impl<'a> Iterator for Iter<'a, '_> {
+impl<'a> Iterator for Iter<'a> {
     type Item = (&'a Janet, &'a Janet);
 
     #[inline]
@@ -1950,25 +1946,25 @@ impl<'a> Iterator for Iter<'a, '_> {
     }
 }
 
-impl ExactSizeIterator for Iter<'_, '_> {}
+impl ExactSizeIterator for Iter<'_> {}
 
-impl FusedIterator for Iter<'_, '_> {}
+impl FusedIterator for Iter<'_> {}
 
 /// An iterator over a reference to the [`JanetTable`] keys.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Keys<'a, 'data> {
-    inner: Iter<'a, 'data>,
+pub struct Keys<'a> {
+    inner: Iter<'a>,
 }
 
-impl Debug for Keys<'_, '_> {
+impl Debug for Keys<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.table.keys()).finish()
     }
 }
 
-impl<'a> Iterator for Keys<'a, '_> {
+impl<'a> Iterator for Keys<'a> {
     type Item = &'a Janet;
 
     #[inline]
@@ -1982,18 +1978,18 @@ impl<'a> Iterator for Keys<'a, '_> {
     }
 }
 
-impl ExactSizeIterator for Keys<'_, '_> {}
+impl ExactSizeIterator for Keys<'_> {}
 
-impl FusedIterator for Keys<'_, '_> {}
+impl FusedIterator for Keys<'_> {}
 
 /// An iterator over a reference to the [`JanetTable`] values.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Values<'a, 'data> {
-    inner: Iter<'a, 'data>,
+pub struct Values<'a> {
+    inner: Iter<'a>,
 }
 
-impl<'a> Iterator for Values<'a, '_> {
+impl<'a> Iterator for Values<'a> {
     type Item = &'a Janet;
 
     #[inline]
@@ -2007,34 +2003,34 @@ impl<'a> Iterator for Values<'a, '_> {
     }
 }
 
-impl Debug for Values<'_, '_> {
+impl Debug for Values<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.table.values()).finish()
     }
 }
 
-impl ExactSizeIterator for Values<'_, '_> {}
+impl ExactSizeIterator for Values<'_> {}
 
-impl FusedIterator for Values<'_, '_> {}
+impl FusedIterator for Values<'_> {}
 
 /// An iterator over a mutable reference to the [`JanetTable`] key-value pairs.
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct IterMut<'a, 'data> {
-    table: &'a JanetTable<'data>,
+pub struct IterMut<'a> {
+    table: &'a JanetTable,
     kv:    *mut JanetKV,
     end:   *mut JanetKV,
 }
 
-impl Debug for IterMut<'_, '_> {
+impl Debug for IterMut<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
     }
 }
 
-impl<'a, 'data> Iterator for IterMut<'a, 'data> {
-    type Item = (&'a Janet, &'data mut Janet);
+impl<'a> Iterator for IterMut<'a> {
+    type Item = (&'a Janet, &'a mut Janet);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -2069,25 +2065,25 @@ impl<'a, 'data> Iterator for IterMut<'a, 'data> {
     }
 }
 
-impl ExactSizeIterator for IterMut<'_, '_> {}
+impl ExactSizeIterator for IterMut<'_> {}
 
-impl FusedIterator for IterMut<'_, '_> {}
+impl FusedIterator for IterMut<'_> {}
 
 /// An Iterator over a mutable reference to the [`JanetTable`] values.
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct ValuesMut<'a, 'data> {
-    inner: IterMut<'a, 'data>,
+pub struct ValuesMut<'a> {
+    inner: IterMut<'a>,
 }
 
-impl Debug for ValuesMut<'_, '_> {
+impl Debug for ValuesMut<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.table.clone()).finish()
     }
 }
 
-impl<'data> Iterator for ValuesMut<'_, 'data> {
-    type Item = &'data mut Janet;
+impl<'a> Iterator for ValuesMut<'a> {
+    type Item = &'a mut Janet;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -2100,27 +2096,27 @@ impl<'data> Iterator for ValuesMut<'_, 'data> {
     }
 }
 
-impl ExactSizeIterator for ValuesMut<'_, '_> {}
+impl ExactSizeIterator for ValuesMut<'_> {}
 
-impl FusedIterator for ValuesMut<'_, '_> {}
+impl FusedIterator for ValuesMut<'_> {}
 
 /// An iterator that moves out of a [`JanetTable`].
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct IntoIter<'data> {
-    table: JanetTable<'data>,
+pub struct IntoIter {
+    table: JanetTable,
     kv:    *mut JanetKV,
     end:   *mut JanetKV,
 }
 
-impl Debug for IntoIter<'_> {
+impl Debug for IntoIter {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
     }
 }
 
-impl Iterator for IntoIter<'_> {
+impl Iterator for IntoIter {
     type Item = (Janet, Janet);
 
     #[inline]
@@ -2156,9 +2152,9 @@ impl Iterator for IntoIter<'_> {
     }
 }
 
-impl ExactSizeIterator for IntoIter<'_> {}
+impl ExactSizeIterator for IntoIter {}
 
-impl FusedIterator for IntoIter<'_> {}
+impl FusedIterator for IntoIter {}
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {

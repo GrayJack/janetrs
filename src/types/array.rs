@@ -48,12 +48,12 @@ pub type RSplitNMut<'a, P> = core::slice::RSplitNMut<'a, Janet, P>;
 /// assert_eq!(2, arr.len());
 /// ```
 #[repr(transparent)]
-pub struct JanetArray<'data> {
+pub struct JanetArray {
     pub(crate) raw: *mut CJanetArray,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[Janet]>>,
 }
 
-impl<'data> JanetArray<'data> {
+impl JanetArray {
     /// Creates a empty [`JanetArray`].
     ///
     /// It is initially created with capacity 0, so it will not allocate data space until
@@ -528,7 +528,7 @@ impl<'data> JanetArray<'data> {
     /// assert_eq!(arr[0], &Janet::boolean(true));
     /// ```
     #[inline]
-    pub fn get_mut(&mut self, index: usize) -> Option<&'data mut Janet> {
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Janet> {
         if index >= self.len() {
             None
         } else {
@@ -794,14 +794,14 @@ impl<'data> JanetArray<'data> {
         // This drop guard will be invoked when predicate or `drop` of element panicked.
         // It shifts unchecked elements to cover holes and `set_len` to the correct length.
         // In cases when predicate and `drop` never panick, it will be optimized out.
-        struct BackshiftOnDrop<'a, 'data> {
-            v: &'a mut JanetArray<'data>,
+        struct BackshiftOnDrop<'a> {
+            v: &'a mut JanetArray,
             processed_len: usize,
             deleted_cnt: usize,
             original_len: usize,
         }
 
-        impl Drop for BackshiftOnDrop<'_, '_> {
+        impl Drop for BackshiftOnDrop<'_> {
             fn drop(&mut self) {
                 if self.deleted_cnt > 0 {
                     // SAFETY: Trailing unchecked items must be valid since we never touch them.
@@ -820,7 +820,7 @@ impl<'data> JanetArray<'data> {
         }
 
         fn process_loop<F, const DELETED: bool>(
-            original_len: usize, f: &mut F, g: &mut BackshiftOnDrop<'_, '_>,
+            original_len: usize, f: &mut F, g: &mut BackshiftOnDrop<'_>,
         ) where
             F: FnMut(&mut Janet) -> bool,
         {
@@ -1936,7 +1936,7 @@ impl<'data> JanetArray<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn iter(&self) -> Iter<'_, '_> {
+    pub fn iter(&self) -> Iter<'_> {
         Iter {
             arr: self,
             index_head: 0,
@@ -1958,7 +1958,7 @@ impl<'data> JanetArray<'data> {
     /// assert!(arr.iter().all(|j| j == Janet::from("Janet")));
     /// ```
     #[inline]
-    pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, 'data> {
+    pub fn iter_mut(&mut self) -> IterMut<'_> {
         let len = self.len() as i32;
         IterMut {
             arr: self,
@@ -2681,7 +2681,7 @@ impl<'data> JanetArray<'data> {
     /// assert_deep_eq!(evens, array![2, 4, 6, 8, 14]);
     /// assert_deep_eq!(odds, array![1, 3, 5, 9, 11, 13, 15]);
     /// ```
-    pub fn extract_if<F>(&mut self, filter: F) -> ExtractIf<'_, 'data, F>
+    pub fn extract_if<F>(&mut self, filter: F) -> ExtractIf<'_, F>
     where
         F: FnMut(&mut Janet) -> bool,
     {
@@ -2739,7 +2739,7 @@ impl<'data> JanetArray<'data> {
 }
 
 // Private methods
-impl JanetArray<'_> {
+impl JanetArray {
     fn get_r(&self, range: Range<usize>) -> Option<&[Janet]> {
         if range.start > range.end || range.end > self.len() {
             None
@@ -2783,7 +2783,7 @@ impl JanetArray<'_> {
     }
 }
 
-impl Debug for JanetArray<'_> {
+impl Debug for JanetArray {
     #[cfg_attr(feature = "inline-more", inline)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_char('@')?;
@@ -2791,7 +2791,7 @@ impl Debug for JanetArray<'_> {
     }
 }
 
-impl Clone for JanetArray<'_> {
+impl Clone for JanetArray {
     #[cfg_attr(feature = "inline-more", inline)]
     fn clone(&self) -> Self {
         let mut clone = Self::with_capacity(self.len());
@@ -2802,21 +2802,21 @@ impl Clone for JanetArray<'_> {
     }
 }
 
-impl PartialOrd for JanetArray<'_> {
+impl PartialOrd for JanetArray {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for JanetArray<'_> {
+impl Ord for JanetArray {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         self.raw.cmp(&other.raw)
     }
 }
 
-impl PartialEq for JanetArray<'_> {
+impl PartialEq for JanetArray {
     #[inline]
     #[allow(clippy::unconditional_recursion)] // false positive
     fn eq(&self, other: &Self) -> bool {
@@ -2824,9 +2824,9 @@ impl PartialEq for JanetArray<'_> {
     }
 }
 
-impl Eq for JanetArray<'_> {}
+impl Eq for JanetArray {}
 
-impl DeepEq for JanetArray<'_> {
+impl DeepEq for JanetArray {
     #[inline]
     fn deep_eq(&self, other: &Self) -> bool {
         if self.len() == other.len() {
@@ -2836,7 +2836,7 @@ impl DeepEq for JanetArray<'_> {
     }
 }
 
-impl DeepEq<JanetTuple<'_>> for JanetArray<'_> {
+impl DeepEq<JanetTuple> for JanetArray {
     #[inline]
     fn deep_eq(&self, other: &JanetTuple) -> bool {
         if self.len() == other.len() {
@@ -2847,7 +2847,7 @@ impl DeepEq<JanetTuple<'_>> for JanetArray<'_> {
 }
 
 
-impl AsRef<[Janet]> for JanetArray<'_> {
+impl AsRef<[Janet]> for JanetArray {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
@@ -2862,7 +2862,7 @@ impl AsRef<[Janet]> for JanetArray<'_> {
     }
 }
 
-impl AsMut<[Janet]> for JanetArray<'_> {
+impl AsMut<[Janet]> for JanetArray {
     #[inline]
     fn as_mut(&mut self) -> &mut [Janet] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
@@ -2877,8 +2877,8 @@ impl AsMut<[Janet]> for JanetArray<'_> {
     }
 }
 
-impl<'data> IntoIterator for JanetArray<'data> {
-    type IntoIter = IntoIter<'data>;
+impl IntoIterator for JanetArray {
+    type IntoIter = IntoIter;
     type Item = Janet;
 
     #[inline]
@@ -2893,8 +2893,8 @@ impl<'data> IntoIterator for JanetArray<'data> {
     }
 }
 
-impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
-    type IntoIter = Iter<'a, 'data>;
+impl<'a> IntoIterator for &'a JanetArray {
+    type IntoIter = Iter<'a>;
     type Item = &'a Janet;
 
     #[inline]
@@ -2909,8 +2909,8 @@ impl<'a, 'data> IntoIterator for &'a JanetArray<'data> {
     }
 }
 
-impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
-    type IntoIter = IterMut<'a, 'data>;
+impl<'a> IntoIterator for &'a mut JanetArray {
+    type IntoIter = IterMut<'a>;
     type Item = &'a mut Janet;
 
     #[inline]
@@ -2925,7 +2925,7 @@ impl<'a, 'data> IntoIterator for &'a mut JanetArray<'data> {
     }
 }
 
-impl<U: Into<Janet>> FromIterator<U> for JanetArray<'_> {
+impl<U: Into<Janet>> FromIterator<U> for JanetArray {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
         let iter = iter.into_iter();
@@ -2944,14 +2944,14 @@ impl<U: Into<Janet>> FromIterator<U> for JanetArray<'_> {
     }
 }
 
-impl From<JanetTuple<'_>> for JanetArray<'_> {
+impl From<JanetTuple> for JanetArray {
     #[cfg_attr(feature = "inline-more", inline)]
-    fn from(tup: JanetTuple<'_>) -> Self {
+    fn from(tup: JanetTuple) -> Self {
         tup.into_iter().collect()
     }
 }
 
-impl TryFrom<&[Janet]> for JanetArray<'_> {
+impl TryFrom<&[Janet]> for JanetArray {
     type Error = core::num::TryFromIntError;
 
     #[cfg_attr(feature = "inline-more", inline)]
@@ -2965,7 +2965,7 @@ impl TryFrom<&[Janet]> for JanetArray<'_> {
     }
 }
 
-impl TryFrom<&[CJanet]> for JanetArray<'_> {
+impl TryFrom<&[CJanet]> for JanetArray {
     type Error = core::num::TryFromIntError;
 
     #[inline]
@@ -2979,14 +2979,14 @@ impl TryFrom<&[CJanet]> for JanetArray<'_> {
     }
 }
 
-impl Default for JanetArray<'_> {
+impl Default for JanetArray {
     #[inline]
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Extend<Janet> for JanetArray<'_> {
+impl Extend<Janet> for JanetArray {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = Janet>>(&mut self, iter: T) {
         let iter = iter.into_iter();
@@ -2995,7 +2995,7 @@ impl Extend<Janet> for JanetArray<'_> {
     }
 }
 
-impl<'a> Extend<&'a Janet> for JanetArray<'_> {
+impl<'a> Extend<&'a Janet> for JanetArray {
     #[cfg_attr(feature = "inline-more", inline)]
     fn extend<T: IntoIterator<Item = &'a Janet>>(&mut self, iter: T) {
         let iter = iter.into_iter();
@@ -3004,14 +3004,14 @@ impl<'a> Extend<&'a Janet> for JanetArray<'_> {
     }
 }
 
-impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray<'_> {
+impl<T: AsRef<[Janet]>> JanetExtend<T> for JanetArray {
     #[inline]
     fn extend(&mut self, collection: T) {
         collection.as_ref().iter().for_each(|&elem| self.push(elem))
     }
 }
 
-impl Index<usize> for JanetArray<'_> {
+impl Index<usize> for JanetArray {
     type Output = Janet;
 
     /// Get a immutable reference of the [`Janet`] hold by [`JanetArray`] at `index`.
@@ -3030,7 +3030,7 @@ impl Index<usize> for JanetArray<'_> {
     }
 }
 
-impl IndexMut<usize> for JanetArray<'_> {
+impl IndexMut<usize> for JanetArray {
     /// Get a exclusive reference of the [`Janet`] hold by [`JanetArray`] at `index`.
     ///
     /// # Janet Panics
@@ -3052,20 +3052,20 @@ impl IndexMut<usize> for JanetArray<'_> {
 /// An iterator over a reference to the [`JanetArray`] elements.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Iter<'a, 'data> {
-    arr: &'a JanetArray<'data>,
+pub struct Iter<'a> {
+    arr: &'a JanetArray,
     index_head: i32,
     index_tail: i32,
 }
 
-impl Debug for Iter<'_, '_> {
+impl Debug for Iter<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.arr.as_ref()).finish()
     }
 }
 
-impl<'a> Iterator for Iter<'a, '_> {
+impl<'a> Iterator for Iter<'a> {
     type Item = &'a Janet;
 
     #[inline]
@@ -3086,7 +3086,7 @@ impl<'a> Iterator for Iter<'a, '_> {
     }
 }
 
-impl DoubleEndedIterator for Iter<'_, '_> {
+impl DoubleEndedIterator for Iter<'_> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index_head == self.index_tail {
@@ -3098,19 +3098,19 @@ impl DoubleEndedIterator for Iter<'_, '_> {
     }
 }
 
-impl ExactSizeIterator for Iter<'_, '_> {}
+impl ExactSizeIterator for Iter<'_> {}
 
-impl FusedIterator for Iter<'_, '_> {}
+impl FusedIterator for Iter<'_> {}
 
 /// An iterator over a mutable reference to the [`JanetArray`] elements.
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct IterMut<'a, 'data> {
-    arr: &'a mut JanetArray<'data>,
+pub struct IterMut<'a> {
+    arr: &'a mut JanetArray,
     index_head: i32,
     index_tail: i32,
 }
 
-impl<'a> Iterator for IterMut<'a, '_> {
+impl<'a> Iterator for IterMut<'a> {
     type Item = &'a mut Janet;
 
     #[inline]
@@ -3118,9 +3118,9 @@ impl<'a> Iterator for IterMut<'a, '_> {
         if self.index_head >= self.index_tail {
             None
         } else {
-            let ret = self.arr.get_mut(self.index_head as usize);
+            let index = self.index_head as usize;
             self.index_head += 1;
-            ret
+            Some(unsafe { &mut *self.arr.as_mut_ptr().add(index) })
         }
     }
 
@@ -3131,46 +3131,46 @@ impl<'a> Iterator for IterMut<'a, '_> {
     }
 }
 
-impl Debug for IterMut<'_, '_> {
+impl Debug for IterMut<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.arr.as_ref()).finish()
     }
 }
 
-impl DoubleEndedIterator for IterMut<'_, '_> {
+impl DoubleEndedIterator for IterMut<'_> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index_head == self.index_tail {
             None
         } else {
             self.index_tail -= 1;
-            self.arr.get_mut(self.index_tail as usize)
+            Some(unsafe { &mut *self.arr.as_mut_ptr().add(self.index_tail as usize) })
         }
     }
 }
 
-impl ExactSizeIterator for IterMut<'_, '_> {}
+impl ExactSizeIterator for IterMut<'_> {}
 
-impl FusedIterator for IterMut<'_, '_> {}
+impl FusedIterator for IterMut<'_> {}
 
 /// An iterator that moves out of a [`JanetArray`].
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct IntoIter<'data> {
-    arr: JanetArray<'data>,
+pub struct IntoIter {
+    arr: JanetArray,
     index_head: i32,
     index_tail: i32,
 }
 
-impl Debug for IntoIter<'_> {
+impl Debug for IntoIter {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.arr.as_ref()).finish()
     }
 }
 
-impl Iterator for IntoIter<'_> {
+impl Iterator for IntoIter {
     type Item = Janet;
 
     #[inline]
@@ -3191,7 +3191,7 @@ impl Iterator for IntoIter<'_> {
     }
 }
 
-impl DoubleEndedIterator for IntoIter<'_> {
+impl DoubleEndedIterator for IntoIter {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index_head == self.index_tail {
@@ -3203,9 +3203,9 @@ impl DoubleEndedIterator for IntoIter<'_> {
     }
 }
 
-impl ExactSizeIterator for IntoIter<'_> {}
+impl ExactSizeIterator for IntoIter {}
 
-impl FusedIterator for IntoIter<'_> {}
+impl FusedIterator for IntoIter {}
 
 /// An iterator which uses a closure to determine if an element should be removed.
 ///
@@ -3219,23 +3219,23 @@ impl FusedIterator for IntoIter<'_> {}
 /// # let _client = janetrs::client::JanetClient::init().unwrap();
 ///
 /// let mut array = array![0, 1, 2];
-/// let iter: ExtractIf<'_, '_, _> =
+/// let iter: ExtractIf<'_, _> =
 ///     array.extract_if(|x| x.try_unwrap::<i32>().map(|x| x % 2 == 0).unwrap_or(false));
 /// ```
 #[derive(Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct ExtractIf<'a, 'data, F>
+pub struct ExtractIf<'a, F>
 where
     F: FnMut(&mut Janet) -> bool,
 {
-    arr:     &'a mut JanetArray<'data>,
+    arr:     &'a mut JanetArray,
     idx:     usize,
     del:     usize,
     old_len: usize,
     pred:    F,
 }
 
-impl<F> Iterator for ExtractIf<'_, '_, F>
+impl<F> Iterator for ExtractIf<'_, F>
 where
     F: FnMut(&mut Janet) -> bool,
 {
@@ -3272,7 +3272,7 @@ where
     }
 }
 
-impl<F> Drop for ExtractIf<'_, '_, F>
+impl<F> Drop for ExtractIf<'_, F>
 where
     F: FnMut(&mut Janet) -> bool,
 {
@@ -3614,13 +3614,13 @@ mod tests {
         let _client = JanetClient::init()?;
         let vec = vec![Janet::nil(); 100];
 
-        let jarr: JanetArray<'_> = vec.into_iter().collect();
+        let jarr: JanetArray = vec.into_iter().collect();
         assert_eq!(jarr.len(), 100);
         assert!(jarr.iter().all(|j| j == Janet::nil()));
 
         let vec = vec![101.0; 100];
 
-        let jarr: JanetArray<'_> = vec.into_iter().collect();
+        let jarr: JanetArray = vec.into_iter().collect();
         assert_eq!(jarr.len(), 100);
         assert!(jarr.iter().all(|j| j == Janet::number(101.0)));
         Ok(())
@@ -3764,7 +3764,7 @@ mod tests {
         let _client = JanetClient::init()?;
 
         let mut array = array![0, 1, 2];
-        let _iter: ExtractIf<'_, '_, _> =
+        let _iter: ExtractIf<'_, _> =
             array.extract_if(|x| x.try_unwrap::<i32>().map(|x| x % 2 == 0).unwrap_or(false));
 
 

@@ -2,6 +2,10 @@
 
 All notable changes to the library should be put here
 
+## Unreleased
+
+- **Breaking** Refactor: Janet types are more like a smart pointer in Rust
+
 ## 0.8.0
 
 - **Breaking** Refactor: Rename `JanetArgs::get_unwrapped` to `JanetArgs::try_get`

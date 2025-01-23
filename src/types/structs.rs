@@ -14,12 +14,12 @@ use super::{DeepEq, Janet, JanetTable};
 /// Builder for [`JanetStruct`]s.
 #[derive(Debug)]
 #[must_use = "builder cannot be utilized as a proper JanetStruct, use the `finish` method"]
-pub struct JanetStructBuilder<'data> {
+pub struct JanetStructBuilder {
     raw:     *mut JanetKV,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[(Janet, Janet)]>>,
 }
 
-impl<'data> JanetStructBuilder<'data> {
+impl JanetStructBuilder {
     /// Insert the key-value pair into the builder.
     ///
     /// Keys that are Janet nil or repeated are ignored. Trying to add more keys than the
@@ -38,7 +38,7 @@ impl<'data> JanetStructBuilder<'data> {
     /// Finalize the build process and create [`JanetStruct`].
     #[inline]
     #[must_use = "function finishes building process and returns JanetStruct"]
-    pub fn finalize(self) -> JanetStruct<'data> {
+    pub fn finalize(self) -> JanetStruct {
         JanetStruct {
             raw:     unsafe { evil_janet::janet_struct_end(self.raw) },
             phantom: PhantomData,
@@ -67,17 +67,17 @@ impl<'data> JanetStructBuilder<'data> {
 ///
 /// [`JanetTable`]: ./../table/struct.JanetTable.html
 #[repr(transparent)]
-pub struct JanetStruct<'data> {
+pub struct JanetStruct {
     pub(crate) raw: *const JanetKV,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[(Janet, Janet)]>>,
 }
 
-impl<'data> JanetStruct<'data> {
+impl JanetStruct {
     /// Start the build process to create a [`JanetStruct`].
     ///
     /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
     #[inline]
-    pub fn builder(len: usize) -> JanetStructBuilder<'data> {
+    pub fn builder(len: usize) -> JanetStructBuilder {
         let len = i32::try_from(len).unwrap_or(i32::MAX);
 
         JanetStructBuilder {
@@ -229,7 +229,7 @@ impl<'data> JanetStruct<'data> {
     /// # Safety
     /// This function doesn't check for null pointer and if the key or value as Janet nil
     #[inline]
-    pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &'data Janet {
+    pub(crate) unsafe fn get_unchecked(&self, key: impl Into<Janet>) -> &Janet {
         self.get_key_value_unchecked(key).1
     }
 
@@ -241,7 +241,7 @@ impl<'data> JanetStruct<'data> {
     #[inline]
     pub(crate) unsafe fn get_key_value_unchecked(
         &self, key: impl Into<Janet>,
-    ) -> (&Janet, &'data mut Janet) {
+    ) -> (&Janet, &mut Janet) {
         let key = key.into();
 
         // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
@@ -384,7 +384,7 @@ impl<'data> JanetStruct<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn keys(&self) -> Keys<'_, '_> {
+    pub fn keys(&self) -> Keys<'_> {
         Keys { inner: self.iter() }
     }
 
@@ -402,7 +402,7 @@ impl<'data> JanetStruct<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn values(&self) -> Values<'_, '_> {
+    pub fn values(&self) -> Values<'_> {
         Values { inner: self.iter() }
     }
 
@@ -420,7 +420,7 @@ impl<'data> JanetStruct<'data> {
     /// }
     /// ```
     #[inline]
-    pub fn iter(&self) -> Iter<'_, '_> {
+    pub fn iter(&self) -> Iter<'_> {
         let cap = self.capacity() as isize;
 
         Iter {
@@ -441,14 +441,14 @@ impl<'data> JanetStruct<'data> {
     }
 }
 
-impl Debug for JanetStruct<'_> {
+impl Debug for JanetStruct {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_map().entries(self.iter()).finish()
     }
 }
 
-impl Clone for JanetStruct<'_> {
+impl Clone for JanetStruct {
     #[cfg_attr(feature = "inline-more", inline)]
     fn clone(&self) -> Self {
         let len = self.len();
@@ -462,14 +462,14 @@ impl Clone for JanetStruct<'_> {
     }
 }
 
-impl Default for JanetStruct<'_> {
+impl Default for JanetStruct {
     #[inline]
     fn default() -> Self {
         crate::structs! {}
     }
 }
 
-impl PartialEq for JanetStruct<'_> {
+impl PartialEq for JanetStruct {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         // if the pointer is the same, one are equal to the other
@@ -491,16 +491,16 @@ impl PartialEq for JanetStruct<'_> {
     }
 }
 
-impl Eq for JanetStruct<'_> {}
+impl Eq for JanetStruct {}
 
-impl PartialOrd for JanetStruct<'_> {
+impl PartialOrd for JanetStruct {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for JanetStruct<'_> {
+impl Ord for JanetStruct {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         use core::cmp::Ordering::{Equal, Greater, Less};
@@ -523,7 +523,7 @@ impl Ord for JanetStruct<'_> {
     }
 }
 
-impl DeepEq for JanetStruct<'_> {
+impl DeepEq for JanetStruct {
     #[inline]
     fn deep_eq(&self, other: &Self) -> bool {
         if self.len() == other.len() {
@@ -539,9 +539,9 @@ impl DeepEq for JanetStruct<'_> {
     }
 }
 
-impl DeepEq<JanetTable<'_>> for JanetStruct<'_> {
+impl DeepEq<JanetTable> for JanetStruct {
     #[inline]
-    fn deep_eq(&self, other: &JanetTable<'_>) -> bool {
+    fn deep_eq(&self, other: &JanetTable) -> bool {
         if self.len() == other.len() {
             return self.iter().all(|(s_key, s_val)| {
                 if let Some(o_val) = other.get(s_key) {
@@ -555,16 +555,16 @@ impl DeepEq<JanetTable<'_>> for JanetStruct<'_> {
     }
 }
 
-impl From<JanetTable<'_>> for JanetStruct<'_> {
+impl From<JanetTable> for JanetStruct {
     #[inline]
-    fn from(table: JanetTable<'_>) -> Self {
-        From::<&JanetTable<'_>>::from(&table)
+    fn from(table: JanetTable) -> Self {
+        From::<&JanetTable>::from(&table)
     }
 }
 
-impl From<&JanetTable<'_>> for JanetStruct<'_> {
+impl From<&JanetTable> for JanetStruct {
     #[cfg_attr(feature = "inline-more", inline)]
-    fn from(table: &JanetTable<'_>) -> Self {
+    fn from(table: &JanetTable) -> Self {
         let mut st = Self::builder(table.len());
 
         for (k, v) in table {
@@ -575,7 +575,7 @@ impl From<&JanetTable<'_>> for JanetStruct<'_> {
     }
 }
 
-impl<T: Into<Janet>> Index<T> for JanetStruct<'_> {
+impl<T: Into<Janet>> Index<T> for JanetStruct {
     type Output = Janet;
 
     /// Get a reference to the value of a given `key`.
@@ -593,8 +593,8 @@ impl<T: Into<Janet>> Index<T> for JanetStruct<'_> {
     }
 }
 
-impl<'data> IntoIterator for JanetStruct<'data> {
-    type IntoIter = IntoIter<'data>;
+impl IntoIterator for JanetStruct {
+    type IntoIter = IntoIter;
     type Item = (Janet, Janet);
 
     #[inline]
@@ -607,8 +607,8 @@ impl<'data> IntoIterator for JanetStruct<'data> {
     }
 }
 
-impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
-    type IntoIter = Iter<'a, 'data>;
+impl<'a> IntoIterator for &'a JanetStruct {
+    type IntoIter = Iter<'a>;
     type Item = (&'a Janet, &'a Janet);
 
     #[inline]
@@ -623,7 +623,7 @@ impl<'a, 'data> IntoIterator for &'a JanetStruct<'data> {
     }
 }
 
-impl<U, J> FromIterator<(U, J)> for JanetStruct<'_>
+impl<U, J> FromIterator<(U, J)> for JanetStruct
 where
     U: Into<Janet>,
     J: Into<Janet>,
@@ -649,20 +649,20 @@ where
 /// An iterator over a reference to the [`JanetStruct`] key-value pairs.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Iter<'a, 'data> {
-    st:  &'a JanetStruct<'data>,
+pub struct Iter<'a> {
+    st:  &'a JanetStruct,
     kv:  *const JanetKV,
     end: *const JanetKV,
 }
 
-impl Debug for Iter<'_, '_> {
+impl Debug for Iter<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.st.iter()).finish()
     }
 }
 
-impl<'a> Iterator for Iter<'a, '_> {
+impl<'a> Iterator for Iter<'a> {
     type Item = (&'a Janet, &'a Janet);
 
     #[inline]
@@ -698,25 +698,25 @@ impl<'a> Iterator for Iter<'a, '_> {
     }
 }
 
-impl ExactSizeIterator for Iter<'_, '_> {}
+impl ExactSizeIterator for Iter<'_> {}
 
-impl FusedIterator for Iter<'_, '_> {}
+impl FusedIterator for Iter<'_> {}
 
 /// An iterator over a reference to the [`JanetStruct`] keys.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Keys<'a, 'data> {
-    inner: Iter<'a, 'data>,
+pub struct Keys<'a> {
+    inner: Iter<'a>,
 }
 
-impl Debug for Keys<'_, '_> {
+impl Debug for Keys<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.st.keys()).finish()
     }
 }
 
-impl<'a> Iterator for Keys<'a, '_> {
+impl<'a> Iterator for Keys<'a> {
     type Item = &'a Janet;
 
     #[inline]
@@ -730,25 +730,25 @@ impl<'a> Iterator for Keys<'a, '_> {
     }
 }
 
-impl ExactSizeIterator for Keys<'_, '_> {}
+impl ExactSizeIterator for Keys<'_> {}
 
-impl FusedIterator for Keys<'_, '_> {}
+impl FusedIterator for Keys<'_> {}
 
 /// An iterator over a reference to the [`JanetStruct`] values.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Values<'a, 'data> {
-    inner: Iter<'a, 'data>,
+pub struct Values<'a> {
+    inner: Iter<'a>,
 }
 
-impl Debug for Values<'_, '_> {
+impl Debug for Values<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.inner.st.values()).finish()
     }
 }
 
-impl<'a> Iterator for Values<'a, '_> {
+impl<'a> Iterator for Values<'a> {
     type Item = &'a Janet;
 
     #[inline]
@@ -762,27 +762,27 @@ impl<'a> Iterator for Values<'a, '_> {
     }
 }
 
-impl ExactSizeIterator for Values<'_, '_> {}
+impl ExactSizeIterator for Values<'_> {}
 
-impl FusedIterator for Values<'_, '_> {}
+impl FusedIterator for Values<'_> {}
 
 /// An iterator that moves out of a [`JanetStruct`].
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct IntoIter<'data> {
-    st:  JanetStruct<'data>,
+pub struct IntoIter {
+    st:  JanetStruct,
     kv:  *const JanetKV,
     end: *const JanetKV,
 }
 
-impl Debug for IntoIter<'_> {
+impl Debug for IntoIter {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.st.iter()).finish()
     }
 }
 
-impl Iterator for IntoIter<'_> {
+impl Iterator for IntoIter {
     type Item = (Janet, Janet);
 
     #[inline]
@@ -818,9 +818,9 @@ impl Iterator for IntoIter<'_> {
     }
 }
 
-impl ExactSizeIterator for IntoIter<'_> {}
+impl ExactSizeIterator for IntoIter {}
 
-impl FusedIterator for IntoIter<'_> {}
+impl FusedIterator for IntoIter {}
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {

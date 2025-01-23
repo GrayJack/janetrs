@@ -136,7 +136,7 @@ impl JanetClient {
     /// If an item in the `replacements` table has the same name as a item in the default
     /// environment table, the item is replaced by the newer.
     #[inline]
-    pub fn init_with_replacements(replacements: JanetTable<'static>) -> Result<Self, Error> {
+    pub fn init_with_replacements(replacements: JanetTable) -> Result<Self, Error> {
         let mut client = Self::init()?;
         client.env_table = Some(JanetEnvironment::with_replacements(replacements));
         Ok(client)
@@ -159,7 +159,7 @@ impl JanetClient {
     /// environment table, the item is replaced by the newer.
     #[inline]
     #[must_use]
-    pub fn load_env_replacements(mut self, replacements: JanetTable<'static>) -> Self {
+    pub fn load_env_replacements(mut self, replacements: JanetTable) -> Self {
         self.env_table = Some(JanetEnvironment::with_replacements(replacements));
         self
     }

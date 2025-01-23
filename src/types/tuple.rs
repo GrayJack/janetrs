@@ -20,14 +20,14 @@ pub type RSplitN<'a, P> = core::slice::RSplitN<'a, Janet, P>;
 /// Builder for [`JanetTuple`]s.
 #[derive(Debug)]
 #[must_use = "builder cannot be utilized as a proper JanetTuple, use the `finish` method"]
-pub struct JanetTupleBuilder<'data> {
+pub struct JanetTupleBuilder {
     raw:     *mut CJanet,
     len:     i32,
     added:   i32,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[Janet]>>,
 }
 
-impl<'data> JanetTupleBuilder<'data> {
+impl JanetTupleBuilder {
     /// Add a new value to the values in the tuple builder.
     #[cfg_attr(feature = "inline-more", inline)]
     pub fn put(mut self, value: impl Into<Janet>) -> Self {
@@ -53,7 +53,7 @@ impl<'data> JanetTupleBuilder<'data> {
     /// item, the unused space will all have value of Janet number zero.
     #[inline]
     #[must_use = "function finishes building process and returns JanetStruct"]
-    pub fn finalize(self) -> JanetTuple<'data> {
+    pub fn finalize(self) -> JanetTuple {
         JanetTuple {
             raw:     unsafe { evil_janet::janet_tuple_end(self.raw) },
             phantom: PhantomData,
@@ -79,17 +79,17 @@ impl<'data> JanetTupleBuilder<'data> {
 ///
 /// [Janet arrays]: JanetArray
 #[repr(transparent)]
-pub struct JanetTuple<'data> {
+pub struct JanetTuple {
     pub(crate) raw: *const CJanet,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[Janet]>>,
 }
 
-impl<'data> JanetTuple<'data> {
+impl JanetTuple {
     /// Start the build process to create a [`JanetTuple`].
     ///
     /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
     #[inline]
-    pub fn builder(len: usize) -> JanetTupleBuilder<'data> {
+    pub fn builder(len: usize) -> JanetTupleBuilder {
         let len = i32::try_from(len).unwrap_or(i32::MAX);
 
         JanetTupleBuilder {
@@ -616,7 +616,7 @@ impl<'data> JanetTuple<'data> {
 
     /// Creates a iterator over the reference of the array items.
     #[inline]
-    pub fn iter(&self) -> Iter<'_, '_> {
+    pub fn iter(&self) -> Iter<'_> {
         Iter {
             tup: self,
             index_head: 0,
@@ -1011,14 +1011,14 @@ impl<'data> JanetTuple<'data> {
     }
 }
 
-impl Debug for JanetTuple<'_> {
+impl Debug for JanetTuple {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
 }
 
-impl Clone for JanetTuple<'_> {
+impl Clone for JanetTuple {
     #[cfg_attr(feature = "inline-more", inline)]
     fn clone(&self) -> Self {
         let len = self.len();
@@ -1032,14 +1032,14 @@ impl Clone for JanetTuple<'_> {
     }
 }
 
-impl PartialOrd for JanetTuple<'_> {
+impl PartialOrd for JanetTuple {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for JanetTuple<'_> {
+impl Ord for JanetTuple {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         use core::cmp::Ordering::{Equal, Greater, Less};
@@ -1059,7 +1059,7 @@ impl Ord for JanetTuple<'_> {
     }
 }
 
-impl PartialEq for JanetTuple<'_> {
+impl PartialEq for JanetTuple {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         // if the pointer is the same, one are equal to the other
@@ -1082,23 +1082,23 @@ impl PartialEq for JanetTuple<'_> {
     }
 }
 
-impl Eq for JanetTuple<'_> {}
+impl Eq for JanetTuple {}
 
-impl super::DeepEq<JanetArray<'_>> for JanetTuple<'_> {
+impl super::DeepEq<JanetArray> for JanetTuple {
     #[inline]
-    fn deep_eq(&self, other: &JanetArray<'_>) -> bool {
+    fn deep_eq(&self, other: &JanetArray) -> bool {
         other.deep_eq(self)
     }
 }
 
-impl Default for JanetTuple<'_> {
+impl Default for JanetTuple {
     #[inline]
     fn default() -> Self {
         crate::tuple![]
     }
 }
 
-impl AsRef<[Janet]> for JanetTuple<'_> {
+impl AsRef<[Janet]> for JanetTuple {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
         // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
@@ -1107,22 +1107,22 @@ impl AsRef<[Janet]> for JanetTuple<'_> {
     }
 }
 
-impl From<JanetArray<'_>> for JanetTuple<'_> {
+impl From<JanetArray> for JanetTuple {
     #[inline]
-    fn from(arr: JanetArray<'_>) -> Self {
+    fn from(arr: JanetArray) -> Self {
         arr.into_iter().collect()
     }
 }
 
-impl From<&JanetArray<'_>> for JanetTuple<'_> {
+impl From<&JanetArray> for JanetTuple {
     #[inline]
-    fn from(arr: &JanetArray<'_>) -> Self {
+    fn from(arr: &JanetArray) -> Self {
         arr.into_iter().collect()
     }
 }
 
-impl<'data> IntoIterator for JanetTuple<'data> {
-    type IntoIter = IntoIter<'data>;
+impl IntoIterator for JanetTuple {
+    type IntoIter = IntoIter;
     type Item = Janet;
 
     #[inline]
@@ -1136,8 +1136,8 @@ impl<'data> IntoIterator for JanetTuple<'data> {
     }
 }
 
-impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
-    type IntoIter = Iter<'a, 'data>;
+impl<'a> IntoIterator for &'a JanetTuple {
+    type IntoIter = Iter<'a>;
     type Item = &'a Janet;
 
     #[inline]
@@ -1151,7 +1151,7 @@ impl<'a, 'data> IntoIterator for &'a JanetTuple<'data> {
     }
 }
 
-impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
+impl<U: Into<Janet>> FromIterator<U> for JanetTuple {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
         let iter = iter.into_iter().collect::<JanetArray>().into_iter();
@@ -1172,7 +1172,7 @@ impl<U: Into<Janet>> FromIterator<U> for JanetTuple<'_> {
     }
 }
 
-impl Index<usize> for JanetTuple<'_> {
+impl Index<usize> for JanetTuple {
     type Output = Janet;
 
     /// Get a reference of the [`Janet`] hold by [`JanetTuple`] at `index`.
@@ -1194,20 +1194,20 @@ impl Index<usize> for JanetTuple<'_> {
 /// An iterator over a reference to the [`JanetTuple`] elements.
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct Iter<'a, 'data> {
-    tup: &'a JanetTuple<'data>,
+pub struct Iter<'a> {
+    tup: &'a JanetTuple,
     index_head: i32,
     index_tail: i32,
 }
 
-impl Debug for Iter<'_, '_> {
+impl Debug for Iter<'_> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.tup.as_ref()).finish()
     }
 }
 
-impl<'a> Iterator for Iter<'a, '_> {
+impl<'a> Iterator for Iter<'a> {
     type Item = &'a Janet;
 
     #[inline]
@@ -1228,7 +1228,7 @@ impl<'a> Iterator for Iter<'a, '_> {
     }
 }
 
-impl DoubleEndedIterator for Iter<'_, '_> {
+impl DoubleEndedIterator for Iter<'_> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index_head == self.index_tail {
@@ -1240,27 +1240,27 @@ impl DoubleEndedIterator for Iter<'_, '_> {
     }
 }
 
-impl ExactSizeIterator for Iter<'_, '_> {}
+impl ExactSizeIterator for Iter<'_> {}
 
-impl FusedIterator for Iter<'_, '_> {}
+impl FusedIterator for Iter<'_> {}
 
 /// An iterator that moves out of a [`JanetTuple`].
 #[derive(Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct IntoIter<'data> {
-    tup: JanetTuple<'data>,
+pub struct IntoIter {
+    tup: JanetTuple,
     index_head: i32,
     index_tail: i32,
 }
 
-impl Debug for IntoIter<'_> {
+impl Debug for IntoIter {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.tup.as_ref()).finish()
     }
 }
 
-impl Iterator for IntoIter<'_> {
+impl Iterator for IntoIter {
     type Item = Janet;
 
     #[inline]
@@ -1281,7 +1281,7 @@ impl Iterator for IntoIter<'_> {
     }
 }
 
-impl DoubleEndedIterator for IntoIter<'_> {
+impl DoubleEndedIterator for IntoIter {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index_head == self.index_tail {
@@ -1293,9 +1293,9 @@ impl DoubleEndedIterator for IntoIter<'_> {
     }
 }
 
-impl ExactSizeIterator for IntoIter<'_> {}
+impl ExactSizeIterator for IntoIter {}
 
-impl FusedIterator for IntoIter<'_> {}
+impl FusedIterator for IntoIter {}
 
 #[cfg(all(test, any(feature = "amalgation", feature = "link-system")))]
 mod tests {
@@ -1365,13 +1365,13 @@ mod tests {
         let _client = JanetClient::init()?;
         let vec = vec![Janet::nil(); 100];
 
-        let jtup: JanetTuple<'_> = vec.into_iter().collect();
+        let jtup: JanetTuple = vec.into_iter().collect();
         assert_eq!(jtup.len(), 100);
         assert!(jtup.iter().all(|j| j == Janet::nil()));
 
         let vec = crate::array![101.0, "string", true];
 
-        let jtup: JanetTuple<'_> = vec.into_iter().collect();
+        let jtup: JanetTuple = vec.into_iter().collect();
         assert_eq!(jtup.len(), 3);
         let mut iter = jtup.iter();
         assert_eq!(Some(&Janet::number(101.0)), iter.next());

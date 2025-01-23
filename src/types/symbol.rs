@@ -13,12 +13,12 @@ use super::{JanetBuffer, JanetString};
 
 /// Janet symbol type. Usually used to name things in Janet.
 #[repr(transparent)]
-pub struct JanetSymbol<'data> {
+pub struct JanetSymbol {
     pub(crate) raw: *const u8,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[u8]>>,
 }
 
-impl JanetSymbol<'_> {
+impl JanetSymbol {
     /// Create a [`JanetSymbol`] with given `name`.
     ///
     /// If the given `name` is bigger than [`i32::MAX`] the generated symbol will have a
@@ -144,7 +144,7 @@ impl JanetSymbol<'_> {
     }
 }
 
-impl Debug for JanetSymbol<'_> {
+impl Debug for JanetSymbol {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
@@ -153,7 +153,7 @@ impl Debug for JanetSymbol<'_> {
     }
 }
 
-impl Display for JanetSymbol<'_> {
+impl Display for JanetSymbol {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
@@ -162,7 +162,7 @@ impl Display for JanetSymbol<'_> {
     }
 }
 
-impl Clone for JanetSymbol<'_> {
+impl Clone for JanetSymbol {
     #[inline]
     fn clone(&self) -> Self {
         Self {
@@ -172,64 +172,64 @@ impl Clone for JanetSymbol<'_> {
     }
 }
 
-impl From<JanetString<'_>> for JanetSymbol<'_> {
+impl From<JanetString> for JanetSymbol {
     #[inline]
-    fn from(string: JanetString<'_>) -> Self {
+    fn from(string: JanetString) -> Self {
         JanetSymbol::new(string)
     }
 }
 
-impl From<&JanetString<'_>> for JanetSymbol<'_> {
+impl From<&JanetString> for JanetSymbol {
     #[inline]
-    fn from(string: &JanetString<'_>) -> Self {
+    fn from(string: &JanetString) -> Self {
         JanetSymbol::new(string)
     }
 }
 
-impl From<JanetKeyword<'_>> for JanetSymbol<'_> {
+impl From<JanetKeyword> for JanetSymbol {
     #[inline]
-    fn from(key: JanetKeyword<'_>) -> Self {
+    fn from(key: JanetKeyword) -> Self {
         JanetSymbol::new(key)
     }
 }
 
-impl From<&JanetKeyword<'_>> for JanetSymbol<'_> {
+impl From<&JanetKeyword> for JanetSymbol {
     #[inline]
-    fn from(key: &JanetKeyword<'_>) -> Self {
+    fn from(key: &JanetKeyword) -> Self {
         JanetSymbol::new(key)
     }
 }
 
-impl From<JanetBuffer<'_>> for JanetSymbol<'_> {
+impl From<JanetBuffer> for JanetSymbol {
     #[inline]
-    fn from(buff: JanetBuffer<'_>) -> Self {
-        From::<&JanetBuffer<'_>>::from(&buff)
+    fn from(buff: JanetBuffer) -> Self {
+        From::<&JanetBuffer>::from(&buff)
     }
 }
 
-impl From<&JanetBuffer<'_>> for JanetSymbol<'_> {
+impl From<&JanetBuffer> for JanetSymbol {
     #[inline]
-    fn from(buff: &JanetBuffer<'_>) -> Self {
+    fn from(buff: &JanetBuffer) -> Self {
         let slice = buff.as_bytes();
         JanetSymbol::new(slice)
     }
 }
 
-impl AsRef<[u8]> for JanetSymbol<'_> {
+impl AsRef<[u8]> for JanetSymbol {
     #[inline]
     fn as_ref(&self) -> &[u8] {
         self.as_bytes()
     }
 }
 
-impl AsRef<BStr> for JanetSymbol<'_> {
+impl AsRef<BStr> for JanetSymbol {
     #[inline]
     fn as_ref(&self) -> &BStr {
         self.as_bytes().as_ref()
     }
 }
 
-impl FromStr for JanetSymbol<'_> {
+impl FromStr for JanetSymbol {
     type Err = Infallible;
 
     #[inline]
@@ -241,12 +241,12 @@ impl FromStr for JanetSymbol<'_> {
 /// Janet keyword. Janet being a lisp-like language a keyword is not a especial word of
 /// the language, it is a normal string that can be defined by the user.
 #[repr(transparent)]
-pub struct JanetKeyword<'data> {
+pub struct JanetKeyword {
     pub(crate) raw: *const u8,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[u8]>>,
 }
 
-impl JanetKeyword<'_> {
+impl JanetKeyword {
     /// Create a [`JanetKeyword`] with given `name`.
     ///
     /// If the given `name` is bigger than i32::MAX the generated symbol will have a name
@@ -352,7 +352,7 @@ impl JanetKeyword<'_> {
     }
 }
 
-impl Debug for JanetKeyword<'_> {
+impl Debug for JanetKeyword {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
@@ -361,7 +361,7 @@ impl Debug for JanetKeyword<'_> {
     }
 }
 
-impl Display for JanetKeyword<'_> {
+impl Display for JanetKeyword {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
@@ -370,7 +370,7 @@ impl Display for JanetKeyword<'_> {
     }
 }
 
-impl Clone for JanetKeyword<'_> {
+impl Clone for JanetKeyword {
     #[inline]
     fn clone(&self) -> Self {
         Self {
@@ -380,64 +380,64 @@ impl Clone for JanetKeyword<'_> {
     }
 }
 
-impl From<JanetString<'_>> for JanetKeyword<'_> {
+impl From<JanetString> for JanetKeyword {
     #[inline]
-    fn from(string: JanetString<'_>) -> Self {
+    fn from(string: JanetString) -> Self {
         JanetKeyword::new(string)
     }
 }
 
-impl From<&JanetString<'_>> for JanetKeyword<'_> {
+impl From<&JanetString> for JanetKeyword {
     #[inline]
-    fn from(string: &JanetString<'_>) -> Self {
+    fn from(string: &JanetString) -> Self {
         JanetKeyword::new(string)
     }
 }
 
-impl From<JanetSymbol<'_>> for JanetKeyword<'_> {
+impl From<JanetSymbol> for JanetKeyword {
     #[inline]
-    fn from(sym: JanetSymbol<'_>) -> Self {
+    fn from(sym: JanetSymbol) -> Self {
         JanetKeyword::new(sym)
     }
 }
 
-impl From<&JanetSymbol<'_>> for JanetKeyword<'_> {
+impl From<&JanetSymbol> for JanetKeyword {
     #[inline]
-    fn from(sym: &JanetSymbol<'_>) -> Self {
+    fn from(sym: &JanetSymbol) -> Self {
         JanetKeyword::new(sym)
     }
 }
 
-impl From<JanetBuffer<'_>> for JanetKeyword<'_> {
+impl From<JanetBuffer> for JanetKeyword {
     #[inline]
-    fn from(buff: JanetBuffer<'_>) -> Self {
-        From::<&JanetBuffer<'_>>::from(&buff)
+    fn from(buff: JanetBuffer) -> Self {
+        From::<&JanetBuffer>::from(&buff)
     }
 }
 
-impl From<&JanetBuffer<'_>> for JanetKeyword<'_> {
+impl From<&JanetBuffer> for JanetKeyword {
     #[inline]
-    fn from(buff: &JanetBuffer<'_>) -> Self {
+    fn from(buff: &JanetBuffer) -> Self {
         let slice = buff.as_bytes();
         JanetKeyword::new(slice)
     }
 }
 
-impl AsRef<[u8]> for JanetKeyword<'_> {
+impl AsRef<[u8]> for JanetKeyword {
     #[inline]
     fn as_ref(&self) -> &[u8] {
         self.as_bytes()
     }
 }
 
-impl AsRef<BStr> for JanetKeyword<'_> {
+impl AsRef<BStr> for JanetKeyword {
     #[inline]
     fn as_ref(&self) -> &BStr {
         self.as_bytes().as_ref()
     }
 }
 
-impl FromStr for JanetKeyword<'_> {
+impl FromStr for JanetKeyword {
     type Err = Infallible;
 
     #[inline]

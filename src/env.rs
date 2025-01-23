@@ -13,7 +13,7 @@ use crate::{
 /// helpful.
 #[derive(Debug)]
 #[repr(transparent)]
-pub struct JanetEnvironment(JanetTable<'static>);
+pub struct JanetEnvironment(JanetTable);
 
 impl JanetEnvironment {
     /// Creates a new environment with Janet default environment.
@@ -31,7 +31,7 @@ impl JanetEnvironment {
     /// replace the original.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn with_replacements(mut replacements: JanetTable<'static>) -> Self {
+    pub fn with_replacements(mut replacements: JanetTable) -> Self {
         // SAFETY: `janet_core_env` never returns a null pointer
         Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(replacements.as_mut_raw())) })
     }
@@ -165,7 +165,7 @@ impl JanetEnvironment {
 
     /// Search the given `symbol` in the environment and returns the value if found.
     #[inline]
-    pub fn resolve<'a>(&self, symbol: impl Into<JanetSymbol<'a>>) -> Option<Janet> {
+    pub fn resolve(&self, symbol: impl Into<JanetSymbol>) -> Option<Janet> {
         let symbol = symbol.into();
         let mut out = Janet::nil();
 
@@ -195,16 +195,16 @@ impl Default for JanetEnvironment {
 ///
 /// # Example
 pub struct DefOptions<'a> {
-    name: JanetSymbol<'a>,
+    name: JanetSymbol,
     value: Janet,
     doc: Option<&'a str>,
-    source_file: Option<JanetString<'a>>,
+    source_file: Option<JanetString>,
     source_line: Option<u32>,
 }
 
 impl<'a> DefOptions<'a> {
     /// Creates a new Janet immutable variable definition with given `name` and `value`.
-    pub fn new(name: impl Into<JanetSymbol<'a>>, value: impl Into<Janet>) -> Self {
+    pub fn new(name: impl Into<JanetSymbol>, value: impl Into<Janet>) -> Self {
         Self {
             name: name.into(),
             value: value.into(),
@@ -223,7 +223,7 @@ impl<'a> DefOptions<'a> {
 
     /// Configure the source file of the Janet definition.
     #[must_use]
-    pub fn source_file(mut self, source_file: impl Into<JanetString<'a>>) -> Self {
+    pub fn source_file(mut self, source_file: impl Into<JanetString>) -> Self {
         self.source_file = Some(source_file.into());
         self
     }
@@ -240,16 +240,16 @@ impl<'a> DefOptions<'a> {
 ///
 /// # Example
 pub struct VarOptions<'a> {
-    name: JanetSymbol<'a>,
+    name: JanetSymbol,
     value: Janet,
     doc: Option<&'a str>,
-    source_file: Option<JanetString<'a>>,
+    source_file: Option<JanetString>,
     source_line: Option<u32>,
 }
 
 impl<'a> VarOptions<'a> {
     /// Creates a new Janet mutable variable definition with given `name` and `value`.
-    pub fn new(name: impl Into<JanetSymbol<'a>>, value: impl Into<Janet>) -> Self {
+    pub fn new(name: impl Into<JanetSymbol>, value: impl Into<Janet>) -> Self {
         Self {
             name: name.into(),
             value: value.into(),
@@ -268,7 +268,7 @@ impl<'a> VarOptions<'a> {
 
     /// Configure the source file of the Janet mutable variable definition.
     #[must_use]
-    pub fn source_file(mut self, source_file: impl Into<JanetString<'a>>) -> Self {
+    pub fn source_file(mut self, source_file: impl Into<JanetString>) -> Self {
         self.source_file = Some(source_file.into());
         self
     }

@@ -28,11 +28,11 @@ pub type JanetRawCFunction =
 
 /// Error type that happens when calling a [`JanetFunction`] on the Rust side.
 #[derive(Debug)]
-pub struct CallError<'data> {
+pub struct CallError {
     kind:   CallErrorKind,
     value:  Janet,
     signal: JanetSignal,
-    fiber:  Option<JanetFiber<'data>>,
+    fiber:  Option<JanetFiber>,
 }
 
 /// Kinds of errors of [`CallError`].
@@ -48,10 +48,10 @@ pub enum CallErrorKind {
     Yield,
 }
 
-impl<'data> CallError<'data> {
+impl CallError {
     #[inline]
     const fn new(
-        kind: CallErrorKind, value: Janet, signal: JanetSignal, fiber: Option<JanetFiber<'data>>,
+        kind: CallErrorKind, value: Janet, signal: JanetSignal, fiber: Option<JanetFiber>,
     ) -> Self {
         Self {
             kind,
@@ -91,14 +91,14 @@ impl<'data> CallError<'data> {
 
     /// Get a exclusive reference to the fiber that the error happened if it exists.
     #[inline]
-    pub fn fiber_mut(&mut self) -> Option<&mut JanetFiber<'data>> {
+    pub fn fiber_mut(&mut self) -> Option<&mut JanetFiber> {
         self.fiber.as_mut()
     }
 
     /// Consume the error and return the fiber that the error happened if it exists.
     #[inline]
     #[must_use = "this consumes self, making it impossible to use afterwards"]
-    pub const fn take_fiber(self) -> Option<JanetFiber<'data>> {
+    pub const fn take_fiber(self) -> Option<JanetFiber> {
         self.fiber
     }
 
@@ -138,7 +138,7 @@ impl<'data> CallError<'data> {
     }
 }
 
-impl Display for CallError<'_> {
+impl Display for CallError {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
@@ -155,17 +155,17 @@ impl Display for CallError<'_> {
     }
 }
 
-impl error::Error for CallError<'_> {}
+impl error::Error for CallError {}
 
 /// A representation of a Janet function defined at the Janet side.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[repr(transparent)]
-pub struct JanetFunction<'data> {
+pub struct JanetFunction {
     pub(crate) raw: *mut CJanetFunction,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<CJanetFunction>>,
 }
 
-impl<'data> JanetFunction<'data> {
+impl JanetFunction {
     /// Create a new [`JanetFunction`] with a `raw` pointer.
     ///
     /// # Safety
@@ -186,7 +186,7 @@ impl<'data> JanetFunction<'data> {
     /// If the executions was successful returns the output, otherwise return the
     /// [`CallError`] with information returned by the call.
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError<'data>> {
+    pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError> {
         let args = args.as_ref();
         let mut out = Janet::nil();
         let fiber = ptr::null_mut();
@@ -229,9 +229,9 @@ impl<'data> JanetFunction<'data> {
     /// If the executions was successful returns the output, otherwise return the
     /// [`CallError`] with information returned by the call.
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn call_with_fiber<'fiber>(
-        &mut self, mut fiber: JanetFiber<'fiber>, args: impl AsRef<[Janet]>,
-    ) -> Result<Janet, CallError<'fiber>> {
+    pub fn call_with_fiber(
+        &mut self, mut fiber: JanetFiber, args: impl AsRef<[Janet]>,
+    ) -> Result<Janet, CallError> {
         let args = args.as_ref();
         let mut out = Janet::nil();
         let raw_sig = unsafe {
@@ -297,7 +297,7 @@ impl<'data> JanetFunction<'data> {
     }
 }
 
-impl fmt::Debug for JanetFunction<'_> {
+impl fmt::Debug for JanetFunction {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.pad("JanetFunction")

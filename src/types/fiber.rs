@@ -19,12 +19,12 @@ use super::{Janet, JanetFunction, JanetSignal, JanetTable};
 /// from user-defined signals.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[repr(transparent)]
-pub struct JanetFiber<'data> {
+pub struct JanetFiber {
     pub(crate) raw: *mut CJanetFiber,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<CJanetFiber>>,
 }
 
-impl<'data> JanetFiber<'data> {
+impl JanetFiber {
     /// Create a new [`JanetFiber`] from a [`JanetFunction`] and it's arguments.
     ///
     /// In case any passed argument is invalid, returns `None`.
@@ -161,7 +161,7 @@ impl<'data> JanetFiber<'data> {
     /// # Ok(()) }
     /// ```
     #[inline]
-    pub fn exec<'a>(&'a mut self) -> Exec<'a, 'data> {
+    pub fn exec(&mut self) -> Exec<'_> {
         Exec {
             fiber: self,
             input: Janet::nil(),
@@ -198,7 +198,7 @@ impl<'data> JanetFiber<'data> {
     ///
     /// [`exec`]: #method.exec
     #[inline]
-    pub fn exec_input<'a>(&'a mut self, input: Janet) -> Exec<'a, 'data> {
+    pub fn exec_input(&mut self, input: Janet) -> Exec<'_> {
         Exec { fiber: self, input }
     }
 
@@ -232,7 +232,7 @@ impl<'data> JanetFiber<'data> {
     /// ```
     /// [`exec`]: #method.exec
     #[inline]
-    pub fn exec_with<'a, F>(&'a mut self, f: F) -> Exec<'a, 'data>
+    pub fn exec_with<F>(&mut self, f: F) -> Exec<'_>
     where
         F: FnOnce() -> Janet,
     {
@@ -266,7 +266,7 @@ impl<'data> JanetFiber<'data> {
     }
 }
 
-impl JanetFiber<'_> {
+impl JanetFiber {
     #[inline]
     pub(crate) fn display_stacktrace(&mut self, err: Janet) {
         unsafe { evil_janet::janet_stacktrace(self.raw, err.inner) }
@@ -277,12 +277,12 @@ impl JanetFiber<'_> {
 ///
 /// **Executing this iterator may trigger a GC collection**
 #[derive(Debug)]
-pub struct Exec<'a, 'data> {
-    fiber: &'a mut JanetFiber<'data>,
+pub struct Exec<'a> {
+    fiber: &'a mut JanetFiber,
     input: Janet,
 }
 
-impl Iterator for Exec<'_, '_> {
+impl Iterator for Exec<'_> {
     type Item = Janet;
 
     #[inline]
@@ -303,7 +303,7 @@ impl Iterator for Exec<'_, '_> {
     }
 }
 
-impl FusedIterator for Exec<'_, '_> {}
+impl FusedIterator for Exec<'_> {}
 
 /// This type represents a the status of a [`JanetFiber`].
 ///

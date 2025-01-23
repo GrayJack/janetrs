@@ -18,6 +18,8 @@ use alloc::{
     vec::Vec,
 };
 
+pub use bstr::{BStr, ByteSlice};
+
 use evil_janet::{
     JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet, JanetType as CJanetType,
 };
@@ -317,7 +319,7 @@ impl Janet {
     /// Create a array [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn array(value: JanetArray<'_>) -> Self {
+    pub fn array(value: JanetArray) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_array(value.raw) },
         }
@@ -326,7 +328,7 @@ impl Janet {
     /// Create a buffer [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn buffer(value: JanetBuffer<'_>) -> Self {
+    pub fn buffer(value: JanetBuffer) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_buffer(value.raw) },
         }
@@ -335,7 +337,7 @@ impl Janet {
     /// Create a table [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn table(value: JanetTable<'_>) -> Self {
+    pub fn table(value: JanetTable) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_table(value.raw) },
         }
@@ -344,7 +346,7 @@ impl Janet {
     /// Create a tuple [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn tuple(value: JanetTuple<'_>) -> Self {
+    pub fn tuple(value: JanetTuple) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_tuple(value.raw) },
         }
@@ -353,7 +355,7 @@ impl Janet {
     /// Create a string [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn string(value: JanetString<'_>) -> Self {
+    pub fn string(value: JanetString) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_string(value.raw) },
         }
@@ -362,7 +364,7 @@ impl Janet {
     /// Create a struct [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn structs(value: JanetStruct<'_>) -> Self {
+    pub fn structs(value: JanetStruct) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_struct(value.raw) },
         }
@@ -371,7 +373,7 @@ impl Janet {
     /// Create a symbol [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn symbol(value: JanetSymbol<'_>) -> Self {
+    pub fn symbol(value: JanetSymbol) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_symbol(value.raw) },
         }
@@ -380,7 +382,7 @@ impl Janet {
     /// Create a keyword [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn keyword(value: JanetKeyword<'_>) -> Self {
+    pub fn keyword(value: JanetKeyword) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_keyword(value.raw) },
         }
@@ -389,7 +391,7 @@ impl Janet {
     /// Create a fiber [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn fiber(value: JanetFiber<'_>) -> Self {
+    pub fn fiber(value: JanetFiber) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_fiber(value.raw) },
         }
@@ -398,7 +400,7 @@ impl Janet {
     /// Create a function [`Janet`] with `value`.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn function(value: JanetFunction<'_>) -> Self {
+    pub fn function(value: JanetFunction) -> Self {
         Self {
             inner: unsafe { evil_janet::janet_wrap_function(value.raw) },
         }
@@ -463,7 +465,7 @@ impl Janet {
 
     /// Resolve a `symbol` in the core environment.
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn from_core<'a>(symbol: impl Into<JanetSymbol<'a>>) -> Option<Self> {
+    pub fn from_core(symbol: impl Into<JanetSymbol>) -> Option<Self> {
         let env = JanetEnvironment::default();
         env.resolve(symbol)
     }
@@ -477,7 +479,7 @@ impl Janet {
     /// Unwrap the [`Janet`] value into a enum that holds the type value
     #[inline]
     #[must_use]
-    pub fn unwrap<'data>(self) -> TaggedJanet<'data> {
+    pub fn unwrap(self) -> TaggedJanet {
         self.into()
     }
 
@@ -1233,52 +1235,48 @@ try_from_janet!(JanetPointer, TaggedJanet::Pointer, JanetType::Pointer);
 from_for_janet!(JanetAbstract, j_abstract);
 try_from_janet!(JanetAbstract, TaggedJanet::Abstract, JanetType::Abstract);
 
-from_for_janet!(JanetTable<'_>, table);
-from_for_janet!(clone &JanetTable<'_>, table);
-from_for_janet!(inner &mut JanetTable<'_>, table);
-try_from_janet!(JanetTable<'_>, TaggedJanet::Table, JanetType::Table);
+from_for_janet!(JanetTable, table);
+from_for_janet!(clone & JanetTable, table);
+from_for_janet!(inner &mut JanetTable, table);
+try_from_janet!(JanetTable, TaggedJanet::Table, JanetType::Table);
 
-from_for_janet!(JanetArray<'_>, array);
-from_for_janet!(clone &JanetArray<'_>, array);
-from_for_janet!(inner &mut JanetArray<'_>, array);
-try_from_janet!(JanetArray<'_>, TaggedJanet::Array, JanetType::Array);
+from_for_janet!(JanetArray, array);
+from_for_janet!(clone & JanetArray, array);
+from_for_janet!(inner &mut JanetArray, array);
+try_from_janet!(JanetArray, TaggedJanet::Array, JanetType::Array);
 
-from_for_janet!(JanetBuffer<'_>, buffer);
-from_for_janet!(clone &JanetBuffer<'_>, buffer);
-from_for_janet!(inner &mut JanetBuffer<'_>, buffer);
-try_from_janet!(JanetBuffer<'_>, TaggedJanet::Buffer, JanetType::Buffer);
+from_for_janet!(JanetBuffer, buffer);
+from_for_janet!(clone & JanetBuffer, buffer);
+from_for_janet!(inner &mut JanetBuffer, buffer);
+try_from_janet!(JanetBuffer, TaggedJanet::Buffer, JanetType::Buffer);
 
-from_for_janet!(JanetTuple<'_>, tuple);
-from_for_janet!(clone &JanetTuple<'_>, tuple);
-try_from_janet!(JanetTuple<'_>, TaggedJanet::Tuple, JanetType::Tuple);
+from_for_janet!(JanetTuple, tuple);
+from_for_janet!(clone & JanetTuple, tuple);
+try_from_janet!(JanetTuple, TaggedJanet::Tuple, JanetType::Tuple);
 
-from_for_janet!(JanetString<'_>, string);
-from_for_janet!(clone &JanetString<'_>, string);
-try_from_janet!(JanetString<'_>, TaggedJanet::String, JanetType::String);
+from_for_janet!(JanetString, string);
+from_for_janet!(clone & JanetString, string);
+try_from_janet!(JanetString, TaggedJanet::String, JanetType::String);
 
-from_for_janet!(JanetStruct<'_>, structs);
-from_for_janet!(clone &JanetStruct<'_>, structs);
-try_from_janet!(JanetStruct<'_>, TaggedJanet::Struct, JanetType::Struct);
+from_for_janet!(JanetStruct, structs);
+from_for_janet!(clone & JanetStruct, structs);
+try_from_janet!(JanetStruct, TaggedJanet::Struct, JanetType::Struct);
 
-from_for_janet!(JanetSymbol<'_>, symbol);
-from_for_janet!(clone &JanetSymbol<'_>, symbol);
-try_from_janet!(JanetSymbol<'_>, TaggedJanet::Symbol, JanetType::Symbol);
+from_for_janet!(JanetSymbol, symbol);
+from_for_janet!(clone & JanetSymbol, symbol);
+try_from_janet!(JanetSymbol, TaggedJanet::Symbol, JanetType::Symbol);
 
-from_for_janet!(JanetKeyword<'_>, keyword);
-from_for_janet!(clone &JanetKeyword<'_>, keyword);
-try_from_janet!(JanetKeyword<'_>, TaggedJanet::Keyword, JanetType::Keyword);
+from_for_janet!(JanetKeyword, keyword);
+from_for_janet!(clone & JanetKeyword, keyword);
+try_from_janet!(JanetKeyword, TaggedJanet::Keyword, JanetType::Keyword);
 
-from_for_janet!(JanetFunction<'_>, function);
-from_for_janet!(clone &JanetFunction<'_>, function);
-try_from_janet!(
-    JanetFunction<'_>,
-    TaggedJanet::Function,
-    JanetType::Function
-);
+from_for_janet!(JanetFunction, function);
+from_for_janet!(clone & JanetFunction, function);
+try_from_janet!(JanetFunction, TaggedJanet::Function, JanetType::Function);
 
-from_for_janet!(JanetFiber<'_>, fiber);
-from_for_janet!(clone &JanetFiber<'_>, fiber);
-try_from_janet!(JanetFiber<'_>, TaggedJanet::Fiber, JanetType::Fiber);
+from_for_janet!(JanetFiber, fiber);
+from_for_janet!(clone & JanetFiber, fiber);
+try_from_janet!(JanetFiber, TaggedJanet::Fiber, JanetType::Fiber);
 
 try_from_janet!(JanetCFunction, TaggedJanet::CFunction, JanetType::CFunction);
 
@@ -1354,26 +1352,26 @@ macro_rules! janet_unwrap_unchecked {
 
 /// Janet type in the form of a Tagged Union.
 #[derive(Debug)]
-pub enum TaggedJanet<'data> {
+pub enum TaggedJanet {
     Abstract(JanetAbstract),
-    Array(JanetArray<'data>),
+    Array(JanetArray),
     Boolean(bool),
-    Buffer(JanetBuffer<'data>),
+    Buffer(JanetBuffer),
     CFunction(JanetCFunction),
-    Fiber(JanetFiber<'data>),
-    Function(JanetFunction<'data>),
-    Keyword(JanetKeyword<'data>),
+    Fiber(JanetFiber),
+    Function(JanetFunction),
+    Keyword(JanetKeyword),
     Nil,
     Number(f64),
     Pointer(JanetPointer),
-    String(JanetString<'data>),
-    Struct(JanetStruct<'data>),
-    Symbol(JanetSymbol<'data>),
-    Table(JanetTable<'data>),
-    Tuple(JanetTuple<'data>),
+    String(JanetString),
+    Struct(JanetStruct),
+    Symbol(JanetSymbol),
+    Table(JanetTable),
+    Tuple(JanetTuple),
 }
 
-impl Display for TaggedJanet<'_> {
+impl Display for TaggedJanet {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -1465,7 +1463,7 @@ impl Display for TaggedJanet<'_> {
     }
 }
 
-impl From<Janet> for TaggedJanet<'_> {
+impl From<Janet> for TaggedJanet {
     #[inline]
     fn from(val: Janet) -> Self {
         match val.kind() {
@@ -1489,7 +1487,7 @@ impl From<Janet> for TaggedJanet<'_> {
     }
 }
 
-impl TaggedJanet<'_> {
+impl TaggedJanet {
     #[inline]
     #[must_use]
     pub const fn kind(&self) -> JanetType {
@@ -1514,7 +1512,7 @@ impl TaggedJanet<'_> {
     }
 }
 
-impl From<TaggedJanet<'_>> for Janet {
+impl From<TaggedJanet> for Janet {
     #[inline]
     fn from(val: TaggedJanet) -> Self {
         match val {
@@ -1884,98 +1882,98 @@ macro_rules! string_impl_partial_ord {
     };
 }
 
-impl_string_like!(JanetString<'_> JanetKeyword<'_> JanetSymbol<'_>);
-impl_part!(JanetString<'_>, JanetKeyword<'_>);
-impl_part!(JanetString<'_>, JanetSymbol<'_>);
-impl_part!(JanetKeyword<'_>, JanetSymbol<'_>);
+impl_string_like!(JanetString JanetKeyword JanetSymbol);
+impl_part!(JanetString, JanetKeyword);
+impl_part!(JanetString, JanetSymbol);
+impl_part!(JanetKeyword, JanetSymbol);
 
-string_impl_partial_eq!(JanetString<'_>, Vec<u8>);
-string_impl_partial_eq!(JanetString<'_>, [u8]);
-string_impl_partial_eq!(JanetString<'_>, &'a [u8]);
-string_impl_partial_eq!(JanetString<'_>, String);
-string_impl_partial_eq!(JanetString<'_>, str);
-string_impl_partial_eq!(JanetString<'_>, &'a str);
-string_impl_partial_eq!(JanetString<'_>, bstr::BStr);
-string_impl_partial_eq!(JanetString<'_>, &'a bstr::BStr);
-string_impl_partial_eq!(JanetString<'_>, bstr::BString);
-string_impl_partial_eq!(JanetString<'_>, &'a bstr::BString);
+string_impl_partial_eq!(JanetString, Vec<u8>);
+string_impl_partial_eq!(JanetString, [u8]);
+string_impl_partial_eq!(JanetString, &'a [u8]);
+string_impl_partial_eq!(JanetString, String);
+string_impl_partial_eq!(JanetString, str);
+string_impl_partial_eq!(JanetString, &'a str);
+string_impl_partial_eq!(JanetString, bstr::BStr);
+string_impl_partial_eq!(JanetString, &'a bstr::BStr);
+string_impl_partial_eq!(JanetString, bstr::BString);
+string_impl_partial_eq!(JanetString, &'a bstr::BString);
 
-string_impl_partial_ord!(JanetString<'_>, Vec<u8>);
-string_impl_partial_ord!(JanetString<'_>, [u8]);
-string_impl_partial_ord!(JanetString<'_>, &'a [u8]);
-string_impl_partial_ord!(JanetString<'_>, String);
-string_impl_partial_ord!(JanetString<'_>, str);
-string_impl_partial_ord!(JanetString<'_>, &'a str);
-string_impl_partial_ord!(JanetString<'_>, bstr::BStr);
-string_impl_partial_ord!(JanetString<'_>, &'a bstr::BStr);
-string_impl_partial_ord!(JanetString<'_>, bstr::BString);
-string_impl_partial_ord!(JanetString<'_>, &'a bstr::BString);
+string_impl_partial_ord!(JanetString, Vec<u8>);
+string_impl_partial_ord!(JanetString, [u8]);
+string_impl_partial_ord!(JanetString, &'a [u8]);
+string_impl_partial_ord!(JanetString, String);
+string_impl_partial_ord!(JanetString, str);
+string_impl_partial_ord!(JanetString, &'a str);
+string_impl_partial_ord!(JanetString, bstr::BStr);
+string_impl_partial_ord!(JanetString, &'a bstr::BStr);
+string_impl_partial_ord!(JanetString, bstr::BString);
+string_impl_partial_ord!(JanetString, &'a bstr::BString);
 
-string_impl_partial_eq!(JanetBuffer<'_>, Vec<u8>);
-string_impl_partial_eq!(JanetBuffer<'_>, [u8]);
-string_impl_partial_eq!(JanetBuffer<'_>, &'a [u8]);
-string_impl_partial_eq!(JanetBuffer<'_>, String);
-string_impl_partial_eq!(JanetBuffer<'_>, str);
-string_impl_partial_eq!(JanetBuffer<'_>, &'a str);
-string_impl_partial_eq!(JanetBuffer<'_>, bstr::BStr);
-string_impl_partial_eq!(JanetBuffer<'_>, &'a bstr::BStr);
-string_impl_partial_eq!(JanetBuffer<'_>, bstr::BString);
-string_impl_partial_eq!(JanetBuffer<'_>, &'a bstr::BString);
+string_impl_partial_eq!(JanetBuffer, Vec<u8>);
+string_impl_partial_eq!(JanetBuffer, [u8]);
+string_impl_partial_eq!(JanetBuffer, &'a [u8]);
+string_impl_partial_eq!(JanetBuffer, String);
+string_impl_partial_eq!(JanetBuffer, str);
+string_impl_partial_eq!(JanetBuffer, &'a str);
+string_impl_partial_eq!(JanetBuffer, bstr::BStr);
+string_impl_partial_eq!(JanetBuffer, &'a bstr::BStr);
+string_impl_partial_eq!(JanetBuffer, bstr::BString);
+string_impl_partial_eq!(JanetBuffer, &'a bstr::BString);
 
-string_impl_partial_ord!(JanetBuffer<'_>, Vec<u8>);
-string_impl_partial_ord!(JanetBuffer<'_>, [u8]);
-string_impl_partial_ord!(JanetBuffer<'_>, &'a [u8]);
-string_impl_partial_ord!(JanetBuffer<'_>, String);
-string_impl_partial_ord!(JanetBuffer<'_>, str);
-string_impl_partial_ord!(JanetBuffer<'_>, &'a str);
-string_impl_partial_ord!(JanetBuffer<'_>, bstr::BStr);
-string_impl_partial_ord!(JanetBuffer<'_>, &'a bstr::BStr);
-string_impl_partial_ord!(JanetBuffer<'_>, bstr::BString);
-string_impl_partial_ord!(JanetBuffer<'_>, &'a bstr::BString);
+string_impl_partial_ord!(JanetBuffer, Vec<u8>);
+string_impl_partial_ord!(JanetBuffer, [u8]);
+string_impl_partial_ord!(JanetBuffer, &'a [u8]);
+string_impl_partial_ord!(JanetBuffer, String);
+string_impl_partial_ord!(JanetBuffer, str);
+string_impl_partial_ord!(JanetBuffer, &'a str);
+string_impl_partial_ord!(JanetBuffer, bstr::BStr);
+string_impl_partial_ord!(JanetBuffer, &'a bstr::BStr);
+string_impl_partial_ord!(JanetBuffer, bstr::BString);
+string_impl_partial_ord!(JanetBuffer, &'a bstr::BString);
 
-string_impl_partial_eq!(JanetSymbol<'_>, Vec<u8>);
-string_impl_partial_eq!(JanetSymbol<'_>, [u8]);
-string_impl_partial_eq!(JanetSymbol<'_>, &'a [u8]);
-string_impl_partial_eq!(JanetSymbol<'_>, String);
-string_impl_partial_eq!(JanetSymbol<'_>, str);
-string_impl_partial_eq!(JanetSymbol<'_>, &'a str);
-string_impl_partial_eq!(JanetSymbol<'_>, bstr::BStr);
-string_impl_partial_eq!(JanetSymbol<'_>, &'a bstr::BStr);
-string_impl_partial_eq!(JanetSymbol<'_>, bstr::BString);
-string_impl_partial_eq!(JanetSymbol<'_>, &'a bstr::BString);
+string_impl_partial_eq!(JanetSymbol, Vec<u8>);
+string_impl_partial_eq!(JanetSymbol, [u8]);
+string_impl_partial_eq!(JanetSymbol, &'a [u8]);
+string_impl_partial_eq!(JanetSymbol, String);
+string_impl_partial_eq!(JanetSymbol, str);
+string_impl_partial_eq!(JanetSymbol, &'a str);
+string_impl_partial_eq!(JanetSymbol, bstr::BStr);
+string_impl_partial_eq!(JanetSymbol, &'a bstr::BStr);
+string_impl_partial_eq!(JanetSymbol, bstr::BString);
+string_impl_partial_eq!(JanetSymbol, &'a bstr::BString);
 
-string_impl_partial_ord!(JanetSymbol<'_>, Vec<u8>);
-string_impl_partial_ord!(JanetSymbol<'_>, [u8]);
-string_impl_partial_ord!(JanetSymbol<'_>, &'a [u8]);
-string_impl_partial_ord!(JanetSymbol<'_>, String);
-string_impl_partial_ord!(JanetSymbol<'_>, str);
-string_impl_partial_ord!(JanetSymbol<'_>, &'a str);
-string_impl_partial_ord!(JanetSymbol<'_>, bstr::BStr);
-string_impl_partial_ord!(JanetSymbol<'_>, &'a bstr::BStr);
-string_impl_partial_ord!(JanetSymbol<'_>, bstr::BString);
-string_impl_partial_ord!(JanetSymbol<'_>, &'a bstr::BString);
+string_impl_partial_ord!(JanetSymbol, Vec<u8>);
+string_impl_partial_ord!(JanetSymbol, [u8]);
+string_impl_partial_ord!(JanetSymbol, &'a [u8]);
+string_impl_partial_ord!(JanetSymbol, String);
+string_impl_partial_ord!(JanetSymbol, str);
+string_impl_partial_ord!(JanetSymbol, &'a str);
+string_impl_partial_ord!(JanetSymbol, bstr::BStr);
+string_impl_partial_ord!(JanetSymbol, &'a bstr::BStr);
+string_impl_partial_ord!(JanetSymbol, bstr::BString);
+string_impl_partial_ord!(JanetSymbol, &'a bstr::BString);
 
-string_impl_partial_eq!(JanetKeyword<'_>, Vec<u8>);
-string_impl_partial_eq!(JanetKeyword<'_>, [u8]);
-string_impl_partial_eq!(JanetKeyword<'_>, &'a [u8]);
-string_impl_partial_eq!(JanetKeyword<'_>, String);
-string_impl_partial_eq!(JanetKeyword<'_>, str);
-string_impl_partial_eq!(JanetKeyword<'_>, &'a str);
-string_impl_partial_eq!(JanetKeyword<'_>, bstr::BStr);
-string_impl_partial_eq!(JanetKeyword<'_>, &'a bstr::BStr);
-string_impl_partial_eq!(JanetKeyword<'_>, bstr::BString);
-string_impl_partial_eq!(JanetKeyword<'_>, &'a bstr::BString);
+string_impl_partial_eq!(JanetKeyword, Vec<u8>);
+string_impl_partial_eq!(JanetKeyword, [u8]);
+string_impl_partial_eq!(JanetKeyword, &'a [u8]);
+string_impl_partial_eq!(JanetKeyword, String);
+string_impl_partial_eq!(JanetKeyword, str);
+string_impl_partial_eq!(JanetKeyword, &'a str);
+string_impl_partial_eq!(JanetKeyword, bstr::BStr);
+string_impl_partial_eq!(JanetKeyword, &'a bstr::BStr);
+string_impl_partial_eq!(JanetKeyword, bstr::BString);
+string_impl_partial_eq!(JanetKeyword, &'a bstr::BString);
 
-string_impl_partial_ord!(JanetKeyword<'_>, Vec<u8>);
-string_impl_partial_ord!(JanetKeyword<'_>, [u8]);
-string_impl_partial_ord!(JanetKeyword<'_>, &'a [u8]);
-string_impl_partial_ord!(JanetKeyword<'_>, String);
-string_impl_partial_ord!(JanetKeyword<'_>, str);
-string_impl_partial_ord!(JanetKeyword<'_>, &'a str);
-string_impl_partial_ord!(JanetKeyword<'_>, bstr::BStr);
-string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BStr);
-string_impl_partial_ord!(JanetKeyword<'_>, bstr::BString);
-string_impl_partial_ord!(JanetKeyword<'_>, &'a bstr::BString);
+string_impl_partial_ord!(JanetKeyword, Vec<u8>);
+string_impl_partial_ord!(JanetKeyword, [u8]);
+string_impl_partial_ord!(JanetKeyword, &'a [u8]);
+string_impl_partial_ord!(JanetKeyword, String);
+string_impl_partial_ord!(JanetKeyword, str);
+string_impl_partial_ord!(JanetKeyword, &'a str);
+string_impl_partial_ord!(JanetKeyword, bstr::BStr);
+string_impl_partial_ord!(JanetKeyword, &'a bstr::BStr);
+string_impl_partial_ord!(JanetKeyword, bstr::BString);
+string_impl_partial_ord!(JanetKeyword, &'a bstr::BString);
 
 
 /// Trait that only exist to extend methods over `[Janet]` so it's easier to get
@@ -2279,19 +2277,19 @@ macro_rules! type_name {
 type_name!(
     bool: Boolean,
     f64: Number,
-    JanetString<'_>: String,
-    JanetSymbol<'_>: Symbol,
-    JanetKeyword<'_>: Keyword,
-    JanetBuffer<'_>: Buffer,
-    JanetTuple<'_>: Tuple,
-    JanetArray<'_>: Array,
-    JanetStruct<'_>: Struct,
-    JanetTable<'_>: Table,
+    JanetString: String,
+    JanetSymbol: Symbol,
+    JanetKeyword: Keyword,
+    JanetBuffer: Buffer,
+    JanetTuple: Tuple,
+    JanetArray: Array,
+    JanetStruct: Struct,
+    JanetTable: Table,
     JanetPointer: Pointer,
     JanetAbstract: Abstract,
-    JanetFunction<'_>: Function,
+    JanetFunction: Function,
     JanetCFunction: CFunction,
-    JanetFiber<'_>: Fiber,
+    JanetFiber: Fiber,
 );
 
 type_name!(i64: "s64", u64: "u64", io::JanetFile: "file", JanetRng: "rng");

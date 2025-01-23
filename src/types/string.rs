@@ -29,14 +29,14 @@ use super::{DeepEq, JanetBuffer};
 
 /// Builder for [`JanetString`]s.
 #[derive(Debug)]
-pub struct JanetStringBuilder<'data> {
+pub struct JanetStringBuilder {
     raw:     *mut u8,
     len:     i32,
     added:   i32,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[u8]>>,
 }
 
-impl<'data> JanetStringBuilder<'data> {
+impl JanetStringBuilder {
     /// Add data to the string builder.
     #[cfg_attr(feature = "inline-more", inline)]
     #[must_use]
@@ -84,7 +84,7 @@ impl<'data> JanetStringBuilder<'data> {
     /// If the build is finalized and not all the allocated space was inserted with a
     /// item, the unused space will all be Null characters.
     #[inline]
-    pub fn finalize(self) -> JanetString<'data> {
+    pub fn finalize(self) -> JanetString {
         JanetString {
             raw:     unsafe { evil_janet::janet_string_end(self.raw) },
             phantom: PhantomData,
@@ -121,12 +121,12 @@ impl<'data> JanetStringBuilder<'data> {
 /// [`builder`]: #method.builder
 /// [`new`]: #method.new
 #[repr(transparent)]
-pub struct JanetString<'data> {
+pub struct JanetString {
     pub(crate) raw: *const u8,
-    phantom: PhantomData<&'data ()>,
+    phantom: PhantomData<alloc::rc::Rc<[u8]>>,
 }
 
-impl<'data> JanetString<'data> {
+impl JanetString {
     /// Create a [`JanetString`] from a given `buffer`.
     ///
     /// # Examples
@@ -169,7 +169,7 @@ impl<'data> JanetString<'data> {
     ///
     /// If the given `len` is lesser than zero it behaves the same as if `len` is zero.
     #[inline]
-    pub fn builder(len: usize) -> JanetStringBuilder<'data> {
+    pub fn builder(len: usize) -> JanetStringBuilder {
         let len = i32::try_from(len).unwrap_or(i32::MAX);
 
         JanetStringBuilder {
@@ -2294,7 +2294,7 @@ impl<'data> JanetString<'data> {
     }
 }
 
-impl Debug for JanetString<'_> {
+impl Debug for JanetString {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
@@ -2303,7 +2303,7 @@ impl Debug for JanetString<'_> {
     }
 }
 
-impl Display for JanetString<'_> {
+impl Display for JanetString {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bstr: &BStr = self.as_bytes().as_ref();
@@ -2312,7 +2312,7 @@ impl Display for JanetString<'_> {
     }
 }
 
-impl Clone for JanetString<'_> {
+impl Clone for JanetString {
     #[inline]
     fn clone(&self) -> Self {
         Self {
@@ -2322,21 +2322,21 @@ impl Clone for JanetString<'_> {
     }
 }
 
-impl Default for JanetString<'_> {
+impl Default for JanetString {
     #[inline]
     fn default() -> Self {
         Self::from("")
     }
 }
 
-impl DeepEq<JanetBuffer<'_>> for JanetString<'_> {
+impl DeepEq<JanetBuffer> for JanetString {
     #[inline]
-    fn deep_eq(&self, other: &JanetBuffer<'_>) -> bool {
+    fn deep_eq(&self, other: &JanetBuffer) -> bool {
         other.deep_eq(self)
     }
 }
 
-impl From<char> for JanetString<'_> {
+impl From<char> for JanetString {
     #[inline]
     fn from(ch: char) -> Self {
         let mut buff = [0; 4];
@@ -2345,7 +2345,7 @@ impl From<char> for JanetString<'_> {
     }
 }
 
-impl From<&char> for JanetString<'_> {
+impl From<&char> for JanetString {
     #[inline]
     fn from(ch: &char) -> Self {
         let mut buff = [0; 4];
@@ -2354,64 +2354,64 @@ impl From<&char> for JanetString<'_> {
     }
 }
 
-impl From<JanetBuffer<'_>> for JanetString<'_> {
+impl From<JanetBuffer> for JanetString {
     #[inline]
-    fn from(buff: JanetBuffer<'_>) -> Self {
-        From::<&JanetBuffer<'_>>::from(&buff)
+    fn from(buff: JanetBuffer) -> Self {
+        From::<&JanetBuffer>::from(&buff)
     }
 }
 
-impl From<&JanetBuffer<'_>> for JanetString<'_> {
+impl From<&JanetBuffer> for JanetString {
     #[inline]
-    fn from(buff: &JanetBuffer<'_>) -> Self {
+    fn from(buff: &JanetBuffer) -> Self {
         let slice = buff.as_bytes();
         JanetString::new(slice)
     }
 }
 
-impl From<super::JanetSymbol<'_>> for JanetString<'_> {
+impl From<super::JanetSymbol> for JanetString {
     #[inline]
-    fn from(sym: super::JanetSymbol<'_>) -> Self {
+    fn from(sym: super::JanetSymbol) -> Self {
         JanetString::new(sym)
     }
 }
 
-impl From<&super::JanetSymbol<'_>> for JanetString<'_> {
+impl From<&super::JanetSymbol> for JanetString {
     #[inline]
-    fn from(sym: &super::JanetSymbol<'_>) -> Self {
+    fn from(sym: &super::JanetSymbol) -> Self {
         JanetString::new(sym)
     }
 }
 
-impl From<super::JanetKeyword<'_>> for JanetString<'_> {
+impl From<super::JanetKeyword> for JanetString {
     #[inline]
-    fn from(key: super::JanetKeyword<'_>) -> Self {
+    fn from(key: super::JanetKeyword) -> Self {
         JanetString::new(key)
     }
 }
 
-impl From<&super::JanetKeyword<'_>> for JanetString<'_> {
+impl From<&super::JanetKeyword> for JanetString {
     #[inline]
-    fn from(key: &super::JanetKeyword<'_>) -> Self {
+    fn from(key: &super::JanetKeyword) -> Self {
         JanetString::new(key)
     }
 }
 
-impl AsRef<[u8]> for JanetString<'_> {
+impl AsRef<[u8]> for JanetString {
     #[inline]
     fn as_ref(&self) -> &[u8] {
         self.as_bytes()
     }
 }
 
-impl AsRef<BStr> for JanetString<'_> {
+impl AsRef<BStr> for JanetString {
     #[inline]
     fn as_ref(&self) -> &BStr {
         self.as_bytes().as_ref()
     }
 }
 
-impl FromStr for JanetString<'_> {
+impl FromStr for JanetString {
     type Err = Infallible;
 
     #[inline]
@@ -2420,7 +2420,7 @@ impl FromStr for JanetString<'_> {
     }
 }
 
-impl Index<usize> for JanetString<'_> {
+impl Index<usize> for JanetString {
     type Output = u8;
 
     /// Get a reference to the byte of the string at the `index`.
@@ -2443,7 +2443,7 @@ impl Index<usize> for JanetString<'_> {
     }
 }
 
-impl FromIterator<char> for JanetString<'_> {
+impl FromIterator<char> for JanetString {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = char>>(iter: T) -> Self {
         let iter = iter.into_iter();
@@ -2459,7 +2459,7 @@ impl FromIterator<char> for JanetString<'_> {
     }
 }
 
-impl<'a> FromIterator<&'a u8> for JanetString<'_> {
+impl<'a> FromIterator<&'a u8> for JanetString {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = &'a u8>>(iter: T) -> Self {
         let iter = iter.into_iter();
@@ -2475,7 +2475,7 @@ impl<'a> FromIterator<&'a u8> for JanetString<'_> {
     }
 }
 
-impl<'a> FromIterator<&'a char> for JanetString<'_> {
+impl<'a> FromIterator<&'a char> for JanetString {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = &'a char>>(iter: T) -> Self {
         let iter = iter.into_iter();
@@ -2491,7 +2491,7 @@ impl<'a> FromIterator<&'a char> for JanetString<'_> {
     }
 }
 
-impl<'a> FromIterator<&'a str> for JanetString<'_> {
+impl<'a> FromIterator<&'a str> for JanetString {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = &'a str>>(iter: T) -> Self {
         let iter = iter.into_iter();
@@ -2507,7 +2507,7 @@ impl<'a> FromIterator<&'a str> for JanetString<'_> {
     }
 }
 
-impl FromIterator<String> for JanetString<'_> {
+impl FromIterator<String> for JanetString {
     #[cfg_attr(feature = "inline-more", inline)]
     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
         let iter = iter.into_iter();
