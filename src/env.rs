@@ -19,9 +19,8 @@ impl JanetEnvironment {
     /// Creates a new environment with Janet default environment.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn new() -> Self {
-        // SAFETY: `janet_core_env` never returns a null pointer
-        Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(ptr::null_mut())) })
+    pub fn new(table: JanetTable<'static>) -> Self {
+        Self(table)
     }
 
     /// Creates a new environment with Janet default environment and the given `env`
@@ -187,7 +186,8 @@ impl JanetEnvironment {
 
 impl Default for JanetEnvironment {
     fn default() -> Self {
-        Self::new()
+        // SAFETY: `janet_core_env` never returns a null pointer
+        Self(unsafe { JanetTable::from_raw(evil_janet::janet_core_env(ptr::null_mut())) })
     }
 }
 

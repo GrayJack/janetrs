@@ -142,6 +142,12 @@ impl JanetClient {
         Ok(client)
     }
 
+    #[inline]
+    pub fn load_env(mut self, env: JanetEnvironment) -> Self {
+        self.env_table = Some(env);
+        self
+    }
+
     /// Load the default environment of Janet.
     ///
     /// The default environment of Janet contains all the Janet C code as well as the
