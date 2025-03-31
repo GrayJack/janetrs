@@ -337,6 +337,24 @@ impl JanetClient {
         self.run_bytes(code.as_bytes())
     }
 
+    #[inline]
+    pub fn unmarshal(&self, image: impl AsRef<[u8]>) -> Janet {
+        let image = image.as_ref();
+        let marsh_out = unsafe {
+            use evil_janet::*;
+            let env = janet_core_env(std::ptr::null_mut());
+            let lookup = janet_env_lookup(env);
+            janet_unmarshal(
+                image.as_ptr(),
+                image.len(),
+                0,
+                lookup,
+                std::ptr::null_mut(),
+            )
+        };
+        Janet::from(marsh_out)
+    }
+
     /// Return a reference of the environment table of the runtime if it exist.
     #[inline]
     #[must_use]
