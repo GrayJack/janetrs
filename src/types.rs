@@ -19,8 +19,9 @@ use alloc::{
 };
 
 use evil_janet::{
-    JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet, JanetType as CJanetType,
+    JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet
 };
+pub use evil_janet::JanetType as CJanetType;
 
 pub mod array;
 pub mod buffer;
@@ -1540,7 +1541,8 @@ impl From<TaggedJanet<'_>> for Janet {
 
 /// Representation of all Janet types.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
-#[repr(u32)]
+#[cfg_attr(windows, repr(i32))]
+#[cfg_attr(not(windows), repr(u32))]
 pub enum JanetType {
     Abstract = evil_janet::JanetType_JANET_ABSTRACT,
     Array  = evil_janet::JanetType_JANET_ARRAY,
@@ -1613,7 +1615,7 @@ impl Display for JanetType {
 impl From<JanetType> for CJanetType {
     #[inline]
     fn from(val: JanetType) -> Self {
-        val as u32
+        val as CJanetType
     }
 }
 
@@ -1623,7 +1625,8 @@ impl From<JanetType> for CJanetType {
 /// `Ok`, `Yield` and `User9` usually represents when it worked, the others usually
 /// represents that something went wrong.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
-#[repr(u32)]
+#[cfg_attr(windows, repr(i32))]
+#[cfg_attr(not(windows), repr(u32))]
 pub enum JanetSignal {
     Ok    = evil_janet::JanetSignal_JANET_SIGNAL_OK,
     Error = evil_janet::JanetSignal_JANET_SIGNAL_ERROR,
@@ -1641,8 +1644,8 @@ pub enum JanetSignal {
     User9 = evil_janet::JanetSignal_JANET_SIGNAL_USER9,
 }
 
-impl From<u32> for JanetSignal {
-    fn from(val: u32) -> Self {
+impl From<CJanetType> for JanetSignal {
+    fn from(val: CJanetType) -> Self {
         match val {
             evil_janet::JanetSignal_JANET_SIGNAL_OK => Self::Ok,
             evil_janet::JanetSignal_JANET_SIGNAL_ERROR => Self::Error,
@@ -1663,7 +1666,7 @@ impl From<u32> for JanetSignal {
     }
 }
 
-impl From<JanetSignal> for u32 {
+impl From<JanetSignal> for CJanetType {
     fn from(val: JanetSignal) -> Self {
         val as _
     }

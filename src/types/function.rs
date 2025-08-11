@@ -308,6 +308,8 @@ impl fmt::Debug for JanetFunction<'_> {
 mod trystate {
     use core::mem::MaybeUninit;
 
+    use evil_janet::JanetType;
+
     use crate::{Janet, JanetSignal};
 
     /// A structure that holds the old and new states of the Janet VM.
@@ -358,7 +360,7 @@ mod trystate {
         pub unsafe fn signal_unchecked(&mut self) -> JanetSignal {
             let signal = evil_janet::_setjmp(self.inner.buf.as_mut_ptr());
 
-            JanetSignal::from(signal as u32)
+            JanetSignal::from(signal as JanetType)
         }
 
         /// Get the [`JanetSignal`] of the state if the environment is set to catch Janet
