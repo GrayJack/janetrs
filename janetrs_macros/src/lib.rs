@@ -191,7 +191,9 @@ pub fn janet_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                 #[allow(non_upper_case_globals)]
                 const #name_line_: u32 = ::core::line!() + 1;
                 #(#attrs)* #[no_mangle] #vis unsafe extern "C-unwind" fn #name_c_fn(argc: i32, argv: *mut ::janetrs::lowlevel::Janet) -> ::janetrs::lowlevel::Janet {
-                    let args = unsafe { core::slice::from_raw_parts_mut(argv, argc as usize) };
+                    // Avoid argv invalidation if the rust function call janet_call
+                    let argv2 = ::evil_janet::janet_tuple_n(argv, argc);
+                    let args = unsafe { ::core::slice::from_raw_parts_mut(argv, argc as usize) };
                     let mut args = unsafe { &mut *(args as *mut [::janetrs::lowlevel::Janet] as *mut [::janetrs::Janet])};
 
                     #(#extra)*
