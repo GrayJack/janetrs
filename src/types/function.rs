@@ -185,8 +185,12 @@ impl JanetFunction {
     ///
     /// If the executions was successful returns the output, otherwise return the
     /// [`CallError`] with information returned by the call.
+    ///
+    /// # Safety
+    /// This function may trigger a garbage collection. Any unrooted value created from
+    /// Rust side must be rooted or dropped before calling this function
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError> {
+    pub unsafe fn call(&mut self, args: impl AsRef<[Janet]>) -> Result<Janet, CallError> {
         let args = args.as_ref();
         let mut out = Janet::nil();
         let fiber = ptr::null_mut();
@@ -229,7 +233,7 @@ impl JanetFunction {
     /// If the executions was successful returns the output, otherwise return the
     /// [`CallError`] with information returned by the call.
     #[cfg_attr(feature = "inline-more", inline)]
-    pub fn call_with_fiber(
+    pub unsafe fn call_with_fiber(
         &mut self, mut fiber: JanetFiber, args: impl AsRef<[Janet]>,
     ) -> Result<Janet, CallError> {
         let args = args.as_ref();

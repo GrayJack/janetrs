@@ -2951,31 +2951,20 @@ impl From<JanetTuple> for JanetArray {
     }
 }
 
-impl TryFrom<&[Janet]> for JanetArray {
-    type Error = core::num::TryFromIntError;
-
-    #[cfg_attr(feature = "inline-more", inline)]
-    fn try_from(slice: &[Janet]) -> Result<Self, Self::Error> {
-        let len: i32 = slice.len().try_into()?;
-        let mut j_array = Self::with_capacity(len as usize);
-
+impl From<&[Janet]> for JanetArray {
+    fn from(slice: &[Janet]) -> Self {
+        let mut j_array = Self::with_capacity(slice.len());
         slice.iter().for_each(|&e| j_array.push(e));
-
-        Ok(j_array)
+        j_array
     }
 }
 
-impl TryFrom<&[CJanet]> for JanetArray {
-    type Error = core::num::TryFromIntError;
-
-    #[inline]
-    fn try_from(slice: &[CJanet]) -> Result<Self, Self::Error> {
-        let len = slice.len().try_into()?;
-
-        Ok(Self {
-            raw:     unsafe { evil_janet::janet_array_n(slice.as_ptr(), len) },
+impl From<&[CJanet]> for JanetArray {
+    fn from(slice: &[CJanet]) -> Self {
+        Self {
+            raw:     unsafe { evil_janet::janet_array_n(slice.as_ptr(), slice.len() as _) },
             phantom: PhantomData,
-        })
+        }
     }
 }
 
