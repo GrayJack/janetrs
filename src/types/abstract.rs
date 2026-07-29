@@ -2,10 +2,6 @@
 //!
 //! In this module you can find the definitions of types and traits to allow to work with
 //! [`JanetAbstract`]. Most of those are re-exported at the supermodule of this module.
-#![allow(
-    unpredictable_function_pointer_comparisons,
-    reason = "Not a better option until 1.85.0"
-)]
 use core::{
     cell::Cell, cmp::Ordering, ffi::c_void, fmt, marker::PhantomData, mem::ManuallyDrop, ptr,
 };
@@ -115,6 +111,7 @@ impl JanetAbstract {
     /// Check if the `JanetAbstract` data is of the type `A`.
     #[inline]
     #[must_use]
+    #[allow(unpredictable_function_pointer_comparisons)]
     pub fn is<A: IsJanetAbstract>(&self) -> bool {
         if self.size() != A::SIZE {
             return false;
@@ -140,6 +137,7 @@ impl JanetAbstract {
         true
     }
 
+    #[allow(unpredictable_function_pointer_comparisons)]
     fn check<A: IsJanetAbstract>(&self) -> Result<(), AbstractError> {
         if self.size() != A::SIZE {
             return Err(AbstractError::MismatchedSize);
