@@ -1,7 +1,7 @@
 //! Janet fibers (soft threads) type.
 use core::{iter::FusedIterator, marker::PhantomData};
 
-use evil_janet::JanetFiber as CJanetFiber;
+use evil_janet::{JanetFiber as CJanetFiber, JanetType};
 use janetrs_macros::cjvg;
 
 use super::{Janet, JanetFunction, JanetSignal, JanetTable};
@@ -309,7 +309,8 @@ impl FusedIterator for Exec<'_> {}
 ///
 /// It mostly corresponds to signals.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
-#[repr(u32)]
+#[cfg_attr(windows, repr(i32))]
+#[cfg_attr(not(windows), repr(u32))]
 pub enum FiberStatus {
     Dead  = evil_janet::JanetFiberStatus_JANET_STATUS_DEAD,
     Error = evil_janet::JanetFiberStatus_JANET_STATUS_ERROR,
@@ -330,9 +331,9 @@ pub enum FiberStatus {
 }
 
 #[allow(non_upper_case_globals)]
-impl From<u32> for FiberStatus {
+impl From<JanetType> for FiberStatus {
     #[inline]
-    fn from(val: u32) -> Self {
+    fn from(val: JanetType) -> Self {
         match val {
             evil_janet::JanetFiberStatus_JANET_STATUS_DEAD => Self::Dead,
             evil_janet::JanetFiberStatus_JANET_STATUS_ERROR => Self::Error,
