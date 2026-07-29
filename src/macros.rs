@@ -240,9 +240,9 @@ macro_rules! janet_mod {
                 )*
 
                 $crate::lowlevel::JanetReg {
-                    name: std::ptr::null(),
+                    name: ::core::ptr::null(),
                     cfun: None,
-                    documentation: std::ptr::null(),
+                    documentation: ::core::ptr::null(),
                 },
             ].as_ptr())
         }

@@ -420,10 +420,10 @@ pub fn declare_janet_mod(input: TokenStream) -> TokenStream {
                 )*
 
                 ::janetrs::lowlevel::JanetRegExt {
-                    name: std::ptr::null(),
+                    name: ::core::ptr::null(),
                     cfun: None,
-                    documentation: std::ptr::null(),
-                    source_file: std::ptr::null(),
+                    documentation: ::core::ptr::null(),
+                    source_file: ::core::ptr::null(),
                     source_line: 0
                 },
             ].as_ptr())
@@ -438,9 +438,9 @@ pub fn declare_janet_mod(input: TokenStream) -> TokenStream {
                 )*
 
                 ::janetrs::lowlevel::JanetReg {
-                    name: std::ptr::null(),
+                    name: ::core::ptr::null(),
                     cfun: None,
-                    documentation: std::ptr::null(),
+                    documentation: ::core::ptr::null(),
                 },
             ].as_ptr())
         }

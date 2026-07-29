@@ -1,4 +1,5 @@
 //! This module implements anything required to run a Janet client.
+#[allow(unused_imports)]
 use core::{
     error::Error as StdError,
     fmt::{self, Display},
@@ -348,14 +349,14 @@ impl JanetClient {
         let image = image.as_ref();
         let marsh_out = unsafe {
             use evil_janet::*;
-            let env = janet_core_env(std::ptr::null_mut());
+            let env = janet_core_env(core::ptr::null_mut());
             let lookup = janet_env_lookup(env);
             janet_unmarshal(
                 image.as_ptr(),
                 image.len(),
                 0,
                 lookup,
-                std::ptr::null_mut(),
+                core::ptr::null_mut(),
             )
         };
         Janet::from(marsh_out)
