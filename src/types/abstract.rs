@@ -497,6 +497,7 @@ mod tests {
         call: None,
         length: None,
         bytes: None,
+        gcperthread: None,
     };
 
     unsafe impl IsJanetAbstract for TestDrop {
@@ -545,6 +546,7 @@ mod tests {
         call: None,
         length: None,
         bytes: None,
+        gcperthread: None,
     };
 
     unsafe impl IsJanetAbstract for TestDrop2 {

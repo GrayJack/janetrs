@@ -922,11 +922,11 @@ mod tests {
 
         assert_eq!(
             iter.next(),
-            Some((&Janet::integer(10), &Janet::from("dez")))
+            Some((&Janet::integer(11), &Janet::from("onze")))
         );
         assert_eq!(
             iter.next(),
-            Some((&Janet::integer(11), &Janet::from("onze")))
+            Some((&Janet::integer(10), &Janet::from("dez")))
         );
         assert_eq!(iter.next(), None);
         Ok(())
@@ -939,8 +939,8 @@ mod tests {
         let st = structs! {10 => "dez", 11 => "onze"};
         let mut iter = st.into_iter();
 
-        assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
         assert_eq!(iter.next(), Some((Janet::integer(11), Janet::from("onze"))));
+        assert_eq!(iter.next(), Some((Janet::integer(10), Janet::from("dez"))));
         assert_eq!(iter.next(), None);
         Ok(())
     }
