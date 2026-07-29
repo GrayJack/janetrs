@@ -1127,7 +1127,7 @@ impl JanetBuffer {
     /// but it does not appear to be an API guarantee.
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn to_str_lossy(&self) -> Cow<str> {
+    pub fn to_str_lossy(&self) -> Cow<'_, str> {
         self.as_bytes().to_str_lossy()
     }
 
@@ -1176,7 +1176,7 @@ impl JanetBuffer {
     #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn to_os_str_lossy(&self) -> Cow<OsStr> {
+    pub fn to_os_str_lossy(&self) -> Cow<'_, OsStr> {
         self.as_bytes().to_os_str_lossy()
     }
 
@@ -1208,7 +1208,7 @@ impl JanetBuffer {
     #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    pub fn to_path_lossy(&self) -> Cow<Path> {
+    pub fn to_path_lossy(&self) -> Cow<'_, Path> {
         self.as_bytes().to_path_lossy()
     }
 
@@ -1623,7 +1623,7 @@ impl JanetBuffer {
     /// assert_eq!(buff.bytes().collect::<Vec<u8>>(), b"Hello");
     /// ```
     #[inline]
-    pub fn bytes(&self) -> Bytes {
+    pub fn bytes(&self) -> Bytes<'_> {
         self.as_bytes().bytes()
     }
 
@@ -1641,7 +1641,7 @@ impl JanetBuffer {
     /// assert_eq!(vec!['☃', '\u{FFFD}', '𝞃', '\u{FFFD}', 'a'], chars);
     /// ```
     #[inline]
-    pub fn chars(&self) -> Chars {
+    pub fn chars(&self) -> Chars<'_> {
         self.as_bytes().chars()
     }
 
@@ -1674,7 +1674,7 @@ impl JanetBuffer {
     /// ]);
     /// ```
     #[inline]
-    pub fn char_indices(&self) -> CharIndices {
+    pub fn char_indices(&self) -> CharIndices<'_> {
         self.as_bytes().char_indices()
     }
 
@@ -1712,7 +1712,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn fields(&self) -> Fields {
+    pub fn fields(&self) -> Fields<'_> {
         self.as_bytes().fields()
     }
 
@@ -1755,7 +1755,7 @@ impl JanetBuffer {
     /// );
     /// ```
     #[inline]
-    pub fn fields_with<F>(&self, f: F) -> FieldsWith<F>
+    pub fn fields_with<F>(&self, f: F) -> FieldsWith<'_, F>
     where
         F: FnMut(char) -> bool,
     {
@@ -1803,7 +1803,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn grapheme_indices(&self) -> GraphemeIndices {
+    pub fn grapheme_indices(&self) -> GraphemeIndices<'_> {
         self.as_bytes().grapheme_indices()
     }
 
@@ -1838,7 +1838,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn graphemes(&self) -> Graphemes {
+    pub fn graphemes(&self) -> Graphemes<'_> {
         self.as_bytes().graphemes()
     }
 
@@ -1876,7 +1876,7 @@ impl JanetBuffer {
     /// ]);
     /// ```
     #[inline]
-    pub fn lines(&self) -> Lines {
+    pub fn lines(&self) -> Lines<'_> {
         self.as_bytes().lines()
     }
 
@@ -1921,7 +1921,7 @@ impl JanetBuffer {
     /// ]);
     /// ```
     #[inline]
-    pub fn lines_with_terminator(&self) -> LinesWithTerminator {
+    pub fn lines_with_terminator(&self) -> LinesWithTerminator<'_> {
         self.as_bytes().lines_with_terminator()
     }
 
@@ -1956,7 +1956,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn sentence_indices(&self) -> SentenceIndices {
+    pub fn sentence_indices(&self) -> SentenceIndices<'_> {
         self.as_bytes().sentence_indices()
     }
 
@@ -1989,7 +1989,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn sentences(&self) -> Sentences {
+    pub fn sentences(&self) -> Sentences<'_> {
         self.as_bytes().sentences()
     }
 
@@ -2409,7 +2409,7 @@ impl JanetBuffer {
     ///
     /// [`to_str_lossy`]: #method.to_str_lossy
     #[inline]
-    pub fn utf8_chunks(&self) -> Utf8Chunks {
+    pub fn utf8_chunks(&self) -> Utf8Chunks<'_> {
         ByteSlice::utf8_chunks(self.as_bytes())
     }
 
@@ -2449,7 +2449,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn word_indices(&self) -> WordIndices {
+    pub fn word_indices(&self) -> WordIndices<'_> {
         self.as_bytes().word_indices()
     }
 
@@ -2485,7 +2485,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn words(&self) -> Words {
+    pub fn words(&self) -> Words<'_> {
         self.as_bytes().words()
     }
 
@@ -2523,7 +2523,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn words_with_break_indices(&self) -> WordsWithBreakIndices {
+    pub fn words_with_break_indices(&self) -> WordsWithBreakIndices<'_> {
         self.as_bytes().words_with_break_indices()
     }
 
@@ -2554,7 +2554,7 @@ impl JanetBuffer {
     #[cfg(feature = "unicode")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unicode")))]
     #[inline]
-    pub fn words_with_breaks(&self) -> WordsWithBreaks {
+    pub fn words_with_breaks(&self) -> WordsWithBreaks<'_> {
         self.as_bytes().words_with_breaks()
     }
 

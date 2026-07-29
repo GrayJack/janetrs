@@ -19,7 +19,7 @@ impl JanetEnvironment {
     /// Creates a new environment with Janet default environment.
     #[inline]
     #[must_use = "function is a constructor associated function"]
-    pub fn new(table: JanetTable<'static>) -> Self {
+    pub fn new(table: JanetTable) -> Self {
         Self(table)
     }
 

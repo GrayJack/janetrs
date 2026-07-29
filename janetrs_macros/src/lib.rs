@@ -449,6 +449,7 @@ pub fn declare_janet_mod(input: TokenStream) -> TokenStream {
     ts.into()
 }
 
+
 /// Checks the specified version of Janet is equal of the used Janet. Emits a boolean.
 ///
 /// **Usage:** `check_janet_version!(<MIN_VERSION>, [MAX_VERSION])` where `MIN_VERSION`
