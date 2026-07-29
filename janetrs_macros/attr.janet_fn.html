@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Macro that creates from a high-level Janet function (`fn(&#38;mut [Janet]) -&#62; Janet`) to the kind of function the Janet C API is expecting (`fn(i32, *mut janetrs::lowlevel::Janet) -&#62; janetrs::lowlevel::Janet`) with a modified name with `_c` postfix."><title>janet_fn in janetrs_macros - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ddecd707.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="janetrs_macros" data-themes="" data-resource-suffix="" data-rustdoc-version="1.99.0-nightly (26ae60a9e 2026-07-28)" data-channel="nightly" data-search-js="search-cf4fc35e.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-417ebf0a.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc attr"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">janet_fn</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../janetrs_macros/index.html">janetrs_<wbr>macros</a><span class="version">0.7.3</span></h2></div><div class="sidebar-elems"><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">janetrs_macros</a></div><h1>Attribute Macro <span class="attr">janet_<wbr>fn</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/janetrs_macros/lib.rs.html#48-221">Source</a> </span></div><pre class="rust item-decl"><code>#[janet_fn]</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Macro that creates from a high-level Janet function (<code>fn(&amp;mut [Janet]) -&gt; Janet</code>)
+to the kind of function the Janet C API is expecting (<code>fn(i32, *mut janetrs::lowlevel::Janet) -&gt; janetrs::lowlevel::Janet</code>) with a modified name with <code>_c</code>
+postfix.</p>
+<p>The optional argument <code>catch</code> adds code to catch Rust panics and transform them to
+Janet panics. This argument is ignored if the <code>std</code> feature is deactivated.</p>
+<p>The optional argument <code>arity</code> adds a arity check for the function. It must receive the
+kind of arity check. These kinds are <code>fix</code>, for fixed arity, and <code>range</code>, for ranged
+or variadic arity. The <code>fix</code> kind receives a integer of the number of the parameters
+the Janet function must have and the <code>range</code> kind can receive two arguments, the first
+one if mandatory while the second one is optional, the first represents the minimal of
+arguments the Janet function have to receive and the second represents the maximum of
+arguments the Janet function can receive. If the maximum is not set for the range
+arity, the maximum check is disabled, allowing variadic arguments.</p>
+<p>The optional arg <code>check_mut_ref</code> adds a check to see if the function received more
+than one reference to the same <code>*mut</code> pointer. This check is not the default because
+Janet Types act like types with interior mutability and the check is expensive, but if
+you want to make sure that your function never receives the same pointer more than
+once you can use this.</p>
+<p><strong>Usages</strong>:</p>
+<ul>
+<li><code>#[janet_fn]</code></li>
+<li><code>#[janet_fn(arity(fix(&lt;N&gt;)))]</code> where <code>N</code> is an integer literal</li>
+<li><code>#[janet_fn(arity(range(&lt;MIN&gt; [, MAX])))]</code> where <code>MIN</code> and <code>MAX</code> are integer
+literals</li>
+<li><code>#[janet_fn(catch)]</code></li>
+<li><code>#[janet_fn(check_mut_ref)]</code></li>
+<li><code>#[janet_fn(arity(&lt;...&gt;), check_mut_ref)]</code> Combining both</li>
+</ul>
+</div></details></section></div></main></body></html>

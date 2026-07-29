@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"attr":["cjvg","janet_fn","janet_version"],"macro":["check_janet_version","declare_janet_mod"]};

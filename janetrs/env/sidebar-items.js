@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["set_dynamic"],"struct":["CFunOptions","DefOptions","JanetEnvironment","VarOptions"]};
