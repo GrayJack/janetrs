@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["IntoIter","Iter","JanetTuple","JanetTupleBuilder"],"type":["RSplit","RSplitN","Split","SplitN"]};
