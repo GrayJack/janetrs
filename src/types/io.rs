@@ -220,9 +220,9 @@ impl Seek for JanetFile {
                 SeekFrom::Start(offset) => {
                     libc::fseek(self.as_file_ptr(), offset as _, libc::SEEK_SET)
                 },
-                SeekFrom::End(offset) => libc::fseek(self.as_file_ptr(), offset, libc::SEEK_END),
+                SeekFrom::End(offset) => libc::fseek(self.as_file_ptr(), offset as _, libc::SEEK_END),
                 SeekFrom::Current(offset) => {
-                    libc::fseek(self.as_file_ptr(), offset, libc::SEEK_CUR)
+                    libc::fseek(self.as_file_ptr(), offset as _, libc::SEEK_CUR)
                 },
             }
         };
