@@ -326,9 +326,11 @@ impl JanetTable {
             None
         } else {
             // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+            //    both types
             // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // 2. A C struct are represented the same way in memory as tuple with the same
+            //    number of
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -338,7 +340,8 @@ impl JanetTable {
             if kv.is_null() {
                 None
             } else {
-                // SAFETY: kv is safe to deref because we checked that it's not a null pointer.
+                // SAFETY: kv is safe to deref because we checked that it's not a null
+                // pointer.
                 unsafe {
                     if (*kv).1.is_nil() {
                         None
@@ -403,9 +406,11 @@ impl JanetTable {
             None
         } else {
             // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+            //    both types
             // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // 2. A C struct are represented the same way in memory as tuple with the same
+            //    number of
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -415,7 +420,8 @@ impl JanetTable {
             if kv.is_null() {
                 None
             } else {
-                // SAFETY: kv is safe to deref because we checked that it's not a null pointer.
+                // SAFETY: kv is safe to deref because we checked that it's not a null
+                // pointer.
                 unsafe {
                     if (*kv).1.is_nil() {
                         None
@@ -459,9 +465,11 @@ impl JanetTable {
         let key = key.into();
 
         // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+        //    types
         // are represented in memory the same way
-        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // 2. A C struct are represented the same way in memory as tuple with the same
+        //    number of
         // the struct fields of the same type of the struct fields
         //
         // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -480,9 +488,11 @@ impl JanetTable {
         let key = key.into();
 
         // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+        //    types
         // are represented in memory the same way
-        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // 2. A C struct are represented the same way in memory as tuple with the same
+        //    number of
         // the struct fields of the same type of the struct fields
         //
         // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -610,9 +620,11 @@ impl JanetTable {
 
         if !key.is_nil() {
             // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+            //    both types
             // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // 2. A C struct are represented the same way in memory as tuple with the same
+            //    number of
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -622,7 +634,8 @@ impl JanetTable {
             if kv.is_null() {
                 proto_lookup!();
             } else {
-                // SAFETY: kv is safe to deref because we checked that it's not a null pointer.
+                // SAFETY: kv is safe to deref because we checked that it's not a null
+                // pointer.
                 #[allow(unused_unsafe)]
                 unsafe {
                     if (*kv).1.is_nil() {
@@ -668,15 +681,18 @@ impl JanetTable {
                     if proto.is_null() {
                         break None;
                     } else {
-                        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+                        // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)`
+                        // because:
+                        // 1. `Janet` contains a `evil_janet::Janet` and it is
+                        //    repr(transparent) so
                         // both types are represented in memory the same way
-                        // 2. A C struct are represented the same way in memory as tuple with the
+                        // 2. A C struct are represented the same way in memory as tuple
+                        //    with the
                         // same number of the struct fields of the same type
                         // of the struct fields
                         //
-                        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
-                        // Janet)`
+                        // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) ===
+                        // (Janet, Janet)`
                         let kv: *mut (Janet, Janet) =
                             unsafe { evil_janet::janet_table_find(proto, key.inner) as *mut _ };
 
@@ -689,8 +705,8 @@ impl JanetTable {
                                 break None;
                             }
                         } else {
-                            // SAFETY: kv is safe to deref because we checked that it's not a null
-                            // pointer.
+                            // SAFETY: kv is safe to deref because we checked that it's
+                            // not a null pointer.
                             unsafe {
                                 if (*kv).1.is_nil() {
                                     if depth < evil_janet::JANET_MAX_PROTO_DEPTH {
@@ -825,9 +841,11 @@ impl JanetTable {
             None
         } else {
             // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+            //    both types
             // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // 2. A C struct are represented the same way in memory as tuple with the same
+            //    number of
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -837,7 +855,8 @@ impl JanetTable {
             if kv.is_null() {
                 None
             } else {
-                // SAFETY: This is safe because we have a exclusive access to the structure
+                // SAFETY: This is safe because we have a exclusive access to the
+                // structure
                 unsafe { Some((&mut (*kv).0, &mut (*kv).1)) }
             }
         }
@@ -893,9 +912,11 @@ impl JanetTable {
             None
         } else {
             // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+            //    both types
             // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // 2. A C struct are represented the same way in memory as tuple with the same
+            //    number of
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -1174,13 +1195,15 @@ impl JanetTable {
         let key = key.into();
 
         if self.get(key).is_some() {
-            // SAFETY: We just checked that the table has the key, so there is no way that the
-            // pointer will be NULL
+            // SAFETY: We just checked that the table has the key, so there is no way that
+            // the pointer will be NULL
             //
             // It's also safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+            // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so
+            //    both types
             // are represented in memory the same way
-            // 2. A C struct are represented the same way in memory as tuple with the same number of
+            // 2. A C struct are represented the same way in memory as tuple with the same
+            //    number of
             // the struct fields of the same type of the struct fields
             //
             // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -1592,8 +1615,9 @@ impl<'a> OccupiedEntry<'a> {
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn get(&self) -> &Janet {
-        // SAFETY: This is safe because `OccupiedEntry` cannot be created by a user and all
-        // functions that creates then must create then with the `elem` field not NULL
+        // SAFETY: This is safe because `OccupiedEntry` cannot be created by a user and
+        // all functions that creates then must create then with the `elem` field
+        // not NULL
         unsafe { &(*self.elem.as_ptr()).1 }
     }
 
@@ -1628,11 +1652,11 @@ impl<'a> OccupiedEntry<'a> {
     /// [`into_mut`]: ./struct.OccupiedEntry.html#method.into_mut
     #[inline]
     pub fn get_mut(&mut self) -> &mut Janet {
-        // SAFETY: This is safe to not check if the pointer is not null because `OccupiedEntry`
-        // cannot be created by a user and all functions that creates then must create
-        // then with the `elem` field not NULL
-        // This is also safe to do return as exclusive borrow because we have a exclusive access
-        // to the value
+        // SAFETY: This is safe to not check if the pointer is not null because
+        // `OccupiedEntry` cannot be created by a user and all functions that
+        // creates then must create then with the `elem` field not NULL
+        // This is also safe to do return as exclusive borrow because we have a exclusive
+        // access to the value
         unsafe { &mut (*self.elem.as_ptr()).1 }
     }
 
@@ -1788,7 +1812,8 @@ impl<'a> VacantEntry<'a> {
         let value = value.into();
         self.table.insert(self.key, value);
 
-        // SAFETY: We just inserted the key-value pair, therefore it certainly is in the table.
+        // SAFETY: We just inserted the key-value pair, therefore it certainly is in the
+        // table.
         unsafe { self.table.get_mut_unchecked(self.key) }
     }
 
@@ -1800,15 +1825,17 @@ impl<'a> VacantEntry<'a> {
 
         self.table.insert(self.key, value);
 
-        // SAFETY: We inserted the key-value pair in the table in the line above, that means we
-        // will always find the pair in the table, so there is no way that the pointer
-        // will be NULL
+        // SAFETY: We inserted the key-value pair in the table in the line above, that
+        // means we will always find the pair in the table, so there is no way
+        // that the pointer will be NULL
         //
         //
         // It's also safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+        //    types
         // are represented in memory the same way
-        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // 2. A C struct are represented the same way in memory as tuple with the same
+        //    number of
         // the struct fields of the same type of the struct fields
         //
         // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -1918,13 +1945,15 @@ impl<'a> Iterator for Iter<'a> {
         unsafe {
             while self.kv < self.end {
                 // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent)
+                //    so both
                 // types are represented in memory the same way
-                // 2. A C struct are represented the same way in memory as tuple with the same
+                // 2. A C struct are represented the same way in memory as tuple with the
+                //    same
                 // number of the struct fields of the same type of the struct fields
-                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-                // It's safe to get the data at the `self.offset` because we checked it's in the
-                // bounds
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                // Janet)` It's safe to get the data at the `self.offset`
+                // because we checked it's in the bounds
                 let ptr = self.kv as *const (Janet, Janet);
 
                 if !(*ptr).0.is_nil() {
@@ -2037,13 +2066,15 @@ impl<'a> Iterator for IterMut<'a> {
         unsafe {
             while self.kv < self.end {
                 // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent)
+                //    so both
                 // types are represented in memory the same way
-                // 2. A C struct are represented the same way in memory as tuple with the same
+                // 2. A C struct are represented the same way in memory as tuple with the
+                //    same
                 // number of the struct fields of the same type of the struct fields
-                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-                // It's safe to get the data at the `self.offset` because we checked it's in the
-                // bounds
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                // Janet)` It's safe to get the data at the `self.offset`
+                // because we checked it's in the bounds
                 let ptr = self.kv as *mut (Janet, Janet);
 
                 if !(*ptr).0.is_nil() {
@@ -2124,13 +2155,15 @@ impl Iterator for IntoIter {
         unsafe {
             while self.kv < self.end {
                 // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent)
+                //    so both
                 // types are represented in memory the same way
-                // 2. A C struct are represented the same way in memory as tuple with the same
+                // 2. A C struct are represented the same way in memory as tuple with the
+                //    same
                 // number of the struct fields of the same type of the struct fields
-                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-                // It's safe to get the data at the `self.offset` because we checked it's in the
-                // bounds
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                // Janet)` It's safe to get the data at the `self.offset`
+                // because we checked it's in the bounds
                 let ptr = self.kv as *mut (Janet, Janet);
 
                 if !(*ptr).0.is_nil() {

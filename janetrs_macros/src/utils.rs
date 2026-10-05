@@ -208,8 +208,9 @@ pub(crate) fn get_doc(attrs: &[syn::Attribute]) -> proc_macro2::TokenStream {
                     let doc_line = lit_str.value();
                     current_part.push_str(doc_line.strip_prefix(' ').unwrap_or(&doc_line));
                 } else {
-                    // This is probably a macro doc from Rust 1.54, e.g. #[doc = include_str!(...)]
-                    // Reset the string buffer, write that part, and then push this macro part too.
+                    // This is probably a macro doc from Rust 1.54, e.g. #[doc =
+                    // include_str!(...)] Reset the string buffer,
+                    // write that part, and then push this macro part too.
                     parts.push(current_part.to_token_stream());
                     current_part.clear();
                     parts.push(nv.value.to_token_stream());

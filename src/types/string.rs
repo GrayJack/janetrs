@@ -56,9 +56,10 @@ impl JanetStringBuilder {
         };
 
         for &byte in &data[..max_len] {
-            // SAFETY: We asserted that the amount of data we are trying to add fit in the allocated
-            // space for the string. The only thing that could go wrong is insert the
-            // data in the wrong order, making the encoding wrong.
+            // SAFETY: We asserted that the amount of data we are trying to add fit in the
+            // allocated space for the string. The only thing that could go
+            // wrong is insert the data in the wrong order, making the
+            // encoding wrong.
             unsafe {
                 let val_ptr = self.raw.offset(self.added as isize);
                 *val_ptr = byte;

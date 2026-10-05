@@ -203,14 +203,18 @@ impl JanetStruct {
             } else {
                 // SAFETY: Safe to deref since it's not null
                 unsafe {
-                    // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                    // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                    // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)`
+                    // because:
+                    // 1. `Janet` contains a `evil_janet::Janet` and it is
+                    //    repr(transparent) so both
                     // types are represented in memory the same way
-                    // 2. A C struct are represented the same way in memory as tuple with the same
+                    // 2. A C struct are represented the same way in memory as tuple with
+                    //    the same
                     // number of the struct fields of the same type of the
                     // struct fields
                     //
-                    // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                    // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                    // Janet)`
                     let kv: *const (Janet, Janet) = kv as *const _;
 
                     if (*kv).1.is_nil() {
@@ -245,9 +249,11 @@ impl JanetStruct {
         let key = key.into();
 
         // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both types
+        // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+        //    types
         // are represented in memory the same way
-        // 2. A C struct are represented the same way in memory as tuple with the same number of
+        // 2. A C struct are represented the same way in memory as tuple with the same
+        //    number of
         // the struct fields of the same type of the struct fields
         //
         // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
@@ -315,14 +321,18 @@ impl JanetStruct {
             } else {
                 // SAFETY: Safe to deref since it's not null
                 unsafe {
-                    // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                    // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                    // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)`
+                    // because:
+                    // 1. `Janet` contains a `evil_janet::Janet` and it is
+                    //    repr(transparent) so both
                     // types are represented in memory the same way
-                    // 2. A C struct are represented the same way in memory as tuple with the same
+                    // 2. A C struct are represented the same way in memory as tuple with
+                    //    the same
                     // number of the struct fields of the same type of the
                     // struct fields
                     //
-                    // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
+                    // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                    // Janet)`
                     let kv: *const (Janet, Janet) = kv as *const _;
 
                     if kv.is_null() {
@@ -670,13 +680,15 @@ impl<'a> Iterator for Iter<'a> {
         unsafe {
             while self.kv < self.end {
                 // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent)
+                //    so both
                 // types are represented in memory the same way
-                // 2. A C struct are represented the same way in memory as tuple with the same
+                // 2. A C struct are represented the same way in memory as tuple with the
+                //    same
                 // number of the struct fields of the same type of the struct fields
-                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-                // It's safe to get the data at the `self.offset` because we checked it's in the
-                // bounds
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                // Janet)` It's safe to get the data at the `self.offset`
+                // because we checked it's in the bounds
                 let ptr = self.kv as *const (Janet, Janet);
 
                 if !(*ptr).0.is_nil() {
@@ -790,13 +802,15 @@ impl Iterator for IntoIter {
         unsafe {
             while self.kv < self.end {
                 // SAFETY: It's safe to to cast `*JanetKV` to `*(Janet, Janet)` because:
-                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent) so both
+                // 1. `Janet` contains a `evil_janet::Janet` and it is repr(transparent)
+                //    so both
                 // types are represented in memory the same way
-                // 2. A C struct are represented the same way in memory as tuple with the same
+                // 2. A C struct are represented the same way in memory as tuple with the
+                //    same
                 // number of the struct fields of the same type of the struct fields
-                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet, Janet)`
-                // It's safe to get the data at the `self.offset` because we checked it's in the
-                // bounds
+                // So, `JanetKV === (evil_janet::Janet, evil_janet::Janet) === (Janet,
+                // Janet)` It's safe to get the data at the `self.offset`
+                // because we checked it's in the bounds
                 let ptr = self.kv as *const (Janet, Janet);
 
                 if !(*ptr).0.is_nil() {

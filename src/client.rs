@@ -89,8 +89,8 @@ impl JanetClient {
             return Err(Error::AlreadyInit);
         }
 
-        // SAFETY: We use a static AtomicBool to make sure that it is started only once (per
-        // thread if "std" feature activated)
+        // SAFETY: We use a static AtomicBool to make sure that it is started only once
+        // (per thread if "std" feature activated)
         unsafe { evil_janet::janet_init() };
         Ok(Self { env_table: None })
     }

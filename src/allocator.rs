@@ -56,21 +56,22 @@ impl Scratch {
     pub fn malloc(&self, layout: Layout) -> Option<NonNull<[u8]>> {
         // Allocate size if it fits in the type size and has a alignment smaller than the
         // minimum alignment of the architecture. Over allocate otherwise
-        let (raw_ptr, alloc_mem_size) =
-            if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
-                let size = layout.size();
+        let (raw_ptr, alloc_mem_size) = if layout.align() <= MIN_ALIGN
+            && layout.align() <= layout.size()
+        {
+            let size = layout.size();
 
-                unsafe { (evil_janet::janet_smalloc(size) as *mut u8, size) }
-            } else {
-                // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
-                #[cfg(target_os = "macos")]
-                if layout.align() > (1 << 31) {
-                    return None;
-                }
+            unsafe { (evil_janet::janet_smalloc(size) as *mut u8, size) }
+        } else {
+            // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
+            #[cfg(target_os = "macos")]
+            if layout.align() > (1 << 31) {
+                return None;
+            }
 
-                let size = layout.size() + layout.align();
-                unsafe { (evil_janet::janet_smalloc(size) as *mut u8, size) }
-            };
+            let size = layout.size() + layout.align();
+            unsafe { (evil_janet::janet_smalloc(size) as *mut u8, size) }
+        };
         NonNull::new(ptr::slice_from_raw_parts_mut(raw_ptr, alloc_mem_size))
     }
 
@@ -80,21 +81,22 @@ impl Scratch {
     pub fn calloc(&self, layout: Layout) -> Option<NonNull<[u8]>> {
         // Allocate size if it fits in the type size and has a alignment smaller than the
         // minimum alignment of the architecture. Over allocate otherwise
-        let (raw_ptr, alloc_mem_size) =
-            if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
-                let size = layout.size();
+        let (raw_ptr, alloc_mem_size) = if layout.align() <= MIN_ALIGN
+            && layout.align() <= layout.size()
+        {
+            let size = layout.size();
 
-                unsafe { (evil_janet::janet_scalloc(1, size) as *mut u8, size) }
-            } else {
-                // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
-                #[cfg(target_os = "macos")]
-                if layout.align() > (1 << 31) {
-                    return None;
-                }
+            unsafe { (evil_janet::janet_scalloc(1, size) as *mut u8, size) }
+        } else {
+            // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
+            #[cfg(target_os = "macos")]
+            if layout.align() > (1 << 31) {
+                return None;
+            }
 
-                let size = layout.size() + layout.align();
-                unsafe { (evil_janet::janet_scalloc(1, size) as *mut u8, size) }
-            };
+            let size = layout.size() + layout.align();
+            unsafe { (evil_janet::janet_scalloc(1, size) as *mut u8, size) }
+        };
         NonNull::new(ptr::slice_from_raw_parts_mut(raw_ptr, alloc_mem_size))
     }
 
@@ -119,27 +121,28 @@ impl Scratch {
 
         // Allocate size if it fits in the type size and has a alignment smaller than the
         // minimum alignment of the architecture. Over allocate otherwise
-        let (raw_ptr, alloc_mem_size) =
-            if layout.align() <= MIN_ALIGN && layout.align() <= new_layout.size() {
-                let size = new_layout.size();
+        let (raw_ptr, alloc_mem_size) = if layout.align() <= MIN_ALIGN
+            && layout.align() <= new_layout.size()
+        {
+            let size = new_layout.size();
 
-                (
-                    evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size) as *mut u8,
-                    size,
-                )
-            } else {
-                // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
-                #[cfg(target_os = "macos")]
-                if layout.align() > (1 << 31) {
-                    return None;
-                }
+            (
+                evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size) as *mut u8,
+                size,
+            )
+        } else {
+            // MacOS alloc_system is buggy on huge alignments (e.g. an align of `1 << 32`)
+            #[cfg(target_os = "macos")]
+            if layout.align() > (1 << 31) {
+                return None;
+            }
 
-                let size = layout.size() + layout.align();
-                (
-                    evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size) as *mut u8,
-                    size,
-                )
-            };
+            let size = layout.size() + layout.align();
+            (
+                evil_janet::janet_srealloc(ptr.as_ptr() as *mut _, size) as *mut u8,
+                size,
+            )
+        };
         NonNull::new(ptr::slice_from_raw_parts_mut(raw_ptr, alloc_mem_size))
     }
 

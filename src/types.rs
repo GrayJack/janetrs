@@ -20,10 +20,8 @@ use alloc::{
 
 pub use bstr::{BStr, ByteSlice};
 
-use evil_janet::{
-    JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet
-};
 pub use evil_janet::JanetType as CJanetType;
+use evil_janet::{JANET_INTMAX_DOUBLE, JANET_INTMIN_DOUBLE, Janet as CJanet};
 
 pub mod array;
 pub mod buffer;
@@ -608,8 +606,9 @@ impl Janet {
                         _ => None,
                     })
                     .map(|f| {
-                        // SAFETY: We are trusting that am Abstract Janet method through a C
-                        // function will not cause UB. It can janet panic.
+                        // SAFETY: We are trusting that am Abstract Janet method through a
+                        // C function will not cause UB. It can
+                        // janet panic.
                         unsafe { f(1, [self.inner].as_mut_ptr()) }.into()
                     })
                     .and_then(|len: Self| match len.unwrap() {
@@ -915,8 +914,8 @@ impl TryFrom<Janet> for u32 {
 impl From<isize> for Janet {
     #[inline]
     fn from(value: isize) -> Self {
-        // In theory, there could be isize of 128 bits, but in practice, it doesn't exist as Rust
-        // target as of today
+        // In theory, there could be isize of 128 bits, but in practice, it doesn't exist
+        // as Rust target as of today
         if value >= i32::MIN as isize && value <= i32::MAX as isize {
             Self::integer(value as i32)
         } else {
@@ -956,8 +955,8 @@ impl TryFrom<Janet> for isize {
 impl From<usize> for Janet {
     #[inline]
     fn from(value: usize) -> Self {
-        // In theory, there could be usize of 128 bits, but in practice, it doesn't exist as Rust
-        // target as of today
+        // In theory, there could be usize of 128 bits, but in practice, it doesn't exist
+        // as Rust target as of today
         if value <= i32::MAX as usize {
             Self::integer(value as i32)
         } else {

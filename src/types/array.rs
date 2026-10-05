@@ -792,8 +792,9 @@ impl JanetArray {
         // Unchecked: Unchecked valid elements.
         //
         // This drop guard will be invoked when predicate or `drop` of element panicked.
-        // It shifts unchecked elements to cover holes and `set_len` to the correct length.
-        // In cases when predicate and `drop` never panick, it will be optimized out.
+        // It shifts unchecked elements to cover holes and `set_len` to the correct
+        // length. In cases when predicate and `drop` never panick, it will be
+        // optimized out.
         struct BackshiftOnDrop<'a> {
             v: &'a mut JanetArray,
             processed_len: usize,
@@ -804,7 +805,8 @@ impl JanetArray {
         impl Drop for BackshiftOnDrop<'_> {
             fn drop(&mut self) {
                 if self.deleted_cnt > 0 {
-                    // SAFETY: Trailing unchecked items must be valid since we never touch them.
+                    // SAFETY: Trailing unchecked items must be valid since we never touch
+                    // them.
                     unsafe {
                         ptr::copy(
                             self.v.as_ptr().add(self.processed_len),
@@ -1621,7 +1623,8 @@ impl JanetArray {
         }
 
         // read: Offset of the element we want to check if it is duplicate.
-        // write: Offset of the place where we want to place the non-duplicate when we find it.
+        // write: Offset of the place where we want to place the non-duplicate when we
+        // find it.
         let (mut read, mut write) = (1, 1usize);
         let ptr = self.as_mut_ptr();
 
@@ -2622,7 +2625,8 @@ impl JanetArray {
         self.as_mut().rsplitn_mut(n, pred)
     }
 
-    // Creates an iterator which uses a closure to determine if an element should be removed.
+    // Creates an iterator which uses a closure to determine if an element should be
+    // removed.
     /// If the closure returns true, then the element is removed and yielded.
     /// If the closure returns false, the element will remain in the vector and will not
     /// be yielded by the iterator.
@@ -2850,10 +2854,10 @@ impl DeepEq<JanetTuple> for JanetArray {
 impl AsRef<[Janet]> for JanetArray {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
-        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
-        // len lesser than isize::MAX
-        // SAFETY 2: Checks for empty array, if it is, returns an empty slice and avoid trying to
-        // access null data
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it
+        // always has len lesser than isize::MAX
+        // SAFETY 2: Checks for empty array, if it is, returns an empty slice and avoid
+        // trying to access null data
         if self.is_empty() {
             &[]
         } else {
@@ -2865,10 +2869,10 @@ impl AsRef<[Janet]> for JanetArray {
 impl AsMut<[Janet]> for JanetArray {
     #[inline]
     fn as_mut(&mut self) -> &mut [Janet] {
-        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
-        // len lesser than isize::MAX and we have exclusive access to the data
-        // SAFETY 2: Checks for empty array, if it is, returns an empty slice and avoid trying to
-        // access null data
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it
+        // always has len lesser than isize::MAX and we have exclusive access to
+        // the data SAFETY 2: Checks for empty array, if it is, returns an empty
+        // slice and avoid trying to access null data
         if self.is_empty() {
             &mut []
         } else {

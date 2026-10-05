@@ -140,7 +140,8 @@ impl Drop for JanetGcRootGuard {
     #[inline]
     fn drop(&mut self) {
         // SAFETY: Since we unrooting the same value we rooted, this should always work.
-        // For extra safety, below it's add a debug assert to be sure on debug compilations.
+        // For extra safety, below it's add a debug assert to be sure on debug
+        // compilations.
         let res = unsafe { evil_janet::janet_gcunroot(self.value.inner) };
 
         // Assert in debug mode that the result is 1

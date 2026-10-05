@@ -168,7 +168,8 @@ impl JanetEnvironment {
         let symbol = symbol.into();
         let mut out = Janet::nil();
 
-        // SAFETY: `janet_resolve` does not mutate the inner table and should be safe to use
+        // SAFETY: `janet_resolve` does not mutate the inner table and should be safe to
+        // use
         unsafe {
             evil_janet::janet_resolve(self.0.as_raw() as *mut _, symbol.as_raw(), &mut out.inner)
         };

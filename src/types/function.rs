@@ -150,7 +150,7 @@ impl Display for CallError {
                 "This function can yield more than one result. In those cases it's recommended to \
                  create a JanetFiber to execute all its steps",
             ),
-            CallErrorKind::Run { .. } => f.pad("Failed to execute the Janet function."),
+            CallErrorKind::Run => f.pad("Failed to execute the Janet function."),
         }
     }
 }
@@ -336,8 +336,8 @@ mod trystate {
                     // SAFETY: C-FFI
                     evil_janet::janet_try_init(state.as_mut_ptr());
 
-                    // SAFETY: The above function initializes the state, therefore it is initialized
-                    // now
+                    // SAFETY: The above function initializes the state, therefore it is
+                    // initialized now
                     state.assume_init()
                 }
             };

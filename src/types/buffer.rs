@@ -367,8 +367,8 @@ impl JanetBuffer {
     #[inline]
     #[must_use = "this returns the result of the operation, without modifying the original"]
     pub fn as_bytes(&self) -> &[u8] {
-        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
-        // len lesser than isize::MAX
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it
+        // always has len lesser than isize::MAX
         unsafe { core::slice::from_raw_parts((*self.raw).data, self.len()) }
     }
 
@@ -385,8 +385,8 @@ impl JanetBuffer {
     /// ```
     #[inline]
     pub fn as_bytes_mut(&mut self) -> &mut [u8] {
-        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
-        // len lesser than isize::MAX and we have exclusive access
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it
+        // always has len lesser than isize::MAX and we have exclusive access
         unsafe { core::slice::from_raw_parts_mut((*self.raw).data, self.len()) }
     }
 

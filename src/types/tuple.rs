@@ -37,7 +37,8 @@ impl JanetTupleBuilder {
             return self;
         }
 
-        // SAFETY: We assured that if cannot try to write above it's max len in the lines above.
+        // SAFETY: We assured that if cannot try to write above it's max len in the lines
+        // above.
         unsafe {
             let val_ptr = self.raw.offset(self.added as isize);
             *val_ptr = value.inner;
@@ -1101,8 +1102,8 @@ impl Default for JanetTuple {
 impl AsRef<[Janet]> for JanetTuple {
     #[inline]
     fn as_ref(&self) -> &[Janet] {
-        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it always has
-        // len lesser than isize::MAX
+        // SAFETY: Janet uses i32 as max size for all collections and indexing, so it
+        // always has len lesser than isize::MAX
         unsafe { core::slice::from_raw_parts(self.raw as *const _, self.len()) }
     }
 }
